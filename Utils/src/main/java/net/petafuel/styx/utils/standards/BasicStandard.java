@@ -1,6 +1,6 @@
 package net.petafuel.styx.utils.standards;
 
-import net.petafuel.styx.utils.Signer;
+import net.petafuel.styx.utils.http.Signer;
 
 public abstract class BasicStandard implements XS2AStandardInterface
 {

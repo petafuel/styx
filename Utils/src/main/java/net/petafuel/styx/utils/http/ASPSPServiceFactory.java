@@ -17,12 +17,12 @@ public class ASPSPServiceFactory
 
     public <T> T createService(Class<T> xs2aService)
     {
-        //OkHttpClient.Builder okClientBuilder = new OkHttpClient.Builder().readTimeout(1000, TimeUnit.SECONDS);
+        OkHttpClient.Builder okClientBuilder = new OkHttpClient.Builder().readTimeout(1000, TimeUnit.SECONDS);
 
         return new Retrofit.Builder()
                 .baseUrl(this.baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(UnsafeOkHttpClient.getUnsafeOkHttpClient())
+                .client(okClientBuilder.build())
                 .build()
                 .create(xs2aService);
     }

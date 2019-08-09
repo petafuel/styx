@@ -1,0 +1,57 @@
+package net.petafuel.styx.core.xs2a.entities;
+
+public class PSU {
+
+    private String id;
+
+    private String idType;
+
+    private String corporateId;
+
+    private String corporateIdType;
+
+    public PSU(String id)
+    {
+        this.id = id;
+    }
+
+    public String getId()
+    {
+        return id;
+    }
+
+    public void setId(String id)
+    {
+        this.id = id;
+    }
+
+    public String getIdType()
+    {
+        return idType;
+    }
+
+    public void setIdType(String idType)
+    {
+        this.idType = idType;
+    }
+
+    public String getCorporateId()
+    {
+        return corporateId;
+    }
+
+    public void setCorporateId(String corporateId)
+    {
+        this.corporateId = corporateId;
+    }
+
+    public String getCorporateIdType()
+    {
+        return corporateIdType;
+    }
+
+    public void setCorporateIdType(String corporateIdType)
+    {
+        this.corporateIdType = corporateIdType;
+    }
+}

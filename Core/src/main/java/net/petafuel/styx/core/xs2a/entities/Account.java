@@ -4,38 +4,44 @@ import java.io.Serializable;
 
 public class Account implements Serializable {
 
-    public enum Type
-    {
-        IBAN,
-        MASKED_PAN
-    }
-
-    private String iban;
     private String identifier;
     private Type type;
     private String currency;
-
-    public Account(String iban){
-        this.iban = iban;
+    public Account(String identifier, String currency, Type type) {
+        this.identifier = identifier;
+        this.currency = currency;
+        this.type = type;
     }
 
-    public String getIdentifier()
-    {
-        return identifier;
+    public Account(String identifier) {
+        this(identifier, "EUR", Type.IBAN);
     }
 
-    public Type getType()
-    {
+    public Type getType() {
         return type;
     }
 
-    public String getCurrency()
-    {
+    public String getCurrency() {
         return currency;
     }
 
-    public String getIBAN() {
-        return iban;
+    public String getIdentifier() {
+        return identifier;
     }
-    
+
+    public enum Type {
+        IBAN("iban"),
+        MASKED_PAN("maskedPan");
+
+        private String jsonKey;
+
+        Type(String str) {
+            this.jsonKey = str;
+        }
+
+        public String getJsonKey() {
+            return this.jsonKey;
+        }
+    }
+
 }

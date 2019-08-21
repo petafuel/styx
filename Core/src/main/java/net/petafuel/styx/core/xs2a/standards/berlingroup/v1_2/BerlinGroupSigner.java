@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
+import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -9,18 +10,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringJoiner;
+import java.util.*;
 
-public class BerlinGroupSigner
-{
+public class BerlinGroupSigner {
     private static final Logger LOG = LogManager.getLogger(BerlinGroupSigner.class);
     /**
      * RFC 7230 (HTTP/1.1) -> Header Fields are case-INsensitive
@@ -49,31 +43,25 @@ public class BerlinGroupSigner
     private String issuerDN;
     private String algorithm;
 
-    public BerlinGroupSigner()
-    {
+    public BerlinGroupSigner() {
         Properties config = new Properties();
         InputStream in = BerlinGroupSigner.class.getClassLoader().getResourceAsStream("config.properties");
-        try
-        {
+        try {
             config.load(in);
             in.close();
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         String p12Path = config.getProperty("certificate.path");
         String passphraseFilePath = config.getProperty("certificate.passphrasefile.path");
 
-        try
-        {
+        try {
             char[] passphrase = new String(Files.readAllBytes(Paths.get(passphraseFilePath)), StandardCharsets.UTF_8).toCharArray();
             KeyStore pkcs12Bundle = KeyStore.getInstance("pkcs12");
-            try (FileInputStream p12IS = new FileInputStream(p12Path))
-            {
+            try (FileInputStream p12IS = new FileInputStream(p12Path)) {
                 pkcs12Bundle.load(p12IS, passphrase);
                 this.signature = Signature.getInstance("SHA256withRSA");
-                if (pkcs12Bundle.aliases().hasMoreElements())
-                {
+                if (pkcs12Bundle.aliases().hasMoreElements()) {
                     //TODO check if crt alias is correct
                     String crtName = pkcs12Bundle.aliases().nextElement();
                     this.signature.initSign((PrivateKey) pkcs12Bundle.getKey(crtName, passphrase));
@@ -84,27 +72,32 @@ public class BerlinGroupSigner
                     this.serialHex = crt.getSerialNumber().toString(16);
                     this.issuerDN = crt.getIssuerDN().getName();
                     this.algorithm = crt.getSigAlgName();
-                }
-                else
-                {
+                } else {
                     throw new SecurityException("Unable to find correct certificate within p12 bundle");
                 }
             }
 
 
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             LOG.error(e.getMessage());
         }
     }
 
-    public Map<String, String> sign(Map<String, String> headers) {
+    public void sign(XS2ARequest xs2aRequest) {
+        // Digest message body first so we can use this header for signing
+
+        try {
+            this.digest(xs2aRequest);
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Unable to digest message: " + e.getMessage());
+        }
+
+        LinkedHashMap<String, String> headers = xs2aRequest.getHeaders();
+
         StringJoiner signatureStructureJoiner = new StringJoiner(" ");
         StringJoiner signatureContentJoiner = new StringJoiner("\n");
-        for (Map.Entry<String, String> entry : headers.entrySet())
-        {
-            switch (entry.getKey())
-            {
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            switch (entry.getKey()) {
                 case HEADER_DIGEST:
                     signatureStructureJoiner.add(HEADER_DIGEST);
                     signatureContentJoiner.add(HEADER_DIGEST + ": " + entry.getValue());
@@ -134,30 +127,45 @@ public class BerlinGroupSigner
         String headerOrder = signatureStructureJoiner.toString();
         String signatureContent = signatureContentJoiner.toString();
 
-        try
-        {
+        try {
             this.signature.update(signatureContent.getBytes(StandardCharsets.UTF_8));
-        } catch (SignatureException e)
-        {
-            LOG.error(e.getMessage());
+        } catch (SignatureException e) {
+            e.printStackTrace();
         }
         String singedHeaders = null;
-        try
-        {
+        try {
             singedHeaders = Base64.getEncoder().encodeToString(this.signature.sign());
-        } catch (SignatureException e)
-        {
-            LOG.error(e.getMessage());
+        } catch (SignatureException e) {
+            e.printStackTrace();
         }
 
-        headers.put(HEADER_TPP_SIGNATURE_CERTIFICATE, Base64.getEncoder().encodeToString(this.certificate));
-        headers.put(HEADER_SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,
+        xs2aRequest.setHeader(HEADER_SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,
                 this.serialHex,
                 this.issuerDN,
                 this.algorithm,
                 headerOrder,
                 singedHeaders));
+        this.addCertificate(xs2aRequest);
+    }
 
-        return headers;
+    /**
+     * Digest the message body and add to request
+     *
+     * @param request XS2ARequest
+     * @throws NoSuchAlgorithmException
+     */
+    private void digest(XS2ARequest request) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+        byte[] digestHeader = messageDigest.digest(request.getRawBody().getBytes(StandardCharsets.UTF_8));
+        request.setHeader(HEADER_DIGEST, "SHA-256=" + Base64.getEncoder().encodeToString(digestHeader));
+    }
+
+    /**
+     * add certificate to request
+     *
+     * @param request
+     */
+    private void addCertificate(XS2ARequest request) {
+        request.setHeader(HEADER_TPP_SIGNATURE_CERTIFICATE, Base64.getEncoder().encodeToString(this.certificate));
     }
 }

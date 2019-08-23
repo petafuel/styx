@@ -5,21 +5,22 @@ import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentResponse;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.AccountSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentStatusSerializer;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.security.SignatureException;
 
 public class BerlinGroupCS extends BasicService implements CSInterface {
 
@@ -34,7 +35,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
         super(url);
     }
 
-    public Consent createConsent(XS2ARequest consentRequest) throws SignatureException, BankRequestFailedException {
+    public Consent createConsent(XS2ARequest consentRequest) throws BankRequestFailedException {
         this.setUrl(this.url + POST_CONSENT);
         this.createBody(RequestType.POST, JSON, consentRequest);
         this.createHeaders(consentRequest);
@@ -70,7 +71,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
     @Override
     public Consent getConsent(XS2ARequest consentGetRequest) throws BankRequestFailedException {
         this.setUrl(this.url + String.format(GET_CONSENT, ((GetConsentRequest) consentGetRequest).getConsentId()));
-        this.createBody(RequestType.GET, JSON, consentGetRequest);
+        this.createBody(RequestType.GET);
         this.createHeaders(consentGetRequest);
 
         try (Response response = this.execute()) {
@@ -90,10 +91,10 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             ResponseBody responseBody = response.body();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(Consent.class, new ConsentSerializer())
+                    .registerTypeAdapter(Account.class, new AccountSerializer())
                     .create();
             Consent consent = gson.fromJson(responseBody.string(), Consent.class);
             consent.setRequest(consentGetRequest);
-            consent.getSca().setApproach(SCA.Approach.valueOf(response.header("ASPSP-SCA-Approach")));
             return consent;
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage());
@@ -103,7 +104,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
     @Override
     public Consent.State getStatus(XS2ARequest consentStatusRequest) throws BankRequestFailedException {
         this.setUrl(this.url + String.format(GET_CONSENT_STATUS, ((StatusConsentRequest) consentStatusRequest).getConsentId()));
-        this.createBody(RequestType.GET, JSON, consentStatusRequest);
+        this.createBody(RequestType.GET);
         this.createHeaders(consentStatusRequest);
 
         try (Response response = this.execute()) {
@@ -122,11 +123,10 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
 
             ResponseBody responseBody = response.body();
             Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(Consent.class, new ConsentSerializer())
+                    .serializeNulls()
+                    .registerTypeAdapter(Consent.State.class, new ConsentStatusSerializer())
                     .create();
-            Consent consent = gson.fromJson(responseBody.string(), Consent.class);
-
-            return consent.getState();
+            return gson.fromJson(responseBody.string(), Consent.State.class);
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage());
         }

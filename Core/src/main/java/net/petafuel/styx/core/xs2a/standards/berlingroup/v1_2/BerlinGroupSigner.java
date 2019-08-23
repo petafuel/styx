@@ -1,16 +1,19 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import net.petafuel.styx.core.xs2a.exceptions.SigningException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -45,12 +48,10 @@ public class BerlinGroupSigner {
 
     public BerlinGroupSigner() {
         Properties config = new Properties();
-        InputStream in = BerlinGroupSigner.class.getClassLoader().getResourceAsStream("config.properties");
-        try {
+        try (InputStream in = BerlinGroupSigner.class.getClassLoader().getResourceAsStream("config.properties");) {
             config.load(in);
-            in.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Error while loading properties: " + e.getMessage());
         }
         String p12Path = config.getProperty("certificate.path");
         String passphraseFilePath = config.getProperty("certificate.passphrasefile.path");
@@ -62,7 +63,6 @@ public class BerlinGroupSigner {
                 pkcs12Bundle.load(p12IS, passphrase);
                 this.signature = Signature.getInstance("SHA256withRSA");
                 if (pkcs12Bundle.aliases().hasMoreElements()) {
-                    //TODO check if crt alias is correct
                     String crtName = pkcs12Bundle.aliases().nextElement();
                     this.signature.initSign((PrivateKey) pkcs12Bundle.getKey(crtName, passphrase));
 
@@ -76,10 +76,15 @@ public class BerlinGroupSigner {
                     throw new SecurityException("Unable to find correct certificate within p12 bundle");
                 }
             }
-
-
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            LOG.error("Unable to open file" + e.getMessage());
+            throw new SigningException(e.getMessage());
+        } catch (NoSuchAlgorithmException | IOException | UnrecoverableKeyException | InvalidKeyException | CertificateException e) {
             LOG.error(e.getMessage());
+            throw new SigningException(e.getMessage());
+        } catch (KeyStoreException e) {
+            LOG.error("Unable to extract data from Certificate: " + e.getMessage());
+            throw new SigningException(e.getMessage());
         }
     }
 

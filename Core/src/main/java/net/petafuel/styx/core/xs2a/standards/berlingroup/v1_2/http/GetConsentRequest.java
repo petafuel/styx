@@ -19,15 +19,13 @@ public class GetConsentRequest implements XS2ARequest {
     @XS2AHeader("date")
     private String date;
 
-    @XS2AHeader("consentId")
-    private String consentId;
-
     //Accumulated Headers
     private LinkedHashMap<String, String> headers;
 
     /**
-     * Body
+     * Path Parameter
      */
+    private String consentId;
 
     public GetConsentRequest() {
         this.headers = new LinkedHashMap<>();

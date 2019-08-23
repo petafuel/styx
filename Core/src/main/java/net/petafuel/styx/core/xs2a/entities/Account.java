@@ -31,7 +31,10 @@ public class Account implements Serializable {
 
     public enum Type {
         IBAN("iban"),
-        MASKED_PAN("maskedPan");
+        BBAN("bban"),
+        PAN("pan"),
+        MASKED_PAN("maskedPan"),
+        MSISDN("msisdn");
 
         private String jsonKey;
 

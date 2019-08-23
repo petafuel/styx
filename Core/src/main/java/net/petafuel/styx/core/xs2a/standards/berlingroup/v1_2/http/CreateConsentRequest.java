@@ -4,15 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
-import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.Access;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentRequestSerializer;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class CreateConsentRequest implements XS2ARequest {
 
@@ -108,29 +105,5 @@ public class CreateConsentRequest implements XS2ARequest {
 
     public void setCombinedServiceIndicator(boolean combinedServiceIndicator) {
         this.combinedServiceIndicator = combinedServiceIndicator;
-    }
-
-    public List<Account> getBalances() {
-        return this.access.balances;
-    }
-
-    public void setBalances(List<Account> balances) {
-        this.access.balances = balances;
-    }
-
-    public List<Account> getTransactions() {
-        return this.access.transactions;
-    }
-
-    public void setTransactions(List<Account> transactions) {
-        this.access.transactions = transactions;
-    }
-
-    /**
-     * Body
-     */
-    private class Access {
-        public List<Account> balances;
-        public List<Account> transactions;
     }
 }

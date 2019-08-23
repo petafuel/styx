@@ -1,6 +1,5 @@
 package net.petafuel.styx.core.xs2a.utils;
 
-
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
@@ -14,7 +13,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -45,8 +43,7 @@ public class XS2AHeaderParserTest {
     }
 
     @Test
-    void nestedParsing()
-    {
+    void nestedParsing() {
         class ClassDataMember
         {
             @XS2AHeader("id")

@@ -21,13 +21,13 @@ public class ConsentRequestSerializer implements JsonSerializer<CreateConsentReq
 
         JsonObject jsonAccess = new JsonObject();
 
-        if (!src.getBalances().isEmpty()) {
-            JsonElement jsonBalances = gson.toJsonTree(src.getBalances(), new TypeToken<ArrayList<Account>>() {
+        if (src.getAccess().getBalances() != null && !src.getAccess().getBalances().isEmpty()) {
+            JsonElement jsonBalances = gson.toJsonTree(src.getAccess().getBalances(), new TypeToken<ArrayList<Account>>() {
             }.getType());
             jsonAccess.add("balances", jsonBalances);
         }
-        if (!src.getTransactions().isEmpty()) {
-            JsonElement jsonTransactions = gson.toJsonTree(src.getTransactions(), new TypeToken<ArrayList<Account>>() {
+        if (src.getAccess().getTransactions() != null && !src.getAccess().getTransactions().isEmpty()) {
+            JsonElement jsonTransactions = gson.toJsonTree(src.getAccess().getTransactions(), new TypeToken<ArrayList<Account>>() {
             }.getType());
             jsonAccess.add("transactions", jsonTransactions);
         }

@@ -12,12 +12,13 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsent
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestTemplate;
 
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ConsentTest {
 
@@ -42,8 +43,8 @@ public class ConsentTest {
 
         // build Request Body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest();
-        createConsentRequest.setBalances(balances);
-        createConsentRequest.setTransactions(transactions);
+        createConsentRequest.getAccess().setBalances(balances);
+        createConsentRequest.getAccess().setTransactions(transactions);
         createConsentRequest.setPsu(psu);
         createConsentRequest.setCombinedServiceIndicator(false);
         createConsentRequest.setRecurringIndicator(false);
@@ -52,7 +53,7 @@ public class ConsentTest {
 
         Consent consent = standard.getCs().createConsent(createConsentRequest);
 
-        Assert.assertTrue(consent.getId() != null);
+        Assert.assertNotNull(consent.getConsentId());
     }
 
     @Test
@@ -64,7 +65,7 @@ public class ConsentTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         GetConsentRequest getConsentRequest = new GetConsentRequest();
-        getConsentRequest.setConsentId("4574072119180910242***REMOVED***CO4960JJ");
+        getConsentRequest.setConsentId("5267164802280910235***REMOVED***CO4960JJ");
 
         Consent consent = standard.getCs().getConsent(getConsentRequest);
     }
@@ -78,9 +79,11 @@ public class ConsentTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         StatusConsentRequest statusConsentRequest = new StatusConsentRequest();
-        statusConsentRequest.setConsentId("4574072119180910242***REMOVED***CO4960JJ");
+        statusConsentRequest.setConsentId("2337125702280910210***REMOVED***CO4960JJ");
 
-        //Consent consent = standard.getCs().getStatus(statusConsentRequest);
+        assertThrows(BankRequestFailedException.class, () -> {
+            standard.getCs().getStatus(statusConsentRequest);
+        });
     }
 
     @Test
@@ -88,19 +91,14 @@ public class ConsentTest {
     public void deleteConsent() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a"));
-        standard.setAis(new BerlinGroupAIS("https://xs2a-test.fiduciagad.de/xs2a"));
 
         Assert.assertTrue(standard.isCSImplemented());
 
         DeleteConsentRequest deleteConsentRequest = new DeleteConsentRequest();
-        deleteConsentRequest.setConsentId("4574072119180910242***REMOVED***CO4960JJ");
+        deleteConsentRequest.setConsentId("sometest-BAFIN-125314CO4960JJ");
 
-        //Consent consent = standard.getCs().getStatus(deleteConsentRequest);
-    }
-
-    @Test
-    public void test()
-    {
-        System.out.println("tesadsadadasdst");
+        assertThrows(BankRequestFailedException.class, () -> {
+            standard.getCs().deleteConsent(deleteConsentRequest);
+        });
     }
 }

@@ -2,8 +2,7 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 public class Consent {
 
@@ -18,8 +17,11 @@ public class Consent {
     private Date lastActionDate;
     private int frequencyPerDay;
     private SCA sca;
+    private Access access;
 
     public Consent() {
+        this.sca = new SCA();
+        this.access = new Access();
     }
 
     public UUID getId() {
@@ -94,21 +96,38 @@ public class Consent {
         this.sca = sca;
     }
 
-    public enum State {
-        //consent received, not authorised yet
-        RECEIVED,
-        //consent rejected, authorisation was not successful
-        REJECTED,
-        //consent "in progress", not all required authrisation steps have been completed
-        PARTIALLY_AUTHORISED,
-        //consent is ready to be used
-        VALID,
-        //the psu has revoked the consent towards the aspsp
-        REVOKED_BY_PSU,
-        //consent validity has expired
-        EXPIRED,
-        //consent was terminated due to DELETE /consents/{consentid} call
-        TERMINATED_BY_TPP
+    public Access getAccess() {
+        return access;
     }
 
+    public enum State {
+        //consent received, not authorised yet
+        RECEIVED("received"),
+        //consent rejected, authorisation was not successful
+        REJECTED("rejected"),
+        //consent "in progress", not all required authrisation steps have been completed
+        PARTIALLY_AUTHORISED("partiallyAuthorised"),
+        //consent is ready to be used
+        VALID("valid"),
+        //the psu has revoked the consent towards the aspsp
+        REVOKED_BY_PSU("revokedByPsu"),
+        //consent validity has expired
+        EXPIRED("expired"),
+        //consent was terminated due to DELETE /consents/{consentid} call
+        TERMINATED_BY_TPP("terminatedByTpp");
+
+        private String jsonKey;
+
+        State(String jsonKey) {
+            this.jsonKey = jsonKey;
+        }
+
+        public String getJsonKey() {
+            return jsonKey;
+        }
+
+        public static Consent.State getByString(String search) {
+            return Arrays.stream(Consent.State.values()).filter(linkType -> linkType.getJsonKey().equals(search)).findFirst().orElse(null);
+        }
+    }
 }

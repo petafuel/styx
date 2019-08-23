@@ -6,6 +6,7 @@ import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import org.junit.Assert;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
@@ -110,6 +111,7 @@ public class ConsentTest {
     @Test
     @DisplayName("Create consent without PSU")
     @Tag("integration")
+    @Disabled
     public void createNoPsuConsent() throws SignatureException {
         XS2AStandard standard = new XS2AStandard();
         standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a"));

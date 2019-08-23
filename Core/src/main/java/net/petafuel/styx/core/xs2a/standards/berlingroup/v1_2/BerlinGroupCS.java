@@ -1,123 +1,163 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
+import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
-import net.petafuel.styx.core.xs2a.entities.PSU;
+import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.AccountSerializer;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentStatusSerializer;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.util.Base64;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class BerlinGroupCS extends BasicService implements CSInterface {
 
-    private static final MediaType JSON  = MediaType.get("application/json; charset=utf-8");
-
     private static final Logger LOG = LogManager.getLogger(BerlinGroupCS.class);
+
+    private static final String POST_CONSENT = "/v1/consents";
+    private static final String GET_CONSENT = "/v1/consents/%s";
+    private static final String GET_CONSENT_STATUS = "/v1/consents/%s/status";
+    private static final String DELETE_CONSENT = "/v1/consents/%s";
 
     public BerlinGroupCS(String url) {
         super(url);
     }
 
-    public Consent createConsent(PSU psu, List<Account> balances, List<Account> transactions, UUID consentId) throws SignatureException, BankRequestFailedException {
+    public Consent createConsent(XS2ARequest consentRequest) throws BankRequestFailedException {
+        this.setUrl(this.url + POST_CONSENT);
+        this.createBody(RequestType.POST, JSON, consentRequest);
+        this.createHeaders(consentRequest);
 
-        OkHttpClient client = new OkHttpClient();
+        try (Response response = this.execute()) {
 
-        // build Request Body
-        CreateConsentRequest createConsentRequest = new CreateConsentRequest();
-        createConsentRequest.setBalances(balances);
-        createConsentRequest.setTransactions(transactions);
-
-        // serialisation CreateConsentRequest
-        Gson gson = new Gson();
-        String json = gson.toJson(createConsentRequest);
-
-
-        byte[] bytes;
-
-        try {
-             bytes = MessageDigest.getInstance("SHA-256").digest(json.getBytes());
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error(e.getMessage());
-            throw new SignatureException();
-        }
-
-        String digest = "SHA-256=" + Base64
-                .getEncoder()
-                .encodeToString(bytes);
-
-        Map<String, String> headers = new LinkedHashMap<>();
-
-        headers.put("psu-id", psu.getId());
-        headers.put("x-request-id", consentId.toString());
-        headers.put("digest", digest);
-        headers.put("date", "2019-08-08"); // todo set date dynamic
-
-        BerlinGroupSigner signer = new BerlinGroupSigner();
-        headers = signer.sign(headers);
-
-        RequestBody body = RequestBody.create(json, JSON);
-        Request.Builder builder = new Request.Builder()
-                .url(this.url + "/v1/consents")
-                .post(body);
-
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            builder.header(entry.getKey(), entry.getValue());
-        }
-        Request request = builder.build();
-
-        // send Request
-        try (Response response = client.newCall(request).execute()) {
-
-            String responseBody = response.body().string();
-
-            // Errors
-            // check for required SCA
-            // Common Errors (400, 500)
-            if(response.code() != 201) {
-                LOG.error(responseBody);
-                throw new BankRequestFailedException();
+            if (response.code() != 201) {
+                String msg = "Request failed with ResponseCode {} -> {}";
+                if (response.body() == null) {
+                    LOG.error(msg, response.code(), "empty response body");
+                    throw new BankRequestFailedException("empty response body", response.code());
+                } else {
+                    String responseMessage = response.body().string();
+                    LOG.error(msg, response.code(), responseMessage);
+                    throw new BankRequestFailedException(responseMessage, response.code());
+                }
             }
 
-            // todo map Identifier (x-Request-Id, ID, consentId)
-            CreateConsentResponse createConsentResponse = gson.fromJson(responseBody, CreateConsentResponse.class);
+            ResponseBody responseBody = response.body();
 
-            // Response parsen
-            return new Consent(consentId);
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Consent.class, new ConsentSerializer())
+                    .create();
+            Consent consent = gson.fromJson(responseBody.string(), Consent.class);
+            consent.setRequest(consentRequest);
+            consent.getSca().setApproach(SCA.Approach.valueOf(response.header("ASPSP-SCA-Approach")));
+            return consent;
         } catch (IOException e) {
-            throw new BankRequestFailedException();
+            throw new BankRequestFailedException(e.getMessage());
         }
-
     }
 
     @Override
-    public Consent getConsent() {
-        return null;
+    public Consent getConsent(XS2ARequest consentGetRequest) throws BankRequestFailedException {
+        this.setUrl(this.url + String.format(GET_CONSENT, ((GetConsentRequest) consentGetRequest).getConsentId()));
+        this.createBody(RequestType.GET);
+        this.createHeaders(consentGetRequest);
+
+        try (Response response = this.execute()) {
+
+            if (response.code() != 200) {
+                String msg = "Request failed with ResponseCode {} -> {}";
+                if (response.body() == null) {
+                    LOG.error(msg, response.code(), "empty response body");
+                    throw new BankRequestFailedException("empty response body", response.code());
+                } else {
+                    String responseMessage = response.body().string();
+                    LOG.error(msg, response.code(), responseMessage);
+                    throw new BankRequestFailedException(responseMessage, response.code());
+                }
+            }
+
+            ResponseBody responseBody = response.body();
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Consent.class, new ConsentSerializer())
+                    .registerTypeAdapter(Account.class, new AccountSerializer())
+                    .create();
+            Consent consent = gson.fromJson(responseBody.string(), Consent.class);
+            consent.setRequest(consentGetRequest);
+            return consent;
+        } catch (IOException e) {
+            throw new BankRequestFailedException(e.getMessage());
+        }
     }
 
     @Override
-    public Consent getStatus() {
-        return null;
+    public Consent.State getStatus(XS2ARequest consentStatusRequest) throws BankRequestFailedException {
+        this.setUrl(this.url + String.format(GET_CONSENT_STATUS, ((StatusConsentRequest) consentStatusRequest).getConsentId()));
+        this.createBody(RequestType.GET);
+        this.createHeaders(consentStatusRequest);
+
+        try (Response response = this.execute()) {
+
+            if (response.code() != 200) {
+                String msg = "Request failed with ResponseCode {} -> {}";
+                if (response.body() == null) {
+                    LOG.error(msg, response.code(), "empty response body");
+                    throw new BankRequestFailedException("empty response body", response.code());
+                } else {
+                    String responseMessage = response.body().string();
+                    LOG.error(msg, response.code(), responseMessage);
+                    throw new BankRequestFailedException(responseMessage, response.code());
+                }
+            }
+
+            ResponseBody responseBody = response.body();
+            Gson gson = new GsonBuilder()
+                    .serializeNulls()
+                    .registerTypeAdapter(Consent.State.class, new ConsentStatusSerializer())
+                    .create();
+            return gson.fromJson(responseBody.string(), Consent.State.class);
+        } catch (IOException e) {
+            throw new BankRequestFailedException(e.getMessage());
+        }
     }
 
     @Override
-    public Consent deleteConsent() {
-        return null;
+    public Consent deleteConsent(XS2ARequest consentDeleteRequest) throws BankRequestFailedException {
+        this.setUrl(this.url + String.format(DELETE_CONSENT, ((DeleteConsentRequest) consentDeleteRequest).getConsentId()));
+        this.createBody(RequestType.DELETE, JSON, consentDeleteRequest);
+        this.createHeaders(consentDeleteRequest);
+
+        try (Response response = this.execute()) {
+
+            if (response.code() != 204) {
+                String msg = "Request failed with ResponseCode {} -> {}";
+                if (response.body() == null) {
+                    LOG.error(msg, response.code(), "empty response body");
+                    throw new BankRequestFailedException("empty response body", response.code());
+                } else {
+                    String responseMessage = response.body().string();
+                    LOG.error(msg, response.code(), responseMessage);
+                    throw new BankRequestFailedException(responseMessage, response.code());
+                }
+            }
+            Consent consent = new Consent();
+            consent.setRequest(consentDeleteRequest);
+            consent.setConsentId(((DeleteConsentRequest) consentDeleteRequest).getConsentId());
+            consent.setState(Consent.State.TERMINATED_BY_TPP);
+            return consent;
+        } catch (IOException e) {
+            throw new BankRequestFailedException(e.getMessage());
+        }
     }
 }

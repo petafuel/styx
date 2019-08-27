@@ -3,17 +3,19 @@ package net.petafuel.styx.core.xs2a.contracts;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Balance;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
+import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 
 import java.util.List;
 
 public interface AISInterface {
 
-    public List<Account> getAccountList();
+    List<Account> getAccountList(XS2AGetRequest request) throws BankRequestFailedException;
 
-    public Account getAccount(String accountId);
+    Account getAccount(XS2AGetRequest request) throws BankRequestFailedException;
 
-    public List<Balance> getBalancesByAccount(String accountId);
+    List<Balance> getBalancesByAccount(XS2AGetRequest request) throws BankRequestFailedException;
 
-    public List<Transaction> getTransactionsByAccount(String accountId);
+    List<Transaction> getTransactionsByAccount(XS2AGetRequest request) throws BankRequestFailedException;
 
+    Transaction getTransaction(XS2AGetRequest request) throws BankRequestFailedException;
 }

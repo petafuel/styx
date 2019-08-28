@@ -9,6 +9,8 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.Map;
 
+import net.petafuel.styx.core.xs2a.utils.XS2AQueryParameterParser;
+
 public abstract class BasicService {
     private static final Logger LOG = LogManager.getLogger(BasicService.class);
 
@@ -59,5 +61,24 @@ public abstract class BasicService {
         POST,
         GET,
         DELETE
+    }
+
+    private static String httpBuildQuery(Map<String, String> data) {
+        if (data.isEmpty()) {
+            return "";
+        }
+        StringBuilder query = new StringBuilder("?");
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            query.append(entry.getKey())
+                    .append("=")
+                    .append(entry.getValue())
+                    .append("&");
+        }
+        return query.toString();
+    }
+
+    protected String getHttpQueryString(XS2AGetRequest request) {
+        XS2AQueryParameterParser.parse(request);
+        return BasicService.httpBuildQuery(request.getQueryParameters());
     }
 }

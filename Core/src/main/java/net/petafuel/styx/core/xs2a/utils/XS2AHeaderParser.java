@@ -5,6 +5,7 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.XS2AHeaderParserException;
 
 import java.lang.reflect.Field;
+import java.util.*;
 
 public class XS2AHeaderParser {
     private XS2AHeaderParser() {
@@ -20,7 +21,10 @@ public class XS2AHeaderParser {
 
     private static void mapFields(Object o, XS2ARequest xs2aRequest) throws IllegalAccessException {
         Class<?> c = o.getClass();
-        for (Field field : c.getDeclaredFields()) {
+        ArrayList<Field> fields = new ArrayList<>(Arrays.asList(c.getDeclaredFields()));
+        List<Field> parentFields = Arrays.asList(c.getSuperclass().getDeclaredFields());
+        fields.addAll(parentFields);
+        for (Field field : fields) {
             field.setAccessible(true);
             if (field.isAnnotationPresent(XS2AHeader.class)) {
                 if (field.getAnnotation(XS2AHeader.class).nested() && field.get(o) != null) {

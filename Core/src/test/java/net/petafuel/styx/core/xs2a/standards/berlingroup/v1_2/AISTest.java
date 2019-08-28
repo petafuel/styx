@@ -4,6 +4,7 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
@@ -19,6 +20,7 @@ public class AISTest {
     private static final String ACCOUNT_ID = "3dc3d5b3-7023-4848-9853-f5400a64e80f";
 
     @Test
+    @Tag("integration")
     public void testAccountList() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API));
@@ -28,6 +30,7 @@ public class AISTest {
     }
 
     @Test
+    @Tag("integration")
     public void testAccountDetails() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API));
@@ -38,6 +41,7 @@ public class AISTest {
     }
 
     @Test
+    @Tag("integration")
     public void testBalances() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API));
@@ -48,6 +52,7 @@ public class AISTest {
     }
 
     @Test
+    @Tag("integration")
     public void testTransactions() {
         XS2AStandard standard = new XS2AStandard();
         standard.setAis(new BerlinGroupAIS(DEUTSCHE_BANK_BASE_API));
@@ -63,6 +68,7 @@ public class AISTest {
     }
 
     @Test
+    @Tag("integration")
     public void testTransactionDetails() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setAis(new BerlinGroupAIS("https://xs2a.banking.co.at/xs2a-sandbox/m002"));

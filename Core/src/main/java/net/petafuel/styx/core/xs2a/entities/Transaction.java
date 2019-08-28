@@ -119,7 +119,7 @@ public class Transaction {
     }
 
     public enum Status {
-        BOOKED, PENDING //
+        BOOKED, PENDING, BOTH
     }
 
     public enum Type {

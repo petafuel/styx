@@ -23,7 +23,7 @@ public class AISTest {
     @Tag("integration")
     public void testAccountList() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
-        standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API));
+        standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API, new BerlinGroupSigner()));
         ReadAccountListRequest r1 = new ReadAccountListRequest(CONSENT_ID);
         r1.setWithBalance(true);
         List<Account> list = standard.getAis().getAccountList(r1);
@@ -33,7 +33,7 @@ public class AISTest {
     @Tag("integration")
     public void testAccountDetails() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
-        standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API));
+        standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API, new BerlinGroupSigner()));
         ReadAccountDetailsRequest r1 = new ReadAccountDetailsRequest(ACCOUNT_ID, CONSENT_ID);
         r1.setWithBalance(true);
 
@@ -44,7 +44,7 @@ public class AISTest {
     @Tag("integration")
     public void testBalances() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
-        standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API));
+        standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API, new BerlinGroupSigner()));
 
         ReadBalancesRequest r1 = new ReadBalancesRequest(ACCOUNT_ID, CONSENT_ID);
 
@@ -55,7 +55,7 @@ public class AISTest {
     @Tag("integration")
     public void testTransactions() {
         XS2AStandard standard = new XS2AStandard();
-        standard.setAis(new BerlinGroupAIS(DEUTSCHE_BANK_BASE_API));
+        standard.setAis(new BerlinGroupAIS(DEUTSCHE_BANK_BASE_API, new BerlinGroupSigner()));
 
         try {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -71,7 +71,7 @@ public class AISTest {
     @Tag("integration")
     public void testTransactionDetails() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
-        standard.setAis(new BerlinGroupAIS("https://xs2a.banking.co.at/xs2a-sandbox/m002"));
+        standard.setAis(new BerlinGroupAIS("https://xs2a.banking.co.at/xs2a-sandbox/m002", new BerlinGroupSigner()));
 
         ReadTransactionDetailsRequest r1 = new ReadTransactionDetailsRequest(ACCOUNT_ID, "3603140611280910256***REMOVED***CO4960JJ", CONSENT_ID);
         Object result = standard.getAis().getTransaction(r1);

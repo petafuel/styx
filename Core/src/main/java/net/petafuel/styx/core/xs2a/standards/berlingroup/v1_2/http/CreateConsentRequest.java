@@ -7,6 +7,7 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Access;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentRequestSerializer;
+import net.petafuel.styx.core.xs2a.utils.Config;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -25,6 +26,12 @@ public class CreateConsentRequest implements XS2ARequest {
     @XS2AHeader("date")
     private String date;
 
+    @XS2AHeader("tpp-redirect-preferred")
+    private boolean tppRedirectPreferred;
+
+    @XS2AHeader("tpp-redirect-uri")
+    private String tppRedirectUri;
+
     //Accumulated Headers
     private LinkedHashMap<String, String> headers;
 
@@ -42,6 +49,7 @@ public class CreateConsentRequest implements XS2ARequest {
         this.xRequestId = String.valueOf(UUID.randomUUID());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, d MMM yyyy HH:mm:ss zz");
         this.date = simpleDateFormat.format(new Date());
+        this.tppRedirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.xRequestId;
     }
 
     @Override
@@ -105,5 +113,21 @@ public class CreateConsentRequest implements XS2ARequest {
 
     public void setCombinedServiceIndicator(boolean combinedServiceIndicator) {
         this.combinedServiceIndicator = combinedServiceIndicator;
+    }
+
+    public Boolean getTppRedirectPreferred() {
+        return tppRedirectPreferred;
+    }
+
+    public void setTppRedirectPreferred(boolean tppRedirectPreferred) {
+        this.tppRedirectPreferred = tppRedirectPreferred;
+    }
+
+    public String getTppRedirectUri() {
+        return tppRedirectUri;
+    }
+
+    public void setTppRedirectUri(String tppRedirectUri) {
+        this.tppRedirectUri = tppRedirectUri;
     }
 }

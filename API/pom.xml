@@ -8,12 +8,9 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>API</artifactId>
     <groupId>net.petafuel.styx.api</groupId>
     <packaging>war</packaging>
-
-
     <dependencies>
         <dependency>
             <groupId>org.glassfish.main.extras</groupId>
@@ -50,6 +47,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.default.goal>clean install</maven.default.goal>
+        <jbossweb.virtualhost>dev.pboss</jbossweb.virtualhost>
+        <jbossweb.contextroot>/styx</jbossweb.contextroot>
     </properties>
     <build>
         <defaultGoal>${maven.default.goal}</defaultGoal>
@@ -62,7 +61,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Dependencies>org.jboss.remote-naming, org.hornetq</Dependencies>
+                            <Dependencies>org.jboss.remote-naming</Dependencies>
                         </manifestEntries>
                     </archive>
                     <webResources>

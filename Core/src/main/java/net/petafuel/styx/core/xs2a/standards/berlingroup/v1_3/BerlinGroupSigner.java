@@ -1,4 +1,4 @@
-package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
+package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.SigningException;
@@ -30,6 +30,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
     private static final String HEADER_PSU_CORPORATE_ID = "psu-corporate-id";
     private static final String HEADER_TPP_REDIRECT_URL = "tpp-redirect-uri";
     private static final String HEADER_SIGNATURE = "signature";
+    private static final String HEADER_TPP_REDIRECT_PREFERRED = "tpp-redirect-preferred";
     /**
      * $1 certificate serial
      * $2 certificate issuer DN
@@ -103,6 +104,9 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
                     signatureStructureJoiner.add(HEADER_TPP_REDIRECT_URL);
                     signatureContentJoiner.add(HEADER_TPP_REDIRECT_URL + ": " + entry.getValue());
                     break;
+                case HEADER_TPP_REDIRECT_PREFERRED:
+                    signatureContentJoiner.add(HEADER_TPP_REDIRECT_PREFERRED);
+                    signatureContentJoiner.add(HEADER_TPP_REDIRECT_PREFERRED + ": " + entry.getValue());
             }
         }
         String headerOrder = signatureStructureJoiner.toString();

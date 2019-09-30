@@ -1,12 +1,23 @@
 package net.petafuel.styx.core.xs2a.contracts;
 
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.exceptions.CertificateException;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.utils.CertificateManager;
 import net.petafuel.styx.core.xs2a.utils.XS2AHeaderParser;
+import net.petafuel.styx.core.xs2a.utils.XS2AQueryParameterParser;
 import okhttp3.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Map;
 
 import net.petafuel.styx.core.xs2a.utils.XS2AQueryParameterParser;
@@ -16,13 +27,16 @@ public abstract class BasicService {
 
     protected static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     protected static final MediaType XML = MediaType.get("text/xml; charset=utf-8");
+    private static final Logger LOG = LogManager.getLogger(BasicService.class);
     protected String url;
     private Request.Builder builder;
+    private IBerlinGroupSigner signer;
 
-    public BasicService(String url) {
+    public BasicService(String url, IBerlinGroupSigner signer) {
 
         this.url = url;
         this.builder = new Request.Builder();
+        this.signer = signer;
     }
 
     protected void setUrl(String url) {
@@ -42,8 +56,7 @@ public abstract class BasicService {
         XS2AHeaderParser.parse(request);
 
         //Sign Request
-        BerlinGroupSigner berlinGroupSigner = new BerlinGroupSigner();
-        berlinGroupSigner.sign(request);
+        this.signer.sign(request);
 
         // Set Request Headers
         for (Map.Entry<String, String> entry : request.getHeaders().entrySet()) {
@@ -53,7 +66,31 @@ public abstract class BasicService {
 
     protected Response execute() throws IOException {
         Request request = this.builder.build();
-        OkHttpClient client = new OkHttpClient();
+        CertificateManager certificateManager = CertificateManager.getInstance();
+        SSLContext sslContext = certificateManager.getSSLContext();
+
+        //TODO Refactor the trustmanager into the CertificateManager
+        X509TrustManager x509Tm = null;
+        try {
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("SunX509");
+            trustManagerFactory.init((KeyStore) null);
+            for (TrustManager tm : trustManagerFactory.getTrustManagers()) {
+                if (tm instanceof X509TrustManager) {
+                    x509Tm = (X509TrustManager) tm;
+                    break;
+                }
+            }
+        } catch (KeyStoreException | NoSuchAlgorithmException e) {
+            LOG.error(e.getMessage());
+        } catch (NullPointerException e) {
+            LOG.error("Unable to get Trust Managers from TrustManager Factory");
+        }
+        if(x509Tm == null)
+        {
+            throw new CertificateException("There is no default Trust store available");
+        }
+
+        OkHttpClient client = new OkHttpClient().newBuilder().sslSocketFactory(sslContext.getSocketFactory(), x509Tm).build();
         return client.newCall(request).execute();
     }
 

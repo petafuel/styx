@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="60">
+    <Properties>
+        <Property name="log-pattern">%d %-5p [%t] [] %c - %m%n</Property>
+        <Property name="log-directory">log/</Property>
+        <Property name="log-filename">styxapi.log</Property>
+        <Property name="date-suffix">.%d{yyyy-MM-dd}</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${sys:log-pattern}"/>
+        </Console>
+        <RollingRandomAccessFile name="File" fileName="${sys:log-directory}${sys:log-filename}"
+                                 filePattern="${sys:log-directory}${sys:log-filename}${sys:date-suffix}" append="true">
+            <PatternLayout pattern="${sys:log-pattern}"/>
+            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        </RollingRandomAccessFile>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="File"/>
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

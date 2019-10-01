@@ -5,7 +5,9 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.XS2AHeaderParserException;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class XS2AHeaderParser {
     private XS2AHeaderParser() {
@@ -15,7 +17,7 @@ public class XS2AHeaderParser {
         try {
             mapFields(annotated, annotated);
         } catch (IllegalAccessException e) {
-            throw new XS2AHeaderParserException(e.getMessage());
+            throw new XS2AHeaderParserException(e.getMessage(), e);
         }
     }
 
@@ -35,7 +37,7 @@ public class XS2AHeaderParser {
                             xs2aRequest.setHeader(field.getAnnotation(XS2AHeader.class).value(), String.valueOf(field.get(o)));
                         }
                     } catch (IllegalAccessException e) {
-                        throw new XS2AHeaderParserException(e.getMessage());
+                        throw new XS2AHeaderParserException(e.getMessage(), e);
                     }
                 }
             }

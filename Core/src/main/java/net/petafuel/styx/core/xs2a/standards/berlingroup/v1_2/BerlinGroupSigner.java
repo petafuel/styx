@@ -15,7 +15,10 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Base64;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringJoiner;
 
 public class BerlinGroupSigner {
     private static final Logger LOG = LogManager.getLogger(BerlinGroupSigner.class);
@@ -78,13 +81,13 @@ public class BerlinGroupSigner {
             }
         } catch (FileNotFoundException e) {
             LOG.error("Unable to open file" + e.getMessage());
-            throw new SigningException(e.getMessage());
+            throw new SigningException(e.getMessage(), e);
         } catch (NoSuchAlgorithmException | IOException | UnrecoverableKeyException | InvalidKeyException | CertificateException e) {
             LOG.error(e.getMessage());
-            throw new SigningException(e.getMessage());
+            throw new SigningException(e.getMessage(), e);
         } catch (KeyStoreException e) {
             LOG.error("Unable to extract data from Certificate: " + e.getMessage());
-            throw new SigningException(e.getMessage());
+            throw new SigningException(e.getMessage(), e);
         }
     }
 
@@ -97,7 +100,7 @@ public class BerlinGroupSigner {
             LOG.error("Unable to digest message: " + e.getMessage());
         }
 
-        LinkedHashMap<String, String> headers = xs2aRequest.getHeaders();
+        Map<String, String> headers = xs2aRequest.getHeaders();
 
         StringJoiner signatureStructureJoiner = new StringJoiner(" ");
         StringJoiner signatureContentJoiner = new StringJoiner("\n");
@@ -127,6 +130,9 @@ public class BerlinGroupSigner {
                     signatureStructureJoiner.add(HEADER_TPP_REDIRECT_URL);
                     signatureContentJoiner.add(HEADER_TPP_REDIRECT_URL + ": " + entry.getValue());
                     break;
+                default:
+                    //can't handle unknown headers
+                    break;
             }
         }
         String headerOrder = signatureStructureJoiner.toString();
@@ -135,13 +141,13 @@ public class BerlinGroupSigner {
         try {
             this.signature.update(signatureContent.getBytes(StandardCharsets.UTF_8));
         } catch (SignatureException e) {
-            e.printStackTrace();
+            LOG.error(e.getStackTrace());
         }
         String singedHeaders = null;
         try {
             singedHeaders = Base64.getEncoder().encodeToString(this.signature.sign());
         } catch (SignatureException e) {
-            e.printStackTrace();
+            LOG.error(e.getStackTrace());
         }
 
         xs2aRequest.setHeader(HEADER_SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,

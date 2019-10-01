@@ -6,9 +6,13 @@ import com.google.gson.reflect.TypeToken;
 import net.petafuel.styx.core.xs2a.contracts.AISInterface;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
-import net.petafuel.styx.core.xs2a.entities.*;
+import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.Balance;
+import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.*;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.AccountSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.BalancesSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.TransactionsSerializer;
@@ -46,7 +50,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
             return gson.fromJson(body, type);
         } catch (Exception e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
@@ -68,7 +72,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
             List<Account> accounts = gson.fromJson(body, type);
             return accounts.get(0);
         } catch (Exception e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
@@ -90,7 +94,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
             return gson.fromJson(body, type);
         } catch (Exception e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
@@ -111,7 +115,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
             return gson.fromJson(body, type);
         } catch (Exception e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
@@ -134,7 +138,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
             List<Transaction> transactions = gson.fromJson(body, type);
             return transactions.get(0);
         } catch (Exception e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 }

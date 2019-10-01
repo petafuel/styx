@@ -1,21 +1,22 @@
 package net.petafuel.styx.core.xs2a.utils;
 
-import net.petafuel.styx.core.xs2a.contracts.XS2AQueryParameter;
 import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2AQueryParameter;
 import net.petafuel.styx.core.xs2a.exceptions.XS2AHeaderParserException;
 
 import java.lang.reflect.Field;
 
 public class XS2AQueryParameterParser {
 
-    public XS2AQueryParameterParser() {
+    private XS2AQueryParameterParser() {
+        //To hide constructor from static Parser
     }
 
     public static void parse(XS2AGetRequest annotated) {
         try {
             mapFields(annotated, annotated);
         } catch (IllegalAccessException e) {
-            throw new XS2AHeaderParserException(e.getMessage());
+            throw new XS2AHeaderParserException(e.getMessage(), e);
         }
     }
 
@@ -30,7 +31,7 @@ public class XS2AQueryParameterParser {
                         request.setQueryParameter(field.getAnnotation(XS2AQueryParameter.class).value(), String.valueOf(field.get(o)));
                     }
                 } catch (IllegalAccessException e) {
-                    throw new XS2AHeaderParserException(e.getMessage());
+                    throw new XS2AHeaderParserException(e.getMessage(), e);
                 }
             }
         }

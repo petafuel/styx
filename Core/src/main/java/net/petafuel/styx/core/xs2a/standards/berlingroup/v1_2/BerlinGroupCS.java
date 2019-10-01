@@ -64,7 +64,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             consent.getSca().setApproach(SCA.Approach.valueOf(response.header("ASPSP-SCA-Approach")));
             return consent;
         } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
@@ -97,7 +97,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             consent.setRequest(consentGetRequest);
             return consent;
         } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), new Exception());
         }
     }
 
@@ -128,7 +128,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
                     .create();
             return gson.fromJson(responseBody.string(), Consent.State.class);
         } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
@@ -157,7 +157,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             consent.setState(Consent.State.TERMINATED_BY_TPP);
             return consent;
         } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 }

@@ -77,14 +77,14 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
 
         try {
             String bookingDateString = object.get("valueDate").getAsString();
-            valueDate = new SimpleDateFormat("yyyy-MM-d").parse(bookingDateString);
+            valueDate = new SimpleDateFormat("yyyy-MM-dd").parse(bookingDateString);
         } catch (Exception ignored) {
         }
 
         if (status == Transaction.Status.BOOKED) {
             try {
                 String bookingDateString = object.get("bookingDate").getAsString();
-                bookingDate = new SimpleDateFormat("yyyy-MM-d").parse(bookingDateString);
+                bookingDate = new SimpleDateFormat("yyyy-MM-dd").parse(bookingDateString);
             } catch (Exception ignored) {
             }
         }

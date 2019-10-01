@@ -27,7 +27,7 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
     @Override
     public JsonElement serialize(CreateConsentRequest src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject encoded = new JsonObject();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-d");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Account.class, new AccountSerializer())
                 .create();
@@ -84,16 +84,12 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
         if (consentResponse.get(JSON_KEY_ACCESS) != null) {
             if (consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_BALANCES) != null) {
                 JsonArray balanceAccounts = consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_BALANCES).getAsJsonArray();
-                for (JsonElement balanceAccount : balanceAccounts) {
-                    consent.getAccess().addBalanceAccount(context.deserialize(balanceAccount, Account.class));
-                }
+                consent.getAccess().addBalanceAccounts(context.deserialize(balanceAccounts, Account.class));
 
             }
             if (consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_TRANSACTIONS) != null) {
                 JsonArray transactionAccounts = consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_TRANSACTIONS).getAsJsonArray();
-                for (JsonElement transcationAccount : transactionAccounts) {
-                    consent.getAccess().addTransactionAccount(context.deserialize(transcationAccount, Account.class));
-                }
+                consent.getAccess().addTransactionAccounts(context.deserialize(transactionAccounts, Account.class));
             }
         }
 

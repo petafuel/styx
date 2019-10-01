@@ -24,11 +24,11 @@ public class AccountSerializer implements JsonSerializer<Account>, JsonDeseriali
 
     @Override
     public List<Account> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
-        JsonObject response = json.getAsJsonObject();
-        if (response.get("account") != null) {
-            return this.deserializeSingleAccount(response.get("account").getAsJsonObject());
+        if (json.isJsonArray()) {
+            return this.deserializeMultipleAccount(json.getAsJsonArray());
+        } else {
+            return this.deserializeSingleAccount(json.getAsJsonObject());
         }
-        return this.deserializeMultipleAccount(response.get("accounts").getAsJsonArray());
     }
 
     private List<Account> deserializeSingleAccount(JsonObject object) {

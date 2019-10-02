@@ -43,7 +43,7 @@ public class BalancesSerializer implements JsonDeserializer<List<Balance>> {
 
         try {
             String referenceDateString = object.get("referenceDate").getAsString();
-            Date referenceDate = new SimpleDateFormat("yyyy-MM-d").parse(referenceDateString);
+            Date referenceDate = new SimpleDateFormat("yyyy-MM-dd").parse(referenceDateString);
             b1.setReferenceDate(referenceDate);
         } catch (Exception ignored) {
         }

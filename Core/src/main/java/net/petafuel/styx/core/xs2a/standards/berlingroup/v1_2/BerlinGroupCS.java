@@ -42,19 +42,12 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 201) {
-                String msg = "Request failed with ResponseCode {} -> {}";
-                if (response.body() == null) {
-                    LOG.error(msg, response.code(), "empty response body");
-                    throw new BankRequestFailedException("empty response body", response.code());
-                } else {
-                    String responseMessage = response.body().string();
-                    LOG.error(msg, response.code(), responseMessage);
-                    throw new BankRequestFailedException(responseMessage, response.code());
-                }
+            ResponseBody responseBody = response.body();
+
+            if (response.code() != 201 || responseBody == null) {
+                throwBankRequestException(response);
             }
 
-            ResponseBody responseBody = response.body();
 
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(Consent.class, new ConsentSerializer())
@@ -64,7 +57,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             consent.getSca().setApproach(SCA.Approach.valueOf(response.header("ASPSP-SCA-Approach")));
             return consent;
         } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
@@ -76,19 +69,11 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 200) {
-                String msg = "Request failed with ResponseCode {} -> {}";
-                if (response.body() == null) {
-                    LOG.error(msg, response.code(), "empty response body");
-                    throw new BankRequestFailedException("empty response body", response.code());
-                } else {
-                    String responseMessage = response.body().string();
-                    LOG.error(msg, response.code(), responseMessage);
-                    throw new BankRequestFailedException(responseMessage, response.code());
-                }
+            ResponseBody responseBody = response.body();
+            if (response.code() != 200 || responseBody == null) {
+                throwBankRequestException(response);
             }
 
-            ResponseBody responseBody = response.body();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(Consent.class, new ConsentSerializer())
                     .registerTypeAdapter(Account.class, new AccountSerializer())
@@ -97,7 +82,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             consent.setRequest(consentGetRequest);
             return consent;
         } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), new Exception());
         }
     }
 
@@ -109,26 +94,18 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 200) {
-                String msg = "Request failed with ResponseCode {} -> {}";
-                if (response.body() == null) {
-                    LOG.error(msg, response.code(), "empty response body");
-                    throw new BankRequestFailedException("empty response body", response.code());
-                } else {
-                    String responseMessage = response.body().string();
-                    LOG.error(msg, response.code(), responseMessage);
-                    throw new BankRequestFailedException(responseMessage, response.code());
-                }
+            ResponseBody responseBody = response.body();
+            if (response.code() != 200 || responseBody == null) {
+                throwBankRequestException(response);
             }
 
-            ResponseBody responseBody = response.body();
             Gson gson = new GsonBuilder()
                     .serializeNulls()
                     .registerTypeAdapter(Consent.State.class, new ConsentStatusSerializer())
                     .create();
             return gson.fromJson(responseBody.string(), Consent.State.class);
         } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
@@ -141,15 +118,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
         try (Response response = this.execute()) {
 
             if (response.code() != 204) {
-                String msg = "Request failed with ResponseCode {} -> {}";
-                if (response.body() == null) {
-                    LOG.error(msg, response.code(), "empty response body");
-                    throw new BankRequestFailedException("empty response body", response.code());
-                } else {
-                    String responseMessage = response.body().string();
-                    LOG.error(msg, response.code(), responseMessage);
-                    throw new BankRequestFailedException(responseMessage, response.code());
-                }
+                throwBankRequestException(response);
             }
             Consent consent = new Consent();
             consent.setRequest(consentDeleteRequest);
@@ -157,7 +126,20 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             consent.setState(Consent.State.TERMINATED_BY_TPP);
             return consent;
         } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage());
+            throw new BankRequestFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void throwBankRequestException(Response response) throws BankRequestFailedException, IOException {
+        String msg = "Request failed with ResponseCode {} -> {}";
+        ResponseBody body = response.body();
+        if (body == null) {
+            LOG.error(msg, response.code(), "empty response body");
+            throw new BankRequestFailedException("empty response body", response.code());
+        } else {
+            String responseMessage = body.string();
+            LOG.error(msg, response.code(), responseMessage);
+            throw new BankRequestFailedException(responseMessage, response.code());
         }
     }
 }

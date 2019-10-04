@@ -14,6 +14,7 @@ import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.StringJoiner;
 
 public class BerlinGroupSigner implements IBerlinGroupSigner {
@@ -48,7 +49,6 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
     public BerlinGroupSigner() {
         CertificateManager certificateManager = CertificateManager.getInstance();
         try {
-
             X509Certificate crt = certificateManager.getCertificate();
             this.certificate = crt.getEncoded();
             this.serialHex = crt.getSerialNumber().toString(16);
@@ -73,7 +73,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
             LOG.error("Unable to digest message: " + e.getMessage());
         }
 
-        LinkedHashMap<String, String> headers = xs2aRequest.getHeaders();
+        Map<String, String> headers = xs2aRequest.getHeaders();
 
         StringJoiner signatureStructureJoiner = new StringJoiner(" ");
         StringJoiner signatureContentJoiner = new StringJoiner("\n");
@@ -103,6 +103,9 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
                     signatureStructureJoiner.add(HEADER_TPP_REDIRECT_URL);
                     signatureContentJoiner.add(HEADER_TPP_REDIRECT_URL + ": " + entry.getValue());
                     break;
+                default:
+                    //can't handle unknown headers
+                    break;
             }
         }
         String headerOrder = signatureStructureJoiner.toString();
@@ -111,13 +114,13 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
         try {
             this.signature.update(signatureContent.getBytes(StandardCharsets.UTF_8));
         } catch (SignatureException e) {
-            e.printStackTrace();
+            LOG.error(e.getStackTrace());
         }
         String singedHeaders = null;
         try {
             singedHeaders = Base64.getEncoder().encodeToString(this.signature.sign());
         } catch (SignatureException e) {
-            e.printStackTrace();
+            LOG.error(e.getStackTrace());
         }
 
         xs2aRequest.setHeader(HEADER_SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,

@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -96,7 +97,7 @@ public class XS2AHeaderParserTest {
             }
 
             @Override
-            public LinkedHashMap<String, String> getHeaders() {
+            public Map<String, String> getHeaders() {
                 return this.headers;
             }
         }

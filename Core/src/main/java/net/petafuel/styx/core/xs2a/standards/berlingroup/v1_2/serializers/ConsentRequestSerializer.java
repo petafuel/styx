@@ -14,7 +14,7 @@ public class ConsentRequestSerializer implements JsonSerializer<CreateConsentReq
     @Override
     public JsonElement serialize(CreateConsentRequest src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject encoded = new JsonObject();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-d");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Account.class, new AccountSerializer())
                 .create();

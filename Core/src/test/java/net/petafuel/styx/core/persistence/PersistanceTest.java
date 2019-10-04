@@ -56,12 +56,14 @@ public class PersistanceTest {
 
 
     @Test
+    @Tag("integration")
     public void testDatabaseConnection() throws SQLException {
         Connection connection = Persistence.getInstance().getConnection();
         Assert.assertTrue(connection.isValid(1));
     }
 
     @Test
+    @Tag("integration")
     public void saveConsents() {
         consent.setId(String.valueOf(UUID.randomUUID()));
         Consent fromDatabase = new PersistentConsent().create(consent);
@@ -84,6 +86,7 @@ public class PersistanceTest {
     }
 
     @Test
+    @Tag("integration")
     public void getConsent() {
         consent.setId(String.valueOf(UUID.randomUUID()));
         Consent createdConsent = new PersistentConsent().create(consent);
@@ -96,6 +99,7 @@ public class PersistanceTest {
     }
 
     @Test
+    @Tag("integration")
     public void updateConsent() {
         consent.setId(String.valueOf(UUID.randomUUID()));
         Consent createdConsent = new PersistentConsent().create(consent);
@@ -124,6 +128,7 @@ public class PersistanceTest {
     }
 
     @Test
+    @Tag("integration")
     public void updateConsentState() {
         consent.setId(String.valueOf(UUID.randomUUID()));
         Consent createdConsent = new PersistentConsent().create(consent);
@@ -134,6 +139,7 @@ public class PersistanceTest {
     }
 
     @Test
+    @Tag("integration")
     public void deleteConsent() {
         consent.setId(String.valueOf(UUID.randomUUID()));
         Consent createdConsent = new PersistentConsent().create(consent);

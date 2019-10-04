@@ -9,7 +9,10 @@ import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentRequestSerializer;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class CreateConsentRequest implements XS2ARequest {
 
@@ -26,7 +29,7 @@ public class CreateConsentRequest implements XS2ARequest {
     private String date;
 
     //Accumulated Headers
-    private LinkedHashMap<String, String> headers;
+    private Map<String, String> headers;
 
     /**
      * Body
@@ -71,7 +74,7 @@ public class CreateConsentRequest implements XS2ARequest {
         this.access = access;
     }
 
-    public LinkedHashMap<String, String> getHeaders() {
+    public Map<String, String> getHeaders() {
         return headers;
     }
 

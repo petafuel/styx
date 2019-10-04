@@ -4,6 +4,7 @@ package net.petafuel.styx.core.xs2a.contracts;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public abstract class XS2AGetRequest implements XS2ARequest {
@@ -25,10 +26,10 @@ public abstract class XS2AGetRequest implements XS2ARequest {
     private String authorization;
 
     //Accumulated Headers
-    private LinkedHashMap<String, String> headers;
+    private Map<String, String> headers;
 
     //Accumulated Query Parameters
-    private LinkedHashMap<String, String> queryParameters;
+    private Map<String, String> queryParameters;
 
     /**
      * Body
@@ -53,7 +54,7 @@ public abstract class XS2AGetRequest implements XS2ARequest {
     }
 
     @Override
-    public LinkedHashMap<String, String> getHeaders() {
+    public Map<String, String> getHeaders() {
         return headers;
     }
 
@@ -61,7 +62,7 @@ public abstract class XS2AGetRequest implements XS2ARequest {
         this.queryParameters.put(key, value);
     }
 
-    public LinkedHashMap<String, String> getQueryParameters() {
+    public Map<String, String> getQueryParameters() {
         return queryParameters;
     }
 

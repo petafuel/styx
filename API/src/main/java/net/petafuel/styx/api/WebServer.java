@@ -1,7 +1,11 @@
 package net.petafuel.styx.api;
 
+import net.petafuel.styx.api.v1.account.boundary.AccountResource;
+import net.petafuel.styx.api.v1.auth.boundary.AuthResource;
 import net.petafuel.styx.api.v1.callback.boundary.CallbackResource;
 import com.sun.net.httpserver.HttpServer;
+import net.petafuel.styx.api.v1.consent.boundary.ConsentResource;
+import net.petafuel.styx.api.v1.payment.boundary.PaymentResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
@@ -26,7 +30,12 @@ public class WebServer {
 
     void startHttpServer() throws Exception {
         try {
-            ResourceConfig config = new ResourceConfig(CallbackResource.class);
+            ResourceConfig config = new ResourceConfig()
+                    .register(CallbackResource.class)
+                    .register(AccountResource.class)
+                    .register(AuthResource.class)
+                    .register(ConsentResource.class)
+                    .register(PaymentResource.class);
 
             try {
                 String url = schema + ip + ":" + port + "/";

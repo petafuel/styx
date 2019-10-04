@@ -2,22 +2,16 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.SigningException;
+import net.petafuel.styx.core.xs2a.utils.CertificateManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Map;
-import java.util.Properties;
 import java.util.StringJoiner;
 
 public class BerlinGroupSigner {
@@ -50,43 +44,20 @@ public class BerlinGroupSigner {
     private String algorithm;
 
     public BerlinGroupSigner() {
-        Properties config = new Properties();
-        try (InputStream in = BerlinGroupSigner.class.getClassLoader().getResourceAsStream("config.properties");) {
-            config.load(in);
-        } catch (IOException e) {
-            LOG.error("Error while loading properties: " + e.getMessage());
-        }
-        String p12Path = config.getProperty("certificate.path");
-        String passphraseFilePath = config.getProperty("certificate.passphrasefile.path");
-
+        CertificateManager certificateManager = CertificateManager.getInstance();
         try {
-            char[] passphrase = new String(Files.readAllBytes(Paths.get(passphraseFilePath)), StandardCharsets.UTF_8).toCharArray();
-            KeyStore pkcs12Bundle = KeyStore.getInstance("pkcs12");
-            try (FileInputStream p12IS = new FileInputStream(p12Path)) {
-                pkcs12Bundle.load(p12IS, passphrase);
-                this.signature = Signature.getInstance("SHA256withRSA");
-                if (pkcs12Bundle.aliases().hasMoreElements()) {
-                    String crtName = pkcs12Bundle.aliases().nextElement();
-                    this.signature.initSign((PrivateKey) pkcs12Bundle.getKey(crtName, passphrase));
 
-                    X509Certificate crt = (X509Certificate) pkcs12Bundle.getCertificate(crtName);
+            X509Certificate crt = certificateManager.getCertificate();
+            this.certificate = crt.getEncoded();
+            this.serialHex = crt.getSerialNumber().toString(16);
+            this.issuerDN = crt.getIssuerDN().getName();
+            this.algorithm = crt.getSigAlgName();
 
-                    this.certificate = crt.getEncoded();
-                    this.serialHex = crt.getSerialNumber().toString(16);
-                    this.issuerDN = crt.getIssuerDN().getName();
-                    this.algorithm = crt.getSigAlgName();
-                } else {
-                    throw new SecurityException("Unable to find correct certificate within p12 bundle");
-                }
-            }
-        } catch (FileNotFoundException e) {
-            LOG.error("Unable to open file" + e.getMessage());
-            throw new SigningException(e.getMessage(), e);
-        } catch (NoSuchAlgorithmException | IOException | UnrecoverableKeyException | InvalidKeyException | CertificateException e) {
+            this.signature = Signature.getInstance(this.algorithm);
+            this.signature.initSign(certificateManager.getPrivateKey());
+
+        } catch (NoSuchAlgorithmException | InvalidKeyException | CertificateException e) {
             LOG.error(e.getMessage());
-            throw new SigningException(e.getMessage(), e);
-        } catch (KeyStoreException e) {
-            LOG.error("Unable to extract data from Certificate: " + e.getMessage());
             throw new SigningException(e.getMessage(), e);
         }
     }

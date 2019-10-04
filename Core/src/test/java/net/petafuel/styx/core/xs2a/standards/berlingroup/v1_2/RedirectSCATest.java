@@ -33,18 +33,18 @@ public class RedirectSCATest {
 
 
         PSU psu = new PSU("4321-87654321-4321");
-
+        Consent consent = new Consent();
+        consent.getAccess().setBalances(balances);
+        consent.getAccess().setTransactions(transactions);
+        consent.setPsu(psu);
+        consent.setCombinedServiceIndicator(false);
+        consent.setRecurringIndicator(false);
+        consent.setFrequencyPerDay(4);
+        consent.setValidUntil(new Date());
         // build Request Body
-        CreateConsentRequest createConsentRequest = new CreateConsentRequest();
-        createConsentRequest.getAccess().setBalances(balances);
-        createConsentRequest.getAccess().setTransactions(transactions);
-        createConsentRequest.setPsu(psu);
-        createConsentRequest.setCombinedServiceIndicator(false);
-        createConsentRequest.setRecurringIndicator(false);
-        createConsentRequest.setFrequencyPerDay(4);
-        createConsentRequest.setValidUntil(new Date());
+        CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
 
-        Consent consent = standard.getCs().createConsent(createConsentRequest);
+        consent = standard.getCs().createConsent(createConsentRequest);
 
         //TODO call sca link
         //return redirect link to client

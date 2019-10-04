@@ -58,7 +58,7 @@ public class BerlinGroupSigner {
 
         } catch (NoSuchAlgorithmException | InvalidKeyException | CertificateException e) {
             LOG.error(e.getMessage());
-            throw new SigningException(e.getMessage());
+            throw new SigningException(e.getMessage(), e);
         }
     }
 

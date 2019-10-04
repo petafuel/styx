@@ -34,22 +34,22 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
 
         JsonObject jsonAccess = new JsonObject();
 
-        if (src.getAccess().getBalances() != null && !src.getAccess().getBalances().isEmpty()) {
-            JsonElement jsonBalances = gson.toJsonTree(src.getAccess().getBalances(), new TypeToken<ArrayList<Account>>() {
+        if (src.getConsent().getAccess().getBalances() != null && !src.getConsent().getAccess().getBalances().isEmpty()) {
+            JsonElement jsonBalances = gson.toJsonTree(src.getConsent().getAccess().getBalances(), new TypeToken<ArrayList<Account>>() {
             }.getType());
             jsonAccess.add(JSON_KEY_BALANCES, jsonBalances);
         }
-        if (src.getAccess().getTransactions() != null && !src.getAccess().getTransactions().isEmpty()) {
-            JsonElement jsonTransactions = gson.toJsonTree(src.getAccess().getTransactions(), new TypeToken<ArrayList<Account>>() {
+        if (src.getConsent().getAccess().getTransactions() != null && !src.getConsent().getAccess().getTransactions().isEmpty()) {
+            JsonElement jsonTransactions = gson.toJsonTree(src.getConsent().getAccess().getTransactions(), new TypeToken<ArrayList<Account>>() {
             }.getType());
             jsonAccess.add(JSON_KEY_TRANSACTIONS, jsonTransactions);
         }
         encoded.add(JSON_KEY_ACCESS, jsonAccess);
 
-        encoded.addProperty(JSON_KEY_RECURRING_INDICATOR, src.isRecurringIndicator());
-        encoded.addProperty(JSON_KEY_VALID_UTIL, dateFormat.format(src.getValidUntil()));
-        encoded.addProperty(JSON_KEY_FREQUENCY_PER_DAY, src.getFrequencyPerDay());
-        encoded.addProperty(JSON_KEY_COMBINED_SERVICE_INDICATOR, src.isCombinedServiceIndicator());
+        encoded.addProperty(JSON_KEY_RECURRING_INDICATOR, src.getConsent().isRecurringIndicator());
+        encoded.addProperty(JSON_KEY_VALID_UTIL, dateFormat.format(src.getConsent().getValidUntil()));
+        encoded.addProperty(JSON_KEY_FREQUENCY_PER_DAY, src.getConsent().getFrequencyPerDay());
+        encoded.addProperty(JSON_KEY_COMBINED_SERVICE_INDICATOR, src.getConsent().isCombinedServiceIndicator());
         return encoded;
     }
 
@@ -58,7 +58,7 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
         JsonObject consentResponse = json.getAsJsonObject();
         Consent consent = new Consent();
         if (consentResponse.get(JSON_KEY_CONSENT_ID) != null) {
-            consent.setConsentId(consentResponse.get(JSON_KEY_CONSENT_ID).getAsString());
+            consent.setId(consentResponse.get(JSON_KEY_CONSENT_ID).getAsString());
         }
         if (consentResponse.get(JSON_KEY_CONSENT_STATUS) != null) {
             consent.setState(Consent.State.valueOf(consentResponse.get(JSON_KEY_CONSENT_STATUS).getAsString().toUpperCase()));

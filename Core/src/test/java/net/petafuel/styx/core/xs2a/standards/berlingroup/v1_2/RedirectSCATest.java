@@ -17,6 +17,7 @@ import java.util.List;
 public class RedirectSCATest {
 
     @Test
+    @Tag("integration")
     public void startSCA() throws SignatureException, BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setCs(new BerlinGroupCS("https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/xs2a-api/12345678"));

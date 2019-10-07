@@ -7,12 +7,9 @@ import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.Redirect;
 import net.petafuel.styx.core.xs2a.sca.SCAMethod;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupCS;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.sca.SCAHandler;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 
 import java.security.SignatureException;
 import java.util.Date;
@@ -44,7 +41,7 @@ public class RedirectSCATest {
 
         //hardcoded values
         PSU psu = new PSU("PSU-Successful");
-        psu.setIpAddress("192.168.8.78");
+        psu.setIp("192.168.8.78");
         psu.setIdType("DE_ONLB_DB");
 
         // build Request Body

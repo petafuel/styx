@@ -34,21 +34,23 @@ public class RedirectSCATest {
         //transactions.add(new Account("DE40100100103307118608"));
 
         PSU psu = new PSU("555-5555555");
-        psu.setIpAddress("192.168.8.78");
+        psu.setIp("192.168.8.78");
         psu.setIdType("DE_ONLB_SB");
 
+        Consent consent = new Consent();
+        consent.getAccess().setBalances(balances);
+        consent.getAccess().setTransactions(transactions);
+        consent.setPsu(psu);
+        consent.setCombinedServiceIndicator(false);
+        consent.setRecurringIndicator(true);
+        consent.setFrequencyPerDay(4);
+        consent.setValidUntil(new Date());
+
         //build Request Body
-        CreateConsentRequest createConsentRequest = new CreateConsentRequest();
-        createConsentRequest.getAccess().setBalances(balances);
-        createConsentRequest.getAccess().setTransactions(transactions);
-        createConsentRequest.setPsu(psu);
-        createConsentRequest.setCombinedServiceIndicator(false);
-        createConsentRequest.setRecurringIndicator(true);
-        createConsentRequest.setFrequencyPerDay(4);
-        createConsentRequest.setValidUntil(new Date());
+        CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
         createConsentRequest.setTppRedirectPreferred(true);
 
-        Consent consent = standard.getCs().createConsent(createConsentRequest);
+        consent = standard.getCs().createConsent(createConsentRequest);
         SCAMethod redirectSCA = SCAHandler.decision(consent);
         if(redirectSCA instanceof Redirect)
         {

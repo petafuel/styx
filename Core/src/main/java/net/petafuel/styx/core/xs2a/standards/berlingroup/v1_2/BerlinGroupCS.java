@@ -2,6 +2,7 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.petafuel.styx.core.persistence.layers.PersistentConsent;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
@@ -10,6 +11,7 @@ import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
@@ -22,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class BerlinGroupCS extends BasicService implements CSInterface {
 
@@ -49,13 +52,18 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
                 throwBankRequestException(response);
             }
 
-
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(Consent.class, new ConsentSerializer())
                     .create();
             Consent consent = gson.fromJson(responseBody.string(), Consent.class);
-            consent.setRequest(consentRequest);
-            consent.getSca().setApproach(SCA.Approach.valueOf(response.header("ASPSP-SCA-Approach")));
+            consent.setxRequestId(UUID.fromString(consentRequest.getHeaders().get("x-request-id")));
+            consent.setPsu(((CreateConsentRequest) consentRequest).getConsent().getPsu());
+            //if the sca method was not set by previously parsing the body, use the bank supplied header
+            if (consent.getSca().getApproach() == null) {
+                consent.getSca().setApproach(SCA.Approach.valueOf(response.header("ASPSP-SCA-Approach")));
+            }
+            consent.setAccess(((CreateConsentRequest) consentRequest).getConsent().getAccess());
+            new PersistentConsent().create(consent);
             return consent;
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
@@ -79,9 +87,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
                     .registerTypeAdapter(Consent.class, new ConsentSerializer())
                     .registerTypeAdapter(Account.class, new AccountSerializer())
                     .create();
-            Consent consent = gson.fromJson(responseBody.string(), Consent.class);
-            consent.setRequest(consentGetRequest);
-            return consent;
+            return gson.fromJson(responseBody.string(), Consent.class);
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(),e);
         }
@@ -122,10 +128,8 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
                 throwBankRequestException(response);
             }
             Consent consent = new Consent();
-            consent.setRequest(consentDeleteRequest);
             consent.setId(((DeleteConsentRequest) consentDeleteRequest).getConsentId());
-            consent.setState(Consent.State.TERMINATED_BY_TPP);
-            return consent;
+            return new PersistentConsent().updateState(consent, Consent.State.TERMINATED_BY_TPP);
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }

@@ -8,8 +8,8 @@ public class SCA {
     public enum Approach {
         DECOUPLED,
         EMBEDDED,
-        OAUTH2,
-        REDIRECT
+        REDIRECT,
+        OAUTH2
     }
 
     public enum Status {

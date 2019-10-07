@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.StringJoiner;
 
+
 public abstract class BasicService {
     protected static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     protected static final MediaType XML = MediaType.get("text/xml; charset=utf-8");

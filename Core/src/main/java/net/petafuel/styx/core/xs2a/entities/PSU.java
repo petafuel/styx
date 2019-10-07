@@ -17,7 +17,16 @@ public class PSU {
     private String corporateIdType;
 
     @XS2AHeader("psu-ip-address")
-    private String ipAddress;
+    private String ip;
+
+    @XS2AHeader("psu-ip-port")
+    private Integer port;
+
+    @XS2AHeader("psu-user-agent")
+    private String userAgent;
+
+    @XS2AHeader("psu-geo-location")
+    private String geoLocation;
 
     public PSU(String id) {
         this.id = id;
@@ -55,11 +64,35 @@ public class PSU {
         this.corporateIdType = corporateIdType;
     }
 
-    public String getIpAddress() {
-        return ipAddress;
+    public String getIp() {
+        return ip;
     }
 
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public String getGeoLocation() {
+        return geoLocation;
+    }
+
+    public void setGeoLocation(String geoLocation) {
+        this.geoLocation = geoLocation;
     }
 }

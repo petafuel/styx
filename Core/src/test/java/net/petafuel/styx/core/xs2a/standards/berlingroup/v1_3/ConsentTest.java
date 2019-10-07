@@ -1,4 +1,4 @@
-package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
+package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.Account;
@@ -10,9 +10,9 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsent
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
 import org.junit.Assert;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 
 import java.security.SignatureException;
 import java.util.Date;
@@ -28,6 +28,8 @@ public class ConsentTest {
     public void createConsent() throws SignatureException, BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+        //standard.setCs(new BerlinGroupCS("https://simulator-xs2a.db.com/", new BerlinGroupSigner()));
+        //standard.setCs(new BerlinGroupCS("https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/xs2a-api/12345678", new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
 
@@ -51,7 +53,7 @@ public class ConsentTest {
         createConsentRequest.setRecurringIndicator(false);
         createConsentRequest.setFrequencyPerDay(4);
         createConsentRequest.setValidUntil(new Date());
-        createConsentRequest.setTppRedirectPreferred(true);
+        //createConsentRequest.setTppRedirectPreferred(true);
 
         Consent consent = standard.getCs().createConsent(createConsentRequest);
 
@@ -62,12 +64,13 @@ public class ConsentTest {
     @Tag("integration")
     public void getConsent() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+        //standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+        standard.setCs(new BerlinGroupCS("https://xs2a-sndbx.consorsbank.de", new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
 
         GetConsentRequest getConsentRequest = new GetConsentRequest();
-        getConsentRequest.setConsentId("5267164802280910235***REMOVED***CO4960JJ");
+        getConsentRequest.setConsentId("EM1-vesW6HU5cDpPh_bpc65mJd0dlnpO8qmvGlgGViZNGGhgcbQrDieFkQ9dkzEmzEogXxwAl1YzF4bFRYCMAg==_=_bS6p6XvTWI");
 
         Consent consent = standard.getCs().getConsent(getConsentRequest);
     }

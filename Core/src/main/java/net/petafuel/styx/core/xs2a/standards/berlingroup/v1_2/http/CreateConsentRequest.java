@@ -7,12 +7,10 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Access;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentRequestSerializer;
+import net.petafuel.styx.core.xs2a.utils.Config;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class CreateConsentRequest implements XS2ARequest {
 
@@ -28,8 +26,17 @@ public class CreateConsentRequest implements XS2ARequest {
     @XS2AHeader("date")
     private String date;
 
+    @XS2AHeader("tpp-redirect-preferred")
+    private boolean tppRedirectPreferred;
+
+    @XS2AHeader("tpp-redirect-uri")
+    private String tppRedirectUri;
+
+    @XS2AHeader("tpp-nok-redirect-uri")
+    private String tppNokRedirectUri;
+
     //Accumulated Headers
-    private Map<String, String> headers;
+    private LinkedHashMap<String, String> headers;
 
     /**
      * Body
@@ -43,8 +50,13 @@ public class CreateConsentRequest implements XS2ARequest {
     public CreateConsentRequest() {
         this.headers = new LinkedHashMap<>();
         this.xRequestId = String.valueOf(UUID.randomUUID());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, d MMM yyyy HH:mm:ss zz");
+        //Maybe in some cases we need different date formats
+        //SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss zz");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss zz", Locale.ENGLISH);
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         this.date = simpleDateFormat.format(new Date());
+        this.tppRedirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.xRequestId;
+        this.tppNokRedirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.xRequestId;
     }
 
     @Override
@@ -74,7 +86,7 @@ public class CreateConsentRequest implements XS2ARequest {
         this.access = access;
     }
 
-    public Map<String, String> getHeaders() {
+    public LinkedHashMap<String, String> getHeaders() {
         return headers;
     }
 
@@ -108,5 +120,29 @@ public class CreateConsentRequest implements XS2ARequest {
 
     public void setCombinedServiceIndicator(boolean combinedServiceIndicator) {
         this.combinedServiceIndicator = combinedServiceIndicator;
+    }
+
+    public Boolean getTppRedirectPreferred() {
+        return tppRedirectPreferred;
+    }
+
+    public void setTppRedirectPreferred(boolean tppRedirectPreferred) {
+        this.tppRedirectPreferred = tppRedirectPreferred;
+    }
+
+    public String getTppRedirectUri() {
+        return tppRedirectUri;
+    }
+
+    public void setTppRedirectUri(String tppRedirectUri) {
+        this.tppRedirectUri = tppRedirectUri;
+    }
+
+    public String getTppNokRedirectUri() {
+        return tppNokRedirectUri;
+    }
+
+    public void setTppNokRedirectUri(String tppNokRedirectUri) {
+        this.tppNokRedirectUri = tppNokRedirectUri;
     }
 }

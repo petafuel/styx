@@ -1,4 +1,4 @@
-package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
+package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.SigningException;
@@ -103,9 +103,6 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
                     signatureStructureJoiner.add(HEADER_TPP_REDIRECT_URL);
                     signatureContentJoiner.add(HEADER_TPP_REDIRECT_URL + ": " + entry.getValue());
                     break;
-                default:
-                    //can't handle unknown headers
-                    break;
             }
         }
         String headerOrder = signatureStructureJoiner.toString();
@@ -114,13 +111,13 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
         try {
             this.signature.update(signatureContent.getBytes(StandardCharsets.UTF_8));
         } catch (SignatureException e) {
-            LOG.error(e.getStackTrace());
+            e.printStackTrace();
         }
         String singedHeaders = null;
         try {
             singedHeaders = Base64.getEncoder().encodeToString(this.signature.sign());
         } catch (SignatureException e) {
-            LOG.error(e.getStackTrace());
+            e.printStackTrace();
         }
 
         xs2aRequest.setHeader(HEADER_SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,

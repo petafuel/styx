@@ -16,6 +16,9 @@ public class PSU {
     @XS2AHeader("psu-corporate-id-type")
     private String corporateIdType;
 
+    @XS2AHeader("psu-ip-address")
+    private String ipAddress;
+
     public PSU(String id) {
         this.id = id;
     }
@@ -50,5 +53,13 @@ public class PSU {
 
     public void setCorporateIdType(String corporateIdType) {
         this.corporateIdType = corporateIdType;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 }

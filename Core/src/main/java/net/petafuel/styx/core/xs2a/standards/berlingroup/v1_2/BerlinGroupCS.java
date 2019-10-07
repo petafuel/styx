@@ -9,6 +9,7 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
@@ -31,8 +32,8 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
     private static final String GET_CONSENT_STATUS = "/v1/consents/%s/status";
     private static final String DELETE_CONSENT = "/v1/consents/%s";
 
-    public BerlinGroupCS(String url) {
-        super(url);
+    public BerlinGroupCS(String url, IBerlinGroupSigner signer) {
+        super(url, signer);
     }
 
     public Consent createConsent(XS2ARequest consentRequest) throws BankRequestFailedException {
@@ -82,7 +83,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             consent.setRequest(consentGetRequest);
             return consent;
         } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage(), new Exception());
+            throw new BankRequestFailedException(e.getMessage(),e);
         }
     }
 
@@ -122,7 +123,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             }
             Consent consent = new Consent();
             consent.setRequest(consentDeleteRequest);
-            consent.setConsentId(((DeleteConsentRequest) consentDeleteRequest).getConsentId());
+            consent.setId(((DeleteConsentRequest) consentDeleteRequest).getConsentId());
             consent.setState(Consent.State.TERMINATED_BY_TPP);
             return consent;
         } catch (IOException e) {

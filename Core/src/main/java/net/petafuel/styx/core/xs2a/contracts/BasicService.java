@@ -3,6 +3,9 @@ package net.petafuel.styx.core.xs2a.contracts;
 import net.petafuel.styx.core.xs2a.exceptions.CertificateException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.CertificateManager;
+import net.petafuel.styx.core.xs2a.exceptions.CertificateException;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.utils.CertificateManager;
 import net.petafuel.styx.core.xs2a.utils.XS2AHeaderParser;
 import net.petafuel.styx.core.xs2a.utils.XS2AQueryParameterParser;
 import okhttp3.*;
@@ -17,6 +20,7 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Map;
 
 public abstract class BasicService {
@@ -25,25 +29,13 @@ public abstract class BasicService {
     private static final Logger LOG = LogManager.getLogger(BasicService.class);
     protected String url;
     private Request.Builder builder;
+    private IBerlinGroupSigner signer;
 
-    public BasicService(String url) {
+    public BasicService(String url, IBerlinGroupSigner signer) {
 
         this.url = url;
         this.builder = new Request.Builder();
-    }
-
-    private static String httpBuildQuery(Map<String, String> data) {
-        if (data.isEmpty()) {
-            return "";
-        }
-        StringBuilder query = new StringBuilder("?");
-        for (Map.Entry<String, String> entry : data.entrySet()) {
-            query.append(entry.getKey())
-                    .append("=")
-                    .append(entry.getValue())
-                    .append("&");
-        }
-        return query.toString();
+        this.signer = signer;
     }
 
     protected void setUrl(String url) {
@@ -63,8 +55,7 @@ public abstract class BasicService {
         XS2AHeaderParser.parse(request);
 
         //Sign Request
-        BerlinGroupSigner berlinGroupSigner = new BerlinGroupSigner();
-        berlinGroupSigner.sign(request);
+        this.signer.sign(request);
 
         // Set Request Headers
         for (Map.Entry<String, String> entry : request.getHeaders().entrySet()) {
@@ -98,7 +89,7 @@ public abstract class BasicService {
             throw new CertificateException("There is no default Trust store available");
         }
 
-        OkHttpClient client = new OkHttpClient().newBuilder().sslSocketFactory(sslContext.getSocketFactory(), x509Tm).build();
+        OkHttpClient client = new OkHttpClient().newBuilder().protocols(Arrays.asList(Protocol.HTTP_1_1)).sslSocketFactory(sslContext.getSocketFactory(), x509Tm).build();
         return client.newCall(request).execute();
     }
 
@@ -111,5 +102,24 @@ public abstract class BasicService {
         POST,
         GET,
         DELETE
+    }
+
+    private static String httpBuildQuery(Map<String, String> data) {
+        if (data.isEmpty()) {
+            return "";
+        }
+        StringBuilder query = new StringBuilder("?");
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            query.append(entry.getKey())
+                    .append("=")
+                    .append(entry.getValue())
+                    .append("&");
+        }
+        return query.toString();
+    }
+
+    protected String getHttpQueryString(XS2AGetRequest request) {
+        XS2AQueryParameterParser.parse(request);
+        return BasicService.httpBuildQuery(request.getQueryParameters());
     }
 }

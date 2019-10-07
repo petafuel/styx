@@ -10,6 +10,7 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Balance;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
@@ -30,8 +31,8 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     private static final String GET_TRANSACTIONS = "/v1/accounts/%s/transactions";
     private static final String GET_TRANSACTION_DETAILS = "/v1/accounts/%s/transactions/%s";
 
-    public BerlinGroupAIS(String url) {
-        super(url);
+    public BerlinGroupAIS(String url, IBerlinGroupSigner signer) {
+        super(url, signer);
     }
 
     @Override

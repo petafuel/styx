@@ -120,7 +120,7 @@ public class XS2AHeaderParserTest {
             }
 
             @Override
-            public Map<String, String> getHeaders() {
+            public LinkedHashMap<String, String> getHeaders() {
                 return this.headers;
             }
         }

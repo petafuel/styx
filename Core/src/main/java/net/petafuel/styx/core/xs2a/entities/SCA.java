@@ -30,6 +30,7 @@ public class SCA {
         AUTHORISATION_WITH_PSU_AUTHENTICATION("startAuthorisationWithPsuAuthentication"),
         AUTHORISATION_WITH_ENCRYPTED_PSU_AUTHENTICATION("startAuthorisationWithEncryptedPsuAuthentication"),
         STATUS("status"),
+        SCA_STATUS("scaStatus"),
         SELF("self"),
         SCA_REDIRECT("scaRedirect"),
         SCA_OAUTH("scaOAuth");

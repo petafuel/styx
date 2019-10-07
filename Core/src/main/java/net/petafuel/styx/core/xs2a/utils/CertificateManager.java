@@ -96,6 +96,7 @@ public class CertificateManager {
             KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
 
             sslContext = SSLContext.getInstance("TLS");
+
             sslContext.init(keyManagers, null, new SecureRandom());
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyManagementException e) {
             LOG.error(e.getMessage());

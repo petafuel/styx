@@ -6,7 +6,6 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class DeleteConsentRequest implements XS2ARequest {
@@ -32,7 +31,7 @@ public class DeleteConsentRequest implements XS2ARequest {
     public DeleteConsentRequest() {
         this.headers = new LinkedHashMap<>();
         this.xRequestId = String.valueOf(UUID.randomUUID());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, d MM yyyy HH:mm:ss zz");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, dd MM yyyy HH:mm:ss zz");
         this.date = simpleDateFormat.format(new Date());
     }
 
@@ -47,7 +46,7 @@ public class DeleteConsentRequest implements XS2ARequest {
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public LinkedHashMap<String, String> getHeaders() {
         return this.headers;
     }
 

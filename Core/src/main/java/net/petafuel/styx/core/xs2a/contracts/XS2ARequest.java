@@ -1,11 +1,11 @@
 package net.petafuel.styx.core.xs2a.contracts;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public interface XS2ARequest {
     String getRawBody();
 
     void setHeader(String key, String value);
 
-    Map<String, String> getHeaders();
+    LinkedHashMap<String, String> getHeaders();
 }

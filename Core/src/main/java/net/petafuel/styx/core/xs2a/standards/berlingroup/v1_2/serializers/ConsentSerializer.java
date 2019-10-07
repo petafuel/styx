@@ -1,9 +1,11 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers;
 
 import com.google.gson.*;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
+import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 
@@ -23,6 +25,7 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
     private static final String JSON_KEY_FREQUENCY_PER_DAY = "frequencyPerDay";
     private static final String JSON_KEY_COMBINED_SERVICE_INDICATOR = "combinedServiceIndicator";
     private static final String JSON_KEY_CONSENT_ID = "consentId";
+    private static final String JSON_KEY_LINKS = "_links";
 
     @Override
     public JsonElement serialize(CreateConsentRequest src, Type typeOfSrc, JsonSerializationContext context) {
@@ -84,15 +87,26 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
         if (consentResponse.get(JSON_KEY_ACCESS) != null) {
             if (consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_BALANCES) != null) {
                 JsonArray balanceAccounts = consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_BALANCES).getAsJsonArray();
-                consent.getAccess().addBalanceAccounts(context.deserialize(balanceAccounts, Account.class));
+                for (JsonElement balanceAccount : balanceAccounts) {
+                    consent.getAccess().addBalanceAccount(context.deserialize(balanceAccount, Account.class));
+                }
 
             }
             if (consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_TRANSACTIONS) != null) {
                 JsonArray transactionAccounts = consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_TRANSACTIONS).getAsJsonArray();
-                consent.getAccess().addTransactionAccounts(context.deserialize(transactionAccounts, Account.class));
+                for (JsonElement transcationAccount : transactionAccounts) {
+                    consent.getAccess().addTransactionAccount(context.deserialize(transcationAccount, Account.class));
+                }
             }
         }
-
+        if (consentResponse.get(JSON_KEY_LINKS) != null) {
+            JsonObject test = consentResponse.get(JSON_KEY_LINKS).getAsJsonObject();
+            for (SCA.LinkType linkType: SCA.LinkType.values()) {
+                if (test.get(linkType.getJsonKey()) != null) {
+                    consent.getSca().addLink(linkType, test.get(linkType.getJsonKey()).getAsJsonObject().get("href").toString());
+                }
+            }
+        }
 
         return consent;
     }

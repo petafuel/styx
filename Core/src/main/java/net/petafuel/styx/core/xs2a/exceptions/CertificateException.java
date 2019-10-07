@@ -4,5 +4,4 @@ public class CertificateException extends RuntimeException {
     public CertificateException(String msg) {
         super(msg);
     }
-
 }

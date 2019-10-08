@@ -1,11 +1,16 @@
 package net.petafuel.styx.core.xs2a.contracts;
 
 import net.petafuel.styx.core.xs2a.exceptions.CertificateException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.CertificateManager;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.XS2AHeaderParser;
 import net.petafuel.styx.core.xs2a.utils.XS2AQueryParameterParser;
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,12 +24,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.StringJoiner;
 
-import net.petafuel.styx.core.xs2a.utils.XS2AQueryParameterParser;
 
 public abstract class BasicService {
-    private static final Logger LOG = LogManager.getLogger(BasicService.class);
-
     protected static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     protected static final MediaType XML = MediaType.get("text/xml; charset=utf-8");
     private static final Logger LOG = LogManager.getLogger(BasicService.class);
@@ -90,7 +93,7 @@ public abstract class BasicService {
             throw new CertificateException("There is no default Trust store available");
         }
 
-        OkHttpClient client = new OkHttpClient().newBuilder().sslSocketFactory(sslContext.getSocketFactory(), x509Tm).build();
+        OkHttpClient client = new OkHttpClient().newBuilder().protocols(Arrays.asList(Protocol.HTTP_1_1)).sslSocketFactory(sslContext.getSocketFactory(), x509Tm).build();
         return client.newCall(request).execute();
     }
 
@@ -104,12 +107,9 @@ public abstract class BasicService {
         if (data.isEmpty()) {
             return "";
         }
-        StringBuilder query = new StringBuilder("?");
+        StringJoiner query = new StringJoiner("&", "?", "");
         for (Map.Entry<String, String> entry : data.entrySet()) {
-            query.append(entry.getKey())
-                    .append("=")
-                    .append(entry.getValue())
-                    .append("&");
+            query.add(entry.getKey() + "=" + entry.getValue());
         }
         return query.toString();
     }

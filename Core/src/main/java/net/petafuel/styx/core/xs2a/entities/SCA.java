@@ -8,8 +8,8 @@ public class SCA {
     public enum Approach {
         DECOUPLED,
         EMBEDDED,
-        OAUTH2,
-        REDIRECT
+        REDIRECT,
+        OAUTH2
     }
 
     public enum Status {
@@ -30,6 +30,7 @@ public class SCA {
         AUTHORISATION_WITH_PSU_AUTHENTICATION("startAuthorisationWithPsuAuthentication"),
         AUTHORISATION_WITH_ENCRYPTED_PSU_AUTHENTICATION("startAuthorisationWithEncryptedPsuAuthentication"),
         STATUS("status"),
+        SCA_STATUS("scaStatus"),
         SELF("self"),
         SCA_REDIRECT("scaRedirect"),
         SCA_OAUTH("scaOAuth");

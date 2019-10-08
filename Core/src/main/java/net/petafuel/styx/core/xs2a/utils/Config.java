@@ -28,7 +28,7 @@ public class Config {
     private Config() {
         config = new Properties();
         try (
-            InputStream in = CertificateManager.class.getClassLoader().getResourceAsStream("config.properties")) {
+            InputStream in = Config.class.getClassLoader().getResourceAsStream("config.properties")) {
             config.load(in);
         } catch (
                 IOException e) {

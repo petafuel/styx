@@ -16,6 +16,18 @@ public class PSU {
     @XS2AHeader("psu-corporate-id-type")
     private String corporateIdType;
 
+    @XS2AHeader("psu-ip-address")
+    private String ip;
+
+    @XS2AHeader("psu-ip-port")
+    private Integer port;
+
+    @XS2AHeader("psu-user-agent")
+    private String userAgent;
+
+    @XS2AHeader("psu-geo-location")
+    private String geoLocation;
+
     public PSU(String id) {
         this.id = id;
     }
@@ -50,5 +62,37 @@ public class PSU {
 
     public void setCorporateIdType(String corporateIdType) {
         this.corporateIdType = corporateIdType;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public String getGeoLocation() {
+        return geoLocation;
+    }
+
+    public void setGeoLocation(String geoLocation) {
+        this.geoLocation = geoLocation;
     }
 }

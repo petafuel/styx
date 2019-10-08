@@ -2,6 +2,9 @@ package net.petafuel.styx.core.xs2a.utils;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.Consent;
+import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
@@ -13,7 +16,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -22,8 +26,26 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 public class XS2AHeaderParserTest {
 
     static Stream<Arguments> requestClassProvider() {
+        List<Account> balances = new LinkedList<>();
+        balances.add(new Account("DE40100100103307118608"));
+        balances.add(new Account("DE02100100109307118603"));
+        balances.add(new Account("DE67100100101306118605"));
+
+        List<Account> transactions = new LinkedList<>();
+        transactions.add(new Account("DE40100100103307118608"));
+
+
+        PSU psu = new PSU("4321-87654321-4321");
+        Consent consent = new Consent();
+        consent.getAccess().setBalances(balances);
+        consent.getAccess().setTransactions(transactions);
+        consent.setPsu(psu);
+        consent.setCombinedServiceIndicator(false);
+        consent.setRecurringIndicator(false);
+        consent.setFrequencyPerDay(4);
+
         return Stream.of(
-                arguments(new CreateConsentRequest()),
+                arguments(new CreateConsentRequest(consent)),
                 arguments(new StatusConsentRequest()),
                 arguments(new GetConsentRequest()),
                 arguments(new DeleteConsentRequest())
@@ -97,7 +119,7 @@ public class XS2AHeaderParserTest {
             }
 
             @Override
-            public Map<String, String> getHeaders() {
+            public LinkedHashMap<String, String> getHeaders() {
                 return this.headers;
             }
         }

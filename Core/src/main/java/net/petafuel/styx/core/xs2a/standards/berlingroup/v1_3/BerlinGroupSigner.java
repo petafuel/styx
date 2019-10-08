@@ -61,7 +61,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
 
         } catch (NoSuchAlgorithmException | InvalidKeyException | CertificateException e) {
             LOG.error(e.getMessage());
-            throw new SigningException(e.getMessage());
+            throw new SigningException(e.getMessage(), e);
         }
     }
 
@@ -104,9 +104,6 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
                     signatureStructureJoiner.add(HEADER_TPP_REDIRECT_URL);
                     signatureContentJoiner.add(HEADER_TPP_REDIRECT_URL + ": " + entry.getValue());
                     break;
-                case HEADER_TPP_REDIRECT_PREFERRED:
-                    signatureContentJoiner.add(HEADER_TPP_REDIRECT_PREFERRED);
-                    signatureContentJoiner.add(HEADER_TPP_REDIRECT_PREFERRED + ": " + entry.getValue());
             }
         }
         String headerOrder = signatureStructureJoiner.toString();

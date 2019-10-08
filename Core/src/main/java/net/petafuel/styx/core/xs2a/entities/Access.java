@@ -16,8 +16,16 @@ public class Access {
         balances.addAll(accounts);
     }
 
+    public void addBalanceAccount(Account account) {
+        this.balances.add(account);
+    }
+
     public void addTransactionAccounts(List<Account> accounts) {
         transactions.addAll(accounts);
+    }
+
+    public void addTransactionAccount(Account account) {
+        this.transactions.add(account);
     }
 
     public List<Account> getBalances() {

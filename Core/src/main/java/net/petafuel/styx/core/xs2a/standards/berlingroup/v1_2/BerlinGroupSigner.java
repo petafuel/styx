@@ -14,7 +14,6 @@ import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.StringJoiner;
 
 public class BerlinGroupSigner implements IBerlinGroupSigner {
@@ -49,6 +48,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
     public BerlinGroupSigner() {
         CertificateManager certificateManager = CertificateManager.getInstance();
         try {
+
             X509Certificate crt = certificateManager.getCertificate();
             this.certificate = crt.getEncoded();
             this.serialHex = crt.getSerialNumber().toString(16);
@@ -60,7 +60,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
 
         } catch (NoSuchAlgorithmException | InvalidKeyException | CertificateException e) {
             LOG.error(e.getMessage());
-            throw new SigningException(e.getMessage());
+            throw new SigningException(e.getMessage(), e);
         }
     }
 
@@ -73,7 +73,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
             LOG.error("Unable to digest message: " + e.getMessage());
         }
 
-        Map<String, String> headers = xs2aRequest.getHeaders();
+        LinkedHashMap<String, String> headers = xs2aRequest.getHeaders();
 
         StringJoiner signatureStructureJoiner = new StringJoiner(" ");
         StringJoiner signatureContentJoiner = new StringJoiner("\n");

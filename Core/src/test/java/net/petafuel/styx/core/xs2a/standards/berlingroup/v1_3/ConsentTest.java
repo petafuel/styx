@@ -43,35 +43,35 @@ public class ConsentTest {
         List<Account> transactions = new LinkedList<>();
         transactions.add(new Account("DE40100100103307118608"));
 
-
         PSU psu = new PSU("4321-87654321-4321");
-
+        Consent consent = new Consent();
+        consent.getAccess().setBalances(balances);
+        consent.getAccess().setTransactions(transactions);
+        consent.setPsu(psu);
+        consent.setCombinedServiceIndicator(false);
+        consent.setRecurringIndicator(false);
+        consent.setFrequencyPerDay(4);
+        consent.setValidUntil(new Date());
         // build Request Body
-        CreateConsentRequest createConsentRequest = new CreateConsentRequest();
-        createConsentRequest.getAccess().setBalances(balances);
-        createConsentRequest.getAccess().setTransactions(transactions);
-        createConsentRequest.setPsu(psu);
-        createConsentRequest.setCombinedServiceIndicator(false);
-        createConsentRequest.setRecurringIndicator(false);
-        createConsentRequest.setFrequencyPerDay(4);
-        createConsentRequest.setValidUntil(new Date());
-        //createConsentRequest.setTppRedirectPreferred(true);
+        CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
+        createConsentRequest.setTppRedirectPreferred(true);
 
-        Consent consent = standard.getCs().createConsent(createConsentRequest);
+        consent = standard.getCs().createConsent(createConsentRequest);
 
-        Assert.assertNotNull(consent.getConsentId());
+        Assert.assertNotNull(consent.getId());
     }
 
     @Test
     @Tag("integration")
     public void getConsent() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+        //standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+        standard.setCs(new BerlinGroupCS("https://xs2a-sndbx.consorsbank.de", new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
 
         GetConsentRequest getConsentRequest = new GetConsentRequest();
-        getConsentRequest.setConsentId("5267164802280910235***REMOVED***CO4960JJ");
+        getConsentRequest.setConsentId("EM1-vesW6HU5cDpPh_bpc65mJd0dlnpO8qmvGlgGViZNGGhgcbQrDieFkQ9dkzEmzEogXxwAl1YzF4bFRYCMAg==_=_bS6p6XvTWI");
 
         Consent consent = standard.getCs().getConsent(getConsentRequest);
     }
@@ -121,19 +121,19 @@ public class ConsentTest {
         balances.add(new Account("DE40100100103307118608"));
 
         PSU psu = new PSU("4321-87654321-4321");
-
+        Consent consent = new Consent();
+        consent.getAccess().setBalances(balances);
+        consent.setPsu(psu);
+        consent.setCombinedServiceIndicator(false);
+        consent.setRecurringIndicator(false);
+        consent.setFrequencyPerDay(4);
+        consent.setValidUntil(new Date());
         // Build request body
-        CreateConsentRequest createConsentRequest = new CreateConsentRequest();
-        createConsentRequest.getAccess().setBalances(balances);
-        createConsentRequest.setPsu(psu);
-        createConsentRequest.setCombinedServiceIndicator(false);
-        createConsentRequest.setRecurringIndicator(false);
-        createConsentRequest.setFrequencyPerDay(4);
-        createConsentRequest.setValidUntil(new Date());
+        CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
 
-        Consent consent = standard.getCs().createConsent(createConsentRequest);
+        consent = standard.getCs().createConsent(createConsentRequest);
 
-        Assert.assertNotNull(consent.getConsentId());
+        Assert.assertNotNull(consent.getId());
     }
 
     @Test
@@ -149,19 +149,18 @@ public class ConsentTest {
         transactions.add(new Account("DE40100100103307118608"));
 
         PSU psu = new PSU("4321-87654321-4321");
-
+        Consent consent = new Consent();
+        consent.getAccess().setTransactions(transactions);
+        consent.setPsu(psu);
+        consent.setCombinedServiceIndicator(false);
+        consent.setRecurringIndicator(false);
+        consent.setFrequencyPerDay(4);
+        consent.setValidUntil(new Date());
         // Build request body
-        CreateConsentRequest createConsentRequest = new CreateConsentRequest();
-        createConsentRequest.getAccess().setTransactions(transactions);
-        createConsentRequest.setPsu(psu);
-        createConsentRequest.setCombinedServiceIndicator(false);
-        createConsentRequest.setRecurringIndicator(false);
-        createConsentRequest.setFrequencyPerDay(4);
-        createConsentRequest.setValidUntil(new Date());
+        CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
+        consent = standard.getCs().createConsent(createConsentRequest);
 
-        Consent consent = standard.getCs().createConsent(createConsentRequest);
-
-        Assert.assertNotNull(consent.getConsentId());
+        Assert.assertNotNull(consent.getId());
     }
 
     @Test
@@ -174,17 +173,17 @@ public class ConsentTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         PSU psu = new PSU("4321-87654321-4321");
-
+        Consent consent = new Consent();
+        consent.setPsu(psu);
+        consent.setCombinedServiceIndicator(false);
+        consent.setRecurringIndicator(false);
+        consent.setFrequencyPerDay(4);
+        consent.setValidUntil(new Date());
         // Build request body
-        CreateConsentRequest createConsentRequest = new CreateConsentRequest();
-        createConsentRequest.setPsu(psu);
-        createConsentRequest.setCombinedServiceIndicator(false);
-        createConsentRequest.setRecurringIndicator(false);
-        createConsentRequest.setFrequencyPerDay(4);
-        createConsentRequest.setValidUntil(new Date());
+        CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
 
         try {
-            Consent consent = standard.getCs().createConsent(createConsentRequest);
+            consent = standard.getCs().createConsent(createConsentRequest);
             Assert.fail("BankRequestFailedException exception not thrown.");  // This line should never be reached.
         } catch (BankRequestFailedException e) {
             Assert.assertEquals(400, e.getHttpStatusCode());
@@ -207,19 +206,19 @@ public class ConsentTest {
         transactions.add(new Account("DE40100100103307118608"));
 
         PSU psu = new PSU("");
-
+        Consent consent = new Consent();
+        consent.getAccess().setBalances(balances);
+        consent.getAccess().setTransactions(transactions);
+        consent.setPsu(psu);
+        consent.setCombinedServiceIndicator(false);
+        consent.setRecurringIndicator(false);
+        consent.setFrequencyPerDay(4);
+        consent.setValidUntil(new Date());
         // Build request body
-        CreateConsentRequest createConsentRequest = new CreateConsentRequest();
-        createConsentRequest.getAccess().setBalances(balances);
-        createConsentRequest.getAccess().setTransactions(transactions);
-        createConsentRequest.setPsu(psu);
-        createConsentRequest.setCombinedServiceIndicator(false);
-        createConsentRequest.setRecurringIndicator(false);
-        createConsentRequest.setFrequencyPerDay(4);
-        createConsentRequest.setValidUntil(new Date());
+        CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
 
         try {
-            Consent consent = standard.getCs().createConsent(createConsentRequest);
+            consent = standard.getCs().createConsent(createConsentRequest);
             Assert.fail("BankRequestFailedException exception not thrown.");  // This line should never be reached.
         } catch (BankRequestFailedException e) {
             Assert.assertEquals(400, e.getHttpStatusCode());

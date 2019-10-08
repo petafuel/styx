@@ -95,7 +95,7 @@ public class CertificateManager {
             keyManagerFactory.init(this.clientKeyStore, this.password);
             KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
 
-            sslContext = SSLContext.getInstance("SSL");
+            sslContext = SSLContext.getInstance("TLS");
             sslContext.init(keyManagers, null, new SecureRandom());
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyManagementException e) {
             LOG.error(e.getMessage());
@@ -103,6 +103,7 @@ public class CertificateManager {
         }
         return sslContext;
     }
+
 
     /**
      * Extracts the key from our keystore, also dependend on the alias chosen for the crt within the keystore

@@ -6,7 +6,6 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class GetConsentRequest implements XS2ARequest {
@@ -46,7 +45,7 @@ public class GetConsentRequest implements XS2ARequest {
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public LinkedHashMap<String, String> getHeaders() {
         return headers;
     }
 

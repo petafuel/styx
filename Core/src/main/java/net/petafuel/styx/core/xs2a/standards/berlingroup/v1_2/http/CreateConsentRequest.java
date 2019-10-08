@@ -7,10 +7,13 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
+import net.petafuel.styx.core.xs2a.utils.Config;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.UUID;
 
 public class CreateConsentRequest implements XS2ARequest {
@@ -27,17 +30,30 @@ public class CreateConsentRequest implements XS2ARequest {
     @XS2AHeader("date")
     private String date;
 
+    @XS2AHeader("tpp-redirect-preferred")
+    private boolean tppRedirectPreferred;
+
+    @XS2AHeader("tpp-redirect-uri")
+    private String tppRedirectUri;
+
+    @XS2AHeader("tpp-nok-redirect-uri")
+    private String tppNokRedirectUri;
+
+    //Accumulated Headers
+    private LinkedHashMap<String, String> headers;
+
     /**
      * Body
      */
     Consent consent;
-    //Accumulated Headers
-    private LinkedHashMap<String, String> headers;
 
     public CreateConsentRequest(Consent consent) {
         this.headers = new LinkedHashMap<>();
         this.xRequestId = String.valueOf(UUID.randomUUID());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, d MMM yyyy HH:mm:ss zz");
+        //Maybe in some cases we need different date formats
+        //SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss zz");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss zz", Locale.ENGLISH);
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         this.date = simpleDateFormat.format(new Date());
         this.consent = consent;
         if (consent.getxRequestId() == null) {
@@ -48,6 +64,8 @@ public class CreateConsentRequest implements XS2ARequest {
             this.xRequestId = consent.getxRequestId().toString();
         }
         this.setPsu(consent.getPsu());
+        this.tppRedirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.xRequestId;
+        this.tppNokRedirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.xRequestId;
     }
 
     @Override
@@ -83,5 +101,29 @@ public class CreateConsentRequest implements XS2ARequest {
 
     public void setConsent(Consent consent) {
         this.consent = consent;
+    }
+
+    public Boolean getTppRedirectPreferred() {
+        return tppRedirectPreferred;
+    }
+
+    public void setTppRedirectPreferred(boolean tppRedirectPreferred) {
+        this.tppRedirectPreferred = tppRedirectPreferred;
+    }
+
+    public String getTppRedirectUri() {
+        return tppRedirectUri;
+    }
+
+    public void setTppRedirectUri(String tppRedirectUri) {
+        this.tppRedirectUri = tppRedirectUri;
+    }
+
+    public String getTppNokRedirectUri() {
+        return tppNokRedirectUri;
+    }
+
+    public void setTppNokRedirectUri(String tppNokRedirectUri) {
+        this.tppNokRedirectUri = tppNokRedirectUri;
     }
 }

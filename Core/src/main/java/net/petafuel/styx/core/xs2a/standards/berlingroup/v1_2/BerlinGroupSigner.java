@@ -2,8 +2,8 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.SigningException;
-import net.petafuel.styx.core.xs2a.utils.CertificateManager;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.utils.CertificateManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

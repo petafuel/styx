@@ -10,8 +10,8 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
@@ -58,9 +58,13 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             Consent consent = gson.fromJson(responseBody.string(), Consent.class);
             consent.setxRequestId(UUID.fromString(consentRequest.getHeaders().get("x-request-id")));
             consent.setPsu(((CreateConsentRequest) consentRequest).getConsent().getPsu());
-            consent.getSca().setApproach(SCA.Approach.valueOf(response.header("ASPSP-SCA-Approach")));
+            //if the sca method was not set by previously parsing the body, use the bank supplied header
+            if (consent.getSca().getApproach() == null) {
+                consent.getSca().setApproach(SCA.Approach.valueOf(response.header("ASPSP-SCA-Approach")));
+            }
             consent.setAccess(((CreateConsentRequest) consentRequest).getConsent().getAccess());
-            return new PersistentConsent().create(consent);
+            new PersistentConsent().create(consent);
+            return consent;
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }

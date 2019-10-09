@@ -5,19 +5,15 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.sca.Redirect;
+import net.petafuel.styx.core.xs2a.sca.SCAHandler;
+import net.petafuel.styx.core.xs2a.sca.SCAMethod;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
-import net.petafuel.styx.core.xs2a.sca.Redirect;
-import net.petafuel.styx.core.xs2a.sca.SCAMethod;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupCS;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupSigner;
-import net.petafuel.styx.core.xs2a.sca.SCAHandler;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
-
 
 import java.security.SignatureException;
 import java.util.Date;
@@ -38,7 +34,6 @@ public class RedirectSCATest {
         //standard.setCs(new BerlinGroupCS("https://xs2a-sndbx.dab-bank.de", new BerlinGroupSigner()));
         //standard.setCs(new BerlinGroupCS("https://sandbox.sparda.de.schulung.sparda.de", new BerlinGroupSigner()));
 
-
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> balances = new LinkedList<>();
@@ -50,7 +45,7 @@ public class RedirectSCATest {
         transactions.add(new Account("DE40100100103307118608"));
 
         PSU psu = new PSU("PSU-Successful");
-        psu.setIpAddress("192.168.8.78");
+        psu.setIp("192.168.8.78");
         psu.setIdType("DE_ONLB_DB");
 
         Consent consent = new Consent();
@@ -63,12 +58,14 @@ public class RedirectSCATest {
         consent.setValidUntil(new Date());
         // build Request Body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
-        consent = standard.getCs().createConsent(createConsentRequest);
 
+        consent = standard.getCs().createConsent(createConsentRequest);
         SCAMethod redirectSCA = SCAHandler.decision(consent);
         if(redirectSCA instanceof Redirect)
         {
             Assert.assertNotNull(((Redirect) redirectSCA).getRedirectLink());
         }
+        //TODO call sca link
+        //return redirect link to client
     }
 }

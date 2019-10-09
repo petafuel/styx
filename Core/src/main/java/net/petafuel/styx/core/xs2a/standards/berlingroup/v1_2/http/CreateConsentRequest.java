@@ -7,12 +7,13 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentRequestSerializer;
 import net.petafuel.styx.core.xs2a.utils.Config;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.UUID;
 
 public class CreateConsentRequest implements XS2ARequest {
@@ -45,8 +46,6 @@ public class CreateConsentRequest implements XS2ARequest {
      * Body
      */
     Consent consent;
-    //Accumulated Headers
-    private LinkedHashMap<String, String> headers;
 
     public CreateConsentRequest(Consent consent) {
         this.headers = new LinkedHashMap<>();

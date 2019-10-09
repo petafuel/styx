@@ -1,14 +1,16 @@
 package net.petafuel.styx.core.xs2a.contracts;
 
 import net.petafuel.styx.core.xs2a.exceptions.CertificateException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.CertificateManager;
-import net.petafuel.styx.core.xs2a.exceptions.CertificateException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
-import net.petafuel.styx.core.xs2a.utils.CertificateManager;
 import net.petafuel.styx.core.xs2a.utils.XS2AHeaderParser;
 import net.petafuel.styx.core.xs2a.utils.XS2AQueryParameterParser;
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,6 +24,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.StringJoiner;
+
 
 public abstract class BasicService {
     protected static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
@@ -93,11 +97,6 @@ public abstract class BasicService {
         return client.newCall(request).execute();
     }
 
-    protected String getHttpQueryString(XS2AGetRequest request) {
-        XS2AQueryParameterParser.parse(request);
-        return BasicService.httpBuildQuery(request.getQueryParameters());
-    }
-
     protected enum RequestType {
         POST,
         GET,
@@ -108,12 +107,9 @@ public abstract class BasicService {
         if (data.isEmpty()) {
             return "";
         }
-        StringBuilder query = new StringBuilder("?");
+        StringJoiner query = new StringJoiner("&", "?", "");
         for (Map.Entry<String, String> entry : data.entrySet()) {
-            query.append(entry.getKey())
-                    .append("=")
-                    .append(entry.getValue())
-                    .append("&");
+            query.add(entry.getKey() + "=" + entry.getValue());
         }
         return query.toString();
     }

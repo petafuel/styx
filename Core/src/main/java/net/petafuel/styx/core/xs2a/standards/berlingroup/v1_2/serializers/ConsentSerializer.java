@@ -1,7 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers;
 
 import com.google.gson.*;
-import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
@@ -100,10 +99,15 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
             }
         }
         if (consentResponse.get(JSON_KEY_LINKS) != null) {
-            JsonObject test = consentResponse.get(JSON_KEY_LINKS).getAsJsonObject();
+            JsonObject links = consentResponse.get(JSON_KEY_LINKS).getAsJsonObject();
+            if (links.get(SCA.LinkType.SCA_REDIRECT.getJsonKey()) != null) {
+                consent.getSca().setApproach(SCA.Approach.REDIRECT);
+            } else if (links.get(SCA.LinkType.SCA_OAUTH.getJsonKey()) != null) {
+                consent.getSca().setApproach(SCA.Approach.OAUTH2);
+            }
             for (SCA.LinkType linkType: SCA.LinkType.values()) {
-                if (test.get(linkType.getJsonKey()) != null) {
-                    consent.getSca().addLink(linkType, test.get(linkType.getJsonKey()).getAsJsonObject().get("href").toString());
+                if (links.get(linkType.getJsonKey()) != null) {
+                    consent.getSca().addLink(linkType, links.get(linkType.getJsonKey()).getAsJsonObject().get("href").toString());
                 }
             }
         }

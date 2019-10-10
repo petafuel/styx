@@ -36,7 +36,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
     private static final String DELETE_CONSENT = "/v1/consents/%s";
 
     public BerlinGroupCS(String url, IBerlinGroupSigner signer) {
-        super(url, signer);
+        super(LOG, url, signer);
     }
 
     public Consent createConsent(XS2ARequest consentRequest) throws BankRequestFailedException {
@@ -87,7 +87,10 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
                     .registerTypeAdapter(Consent.class, new ConsentSerializer())
                     .registerTypeAdapter(Account.class, new AccountSerializer())
                     .create();
-            return gson.fromJson(responseBody.string(), Consent.class);
+
+            Consent consent = gson.fromJson(responseBody.string(), Consent.class);
+            consent.setId(((GetConsentRequest) consentGetRequest).getConsentId());
+            return consent;
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(),e);
         }
@@ -132,19 +135,6 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
             return new PersistentConsent().updateState(consent, Consent.State.TERMINATED_BY_TPP);
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
-        }
-    }
-
-    private void throwBankRequestException(Response response) throws BankRequestFailedException, IOException {
-        String msg = "Request failed with ResponseCode {} -> {}";
-        ResponseBody body = response.body();
-        if (body == null) {
-            LOG.error(msg, response.code(), "empty response body");
-            throw new BankRequestFailedException("empty response body", response.code());
-        } else {
-            String responseMessage = body.string();
-            LOG.error(msg, response.code(), responseMessage);
-            throw new BankRequestFailedException(responseMessage, response.code());
         }
     }
 }

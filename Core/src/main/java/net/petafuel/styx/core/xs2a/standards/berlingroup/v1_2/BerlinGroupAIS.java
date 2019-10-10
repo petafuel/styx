@@ -18,6 +18,8 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.Accoun
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.BalancesSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.TransactionsSerializer;
 import okhttp3.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -31,8 +33,10 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     private static final String GET_TRANSACTIONS = "/v1/accounts/%s/transactions";
     private static final String GET_TRANSACTION_DETAILS = "/v1/accounts/%s/transactions/%s";
 
+    private static final Logger LOG = LogManager.getLogger(BerlinGroupAIS.class);
+
     public BerlinGroupAIS(String url, IBerlinGroupSigner signer) {
-        super(url, signer);
+        super(LOG, url, signer);
     }
 
     @Override
@@ -42,6 +46,10 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
         this.createHeaders(request);
 
         try (Response response = this.execute()) {
+
+            if (response.code() != 200) {
+                throwBankRequestException(response);
+            }
             String body = response.body().string();
             Type type = new TypeToken<ArrayList<Account>>() {
             }.getType();
@@ -63,6 +71,10 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
         this.createHeaders(request);
 
         try (Response response = this.execute()) {
+
+            if (response.code() != 200) {
+                throwBankRequestException(response);
+            }
             String body = response.body().string();
             Type type = new TypeToken<ArrayList<Account>>() {
             }.getType();
@@ -86,6 +98,10 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
         this.createHeaders(request);
 
         try (Response response = this.execute()) {
+
+            if (response.code() != 200) {
+                throwBankRequestException(response);
+            }
             String body = response.body().string();
             Type type = new TypeToken<ArrayList<Balance>>() {
             }.getType();
@@ -107,6 +123,10 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
         this.createHeaders(request);
 
         try (Response response = this.execute()) {
+
+            if (response.code() != 200) {
+                throwBankRequestException(response);
+            }
             String body = response.body().string();
             Type type = new TypeToken<ArrayList<Transaction>>() {
             }.getType();
@@ -129,6 +149,10 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
         this.createHeaders(request);
 
         try (Response response = this.execute()) {
+
+            if (response.code() != 200) {
+                throwBankRequestException(response);
+            }
             String body = response.body().string();
             Type type = new TypeToken<ArrayList<Transaction>>() {
             }.getType();

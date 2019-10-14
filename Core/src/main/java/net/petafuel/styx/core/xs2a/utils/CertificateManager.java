@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.utils;
 
+import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.exceptions.CertificateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,14 +11,29 @@ import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.*;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 
+/**
+ * Handels read access revolving around the client certificate handed out by the (N)CA
+ * <p>
+ * <br>CertificateManager is done via Singleton implementation to avoid reading in the Keystore multiple times
+ * <br>Keystore changes require an application restart
+ * <br>The certificate within the keystore should be stored using an alias, this can be set within the
+ * config.properties in the Core Maven Module
+ * </p>
+ *
+ * @since 1.0-SNAPSHOT
+ */
 public class CertificateManager {
     private static final Logger LOG = LogManager.getLogger(CertificateManager.class);
     private static final String KEYSTORE_PATH = "keystore.path";
@@ -29,20 +45,17 @@ public class CertificateManager {
     private char[] password;
 
     private CertificateManager() {
-        Properties config = new Properties();
-        try (InputStream in = CertificateManager.class.getClassLoader().getResourceAsStream("config.properties")) {
-            config.load(in);
-        } catch (IOException e) {
-            LOG.error("Error while loading properties: " + e.getMessage());
-            throw new CertificateException("Error while loading certificate properties: " + e.getMessage());
-        }
-        String keyStorePath = config.getProperty(KEYSTORE_PATH);
-        this.keyStoreStyxAlias = config.getProperty(KEYSTORE_STYX_ALIAS);
+
+        String keyStorePath = Config.getInstance().getProperties().getProperty(KEYSTORE_PATH);
+        this.keyStoreStyxAlias = Config.getInstance().getProperties().getProperty(KEYSTORE_STYX_ALIAS);
         try {
-            this.password = new String(Files.readAllBytes(Paths.get(config.getProperty(KEYSTORE_PASS_PATH))), StandardCharsets.UTF_8).toCharArray();
+            this.password = new String(Files.readAllBytes(
+                    Paths.get(Config.getInstance().getProperties().getProperty(KEYSTORE_PASS_PATH))),
+                    StandardCharsets.UTF_8)
+                    .toCharArray();
         } catch (IOException e) {
             LOG.error(e.getMessage());
-            throw new CertificateException("Unable to load password for keystore: " + e.getMessage());
+            throw new CertificateException("Unable to load password for keystore: " + e.getMessage(), e);
         }
 
         try {
@@ -50,12 +63,13 @@ public class CertificateManager {
             this.clientKeyStore.load(new FileInputStream(keyStorePath), password);
         } catch (KeyStoreException | NoSuchAlgorithmException | java.security.cert.CertificateException e) {
             LOG.error("Something went wrong while loading keystore file: " + e.getMessage());
-            throw new CertificateException("Something went wrong while loading keystore file: " + e.getMessage());
+            throw new CertificateException("Something went wrong while loading keystore file: " + e.getMessage(), e);
         } catch (FileNotFoundException e) {
             LOG.error("Unable to find keystore file: " + e.getMessage());
-            throw new CertificateException("Unable to find keystore file: " + e.getMessage());
+            throw new CertificateException("Unable to find keystore file: " + e.getMessage(), e);
         } catch (IOException e) {
             LOG.error(e.getMessage());
+            throw new CertificateException("Password or format error in keystore: " + e.getMessage(), e);
         }
 
     }
@@ -73,6 +87,7 @@ public class CertificateManager {
 
     /**
      * Return the client certificate specified by the config.properties property keystore.styxalias
+     * @see IBerlinGroupSigner
      * @return X509Certificate
      */
     public X509Certificate getCertificate() {
@@ -80,7 +95,7 @@ public class CertificateManager {
             return (X509Certificate) this.clientKeyStore.getCertificate(this.keyStoreStyxAlias);
         } catch (KeyStoreException e) {
             LOG.error("Unable to get styx certificate from keystore via alias " + this.keyStoreStyxAlias + " : " + e.getMessage());
-            throw new CertificateException("Unable to get styx certificate from keystore: " + e.getMessage());
+            throw new CertificateException("Unable to get styx certificate from keystore: " + e.getMessage(), e);
         }
     }
 
@@ -99,7 +114,7 @@ public class CertificateManager {
             sslContext.init(keyManagers, null, new SecureRandom());
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyManagementException e) {
             LOG.error(e.getMessage());
-            throw new CertificateException("Unable to get sslcontext: " + e.getMessage());
+            throw new CertificateException("Unable to get sslcontext: " + e.getMessage(), e);
         }
         return sslContext;
     }
@@ -114,7 +129,7 @@ public class CertificateManager {
             return (PrivateKey) this.clientKeyStore.getKey(this.keyStoreStyxAlias, this.password);
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
             LOG.error("Unable to get styx private key from keystore via alias " + this.keyStoreStyxAlias + " : " + e.getMessage());
-            throw new CertificateException("Unable to get styx private key from keystore: " + e.getMessage());
+            throw new CertificateException("Unable to get styx private key from keystore: " + e.getMessage(), e);
         }
     }
 }

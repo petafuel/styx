@@ -2,6 +2,12 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 
+/**
+ * PSU model for xs2a users
+ * <p>
+ *     <b>P</b>ayment <b>S</b>ervice <b>U</b>ser
+ * </p>
+ */
 public class PSU {
 
     @XS2AHeader("psu-id")

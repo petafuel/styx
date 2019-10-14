@@ -1,6 +1,6 @@
 package net.petafuel.styx.core.xs2a.sca;
 
-public class Redirect implements SCAMethod{
+public class Redirect implements SCAApproach{
 
     private String redirectLink;
 

@@ -31,7 +31,8 @@ public abstract class XS2AGetRequest implements XS2ARequest {
     private LinkedHashMap<String, String> queryParameters;
 
     /**
-     * Body
+     *
+     * @param consentId specifies the consent ID that will be retrieved from the ASPSP
      */
     public XS2AGetRequest(String consentId) {
         this.consentId = consentId;

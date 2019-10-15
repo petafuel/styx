@@ -5,6 +5,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * A basic consent model as created in AIS conext or in combined service context with AIS and PIS
+ */
 public class Consent {
 
     private String id;
@@ -14,6 +17,7 @@ public class Consent {
     private boolean combinedServiceIndicator;
     private Date validUntil;
     private Date lastUpdated;
+    private Date createdAt;
     private SCA sca;
     private Access access;
     private PSU psu;
@@ -66,6 +70,8 @@ public class Consent {
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
+    public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
     public int getFrequencyPerDay() {
         return frequencyPerDay;
     }

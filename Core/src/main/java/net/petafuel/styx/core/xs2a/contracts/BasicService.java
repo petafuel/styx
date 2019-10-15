@@ -3,7 +3,6 @@ package net.petafuel.styx.core.xs2a.contracts;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.exceptions.CertificateException;
 import net.petafuel.styx.core.xs2a.utils.CertificateManager;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.XS2AHeaderParser;
 import net.petafuel.styx.core.xs2a.utils.XS2AQueryParameterParser;
 import okhttp3.MediaType;

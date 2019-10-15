@@ -24,8 +24,8 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
     /**
      * Save a consent model to the database
      *
-     * @param consent
-     * @return
+     * @param consent Consent that will be inserted into the database
+     * @return Consent that was created in the database
      */
     @Override
     public Consent create(Consent consent) {
@@ -47,8 +47,8 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
     /**
      * get a consent model by id, id has to be set within the consent parameter
      *
-     * @param consent
-     * @return
+     * @param consent A consent that must contain the consent id
+     * @return Consent retrieved by the consent id
      */
     @Override
     public Consent get(Consent consent) {
@@ -69,8 +69,8 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
     /**
      * Update a consent model
      *
-     * @param consent
-     * @return
+     * @param consent Consent with matching consent id in the database will be overwritten
+     * @return Returns the updated Consent
      */
     @Override
     public Consent update(Consent consent) {
@@ -91,9 +91,9 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
     /**
      * Update the state of a consent
      *
-     * @param consent
-     * @param state
-     * @return
+     * @param consent Consent required to have at least the consent id set
+     * @param state New state of the consent
+     * @return Returns the consent with an updated state
      */
     public Consent updateState(Consent consent, Consent.State state) {
         Connection connection = Persistence.getInstance().getConnection();
@@ -115,8 +115,8 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
     /**
      * Delete a consent model from the database
      *
-     * @param consent
-     * @return
+     * @param consent Consent must have at least the consent id defined
+     * @return Returns the full Consent Model which was just deleted from the database
      */
     @Override
     public Consent delete(Consent consent) {
@@ -137,9 +137,9 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
     /**
      * Maps the query ResultSet to a consent model
      *
-     * @param resultSet
-     * @return
-     * @throws SQLException
+     * @param resultSet Result set of a selecting database function
+     * @return Mapped Consent from the database columns
+     * @throws SQLException If the expected database column is not available
      */
     private Consent dbToModel(ResultSet resultSet) throws SQLException {
         Consent consent = new Consent();
@@ -153,6 +153,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         consent.setRecurringIndicator(resultSet.getBoolean("recurring_indicator"));
         consent.setValidUntil(new Date(resultSet.getTimestamp("valid_until").getTime()));
         consent.setLastUpdated(new Date(resultSet.getTimestamp("last_updated").getTime()));
+        consent.setCreatedAt(new Date(resultSet.getTimestamp("created_at").getTime()));
         consent.setFrequencyPerDay(resultSet.getInt("frequency_per_day"));
         consent.setState(Consent.State.getByString(resultSet.getString("state")));
         consent.getSca().setApproach(SCA.Approach.valueOf(resultSet.getString("chosen_sca_method")));
@@ -172,11 +173,11 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
     }
 
     /**
-     * set all consent values in the database query
+     * set all consent values in the database query, modifies the query parameter
      *
-     * @param query
-     * @param consent
-     * @throws SQLException
+     * @param query current query object
+     * @param consent Consent to retrieve the query parameters from
+     * @throws SQLException in case the function call within the query does not match with the retrieved parameters
      */
     private void setQueryValues(CallableStatement query, Consent consent) throws SQLException {
         query.setString(1, consent.getId()); // consent id

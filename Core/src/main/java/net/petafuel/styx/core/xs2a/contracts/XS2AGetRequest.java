@@ -24,6 +24,9 @@ public abstract class XS2AGetRequest implements XS2ARequest {
     @XS2AHeader("authorization")
     private String authorization;
 
+    @XS2AHeader("accept")
+    private String accept;
+
     //Accumulated Headers
     private LinkedHashMap<String, String> headers;
 
@@ -35,6 +38,17 @@ public abstract class XS2AGetRequest implements XS2ARequest {
      */
     public XS2AGetRequest(String consentId) {
         this.consentId = consentId;
+        this.headers = new LinkedHashMap<>();
+        this.queryParameters = new LinkedHashMap<>();
+        this.xRequestId = String.valueOf(UUID.randomUUID());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, d MM yyyy HH:mm:ss zz");
+        this.date = simpleDateFormat.format(new Date());
+    }
+
+    /**
+     * Body
+     */
+    public XS2AGetRequest() {
         this.headers = new LinkedHashMap<>();
         this.queryParameters = new LinkedHashMap<>();
         this.xRequestId = String.valueOf(UUID.randomUUID());
@@ -95,5 +109,13 @@ public abstract class XS2AGetRequest implements XS2ARequest {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getAccept() {
+        return accept;
+    }
+
+    public void setAccept(String accept) {
+        this.accept = accept;
     }
 }

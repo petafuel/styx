@@ -54,10 +54,9 @@ public class RedirectSCATest {
 
         consent = standard.getCs().createConsent(createConsentRequest);
         SCAMethod redirectSCA = SCAHandler.decision(consent);
-        if(redirectSCA instanceof Redirect)
-        {
-            Assert.assertNotNull(((Redirect) redirectSCA).getRedirectLink());
-        }
+        Assert.assertTrue(redirectSCA instanceof Redirect);
+        Assert.assertNotNull(((Redirect) redirectSCA).getRedirectLink());
+        String redirectLink = ((Redirect) redirectSCA).getRedirectLink().replace("\"","") + "?psu-id=PSU-Successful";
         //TODO call sca link
         //return redirect link to client
     }

@@ -64,6 +64,11 @@
             <version>1.437</version>
         </dependency>
         <dependency>
+            <groupId>net.petafuel.library</groupId>
+            <artifactId>JSEPA</artifactId>
+            <version>1.453</version>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.5</version>

@@ -23,10 +23,10 @@ public class ReadTransactionsRequest extends XS2AGetRequest {
     @XS2AQueryParameter("bookingStatus")
     private String bookingStatus;
 
-    @XS2AQueryParameter("fromDate")
+    @XS2AQueryParameter("dateFrom")
     private Date fromDate;
 
-    @XS2AQueryParameter("toDate")
+    @XS2AQueryParameter("dateTo")
     private Date toDate;
 
     @XS2AQueryParameter("withBalance")

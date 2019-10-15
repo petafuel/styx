@@ -62,6 +62,11 @@ public class Balance {
 
     public enum Type {
         CLOSING_BOOKED,
-        EXPECTED
+        EXPECTED,
+        OPENING_BOOKED,
+        INTERIM_AVAILABLE,
+        FORWARD_AVAILABLE,
+        NON_INVOICED,
+
     }
 }

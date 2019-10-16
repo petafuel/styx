@@ -1,7 +1,5 @@
 package net.petafuel.styx.core.xs2a.oauth.entities;
 
-import java.util.Date;
-
 public class Token {
     private String accessToken;
     private String tokenType;

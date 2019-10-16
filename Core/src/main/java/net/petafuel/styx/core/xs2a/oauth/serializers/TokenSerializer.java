@@ -1,6 +1,11 @@
 package net.petafuel.styx.core.xs2a.oauth.serializers;
 
-import com.google.gson.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSerializer;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonDeserializationContext;
 import net.petafuel.styx.core.xs2a.oauth.entities.Token;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
 
@@ -26,7 +31,7 @@ public class TokenSerializer implements JsonDeserializer<Token>, JsonSerializer<
     }
 
     @Override
-    public Token deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+    public Token deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
         JsonObject object = jsonElement.getAsJsonObject();
         String accessToken = object.get("access_token").getAsString();
         String tokenType = object.get("token_type").getAsString();

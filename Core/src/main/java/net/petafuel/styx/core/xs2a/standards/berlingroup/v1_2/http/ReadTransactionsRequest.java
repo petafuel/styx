@@ -63,14 +63,6 @@ public class ReadTransactionsRequest extends XS2AGetRequest {
         this.accountId = accountId;
     }
 
-    public String getAccept() {
-        return accept;
-    }
-
-    public void setAccept(String accept) {
-        this.accept = accept;
-    }
-
     public Date getFromDate() {
         return fromDate;
     }

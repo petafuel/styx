@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.oauth.serializers.TokenSerializer;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
 import net.petafuel.styx.core.xs2a.utils.Config;
 import java.util.LinkedHashMap;
 

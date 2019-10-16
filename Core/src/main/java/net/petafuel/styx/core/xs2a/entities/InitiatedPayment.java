@@ -12,7 +12,7 @@ public class InitiatedPayment implements Serializable {
     private PSU psu;
 
     public enum Status {
-        ACCP, ACSC, ACSP, ACTC, ACWC, ACWP, RCVD, PNDG, RJCT, CANC
+        ACCP, ACSC, ACSP, ACTC, ACWC, ACWP, CANC, PNDG, RCVD, RJCT
     }
 
     public InitiatedPayment(String paymentId, Status status) {

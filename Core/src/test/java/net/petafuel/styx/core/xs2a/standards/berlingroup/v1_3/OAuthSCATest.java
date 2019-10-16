@@ -5,7 +5,7 @@ import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
-import net.petafuel.styx.core.xs2a.oauth.Token;
+import net.petafuel.styx.core.xs2a.oauth.entities.Token;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;

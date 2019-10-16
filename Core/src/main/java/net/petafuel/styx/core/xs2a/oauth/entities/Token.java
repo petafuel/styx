@@ -1,4 +1,4 @@
-package net.petafuel.styx.core.xs2a.oauth;
+package net.petafuel.styx.core.xs2a.oauth.entities;
 
 import java.util.Date;
 

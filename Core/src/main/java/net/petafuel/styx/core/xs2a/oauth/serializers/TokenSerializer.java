@@ -1,7 +1,7 @@
 package net.petafuel.styx.core.xs2a.oauth.serializers;
 
 import com.google.gson.*;
-import net.petafuel.styx.core.xs2a.oauth.Token;
+import net.petafuel.styx.core.xs2a.oauth.entities.Token;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
 
 import java.lang.reflect.Type;

@@ -1,17 +1,17 @@
 package net.petafuel.styx.core.xs2a.contracts;
 
+import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.exceptions.CertificateException;
 import net.petafuel.styx.core.xs2a.utils.CertificateManager;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.XS2AHeaderParser;
 import net.petafuel.styx.core.xs2a.utils.XS2AQueryParameterParser;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.apache.logging.log4j.LogManager;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
@@ -30,12 +30,13 @@ import java.util.StringJoiner;
 public abstract class BasicService {
     protected static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     protected static final MediaType XML = MediaType.get("application/xml; charset=utf-8");
-    private static final Logger LOG = LogManager.getLogger(BasicService.class);
+    private final Logger LOG;
     protected String url;
     private Request.Builder builder;
     private IBerlinGroupSigner signer;
 
-    public BasicService(String url, IBerlinGroupSigner signer) {
+    public BasicService(Logger log, String url, IBerlinGroupSigner signer) {
+        LOG = log;
 
         this.url = url;
         this.builder = new Request.Builder();
@@ -117,5 +118,18 @@ public abstract class BasicService {
     protected String getHttpQueryString(XS2AGetRequest request) {
         XS2AQueryParameterParser.parse(request);
         return BasicService.httpBuildQuery(request.getQueryParameters());
+    }
+
+    protected void throwBankRequestException(Response response) throws BankRequestFailedException, IOException {
+        String msg = "Request failed with ResponseCode {} -> {}";
+        ResponseBody body = response.body();
+        if (body == null) {
+            LOG.error(msg, response.code(), "empty response body");
+            throw new BankRequestFailedException("empty response body", response.code());
+        } else {
+            String responseMessage = body.string();
+            LOG.error(msg, response.code(), responseMessage);
+            throw new BankRequestFailedException(responseMessage, response.code());
+        }
     }
 }

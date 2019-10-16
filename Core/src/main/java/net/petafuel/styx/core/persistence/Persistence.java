@@ -10,7 +10,12 @@ import java.sql.SQLException;
 
 /**
  * General Database Connection Class
- * Singleton, we only need one connection for the database
+ *
+ * <p>
+ *     Singleton, only one connection to the database is allowed<br>
+ *     <code>Connection connection = Persistence.getInstance().getConnection();</code>
+ * </p>
+ * @since 1.0-SNAPSHOT
  */
 public class Persistence {
     private static final Logger LOG = LogManager.getLogger(Persistence.class);
@@ -25,7 +30,7 @@ public class Persistence {
             this.databaseConnection = new DbHelper().getConnection(DATASOURCE_NAME);
         } catch (SQLException | NamingException e) {
             LOG.error("Error connecting to the database: {} \n {}", e.getMessage(), e.getCause());
-            throw new PersistenceException(e.getMessage(), e.getCause());
+            throw new PersistenceException(e.getMessage(), e);
         }
     }
 
@@ -45,7 +50,7 @@ public class Persistence {
             }
         } catch (SQLException e) {
             LOG.error("Error trying to validate the database connection: {} \n {}", e.getMessage(), e.getCause());
-            throw new PersistenceException(e.getMessage(), e.getCause());
+            throw new PersistenceException(e.getMessage(), e);
         }
         return Persistence.singletonInstance;
     }

@@ -4,16 +4,23 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
+import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
+import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
+import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializer.PaymentStatusSerializer;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.SCA;
-import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.InitiatedPaymentSerializer;
-import okhttp3.Response;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.security.SignatureException;
 import java.util.UUID;
@@ -23,9 +30,10 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
     private static final Logger LOG = LogManager.getLogger(BerlinGroupPIS.class);
 
     private static final String INITIATE_PAYMENT = "/v1/payments/%s";
+    private static final String GET_PAYMENT_STATUS = "/v1/%s/%s/%s/status";
 
     public BerlinGroupPIS(String url, IBerlinGroupSigner signer) {
-        super(url, signer);
+        super(LOG, url, signer);
     }
 
     @Override
@@ -55,4 +63,30 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
+
+    @Override
+    public PaymentStatus getPaymentStatus(XS2AGetRequest request) throws BankRequestFailedException {
+        this.setUrl(this.url + String.format(GET_PAYMENT_STATUS,
+                ((ReadPaymentStatusRequest) request).getPaymentService().toString(),
+                ((ReadPaymentStatusRequest) request).getPaymentProduct().toString(),
+                ((ReadPaymentStatusRequest) request).getPaymentId()));
+        this.createBody(RequestType.GET);
+        this.createHeaders(request);
+
+        try (Response response = this.execute()) {
+            if (response.code() != 200) {
+                throwBankRequestException(response);
+            }
+
+            ResponseBody body = response.body();
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(PaymentStatus.class, new PaymentStatusSerializer())
+                    .create();
+            return gson.fromJson(body.string(), PaymentStatus.class);
+
+        } catch (IOException e) {
+            throw new BankRequestFailedException(e.getMessage(), e);
+        }
+    }
+
 }

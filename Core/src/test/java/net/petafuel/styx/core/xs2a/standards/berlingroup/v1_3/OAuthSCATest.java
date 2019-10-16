@@ -137,8 +137,8 @@ public class OAuthSCATest {
     @Test
     public void getTokenRequest() {
 
-        String code = "FA2AD06C39DABFB7A9BA415306E2C5E5";
-        String code_verifier = "BbXNja3WWJzKEEvk0j8P26sBnQBFyjoLeVTyUKcoQmE";
+        String code = "E5E0949D3DA2CFAC80581BE843D55003";
+        String code_verifier = "Sa699pmGwDsJX5IxaojDZ282euq8HGvQP_cT1Z4rHdw";
 
         TokenRequest request = new TokenRequest(code, code_verifier);
         OAuthService service = new OAuthService(SPARKASSE_BANK_AUTHORIZATION_SERVER, new BerlinGroupSigner());

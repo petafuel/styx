@@ -16,7 +16,7 @@ public class AISTest {
     private static final String FIDUCIA_GAD_BASE_API = "https://xs2a-test.fiduciagad.de/xs2a";
     private static final String DEUTSCHE_BANK_BASE_API = "https://simulator-xs2a.db.com/";
 
-    private static final String CONSENT_ID = "3603140611280910256***REMOVED***CO4960JJ";
+    private static final String CONSENT_ID = "3869582906101910204***REMOVED***CO4960JJ";
     private static final String ACCOUNT_ID = "3dc3d5b3-7023-4848-9853-f5400a64e80f";
 
     @Test

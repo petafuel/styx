@@ -87,18 +87,18 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
             if (consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_BALANCES) != null) {
                 JsonArray balanceAccounts = consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_BALANCES).getAsJsonArray();
                 for (JsonElement balanceAccount : balanceAccounts) {
-                    consent.getAccess().addBalanceAccount(context.deserialize(balanceAccount, Account.class));
+                    consent.getAccess().addBalanceAccounts(context.deserialize(balanceAccount, Account.class));
                 }
 
             }
             if (consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_TRANSACTIONS) != null) {
                 JsonArray transactionAccounts = consentResponse.get(JSON_KEY_ACCESS).getAsJsonObject().get(JSON_KEY_TRANSACTIONS).getAsJsonArray();
                 for (JsonElement transcationAccount : transactionAccounts) {
-                    consent.getAccess().addTransactionAccount(context.deserialize(transcationAccount, Account.class));
+                    consent.getAccess().addTransactionAccounts(context.deserialize(transcationAccount, Account.class));
                 }
             }
         }
-        if (consentResponse.get(JSON_KEY_LINKS) != null) {
+        if (consentResponse.get(JSON_KEY_LINKS) != null && !consentResponse.get(JSON_KEY_LINKS).isJsonNull()) {
             JsonObject links = consentResponse.get(JSON_KEY_LINKS).getAsJsonObject();
             if (links.get(SCA.LinkType.SCA_REDIRECT.getJsonKey()) != null) {
                 consent.getSca().setApproach(SCA.Approach.REDIRECT);

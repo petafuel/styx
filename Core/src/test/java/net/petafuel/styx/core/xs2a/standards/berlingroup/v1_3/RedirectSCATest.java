@@ -6,7 +6,7 @@ import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.Redirect;
-import net.petafuel.styx.core.xs2a.sca.SCAMethod;
+import net.petafuel.styx.core.xs2a.sca.SCAApproach;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import org.junit.Assert;
@@ -53,7 +53,7 @@ public class RedirectSCATest {
         createConsentRequest.setTppRedirectPreferred(true);
 
         consent = standard.getCs().createConsent(createConsentRequest);
-        SCAMethod redirectSCA = SCAHandler.decision(consent);
+        SCAApproach redirectSCA = SCAHandler.decision(consent);
         Assert.assertTrue(redirectSCA instanceof Redirect);
         Assert.assertNotNull(((Redirect) redirectSCA).getRedirectLink());
         String redirectLink = ((Redirect) redirectSCA).getRedirectLink().replace("\"","") + "?psu-id=PSU-Successful";

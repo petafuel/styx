@@ -6,8 +6,8 @@ import net.petafuel.styx.core.xs2a.exceptions.InvalidSCAMethodException;
 
 public class SCAHandler {
 
-    public static SCAMethod decision(Consent consent) {
-        SCAMethod scaMethod = null;
+    public static SCAApproach decision(Consent consent) {
+        SCAApproach scaMethod = null;
         switch (consent.getSca().getApproach()) {
             case DECOUPLED:
                 break;

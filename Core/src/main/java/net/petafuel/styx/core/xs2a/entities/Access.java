@@ -3,6 +3,14 @@ package net.petafuel.styx.core.xs2a.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Wrapper for Account objects
+ *
+ * <p>
+ *     Access is used to describe all Accounts that are involved in consent-creation
+ * </p>
+ * @see Account
+ */
 public class Access {
     private List<Account> balances;
     private List<Account> transactions;

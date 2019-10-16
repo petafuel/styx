@@ -3,6 +3,9 @@ package net.petafuel.styx.core.xs2a.entities;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Model to describe an Account in XS2A context
+ */
 public class Account implements Serializable {
 
     /**

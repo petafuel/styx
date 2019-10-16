@@ -24,21 +24,21 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
             JsonArray booked = response.getAsJsonArray("booked");
             JsonArray pending = response.getAsJsonArray("pending");
             for (JsonElement element : booked) {
-                result.add(this.mapToModel((JsonObject) element, Transaction.Status.BOOKED));
+                result.add(this.mapToModel((JsonObject) element, Transaction.BookingStatus.BOOKED));
             }
             for (JsonElement element : pending) {
-                result.add(this.mapToModel((JsonObject) element, Transaction.Status.PENDING));
+                result.add(this.mapToModel((JsonObject) element, Transaction.BookingStatus.PENDING));
             }
         } else {
             JsonObject object = json.getAsJsonObject().getAsJsonObject("transactionsDetails");
-            Transaction.Status status = (object.get("bookingDate") != null) ? Transaction.Status.BOOKED : Transaction.Status.PENDING;
+            Transaction.BookingStatus bookingStatus = (object.get("bookingDate") != null) ? Transaction.BookingStatus.BOOKED : Transaction.BookingStatus.PENDING;
 
-            result.add(this.mapToModel(object, status));
+            result.add(this.mapToModel(object, bookingStatus));
         }
         return result;
     }
 
-    private Transaction mapToModel(JsonObject object, Transaction.Status status) {
+    private Transaction mapToModel(JsonObject object, Transaction.BookingStatus bookingStatus) {
 
         String transactionId = object.get("transactionId").getAsString();
 
@@ -81,7 +81,7 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
         } catch (Exception ignored) {
         }
 
-        if (status == Transaction.Status.BOOKED) {
+        if (bookingStatus == Transaction.BookingStatus.BOOKED) {
             try {
                 String bookingDateString = object.get("bookingDate").getAsString();
                 bookingDate = new SimpleDateFormat("yyyy-MM-dd").parse(bookingDateString);
@@ -89,7 +89,7 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
             }
         }
 
-        Transaction t1 = new Transaction(transactionId, status, type, name, account, currency, amount, remittanceInformationUnstructured);
+        Transaction t1 = new Transaction(transactionId, bookingStatus, type, name, account, currency, amount, remittanceInformationUnstructured);
         t1.setValueDate(valueDate);
         t1.setBookingDate(bookingDate);
         t1.setMandateId(mandateId);

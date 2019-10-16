@@ -2,7 +2,7 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.SigningException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.CertificateManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,12 +16,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
+/**
+ * Berlin Group Signer to sign HTTP Requests on an Application Layer
+ * @version 1.2
+ * @see IBerlinGroupSigner
+ */
 public class BerlinGroupSigner implements IBerlinGroupSigner {
     private static final Logger LOG = LogManager.getLogger(BerlinGroupSigner.class);
-    /**
-     * RFC 7230 (HTTP/1.1) -> Header Fields are case-INsensitive
-     * RFC 7540 (HTTP/2) -> Header Fields remain case-INsensitive
-     */
     private static final String HEADER_TPP_SIGNATURE_CERTIFICATE = "tpp-signature-certificate";
     private static final String HEADER_DIGEST = "digest";
     private static final String HEADER_X_REQUEST_ID = "x-request-id";
@@ -136,7 +137,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
      * Digest the message body and add to request
      *
      * @param request XS2ARequest
-     * @throws NoSuchAlgorithmException
+     * @throws NoSuchAlgorithmException Throws the exception in case the SHA-256 Algorithm is not supported
      */
     private void digest(XS2ARequest request) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
@@ -145,9 +146,9 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
     }
 
     /**
-     * add certificate to request
+     * add certificate to request as base64 String
      *
-     * @param request
+     * @param request The full XS2ARequest that should contain the certificate
      */
     private void addCertificate(XS2ARequest request) {
         request.setHeader(HEADER_TPP_SIGNATURE_CERTIFICATE, Base64.getEncoder().encodeToString(this.certificate));

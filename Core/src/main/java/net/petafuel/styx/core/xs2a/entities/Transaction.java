@@ -3,7 +3,8 @@ package net.petafuel.styx.core.xs2a.entities;
 import java.util.Date;
 
 public class Transaction {
-    private final Status status;
+    private final BookingStatus bookingStatus;
+    private Status status;
     private final Type type;
     private String transactionId;
     /**
@@ -22,10 +23,10 @@ public class Transaction {
     private String mandateId;
     private String bankTransactionCode;
 
-    public Transaction(String transactionId, Status status, Type type, String name, Account account, Currency currency, float amount, String remittanceInformationUnstructured) {
+    public Transaction(String transactionId, BookingStatus bookingStatus, Type type, String name, Account account, Currency currency, float amount, String remittanceInformationUnstructured) {
 
         this.transactionId = transactionId;
-        this.status = status;
+        this.bookingStatus = bookingStatus;
         this.type = type;
         this.name = name;
         this.account = account;
@@ -42,8 +43,8 @@ public class Transaction {
         this.transactionId = transactionId;
     }
 
-    public Status getStatus() {
-        return status;
+    public BookingStatus getBookingStatus() {
+        return bookingStatus;
     }
 
     public Type getType() {
@@ -118,11 +119,41 @@ public class Transaction {
         this.bankTransactionCode = bankTransactionCode;
     }
 
-    public enum Status {
+    public Status getStatus() {
+        return status;
+    }
+
+    public enum BookingStatus {
         BOOKED, PENDING, BOTH
     }
 
     public enum Type {
         CREDIT, DEBIT
+    }
+
+    public enum Status {
+        ACCC("AcceptedSettlementCompleted"),
+        ACCP("AcceptedCustomerProfile"),
+        ACSC("AcceptedSettlementCompleted"),
+        ACSP("AcceptedSettlementInProcess"),
+        ACTC("AcceptedTechnicalValidation"),
+        ACWC("AcceptedWithChange"),
+        ACWP("AcceptedWithoutPosting"),
+        RCVD("Received"),
+        PDNG("Pending"),
+        RJCT("Rejected"),
+        CANC("Cancelled"),
+        ACFC("AcceptedFundsChecked"),
+        PATC("PartiallyAcceptedTechnicalCorrect"),
+        PART("PartiallyAccepted");
+
+        private String name;
+        Status(String fullName) {
+            this.name = fullName;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 }

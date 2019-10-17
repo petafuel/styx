@@ -8,7 +8,7 @@ import java.security.SignatureException;
 
 public interface PISInterface {
 
-    InitiatedPayment initiatePaymentPain001(XS2ARequest xs2ARequest) throws SignatureException, BankRequestFailedException;
+    InitiatedPayment initiatePayment(XS2ARequest xs2ARequest) throws SignatureException, BankRequestFailedException;
 
     PaymentStatus getPaymentStatus(XS2AGetRequest request) throws BankRequestFailedException;
 

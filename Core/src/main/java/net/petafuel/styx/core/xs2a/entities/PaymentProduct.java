@@ -2,7 +2,7 @@ package net.petafuel.styx.core.xs2a.entities;
 
 public enum PaymentProduct {
 
-    SEPA_CREDIT_TRANSFERS("pain.001-sepa-credit-transfers"),
+    SEPA_CREDIT_TRANSFERS("sepa-credit-transfers"),
     INSTANT_SEPA_CREDIT_TRANSFERS("instant-sepa-credit-transfers"),
     TARGET_2_PAYMENTS("target-2-payments"),
     CROSS_BORDER_CREDIT_TRANSFERS("cross-border-credit-transfers"),

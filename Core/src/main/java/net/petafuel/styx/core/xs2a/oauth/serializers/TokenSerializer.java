@@ -13,11 +13,11 @@ import java.lang.reflect.Type;
 
 public class TokenSerializer implements JsonDeserializer<Token>, JsonSerializer<TokenRequest> {
 
-    public static final String GRANT_TYPE = "grant_type";
-    public static final String CODE = "code";
-    public static final String CLIENT_ID = "client_id";
-    public static final String CODE_VERIFIER = "code_verifier";
-    public static final String REDIRECT_URI = "redirect_uri";
+    private static final String GRANT_TYPE = "grant_type";
+    private static final String CODE = "code";
+    private static final String CLIENT_ID = "client_id";
+    private static final String CODE_VERIFIER = "code_verifier";
+    private static final String REDIRECT_URI = "redirect_uri";
 
     @Override
     public JsonElement serialize(TokenRequest tokenRequest, Type type, JsonSerializationContext jsonSerializationContext) {
@@ -35,9 +35,16 @@ public class TokenSerializer implements JsonDeserializer<Token>, JsonSerializer<
         JsonObject object = jsonElement.getAsJsonObject();
         String accessToken = object.get("access_token").getAsString();
         String tokenType = object.get("token_type").getAsString();
-        String refreshToken = object.get("refresh_token").getAsString();
-        int expiresIn = object.get("expires_in").getAsInt();
-
-        return new Token(accessToken, tokenType, refreshToken, expiresIn);
+        Token token = new Token(accessToken, tokenType);
+        if (object.has("refresh_token")) {
+            token.setRefreshToken(object.get("refresh_token").getAsString());
+        }
+        if (object.has("refresh_token")) {
+            token.setExpiresIn(object.get("refresh_token").getAsInt());
+        }
+        if (object.has("scope")) {
+            token.setScope(object.get("scope").getAsString());
+        }
+        return token;
     }
 }

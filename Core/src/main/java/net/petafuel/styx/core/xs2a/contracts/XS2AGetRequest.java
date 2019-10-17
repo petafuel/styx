@@ -11,20 +11,20 @@ public abstract class XS2AGetRequest implements XS2ARequest {
     /**
      * Headers
      */
-    @XS2AHeader("x-request-id")
+    @XS2AHeader(XS2AHeader.X_REQUEST_ID)
     private String xRequestId;
 
-    @XS2AHeader("consent-id")
+    @XS2AHeader(XS2AHeader.CONSENT_ID)
     private String consentId;
 
-    @XS2AHeader("date")
+    @XS2AHeader(XS2AHeader.DATE)
     private String date;
 
     // Optional header. Necessary only if an OAuth2 based authentication was performed in a pre-step or in the related consent authorisation.
-    @XS2AHeader("authorization")
+    @XS2AHeader(XS2AHeader.AUTHORIZATION)
     private String authorization;
 
-    @XS2AHeader("accept")
+    @XS2AHeader(XS2AHeader.ACCEPT)
     private String accept;
 
     //Accumulated Headers

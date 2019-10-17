@@ -5,12 +5,11 @@ public class Token {
     private String tokenType;
     private String refreshToken;
     private int expiresIn;
+    private String scope;
 
-    public Token(String accessToken, String tokenType, String refreshToken, int expiresIn) {
+    public Token(String accessToken, String tokenType) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;
-        this.refreshToken = refreshToken;
-        this.expiresIn = expiresIn;
     }
 
     public String getAccessToken() {
@@ -43,5 +42,13 @@ public class Token {
 
     public void setExpiresIn(int expiresIn) {
         this.expiresIn = expiresIn;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 }

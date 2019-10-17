@@ -37,13 +37,19 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
     }
 
     @Override
-    public InitiatedPayment initiatePaymentPain001(XS2ARequest xs2ARequest) throws SignatureException, BankRequestFailedException {
+    public InitiatedPayment initiatePayment(XS2ARequest xs2ARequest) throws SignatureException, BankRequestFailedException {
 
-        PaymentInitiationPain001Request request = (PaymentInitiationPain001Request) xs2ARequest;
+        if (xs2ARequest instanceof PaymentInitiationPain001Request) {
+            PaymentInitiationPain001Request request = (PaymentInitiationPain001Request) xs2ARequest;
+            this.setUrl(this.url + String.format(INITIATE_PAYMENT, request.getPaymentProduct().toString()));
+            this.createBody(RequestType.POST, XML, xs2ARequest);
+        } else {
+            // TODO Build URL and BODY for Payment initiation in JSON format
+            // this.setUrl(this.url + String.format(INITIATE_PAYMENT, request.getPaymentProduct().toString()));
+            this.createBody(RequestType.POST, JSON, xs2ARequest);
+         }
 
-        this.setUrl(this.url + String.format(INITIATE_PAYMENT, request.getPaymentProduct().toString()));
-        this.createBody(RequestType.POST, XML, request);
-        this.createHeaders(request);
+        this.createHeaders(xs2ARequest);
 
         try (Response response = this.execute()) {
             String body = response.body().string();
@@ -52,7 +58,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
                     .registerTypeAdapter(InitiatedPayment.class, new InitiatedPaymentSerializer())
                     .create();
             InitiatedPayment payment = gson.fromJson(body, InitiatedPayment.class);
-            payment.setxRequestId(UUID.fromString(request.getHeaders().get("x-request-id")));
+            payment.setxRequestId(UUID.fromString(xs2ARequest.getHeaders().get("x-request-id")));
 
             //if the sca method was not set by previously parsing the body, use the bank supplied header
             if (payment.getSca().getApproach() == null) {

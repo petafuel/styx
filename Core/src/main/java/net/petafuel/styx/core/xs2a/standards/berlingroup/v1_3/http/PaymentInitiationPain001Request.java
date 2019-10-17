@@ -14,16 +14,16 @@ import java.util.UUID;
 public class PaymentInitiationPain001Request implements XS2ARequest {
 
     /** Headers */
-    @XS2AHeader("x-request-id")
+    @XS2AHeader(XS2AHeader.X_REQUEST_ID)
     private String xRequestId;
 
-    @XS2AHeader("tpp-redirect-preferred")
+    @XS2AHeader(XS2AHeader.TPP_REDIRECT_PREFERRED)
     private boolean tppRedirectPreferred;
 
-    @XS2AHeader("tpp-redirect-uri")
+    @XS2AHeader(XS2AHeader.TPP_REDIRECT_URL)
     private String tppRedirectUri;
 
-    @XS2AHeader("psu-ip-address")
+    @XS2AHeader(XS2AHeader.PSU_IP_ADDRESS)
     private String psuIpAddress;
 
     /** Accumulated Headers */

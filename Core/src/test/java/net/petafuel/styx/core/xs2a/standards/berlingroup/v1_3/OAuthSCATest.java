@@ -1,6 +1,9 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
-import net.petafuel.jsepa.model.*;
+import net.petafuel.jsepa.model.PaymentInstructionInformation;
+import net.petafuel.jsepa.model.PAIN00100303Document;
+import net.petafuel.jsepa.model.CCTInitiation;
+import net.petafuel.jsepa.model.CreditTransferTransactionInformation;
 import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
@@ -15,13 +18,8 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.util.Vector;
 import java.util.Collections;
-import java.util.UUID;
-import java.util.Base64;
 
 public class OAuthSCATest {
 
@@ -103,20 +101,12 @@ public class OAuthSCATest {
         // Generating the code_verifier, code_challenge & state
         try {
 
-            String state = UUID.randomUUID().toString();
-            SecureRandom sr = new SecureRandom();
-            byte[] code = new byte[32];
-            sr.nextBytes(code);
-            String codeVerifier = Base64.getUrlEncoder().withoutPadding().encodeToString(code);
-            byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(bytes, 0, bytes.length);
-            byte[] digest = md.digest();
-            String codeChallenge = Base64.getUrlEncoder().encodeToString(digest);
-
+            String state = OAuthService.generateState();
+            String codeVerifier = OAuthService.generateCodeVerifier();
+            String codeChallenge = OAuthService.generateCodeChallenge(codeVerifier);
             String clientId = Config.getInstance().getProperties().getProperty("keystore.client_id");
 
-            InitiatedPayment payment = standard.getPis().initiatePaymentPain001(request);
+            InitiatedPayment payment = standard.getPis().initiatePayment(request);
             String urlToSca = SPARKASSE_BANK_AUTHORIZATION_SERVER + "/authorize?" +
                     "client_id=" + clientId +
                     "&response_type=" + "code" +

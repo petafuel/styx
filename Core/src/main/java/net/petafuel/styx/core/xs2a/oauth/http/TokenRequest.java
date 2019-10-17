@@ -11,18 +11,15 @@ import java.util.LinkedHashMap;
 public class TokenRequest implements XS2ARequest {
 
     private String code;
-    private String grantType;
-    private String clientId;
+    private String grantType = "authorization_code";
+    private String clientId = Config.getInstance().getProperties().getProperty("keystore.client_id");
     private String codeVerifier;
-    private String redirectUri;
+    private String redirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl");
 
     public TokenRequest(String code, String codeVerifier)
     {
         this.code = code;
-        this.grantType = "authorization_code";
-        this.clientId = Config.getInstance().getProperties().getProperty("keystore.client_id");
         this.codeVerifier = codeVerifier;
-        this.redirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl");
     }
 
     public String getCode() {

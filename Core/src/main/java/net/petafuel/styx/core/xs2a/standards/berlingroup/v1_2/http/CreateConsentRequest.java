@@ -24,19 +24,19 @@ public class CreateConsentRequest implements XS2ARequest {
     @XS2AHeader(nested = true)
     private PSU psu;
 
-    @XS2AHeader("x-request-id")
+    @XS2AHeader(XS2AHeader.X_REQUEST_ID)
     private String xRequestId;
 
-    @XS2AHeader("date")
+    @XS2AHeader(XS2AHeader.DATE)
     private String date;
 
-    @XS2AHeader("tpp-redirect-preferred")
+    @XS2AHeader(XS2AHeader.TPP_REDIRECT_PREFERRED)
     private boolean tppRedirectPreferred;
 
-    @XS2AHeader("tpp-redirect-uri")
+    @XS2AHeader(XS2AHeader.TPP_REDIRECT_URL)
     private String tppRedirectUri;
 
-    @XS2AHeader("tpp-nok-redirect-uri")
+    @XS2AHeader(XS2AHeader.TPP_NOK_REDIRECT_URI)
     private String tppNokRedirectUri;
 
     //Accumulated Headers

@@ -13,10 +13,10 @@ public class GetConsentRequest implements XS2ARequest {
     /**
      * Headers
      */
-    @XS2AHeader("x-request-id")
+    @XS2AHeader(XS2AHeader.X_REQUEST_ID)
     private String xRequestId;
 
-    @XS2AHeader("date")
+    @XS2AHeader(XS2AHeader.DATE)
     private String date;
 
     //Accumulated Headers

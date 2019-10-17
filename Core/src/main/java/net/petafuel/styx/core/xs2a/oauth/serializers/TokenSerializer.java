@@ -37,13 +37,16 @@ public class TokenSerializer implements JsonDeserializer<Token>, JsonSerializer<
         String tokenType = object.get("token_type").getAsString();
         Token token = new Token(accessToken, tokenType);
         if (object.has("refresh_token")) {
-            token.setRefreshToken(object.get("refresh_token").getAsString());
+            String refreshToken = object.get("refresh_token").getAsString();
+            token.setRefreshToken(refreshToken);
         }
-        if (object.has("refresh_token")) {
-            token.setExpiresIn(object.get("refresh_token").getAsInt());
+        if (object.has("expires_in")) {
+            int expiresIn = object.get("expires_in").getAsInt();
+            token.setExpiresIn(expiresIn);
         }
         if (object.has("scope")) {
-            token.setScope(object.get("scope").getAsString());
+            String scope = object.get("scope").getAsString();
+            token.setScope(scope);
         }
         return token;
     }

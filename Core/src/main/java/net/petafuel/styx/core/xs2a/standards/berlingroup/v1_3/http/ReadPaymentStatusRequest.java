@@ -1,26 +1,27 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupPIS;
+import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
+import net.petafuel.styx.core.xs2a.entities.PaymentService;
 
 public class ReadPaymentStatusRequest extends XS2AGetRequest {
 
-    private BerlinGroupPIS.PaymentService paymentService;
-    private BerlinGroupPIS.PaymentProduct paymentProduct;
+    private PaymentService paymentService;
+    private PaymentProduct paymentProduct;
     private String paymentId;
 
-    public ReadPaymentStatusRequest(BerlinGroupPIS.PaymentService paymentService, BerlinGroupPIS.PaymentProduct paymentProduct, String paymentId) {
+    public ReadPaymentStatusRequest(PaymentService paymentService, PaymentProduct paymentProduct, String paymentId) {
         super();
         this.paymentService = paymentService;
         this.paymentProduct = paymentProduct;
         this.paymentId = paymentId;
     }
 
-    public BerlinGroupPIS.PaymentProduct getPaymentProduct() {
+    public PaymentProduct getPaymentProduct() {
         return paymentProduct;
     }
 
-    public void setPaymentProduct(BerlinGroupPIS.PaymentProduct paymentProduct) {
+    public void setPaymentProduct(PaymentProduct paymentProduct) {
         this.paymentProduct = paymentProduct;
     }
 
@@ -32,11 +33,11 @@ public class ReadPaymentStatusRequest extends XS2AGetRequest {
         this.paymentId = paymentId;
     }
 
-    public BerlinGroupPIS.PaymentService getPaymentService() {
+    public PaymentService getPaymentService() {
         return paymentService;
     }
 
-    public void setPaymentService(BerlinGroupPIS.PaymentService paymentService) {
+    public void setPaymentService(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
 }

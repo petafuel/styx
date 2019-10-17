@@ -10,28 +10,28 @@ import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
  */
 public class PSU {
 
-    @XS2AHeader("psu-id")
+    @XS2AHeader(XS2AHeader.PSU_ID)
     private String id;
 
-    @XS2AHeader("psu-id-type")
+    @XS2AHeader(XS2AHeader.PSU_ID_TYPE)
     private String idType;
 
-    @XS2AHeader("psu-corporate-id")
+    @XS2AHeader(XS2AHeader.PSU_CORPORATE_ID)
     private String corporateId;
 
-    @XS2AHeader("psu-corporate-id-type")
+    @XS2AHeader(XS2AHeader.PSU_CORPORATE_ID_TYPE)
     private String corporateIdType;
 
-    @XS2AHeader("psu-ip-address")
+    @XS2AHeader(XS2AHeader.PSU_IP_ADDRESS)
     private String ip;
 
-    @XS2AHeader("psu-ip-port")
+    @XS2AHeader(XS2AHeader.PSU_IP_PORT)
     private Integer port;
 
-    @XS2AHeader("psu-user-agent")
+    @XS2AHeader(XS2AHeader.PSU_USER_AGENT)
     private String userAgent;
 
-    @XS2AHeader("psu-geo-location")
+    @XS2AHeader(XS2AHeader.PSU_GEO_LOCATION)
     private String geoLocation;
 
     public PSU(String id) {

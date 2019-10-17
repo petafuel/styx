@@ -11,13 +11,13 @@ public class StatusConsentRequest extends GetConsentRequest {
     /**
      * Headers
      */
-    @XS2AHeader("x-request-id")
+    @XS2AHeader(XS2AHeader.X_REQUEST_ID)
     private String xRequestId;
 
-    @XS2AHeader("date")
+    @XS2AHeader(XS2AHeader.DATE)
     private String date;
 
-    @XS2AHeader("consentId")
+    @XS2AHeader(XS2AHeader.CONSENT_ID)
     private String consentId;
 
     //Accumulated Headers

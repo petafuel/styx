@@ -1,18 +1,11 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
-import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2AQueryParameter;
 
 import java.util.Date;
 
 public class ReadTransactionsRequest extends XS2AGetRequest {
-    /**
-     * Headers
-     */
-
-    @XS2AHeader("header")
-    private String accept;
 
     /**
      * Body
@@ -23,11 +16,11 @@ public class ReadTransactionsRequest extends XS2AGetRequest {
     @XS2AQueryParameter("bookingStatus")
     private String bookingStatus;
 
-    @XS2AQueryParameter("fromDate")
-    private Date fromDate;
+    @XS2AQueryParameter("dateFrom")
+    private Date dateFrom;
 
-    @XS2AQueryParameter("toDate")
-    private Date toDate;
+    @XS2AQueryParameter("dateTo")
+    private Date dateTo;
 
     @XS2AQueryParameter("withBalance")
     private boolean withBalance;
@@ -40,12 +33,12 @@ public class ReadTransactionsRequest extends XS2AGetRequest {
     private boolean deltaList;
 
 
-    public ReadTransactionsRequest(String accountId, String consentId, String bookingStatus, Date fromDate, Date toDate) {
+    public ReadTransactionsRequest(String accountId, String consentId, String bookingStatus, Date dateFrom, Date dateTo) {
         super(consentId);
         this.accountId = accountId;
         this.bookingStatus = bookingStatus;
-        this.fromDate = fromDate;
-        this.toDate = toDate;
+        this.dateFrom = dateFrom;
+        this.dateTo = dateTo;
     }
 
     public ReadTransactionsRequest(String accountId, String consentId, String bookingStatus, boolean deltaList) {
@@ -63,28 +56,20 @@ public class ReadTransactionsRequest extends XS2AGetRequest {
         this.accountId = accountId;
     }
 
-    public String getAccept() {
-        return accept;
+    public Date getDateFrom() {
+        return dateFrom;
     }
 
-    public void setAccept(String accept) {
-        this.accept = accept;
+    public void setDateFrom(Date dateFrom) {
+        this.dateFrom = dateFrom;
     }
 
-    public Date getFromDate() {
-        return fromDate;
+    public Date getDateTo() {
+        return dateTo;
     }
 
-    public void setFromDate(Date fromDate) {
-        this.fromDate = fromDate;
-    }
-
-    public Date getToDate() {
-        return toDate;
-    }
-
-    public void setToDate(Date toDate) {
-        this.toDate = toDate;
+    public void setDateTo(Date dateTo) {
+        this.dateTo = dateTo;
     }
 
     public String getEntryReferenceFrom() {

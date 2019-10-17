@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
+import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.SigningException;
 import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
@@ -23,14 +24,7 @@ import java.util.StringJoiner;
  */
 public class BerlinGroupSigner implements IBerlinGroupSigner {
     private static final Logger LOG = LogManager.getLogger(BerlinGroupSigner.class);
-    private static final String HEADER_TPP_SIGNATURE_CERTIFICATE = "tpp-signature-certificate";
-    private static final String HEADER_DIGEST = "digest";
-    private static final String HEADER_X_REQUEST_ID = "x-request-id";
-    private static final String HEADER_DATE = "date";
-    private static final String HEADER_PSU_ID = "psu-id";
-    private static final String HEADER_PSU_CORPORATE_ID = "psu-corporate-id";
-    private static final String HEADER_TPP_REDIRECT_URL = "tpp-redirect-uri";
-    private static final String HEADER_SIGNATURE = "signature";
+
     /**
      * $1 certificate serial
      * $2 certificate issuer DN
@@ -80,29 +74,29 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
         StringJoiner signatureContentJoiner = new StringJoiner("\n");
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             switch (entry.getKey()) {
-                case HEADER_DIGEST:
-                    signatureStructureJoiner.add(HEADER_DIGEST);
-                    signatureContentJoiner.add(HEADER_DIGEST + ": " + entry.getValue());
+                case XS2AHeader.DIGEST:
+                    signatureStructureJoiner.add(XS2AHeader.DIGEST);
+                    signatureContentJoiner.add(XS2AHeader.DIGEST + ": " + entry.getValue());
                     break;
-                case HEADER_X_REQUEST_ID:
-                    signatureStructureJoiner.add(HEADER_X_REQUEST_ID);
-                    signatureContentJoiner.add(HEADER_X_REQUEST_ID + ": " + entry.getValue());
+                case XS2AHeader.X_REQUEST_ID:
+                    signatureStructureJoiner.add(XS2AHeader.X_REQUEST_ID);
+                    signatureContentJoiner.add(XS2AHeader.X_REQUEST_ID + ": " + entry.getValue());
                     break;
-                case HEADER_DATE:
-                    signatureStructureJoiner.add(HEADER_DATE);
-                    signatureContentJoiner.add(HEADER_DATE + ": " + entry.getValue());
+                case XS2AHeader.DATE:
+                    signatureStructureJoiner.add(XS2AHeader.DATE);
+                    signatureContentJoiner.add(XS2AHeader.DATE + ": " + entry.getValue());
                     break;
-                case HEADER_PSU_ID:
-                    signatureStructureJoiner.add(HEADER_PSU_ID);
-                    signatureContentJoiner.add(HEADER_PSU_ID + ": " + entry.getValue());
+                case XS2AHeader.PSU_ID:
+                    signatureStructureJoiner.add(XS2AHeader.PSU_ID);
+                    signatureContentJoiner.add(XS2AHeader.PSU_ID + ": " + entry.getValue());
                     break;
-                case HEADER_PSU_CORPORATE_ID:
-                    signatureStructureJoiner.add(HEADER_PSU_CORPORATE_ID);
-                    signatureContentJoiner.add(HEADER_PSU_CORPORATE_ID + ": " + entry.getValue());
+                case XS2AHeader.PSU_CORPORATE_ID:
+                    signatureStructureJoiner.add(XS2AHeader.PSU_CORPORATE_ID);
+                    signatureContentJoiner.add(XS2AHeader.PSU_CORPORATE_ID + ": " + entry.getValue());
                     break;
-                case HEADER_TPP_REDIRECT_URL:
-                    signatureStructureJoiner.add(HEADER_TPP_REDIRECT_URL);
-                    signatureContentJoiner.add(HEADER_TPP_REDIRECT_URL + ": " + entry.getValue());
+                case XS2AHeader.TPP_REDIRECT_URL:
+                    signatureStructureJoiner.add(XS2AHeader.TPP_REDIRECT_URL);
+                    signatureContentJoiner.add(XS2AHeader.TPP_REDIRECT_URL + ": " + entry.getValue());
                     break;
                 default:
                     //can't handle unknown headers
@@ -124,7 +118,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
             LOG.error(e.getStackTrace());
         }
 
-        xs2aRequest.setHeader(HEADER_SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,
+        xs2aRequest.setHeader(XS2AHeader.SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,
                 this.serialHex,
                 this.issuerDN,
                 this.algorithm,
@@ -142,7 +136,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
     private void digest(XS2ARequest request) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         byte[] digestHeader = messageDigest.digest(request.getRawBody().getBytes(StandardCharsets.UTF_8));
-        request.setHeader(HEADER_DIGEST, "SHA-256=" + Base64.getEncoder().encodeToString(digestHeader));
+        request.setHeader(XS2AHeader.DIGEST, "SHA-256=" + Base64.getEncoder().encodeToString(digestHeader));
     }
 
     /**
@@ -151,6 +145,6 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
      * @param request The full XS2ARequest that should contain the certificate
      */
     private void addCertificate(XS2ARequest request) {
-        request.setHeader(HEADER_TPP_SIGNATURE_CERTIFICATE, Base64.getEncoder().encodeToString(this.certificate));
+        request.setHeader(XS2AHeader.TPP_SIGNATURE_CERTIFICATE, Base64.getEncoder().encodeToString(this.certificate));
     }
 }

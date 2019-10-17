@@ -9,4 +9,24 @@ public @interface XS2AHeader {
     String value() default "";
 
     boolean nested() default false;
+
+    String ACCEPT = "accept";
+    String AUTHORIZATION = "authorization";
+    String CONSENT_ID = "consent-id";
+    String DATE = "date";
+    String DIGEST = "digest";
+    String PSU_CORPORATE_ID = "psu-corporate-id";
+    String PSU_CORPORATE_ID_TYPE = "psu-corporate-id-type";
+    String PSU_GEO_LOCATION = "psu-geo-location";
+    String PSU_ID = "psu-id";
+    String PSU_ID_TYPE = "psu-id-type";
+    String PSU_IP_ADDRESS = "psu-ip-address";
+    String PSU_IP_PORT = "psu-ip-port";
+    String PSU_USER_AGENT = "psu-user-agent";
+    String SIGNATURE = "signature";
+    String TPP_NOK_REDIRECT_URI = "tpp-nok-redirect-uri";
+    String TPP_REDIRECT_PREFERRED = "tpp-redirect-preferred";
+    String TPP_REDIRECT_URL = "tpp-redirect-uri";
+    String TPP_SIGNATURE_CERTIFICATE = "tpp-signature-certificate";
+    String X_REQUEST_ID = "x-request-id";
 }

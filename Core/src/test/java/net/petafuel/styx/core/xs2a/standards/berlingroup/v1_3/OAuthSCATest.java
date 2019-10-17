@@ -26,7 +26,7 @@ public class OAuthSCATest {
     public static final String SPARKASSE_BANK_BASE_API = "https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/xs2a-api/12345678";
     public static final String SPARKASSE_BANK_AUTHORIZATION_SERVER = "https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/oauth/12345678";
 
-    @Tag("Integration")
+    @Tag("integration")
     @Test
     public void initializeSinglePayment() {
 
@@ -123,7 +123,7 @@ public class OAuthSCATest {
         }
     }
 
-    @Tag("Skip")
+    @Tag("integration")
     @Test
     public void getTokenRequest() {
 
@@ -138,8 +138,7 @@ public class OAuthSCATest {
         Assert.assertTrue(true);
     }
 
-
-    @Tag("Integration")
+    @Tag("integration")
     @Test
     public void authorizeConsent() {
         Assert.assertTrue(true);

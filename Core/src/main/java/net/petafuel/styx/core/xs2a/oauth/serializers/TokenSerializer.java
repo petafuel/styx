@@ -18,6 +18,11 @@ public class TokenSerializer implements JsonDeserializer<Token>, JsonSerializer<
     private static final String CLIENT_ID = "client_id";
     private static final String CODE_VERIFIER = "code_verifier";
     private static final String REDIRECT_URI = "redirect_uri";
+    private static final String ACCESS_TOKEN = "access_token";
+    private static final String REFRESH_TOKEN = "refresh_token";
+    private static final String TOKEN_TYPE = "token_type";
+    private static final String EXPIRES_IN = "expires_in";
+    private static final String SCOPE = "scope";
 
     @Override
     public JsonElement serialize(TokenRequest tokenRequest, Type type, JsonSerializationContext jsonSerializationContext) {
@@ -33,19 +38,19 @@ public class TokenSerializer implements JsonDeserializer<Token>, JsonSerializer<
     @Override
     public Token deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
         JsonObject object = jsonElement.getAsJsonObject();
-        String accessToken = object.get("access_token").getAsString();
-        String tokenType = object.get("token_type").getAsString();
+        String accessToken = object.get(ACCESS_TOKEN).getAsString();
+        String tokenType = object.get(TOKEN_TYPE).getAsString();
         Token token = new Token(accessToken, tokenType);
-        if (object.has("refresh_token")) {
-            String refreshToken = object.get("refresh_token").getAsString();
+        if (object.has(REFRESH_TOKEN)) {
+            String refreshToken = object.get(REFRESH_TOKEN).getAsString();
             token.setRefreshToken(refreshToken);
         }
-        if (object.has("expires_in")) {
-            int expiresIn = object.get("expires_in").getAsInt();
+        if (object.has(EXPIRES_IN)) {
+            int expiresIn = object.get(EXPIRES_IN).getAsInt();
             token.setExpiresIn(expiresIn);
         }
-        if (object.has("scope")) {
-            String scope = object.get("scope").getAsString();
+        if (object.has(SCOPE)) {
+            String scope = object.get(SCOPE).getAsString();
             token.setScope(scope);
         }
         return token;

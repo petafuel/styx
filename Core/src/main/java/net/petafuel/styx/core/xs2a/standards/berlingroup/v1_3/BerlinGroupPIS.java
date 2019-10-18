@@ -2,27 +2,30 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.petafuel.jsepa.exception.SEPAParsingException;
+import net.petafuel.jsepa.facades.ReportConverter;
+import net.petafuel.jsepa.model.pain002.TransactionReport;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
+import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
+import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializer.PaymentStatusSerializer;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.InitiatedPaymentSerializer;
 
-import java.security.SignatureException;
 import java.util.UUID;
 
 public class BerlinGroupPIS extends BasicService implements PISInterface {
@@ -37,7 +40,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
     }
 
     @Override
-    public InitiatedPayment initiatePayment(XS2ARequest xs2ARequest) throws SignatureException, BankRequestFailedException {
+    public InitiatedPayment initiatePayment(XS2ARequest xs2ARequest) throws BankRequestFailedException {
 
         if (xs2ARequest instanceof PaymentInitiationPain001Request) {
             PaymentInitiationPain001Request request = (PaymentInitiationPain001Request) xs2ARequest;
@@ -71,26 +74,39 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
     }
 
     @Override
-    public PaymentStatus getPaymentStatus(XS2AGetRequest request) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(GET_PAYMENT_STATUS,
-                ((ReadPaymentStatusRequest) request).getPaymentService().toString(),
-                ((ReadPaymentStatusRequest) request).getPaymentProduct().toString(),
-                ((ReadPaymentStatusRequest) request).getPaymentId()));
-        this.createBody(RequestType.GET);
-        this.createHeaders(request);
+    public PaymentStatus getPaymentStatus(XS2AGetRequest xs2AGetRequest) throws BankRequestFailedException {
 
+        ReadPaymentStatusRequest request = (ReadPaymentStatusRequest) xs2AGetRequest;
+
+        this.setUrl(this.url + String.format(GET_PAYMENT_STATUS,
+                request.getPaymentService().toString(),
+                request.getPaymentProduct().toString(),
+                request.getPaymentId()));
+        this.createBody(RequestType.GET);
+        if (request.getPaymentProduct().isXml()) {
+            request.setHeader(XS2AHeader.ACCEPT, XML.toString());
+        } else {
+            request.setHeader(XS2AHeader.ACCEPT, JSON.toString());
+        }
+        this.createHeaders(request);
         try (Response response = this.execute()) {
-            if (response.code() != 200) {
+            String responseBody = response.body().string();
+            String contentType = response.headers().get("content-type");
+            if (response.code() != 200 || contentType == null) {
                 throwBankRequestException(response);
             }
-
-            ResponseBody body = response.body();
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(PaymentStatus.class, new PaymentStatusSerializer())
-                    .create();
-            return gson.fromJson(body.string(), PaymentStatus.class);
-
-        } catch (IOException e) {
+            assert contentType != null;
+            if (contentType.equalsIgnoreCase(JSON.toString())) {
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(PaymentStatus.class, new PaymentStatusSerializer())
+                        .create();
+                return gson.fromJson(responseBody, PaymentStatus.class);
+            } else {
+                ReportConverter converter = new ReportConverter();
+                TransactionReport report = converter.processReport(responseBody);
+                return new PaymentStatus(Transaction.Status.valueOf(report.getStatus()), null);
+            }
+        } catch (IOException | SEPAParsingException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }

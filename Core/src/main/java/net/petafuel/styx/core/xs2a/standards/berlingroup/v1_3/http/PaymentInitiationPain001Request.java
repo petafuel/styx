@@ -5,8 +5,11 @@ import net.petafuel.jsepa.exception.SEPAWriteException;
 import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedHashMap;
 
 import java.util.UUID;
@@ -23,8 +26,11 @@ public class PaymentInitiationPain001Request implements XS2ARequest {
     @XS2AHeader(XS2AHeader.TPP_REDIRECT_URL)
     private String tppRedirectUri;
 
-    @XS2AHeader(XS2AHeader.PSU_IP_ADDRESS)
-    private String psuIpAddress;
+    @XS2AHeader(nested = true)
+    private PSU psu;
+
+    @XS2AHeader(XS2AHeader.DATE)
+    private String date;
 
     /** Accumulated Headers */
     private LinkedHashMap<String, String> headers;
@@ -33,11 +39,13 @@ public class PaymentInitiationPain001Request implements XS2ARequest {
     private PAIN00100303Document body;
     private PaymentProduct paymentProduct;
 
-    public PaymentInitiationPain001Request(PaymentProduct paymentProduct, PAIN00100303Document body, String psuIpAddress) {
+    public PaymentInitiationPain001Request(PaymentProduct paymentProduct, PAIN00100303Document body, String psuId) {
         this.paymentProduct = paymentProduct;
         this.body = body;
-        this.psuIpAddress = psuIpAddress;
         this.headers = new LinkedHashMap<>();
+        this.psu = new PSU(psuId);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, d MM yyyy HH:mm:ss zz");
+        this.date = simpleDateFormat.format(new Date());
         this.xRequestId = String.valueOf(UUID.randomUUID());
     }
 
@@ -106,11 +114,19 @@ public class PaymentInitiationPain001Request implements XS2ARequest {
         this.tppRedirectUri = tppRedirectUri;
     }
 
-    public String getPsuIpAddress() {
-        return psuIpAddress;
+    public PSU getPsu() {
+        return psu;
     }
 
-    public void setPsuIpAddress(String psuIpAddress) {
-        this.psuIpAddress = psuIpAddress;
+    public void setPsu(PSU psu) {
+        this.psu = psu;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }

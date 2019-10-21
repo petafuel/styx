@@ -90,11 +90,11 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
         }
         this.createHeaders(request);
         try (Response response = this.execute()) {
-            String responseBody = response.body().string();
             String contentType = response.headers().get("content-type");
             if (response.code() != 200 || contentType == null) {
                 throwBankRequestException(response);
             }
+            String responseBody = response.body().string();
             if (JSON.toString().equalsIgnoreCase(contentType)) {
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(PaymentStatus.class, new PaymentStatusSerializer())

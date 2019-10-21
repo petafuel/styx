@@ -95,8 +95,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
             if (response.code() != 200 || contentType == null) {
                 throwBankRequestException(response);
             }
-            assert contentType != null;
-            if (contentType.equalsIgnoreCase(JSON.toString())) {
+            if (JSON.toString().equalsIgnoreCase(contentType)) {
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(PaymentStatus.class, new PaymentStatusSerializer())
                         .create();

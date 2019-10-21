@@ -66,7 +66,9 @@
         <dependency>
             <groupId>net.petafuel.library</groupId>
             <artifactId>JSEPA</artifactId>
-            <version>1.453</version>
+            <version>1.454-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/JSEPA.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

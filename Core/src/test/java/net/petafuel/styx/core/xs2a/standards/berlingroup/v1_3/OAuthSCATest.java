@@ -94,9 +94,10 @@ public class OAuthSCATest {
         String callbackUrl = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl");
 
         PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
-                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, psuIpAddress);
+                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, "PSU-1234");
         request.setTppRedirectPreferred(true);
         request.setTppRedirectUri(callbackUrl);
+        request.getPsu().setIp(psuIpAddress);
 
         // Generating the code_verifier, code_challenge & state
         try {

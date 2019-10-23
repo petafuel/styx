@@ -39,11 +39,11 @@ public class PaymentInitiationPain001Request implements XS2ARequest {
     private PAIN00100303Document body;
     private PaymentProduct paymentProduct;
 
-    public PaymentInitiationPain001Request(PaymentProduct paymentProduct, PAIN00100303Document body, String psuId) {
+    public PaymentInitiationPain001Request(PaymentProduct paymentProduct, PAIN00100303Document body, PSU psu) {
         this.paymentProduct = paymentProduct;
         this.body = body;
         this.headers = new LinkedHashMap<>();
-        this.psu = new PSU(psuId);
+        this.psu = psu;
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, d MM yyyy HH:mm:ss zz");
         this.date = simpleDateFormat.format(new Date());
         this.xRequestId = String.valueOf(UUID.randomUUID());

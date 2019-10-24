@@ -16,10 +16,10 @@ public class PaymentInitiationJsonRequestSerializer implements JsonSerializer<Pa
 		JsonObject debtorAccount = new JsonObject();
 		JsonObject instructedAmount = new JsonObject();
 
-		creditorAccount.addProperty("iban", src.getBody().getCreditor().getIdentifier());
+		creditorAccount.addProperty(src.getBody().getCreditor().getType().getJsonKey(), src.getBody().getCreditor().getIdentifier());
 		creditorAccount.addProperty("currency", src.getBody().getCreditor().getCurrency().toString());
 		object.add("creditorAccount", creditorAccount);
-		debtorAccount.addProperty("iban", src.getBody().getDebtor().getIdentifier());
+		debtorAccount.addProperty(src.getBody().getDebtor().getType().getJsonKey(), src.getBody().getDebtor().getIdentifier());
 		debtorAccount.addProperty("currency", src.getBody().getDebtor().getCurrency().toString());
         object.addProperty("creditorName", src.getBody().getCreditor().getName());
 		object.add("debtorAccount", debtorAccount);

@@ -50,6 +50,7 @@ public class PISTest {
     }
 
     @Test
+    @Tag("integration")
     public void initiateJSONPayment() {
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(FIDOR_BANK_BASE_API, new BerlinGroupSigner()));

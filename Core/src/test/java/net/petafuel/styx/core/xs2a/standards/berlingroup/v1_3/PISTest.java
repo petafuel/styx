@@ -53,7 +53,7 @@ public class PISTest {
     @Tag("integration")
     public void initiateJSONPayment() {
         XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(FIDOR_BANK_BASE_API, new BerlinGroupSigner()));
+        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
 
         //payment information
         String creditorIban = "DE75999999990000001004"; //Sparkasse

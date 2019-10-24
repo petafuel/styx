@@ -14,6 +14,7 @@ import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializer.PaymentStatusSerializer;
 import okhttp3.Response;
@@ -47,8 +48,8 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
             this.setUrl(this.url + String.format(INITIATE_PAYMENT, request.getPaymentProduct().toString()));
             this.createBody(RequestType.POST, XML, xs2ARequest);
         } else {
-            // TODO Build URL and BODY for Payment initiation in JSON format
-            // this.setUrl(this.url + String.format(INITIATE_PAYMENT, request.getPaymentProduct().toString()));
+            PaymentInitiationJsonRequest request = (PaymentInitiationJsonRequest) xs2ARequest;
+            this.setUrl(this.url + String.format(INITIATE_PAYMENT, request.getPaymentProduct().toString()));
             this.createBody(RequestType.POST, JSON, xs2ARequest);
          }
 

@@ -2,6 +2,7 @@ package net.petafuel.styx.core.keepalive.threads;
 
 import net.petafuel.styx.core.keepalive.contracts.WorkableTask;
 import net.petafuel.styx.core.keepalive.entities.WorkerType;
+import net.petafuel.styx.core.keepalive.recovery.TaskRecoveryDB;
 import net.petafuel.styx.core.keepalive.workers.CoreWorker;
 import net.petafuel.styx.core.xs2a.utils.Config;
 import org.apache.logging.log4j.LogManager;
@@ -57,19 +58,23 @@ public class ThreadManager {
 
     public void start() {
         spawnStartupThreads();
+        //TODO add thread that checks for Worker Timeouts by task signature(Too long for one task) and also checks the workload to spawn or despawn Workers
+        //TODO Configurate threshold for new worker spawnings in config.properties
     }
 
     public void queueTask(WorkableTask task) {
         this.queueTask(task, WorkerType.CORE);
     }
 
-    public void queueTask(WorkableTask task, WorkerType executionPriority) {
-        switch (executionPriority) {
+    public void queueTask(WorkableTask task, WorkerType workerType) {
+        switch (workerType) {
             case CORE:
                 this.coreQueue.add(task);
+                TaskRecoveryDB.setQueued(task, workerType);
                 synchronized (this.coreQueue) {
                     this.coreQueue.notifyAll();
                 }
+                LOG.info("Core Queue size: {}", this.coreQueue.size());
                 break;
             case DEDICATED:
                 this.dedicatedQueue.add(task);
@@ -92,7 +97,7 @@ public class ThreadManager {
 
     private void spawnStartupThreads() {
         IntStream.range(0, minCoreWorkers).forEach(i -> {
-            CoreWorker coreWorker = new CoreWorker(this.coreQueue);
+            CoreWorker coreWorker = new CoreWorker();
             LOG.info("KeepAlive Setup~ Spawning Worker type:{} id:{}", coreWorker.getType(), coreWorker.getId());
             ThreadSpawner.spawn(coreWorker);
         });

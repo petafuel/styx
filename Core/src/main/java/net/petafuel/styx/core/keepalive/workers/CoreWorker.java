@@ -4,12 +4,12 @@ import net.petafuel.styx.core.keepalive.contracts.RunnableWorker;
 import net.petafuel.styx.core.keepalive.contracts.WorkableTask;
 import net.petafuel.styx.core.keepalive.entities.TaskFailureException;
 import net.petafuel.styx.core.keepalive.entities.WorkerType;
+import net.petafuel.styx.core.keepalive.recovery.TaskRecoveryDB;
 import net.petafuel.styx.core.keepalive.threads.ThreadManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Grabs any available in the queue
@@ -17,44 +17,46 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class CoreWorker extends RunnableWorker {
     private static final Logger LOG = LogManager.getLogger(CoreWorker.class);
 
-    private ConcurrentLinkedQueue<WorkableTask> queue;
     private boolean running;
 
-    public CoreWorker(ConcurrentLinkedQueue<WorkableTask> workableTasks) {
+    public CoreWorker() {
         this.setId(UUID.randomUUID());
         this.setType(WorkerType.CORE);
-        this.queue = workableTasks;
         this.running = true;
     }
 
     @Override
     public void run() {
-        Thread.currentThread().setName("Worker-" + getType().toString() + "-" + getId().toString());
+        Thread.currentThread().setName("KeepAlive-Worker-" + getType().toString() + "-" + getId().toString());
         while (running) {
             if (ThreadManager.getInstance().getCoreQueue().isEmpty()) {
-                LOG.info("No polling from queue: Queue is empty -> ideling/waiting", getType(), getId());
+                LOG.info("No polling from queue: Queue is empty -> ideling/waiting");
                 try {
                     synchronized (ThreadManager.getInstance().getCoreQueue()) {
                         ThreadManager.getInstance().getCoreQueue().wait();
                     }
                 } catch (InterruptedException e) {
                     //TODO Error handling
-                    LOG.error("Interrupted", getType(), getId());
+                    LOG.error("Interrupted");
                     Thread.currentThread().interrupt();
                 }
             }
             WorkableTask task;
             synchronized (ThreadManager.getInstance().getCoreQueue()) {
                 task = ThreadManager.getInstance().getCoreQueue().poll();
+                LOG.info("Core Queue size: {}", ThreadManager.getInstance().getCoreQueue().size());
             }
             if (task == null) {
                 continue;
             }
-            LOG.info("Polled from queue: Task id:{} signature:{} is going to be executed", getType(), getId(), task.getId(), task.getSignature());
+            LOG.info("Polled from queue: Task id:{} signature:{} is going to be executed", task.getId(), task.getSignature());
             try {
+                TaskRecoveryDB.setRunning(task);
                 task.execute();
+                TaskRecoveryDB.setDone(task);
             } catch (TaskFailureException failure) {
-
+                //TODO Error handling
+                TaskRecoveryDB.changeWorker(task, WorkerType.RETRY_FAILURE);
             }
         }
     }

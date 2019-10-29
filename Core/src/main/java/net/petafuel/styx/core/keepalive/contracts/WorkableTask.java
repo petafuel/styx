@@ -20,4 +20,8 @@ public abstract class WorkableTask {
     public abstract String getSignature();
 
     public abstract void execute();
+
+    public abstract String getGoal();
+
+    public abstract void buildFromGoal(String goal);
 }

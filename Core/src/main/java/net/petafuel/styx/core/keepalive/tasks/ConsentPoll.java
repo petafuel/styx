@@ -100,6 +100,16 @@ public class ConsentPoll extends WorkableTask {
     }
 
     @Override
+    public String getGoal() {
+        return null;
+    }
+
+    @Override
+    public void buildFromGoal(String goal) {
+
+    }
+
+    @Override
     public UUID getId() {
         return id;
     }

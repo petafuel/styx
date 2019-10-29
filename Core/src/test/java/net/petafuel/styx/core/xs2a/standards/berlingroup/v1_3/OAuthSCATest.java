@@ -7,6 +7,7 @@ import net.petafuel.jsepa.model.CreditTransferTransactionInformation;
 import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.oauth.entities.Token;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
@@ -94,7 +95,7 @@ public class OAuthSCATest {
         String callbackUrl = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl");
 
         PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
-                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, "PSU-1234");
+        PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, new PSU("PSU-1234"));
         request.setTppRedirectPreferred(true);
         request.setTppRedirectUri(callbackUrl);
         request.getPsu().setIp(psuIpAddress);

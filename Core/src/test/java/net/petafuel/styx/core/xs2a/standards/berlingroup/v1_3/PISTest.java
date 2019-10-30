@@ -3,6 +3,8 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.*;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.sca.SCAApproach;
+import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
@@ -77,9 +79,11 @@ public class PISTest {
 
         PSU psu = new PSU("PSU-1234");
         PaymentInitiationJsonRequest request = new PaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
+        request.setTppRedirectPreferred(true);
 
         try {
             InitiatedPayment payment = standard.getPis().initiatePayment(request);
+            SCAApproach approach = SCAHandler.decision(payment);
             Assert.assertTrue(true);
         }
         catch (Exception e)

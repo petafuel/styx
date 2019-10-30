@@ -29,7 +29,7 @@ public class InitiatedPaymentSerializer implements JsonSerializer<InitiatedPayme
             InitiatedPayment payment = new InitiatedPayment(paymentId, transactionStatus);
             JsonObject links = object.get("_links").getAsJsonObject();
             if (links.get(SCA.LinkType.SCA_REDIRECT.getJsonKey()) != null) {
-                    payment.getSca().setApproach(SCA.Approach.REDIRECT);
+                payment.getSca().setApproach(SCA.Approach.REDIRECT);
             } else if (links.get(SCA.LinkType.SCA_OAUTH.getJsonKey()) != null) {
                 payment.getSca().setApproach(SCA.Approach.OAUTH2);
             }

@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.keepalive.tasks;
 
+import com.google.gson.JsonObject;
 import net.petafuel.styx.core.keepalive.contracts.WorkableTask;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +27,7 @@ public class TestSleepTask extends WorkableTask {
     public void execute() {
         LOG.debug("Started test sleep task");
         try {
-            int randomNum = ThreadLocalRandom.current().nextInt(500, 5000 + 1);
+            int randomNum = ThreadLocalRandom.current().nextInt(500, 10000 + 1);
             Thread.sleep(randomNum);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -35,12 +36,12 @@ public class TestSleepTask extends WorkableTask {
     }
 
     @Override
-    public String getGoal() {
-        return "{\"Testtask\": \"i do nothing\"}";
+    public JsonObject getGoal() {
+        return new JsonObject();
     }
 
     @Override
-    public void buildFromGoal(String goal) {
-
+    public TestSleepTask buildFromRecovery(JsonObject goal) {
+        return new TestSleepTask();
     }
 }

@@ -2,21 +2,22 @@ package net.petafuel.styx.core.keepalive.threads;
 
 import net.petafuel.styx.core.keepalive.contracts.WorkableTask;
 import net.petafuel.styx.core.keepalive.entities.WorkerType;
+import net.petafuel.styx.core.keepalive.recovery.RecoveryRoutine;
 import net.petafuel.styx.core.keepalive.recovery.TaskRecoveryDB;
 import net.petafuel.styx.core.keepalive.workers.CoreWorker;
 import net.petafuel.styx.core.xs2a.utils.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
-
+/**
+ * Manages the task queues and worker threads
+ */
 public class ThreadManager {
     private static final String PROPERTY_THREAD_COREQUEUE_MIN_WORKERS = "keepalive.threads.coreQueue.minWorkers";
     private static final String PROPERTY_THREAD_COREQUEUE_MAX_WORKERS = "keepalive.threads.coreQueue.maxWorkers";
@@ -28,8 +29,6 @@ public class ThreadManager {
      */
     private final ConcurrentLinkedQueue<WorkableTask> coreQueue;
     private ConcurrentLinkedQueue<WorkableTask> failureQueue;
-    private ConcurrentLinkedQueue<WorkableTask> dedicatedQueue;
-    private ConcurrentHashMap<UUID, Thread> threads;
     private ThreadPoolExecutor corePool;
 
     private int minCoreWorkers;
@@ -58,6 +57,7 @@ public class ThreadManager {
 
     public void start() {
         spawnStartupThreads();
+        RecoveryRoutine.runTaskRecovery();
         //TODO add thread that checks for Worker Timeouts by task signature(Too long for one task) and also checks the workload to spawn or despawn Workers
         //TODO Configurate threshold for new worker spawnings in config.properties
     }
@@ -77,7 +77,6 @@ public class ThreadManager {
                 LOG.info("Core Queue size: {}", this.coreQueue.size());
                 break;
             case DEDICATED:
-                this.dedicatedQueue.add(task);
                 break;
             case RETRY_FAILURE:
                 this.failureQueue.add(task);

@@ -1,9 +1,12 @@
 package net.petafuel.styx.core.keepalive.contracts;
 
+import com.google.gson.JsonObject;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 
 /**
- * define an executable task for a Worker
+ * Defines an executable task for a Worker
  */
 public abstract class WorkableTask {
 
@@ -13,15 +16,23 @@ public abstract class WorkableTask {
         id = UUID.randomUUID();
     }
 
+    /**
+     * Taskid
+     * @return Returns the task id
+     */
     public UUID getId() {
         return id;
     }
 
+    /**
+     * Should contain a unique signature of the task
+     * @return TaskSignature
+     */
     public abstract String getSignature();
 
     public abstract void execute();
 
-    public abstract String getGoal();
+    public abstract JsonObject getGoal();
 
-    public abstract void buildFromGoal(String goal);
+    public abstract WorkableTask buildFromRecovery(JsonObject goal) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException;
 }

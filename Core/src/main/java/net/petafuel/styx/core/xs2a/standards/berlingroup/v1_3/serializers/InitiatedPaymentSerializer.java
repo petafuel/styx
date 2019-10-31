@@ -35,7 +35,7 @@ public class InitiatedPaymentSerializer implements JsonSerializer<InitiatedPayme
             }
             for (SCA.LinkType linkType: SCA.LinkType.values()) {
                 if (links.get(linkType.getJsonKey()) != null) {
-                    payment.getSca().addLink(linkType, links.get(linkType.getJsonKey()).getAsJsonObject().get("href").toString());
+                    payment.getSca().addLink(linkType, links.get(linkType.getJsonKey()).getAsJsonObject().get("href").getAsString());
                 }
             }
             return payment;

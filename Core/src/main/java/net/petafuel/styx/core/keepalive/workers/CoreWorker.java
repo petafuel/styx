@@ -2,7 +2,8 @@ package net.petafuel.styx.core.keepalive.workers;
 
 import net.petafuel.styx.core.keepalive.contracts.RunnableWorker;
 import net.petafuel.styx.core.keepalive.contracts.WorkableTask;
-import net.petafuel.styx.core.keepalive.entities.TaskFailureException;
+import net.petafuel.styx.core.keepalive.entities.TaskFinalFailureException;
+import net.petafuel.styx.core.keepalive.entities.TaskRetryFailureException;
 import net.petafuel.styx.core.keepalive.entities.WorkerType;
 import net.petafuel.styx.core.keepalive.recovery.TaskRecoveryDB;
 import net.petafuel.styx.core.keepalive.threads.ThreadManager;
@@ -10,14 +11,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Grabs any available in the queue
+ * Basic Worker that will execute Tasks from the coreQueue
  */
 public class CoreWorker extends RunnableWorker {
     private static final Logger LOG = LogManager.getLogger(CoreWorker.class);
 
     private boolean running;
+    private AtomicInteger currentTaskStartTime;
 
     public CoreWorker() {
         this.setId(UUID.randomUUID());
@@ -54,10 +57,18 @@ public class CoreWorker extends RunnableWorker {
                 TaskRecoveryDB.setRunning(task);
                 task.execute();
                 TaskRecoveryDB.setDone(task);
-            } catch (TaskFailureException failure) {
+            } catch (TaskRetryFailureException retryFailure) {
                 //TODO Error handling
                 TaskRecoveryDB.changeWorker(task, WorkerType.RETRY_FAILURE);
+            } catch (TaskFinalFailureException finalFailure) {
+                LOG.error("Task id: {} signature: {} finally failed with code:{} -> {}", task.getId(), task.getSignature(), finalFailure.getCode(), finalFailure.getMessage());
+                TaskRecoveryDB.setFinallyFailed(task, finalFailure.getMessage(), finalFailure.getCode());
             }
         }
+    }
+
+    @Override
+    public void setRunning(boolean running) {
+        this.running = running;
     }
 }

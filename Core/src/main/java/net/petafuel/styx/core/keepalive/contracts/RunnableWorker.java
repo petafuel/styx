@@ -23,4 +23,6 @@ public abstract class RunnableWorker implements Runnable {
     public void setType(WorkerType type) {
         this.type = type;
     }
+
+    public abstract void setRunning(boolean running);
 }

@@ -107,7 +107,7 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
             }
             for (SCA.LinkType linkType: SCA.LinkType.values()) {
                 if (links.get(linkType.getJsonKey()) != null) {
-                    consent.getSca().addLink(linkType, links.get(linkType.getJsonKey()).getAsJsonObject().get("href").toString());
+                    consent.getSca().addLink(linkType, links.get(linkType.getJsonKey()).getAsJsonObject().get("href").getAsString());
                 }
             }
         }

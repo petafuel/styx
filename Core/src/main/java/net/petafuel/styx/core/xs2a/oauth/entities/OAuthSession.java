@@ -4,7 +4,6 @@ import java.util.Date;
 
 public class OAuthSession {
     private int id;
-    private String tppRedirectUrl;
     private String authorizationEndpoint;
     private String tokenEndpoint;
     private String codeVerifier;
@@ -62,14 +61,6 @@ public class OAuthSession {
 
     public void setScope(String scope) {
         this.scope = scope;
-    }
-
-    public String getTppRedirectUrl() {
-        return tppRedirectUrl;
-    }
-
-    public void setTppRedirectUrl(String tppRedirectUrl) {
-        this.tppRedirectUrl = tppRedirectUrl;
     }
 
     public String getAuthorizationEndpoint() {

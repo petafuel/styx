@@ -1,6 +1,5 @@
 CREATE TABLE oauth_sessions (
   id bigserial NOT NULL constraint oauth_sessions_pk primary key,
-  tpp_redirect_uri text NOT NULL,
   authorization_endpoint text NOT NULL,
   token_endpoint text NOT NULL,
   code_verifier text NOT NULL,
@@ -14,10 +13,10 @@ CREATE TABLE oauth_sessions (
   authorized_at timestamp
 );
 
-CREATE OR REPLACE FUNCTION create_oauth_session(tpp_redirect_uri text, authorization_endpoint text,  token_endpoint text, code_verifier text, state text, scope text)
+CREATE OR REPLACE FUNCTION create_oauth_session(authorization_endpoint text,  token_endpoint text, code_verifier text, state text, scope text)
 RETURNS SETOF oauth_sessions AS $BODY$
-INSERT INTO oauth_sessions (tpp_redirect_uri, authorization_endpoint, token_endpoint, code_verifier, state, scope, created_at)
-VALUES ($1, $2, $3, $4, $5, $6, now());
+INSERT INTO oauth_sessions (authorization_endpoint, token_endpoint, code_verifier, state, scope, created_at)
+VALUES ($1, $2, $3, $4, $5, now());
 SELECT * FROM oauth_sessions WHERE state = $4;
 $BODY$ LANGUAGE SQL VOLATILE SECURITY DEFINER;
 

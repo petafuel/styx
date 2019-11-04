@@ -5,6 +5,7 @@ import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
 
+import net.petafuel.styx.core.xs2a.utils.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,8 +53,9 @@ public class CallbackHandler {
             TokenRequest request = new TokenRequest(code, stored.getCodeVerifier());
             OAuthSession authorized = service.accessTokenRequest(stored.getTokenEndpoint(), request);
             authorized.setState(state);
-            OAuthSession updated = db.update(authorized);
-            return updated.getTppRedirectUrl();
+            db.update(authorized);
+
+            return Config.getInstance().getProperties().getProperty("client.redirect.baseurl");
         }  catch (Exception e) {
             return OAuthService.buildLink(state);
         }

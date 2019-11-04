@@ -104,7 +104,7 @@ public abstract class BasicService {
         DELETE
     }
 
-    public static String httpBuildQuery(Map<String, String> data) {
+    protected static String httpBuildQuery(Map<String, String> data) {
         if (data.isEmpty()) {
             return "";
         }

@@ -115,7 +115,6 @@ public class OAuthService extends BasicService {
         OAuthSession session = new OAuthSession();
         session.setCodeVerifier(codeVerifier);
         session.setScope(scope);
-        session.setTppRedirectUrl("***REMOVED***"); // TODO should be provided by the API user or the configuration file
         session.setAuthorizationEndpoint(endpoints.get("authorization_endpoint"));
         session.setTokenEndpoint(endpoints.get("token_endpoint"));
         session.setState(state);

@@ -14,13 +14,12 @@ public class PersistentOAuthSession {
 
     public OAuthSession create(OAuthSession model) {
         Connection connection = Persistence.getInstance().getConnection();
-        try (CallableStatement query = connection.prepareCall("{call create_oauth_session(?, ?, ?, ?, ?, ?)}")) {
-            query.setString(1, model.getTppRedirectUrl());
-            query.setString(2, model.getAuthorizationEndpoint());
-            query.setString(3, model.getTokenEndpoint());
-            query.setString(4, model.getCodeVerifier());
-            query.setString(5, model.getState());
-            query.setString(6, model.getScope());
+        try (CallableStatement query = connection.prepareCall("{call create_oauth_session(?, ?, ?, ?, ?)}")) {
+            query.setString(1, model.getAuthorizationEndpoint());
+            query.setString(2, model.getTokenEndpoint());
+            query.setString(3, model.getCodeVerifier());
+            query.setString(4, model.getState());
+            query.setString(5, model.getScope());
 
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
@@ -71,7 +70,6 @@ public class PersistentOAuthSession {
     private OAuthSession dbToModel(ResultSet resultSet) throws SQLException {
         OAuthSession model = new OAuthSession();
         model.setId(resultSet.getInt("id"));
-        model.setTppRedirectUrl(resultSet.getString("tpp_redirect_uri"));
         model.setAuthorizationEndpoint(resultSet.getString("authorization_endpoint"));
         model.setTokenEndpoint(resultSet.getString("token_endpoint"));
         model.setCodeVerifier(resultSet.getString("code_verifier"));

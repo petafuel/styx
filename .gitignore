@@ -1,2 +1,4 @@
 styx*.iml
 .idea/*
+API/target/*
+Core/target/*

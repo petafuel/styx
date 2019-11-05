@@ -41,6 +41,13 @@ public class PaymentInitiationPain001Request implements XS2ARequest {
 
     public PaymentInitiationPain001Request(PaymentProduct paymentProduct, PAIN00100303Document body, PSU psu) {
         this.paymentProduct = paymentProduct;
+
+        if (this.paymentProduct .equals(PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS)) {
+            if (body.getCctInitiation().getPmtInfos().get(0).getRequestedExecutionDate() == null || "" .equals(body.getCctInitiation().getPmtInfos().get(0).getRequestedExecutionDate())){
+                body.getCctInitiation().getPmtInfos().get(0).setRequestedExecutionDate(body.getCctInitiation().getGrpHeader().getCreationTime());
+            }
+        }
+
         this.body = body;
         this.headers = new LinkedHashMap<>();
         this.psu = psu;

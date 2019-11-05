@@ -5,8 +5,8 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupCS;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.sca.SCAApproach;
+import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
@@ -25,23 +25,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ConsentTest {
 
+    private static final String SPARKASSE_BASE_API = "https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/xs2a-api/12345678";
+
     @Test
     @Tag("integration")
     public void createConsent() throws SignatureException, BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+        standard.setCs(new BerlinGroupCS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
         //standard.setCs(new BerlinGroupCS("https://simulator-xs2a.db.com/", new BerlinGroupSigner()));
         //standard.setCs(new BerlinGroupCS("https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/xs2a-api/12345678", new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE40100100103307118608"));
-        balances.add(new Account("DE02100100109307118603"));
-        balances.add(new Account("DE67100100101306118605"));
+        balances.add(new Account("DE86999999990000001000"));
 
         List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE40100100103307118608"));
+        transactions.add(new Account("DE86999999990000001000"));
 
         PSU psu = new PSU("4321-87654321-4321");
         Consent consent = new Consent();
@@ -58,6 +58,7 @@ public class ConsentTest {
 
         consent = standard.getCs().createConsent(createConsentRequest);
 
+        SCAApproach approach = SCAHandler.decision(consent);
         Assert.assertNotNull(consent.getId());
     }
 
@@ -66,12 +67,12 @@ public class ConsentTest {
     public void getConsent() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         //standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
-        standard.setCs(new BerlinGroupCS("https://xs2a-sndbx.consorsbank.de", new BerlinGroupSigner()));
+        standard.setCs(new BerlinGroupCS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
 
         GetConsentRequest getConsentRequest = new GetConsentRequest();
-        getConsentRequest.setConsentId("EM1-vesW6HU5cDpPh_bpc65mJd0dlnpO8qmvGlgGViZNGGhgcbQrDieFkQ9dkzEmzEogXxwAl1YzF4bFRYCMAg==_=_bS6p6XvTWI");
+        getConsentRequest.setConsentId("983fa01f-eedb-467d-849b-e81e1c8bf47a");
 
         Consent consent = standard.getCs().getConsent(getConsentRequest);
     }
@@ -80,12 +81,12 @@ public class ConsentTest {
     @Tag("integration")
     public void getConsentStatus() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+        standard.setCs(new BerlinGroupCS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
 
         StatusConsentRequest statusConsentRequest = new StatusConsentRequest();
-        statusConsentRequest.setConsentId("2337125702280910210***REMOVED***CO4960JJ");
+        statusConsentRequest.setConsentId("983fa01f-eedb-467d-849b-e81e1c8bf47a");
 
         assertThrows(BankRequestFailedException.class, () -> {
             standard.getCs().getStatus(statusConsentRequest);

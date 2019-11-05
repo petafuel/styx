@@ -6,12 +6,13 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonDeserializationContext;
-import net.petafuel.styx.core.xs2a.oauth.entities.Token;
+import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
 
 import java.lang.reflect.Type;
+import java.util.Date;
 
-public class TokenSerializer implements JsonDeserializer<Token>, JsonSerializer<TokenRequest> {
+public class TokenSerializer implements JsonDeserializer<OAuthSession>, JsonSerializer<TokenRequest> {
 
     private static final String GRANT_TYPE = "grant_type";
     private static final String CODE = "code";
@@ -36,23 +37,25 @@ public class TokenSerializer implements JsonDeserializer<Token>, JsonSerializer<
     }
 
     @Override
-    public Token deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
+    public OAuthSession deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
         JsonObject object = jsonElement.getAsJsonObject();
         String accessToken = object.get(ACCESS_TOKEN).getAsString();
         String tokenType = object.get(TOKEN_TYPE).getAsString();
-        Token token = new Token(accessToken, tokenType);
+        OAuthSession session = new OAuthSession(accessToken, tokenType);
         if (object.has(REFRESH_TOKEN)) {
             String refreshToken = object.get(REFRESH_TOKEN).getAsString();
-            token.setRefreshToken(refreshToken);
+            session.setRefreshToken(refreshToken);
         }
         if (object.has(EXPIRES_IN)) {
-            int expiresIn = object.get(EXPIRES_IN).getAsInt();
-            token.setExpiresIn(expiresIn);
+             int seconds = object.get(EXPIRES_IN).getAsInt();
+             Date date = new Date();
+             date.setTime(date.getTime() + seconds * 1000);
+             session.setExpiresAt(date);
         }
         if (object.has(SCOPE)) {
             String scope = object.get(SCOPE).getAsString();
-            token.setScope(scope);
+            session.setScope(scope);
         }
-        return token;
+        return session;
     }
 }

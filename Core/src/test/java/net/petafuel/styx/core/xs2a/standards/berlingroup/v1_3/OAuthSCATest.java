@@ -1,6 +1,10 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
-import net.petafuel.jsepa.model.*;
+import net.petafuel.jsepa.model.CCTInitiation;
+import net.petafuel.jsepa.model.CreditTransferTransactionInformation;
+import net.petafuel.jsepa.model.GroupHeader;
+import net.petafuel.jsepa.model.PAIN00100303Document;
+import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;

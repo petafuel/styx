@@ -5,17 +5,16 @@ import com.google.gson.GsonBuilder;
 import net.petafuel.jsepa.exception.SEPAParsingException;
 import net.petafuel.jsepa.facades.ReportConverter;
 import net.petafuel.jsepa.model.pain002.TransactionReport;
+import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
-import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
+import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentInitiationJsonRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentStatusSerializer;
 import okhttp3.Response;
@@ -34,8 +33,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
 
     private static final Logger LOG = LogManager.getLogger(BerlinGroupPIS.class);
 
-    private static final String INITIATE_PAYMENT = "/v1/payments/%s";
-    private static final String INITIATE_BULK_PAYMENT = "/v1/bulk-payments/%s";
+    private static final String INITIATE_PAYMENT = "/v1/%s/%s";
     private static final String GET_PAYMENT_STATUS = "/v1/%s/%s/%s/status";
 
     public BerlinGroupPIS(String url, IBerlinGroupSigner signer) {
@@ -43,18 +41,19 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
     }
 
     @Override
-    public InitiatedPayment initiatePayment(XS2ARequest xs2ARequest) throws BankRequestFailedException {
+    public InitiatedPayment initiatePayment(XS2APaymentInitiationRequest xs2ARequest) throws BankRequestFailedException {
 
         if (xs2ARequest instanceof PaymentInitiationPain001Request) {
-            PaymentInitiationPain001Request request = (PaymentInitiationPain001Request) xs2ARequest;
-            this.setUrl(this.url + String.format(INITIATE_PAYMENT, request.getPaymentProduct().toString()));
             this.createBody(RequestType.POST, XML, xs2ARequest);
         } else {
-            PaymentInitiationJsonRequest request = (PaymentInitiationJsonRequest) xs2ARequest;
-            this.setUrl(this.url + String.format(INITIATE_PAYMENT, request.getPaymentProduct().toString()));
             this.createBody(RequestType.POST, JSON, xs2ARequest);
-         }
+        }
 
+        this.setUrl(this.url + String.format(
+                INITIATE_PAYMENT,
+                xs2ARequest.getPaymentService().toString(),
+                xs2ARequest.getPaymentProduct().toString())
+        );
         this.createHeaders(xs2ARequest);
 
         try (Response response = this.execute()) {
@@ -109,40 +108,6 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
                 return new PaymentStatus(Transaction.Status.valueOf(report.getStatus()), null);
             }
         } catch (IOException | SEPAParsingException e) {
-            throw new BankRequestFailedException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public InitiatedPayment initiateBulkPayment(XS2ARequest xs2ARequest) throws BankRequestFailedException {
-
-        if (xs2ARequest instanceof PaymentInitiationPain001Request) {
-            PaymentInitiationPain001Request request = (PaymentInitiationPain001Request) xs2ARequest;
-            this.setUrl(this.url + String.format(INITIATE_BULK_PAYMENT, request.getPaymentProduct().toString()));
-            this.createBody(RequestType.POST, XML, xs2ARequest);
-        } else {
-            BulkPaymentInitiationJsonRequest request = (BulkPaymentInitiationJsonRequest) xs2ARequest;
-            this.setUrl(this.url + String.format(INITIATE_BULK_PAYMENT, request.getPaymentProduct().toString()));
-            this.createBody(RequestType.POST, JSON, xs2ARequest);
-        }
-
-        this.createHeaders(xs2ARequest);
-
-        try (Response response = this.execute()) {
-            String body = response.body().string();
-
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(InitiatedPayment.class, new InitiatedPaymentSerializer())
-                    .create();
-            InitiatedPayment payment = gson.fromJson(body, InitiatedPayment.class);
-            payment.setxRequestId(UUID.fromString(xs2ARequest.getHeaders().get("x-request-id")));
-
-            //if the sca method was not set by previously parsing the body, use the bank supplied header
-            if (payment.getSca().getApproach() == null) {
-                payment.getSca().setApproach(SCA.Approach.valueOf(response.header("ASPSP-SCA-Approach")));
-            }
-            return payment;
-        } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }

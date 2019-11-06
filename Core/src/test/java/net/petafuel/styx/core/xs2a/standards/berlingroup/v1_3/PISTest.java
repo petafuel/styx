@@ -222,7 +222,8 @@ public class PISTest {
         String psuIpAddress = "192.168.1.1";
 
         PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
-                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, new PSU("PSU-1234"));
+                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, PaymentService.PAYMENTS, document, new PSU("PSU-1234")
+        );
         request.setTppRedirectPreferred(true);
         request.getPsu().setIp(psuIpAddress);
 
@@ -300,7 +301,7 @@ public class PISTest {
                 PaymentProduct.SEPA_CREDIT_TRANSFERS, payments, psu, false);
 
         try {
-            InitiatedPayment initiatedPayment = standard.getPis().initiateBulkPayment(request);
+            InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
             Assert.assertNotNull(initiatedPayment);
         } catch (Exception e) {
             Assert.fail();

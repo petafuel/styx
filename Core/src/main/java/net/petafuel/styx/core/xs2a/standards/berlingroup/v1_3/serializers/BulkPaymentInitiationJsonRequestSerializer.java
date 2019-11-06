@@ -1,10 +1,13 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers;
 
-import com.google.gson.*;
+import com.google.gson.JsonSerializer;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonArray;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentInitiationJsonRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -8,6 +8,7 @@ import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentInitiationJsonRequestSerializer;
+import net.petafuel.styx.core.xs2a.utils.Config;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,6 +50,7 @@ public class PaymentInitiationJsonRequest implements XS2ARequest {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, d MM yyyy HH:mm:ss zz");
 		this.date = simpleDateFormat.format(new Date());
 		this.xRequestId = String.valueOf(UUID.randomUUID());
+		this.tppRedirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.xRequestId;
 	}
 
 	@Override

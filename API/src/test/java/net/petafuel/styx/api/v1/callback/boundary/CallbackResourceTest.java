@@ -21,6 +21,10 @@ public class CallbackResourceTest {
         Response r1 = cut.processCallback(
                 headers,
                 "49a52a96-b5ad-41e5-91e5-ff3c77e483dd",
+                null,
+                null,
+                null,
+                null,
                 "{\"x-request-id\":\"49a52a96-b5ad-41e5-91e5-ff3c77e483dd\"}"
         );
         Assert.assertEquals(200, r1.getStatus());

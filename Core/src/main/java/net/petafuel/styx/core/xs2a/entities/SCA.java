@@ -75,6 +75,7 @@ public class SCA {
     }
 
     public void addLink(LinkType linkType, String href) {
-        this._links.put(linkType, href);
+        String withoutQuotes = href.replaceAll("^\"|\"$", "");
+        this._links.put(linkType, withoutQuotes);
     }
 }

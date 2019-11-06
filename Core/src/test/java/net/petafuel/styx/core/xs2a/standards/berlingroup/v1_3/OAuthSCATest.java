@@ -9,7 +9,10 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
-import net.petafuel.styx.core.xs2a.oauth.entities.Token;
+import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
+import net.petafuel.styx.core.xs2a.sca.OAuth2;
+import net.petafuel.styx.core.xs2a.sca.SCAApproach;
+import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
@@ -188,33 +191,18 @@ public class OAuthSCATest {
 
         // Creating the request instance
         String psuIpAddress = "192.168.1.1";
-        String callbackUrl = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl");
 
         PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
                 PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, new PSU("PSU-1234"));
         request.setTppRedirectPreferred(true);
-        request.setTppRedirectUri(callbackUrl);
         request.getPsu().setIp(psuIpAddress);
 
         // Generating the code_verifier, code_challenge & state
         try {
 
-            String state = OAuthService.generateState();
-            String codeVerifier = OAuthService.generateCodeVerifier();
-            String codeChallenge = OAuthService.generateCodeChallenge(codeVerifier);
-            String clientId = Config.getInstance().getProperties().getProperty("keystore.client_id");
-
             InitiatedPayment payment = standard.getPis().initiatePayment(request);
-            String urlToSca = SPARKASSE_BANK_AUTHORIZATION_SERVER + "/authorize?" +
-                    "client_id=" + clientId +
-                    "&response_type=" + "code" +
-                    "&scope=PIS: " + payment.getPaymentId() +
-                    "&redirect_uri=" + callbackUrl +
-                    "&state=" + state +
-                    "&code_challenge_method=" + "S256" +
-                    "&code_challenge=" + codeChallenge;
-
-            System.out.println(urlToSca);
+            SCAApproach approach = SCAHandler.decision(payment);
+            System.out.println(((OAuth2) approach).getAuthoriseLink());
             Assert.assertTrue(true);
         } catch (Exception e) {
             Assert.fail();
@@ -229,9 +217,9 @@ public class OAuthSCATest {
         String code_verifier = "Sa699pmGwDsJX5IxaojDZ282euq8HGvQP_cT1Z4rHdw";
 
         TokenRequest request = new TokenRequest(code, code_verifier);
-        OAuthService service = new OAuthService(SPARKASSE_BANK_AUTHORIZATION_SERVER, new BerlinGroupSigner());
+        OAuthService service = new OAuthService();
         try {
-            Token t1 = service.accessTokenRequest(request);
+            OAuthSession t3 = service.accessTokenRequest("https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/oauth/12345678/token", request);
         } catch (Exception ignored) {}
         Assert.assertTrue(true);
     }

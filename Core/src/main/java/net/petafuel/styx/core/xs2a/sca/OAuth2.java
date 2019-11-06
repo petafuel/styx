@@ -1,10 +1,10 @@
 package net.petafuel.styx.core.xs2a.sca;
 
-public class Redirect implements SCAApproach{
+public class OAuth2 implements SCAApproach{
 
     private String authoriseLink;
 
-    public Redirect(String link)
+    public OAuth2(String link)
     {
         this.authoriseLink = link;
     }

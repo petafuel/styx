@@ -2,7 +2,9 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
 import net.petafuel.jsepa.SEPAWriter;
 import net.petafuel.jsepa.exception.SEPAWriteException;
+import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.jsepa.model.PAIN00100303Document;
+import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.PSU;
@@ -12,7 +14,6 @@ import net.petafuel.styx.core.xs2a.utils.Config;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
-
 import java.util.UUID;
 
 public class PaymentInitiationPain001Request implements XS2ARequest {
@@ -42,10 +43,12 @@ public class PaymentInitiationPain001Request implements XS2ARequest {
 
     public PaymentInitiationPain001Request(PaymentProduct paymentProduct, PAIN00100303Document body, PSU psu) {
         this.paymentProduct = paymentProduct;
+        PaymentInstructionInformation payment = body.getCctInitiation().getPmtInfos().get(0);
+        GroupHeader groupHeader = body.getCctInitiation().getGrpHeader();
 
-        if (this.paymentProduct .equals(PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS)) {
-            if (body.getCctInitiation().getPmtInfos().get(0).getRequestedExecutionDate() == null || "" .equals(body.getCctInitiation().getPmtInfos().get(0).getRequestedExecutionDate())){
-                body.getCctInitiation().getPmtInfos().get(0).setRequestedExecutionDate(body.getCctInitiation().getGrpHeader().getCreationTime());
+        if (this.paymentProduct.equals(PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS)) {
+            if (payment.getRequestedExecutionDate() == null || "".equals(payment.getRequestedExecutionDate())){
+                payment.setRequestedExecutionDate(groupHeader.getCreationTime());
             }
         }
 

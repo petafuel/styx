@@ -27,11 +27,9 @@ public class Config {
 
     private Config() {
         config = new Properties();
-        try (
-            InputStream in = Config.class.getClassLoader().getResourceAsStream("config.properties")) {
+        try (InputStream in = Config.class.getClassLoader().getResourceAsStream("config.properties")) {
             config.load(in);
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
             LOG.error("Error while loading properties: " + e.getMessage());
             throw new CertificateException("Error while loading certificate properties: " + e.getMessage());
         }

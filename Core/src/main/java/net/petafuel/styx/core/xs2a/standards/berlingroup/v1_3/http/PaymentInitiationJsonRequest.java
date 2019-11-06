@@ -41,6 +41,7 @@ public class PaymentInitiationJsonRequest implements XS2ARequest {
 
 	private Payment body;
 	private PaymentProduct paymentProduct;
+	private Date requestedExecutionDate;
 
 	public PaymentInitiationJsonRequest(PaymentProduct paymentProduct, Payment body, PSU psu) {
 		this.paymentProduct = paymentProduct;
@@ -126,5 +127,13 @@ public class PaymentInitiationJsonRequest implements XS2ARequest {
 
 	public void setHeaders(LinkedHashMap<String, String> headers) {
 		this.headers = headers;
+	}
+
+	public Date getRequestedExecutionDate() {
+		return requestedExecutionDate;
+	}
+
+	public void setRequestedExecutionDate(Date requestedExecutionDate) {
+		this.requestedExecutionDate = requestedExecutionDate;
 	}
 }

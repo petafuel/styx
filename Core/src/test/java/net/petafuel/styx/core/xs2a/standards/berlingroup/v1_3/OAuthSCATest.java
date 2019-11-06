@@ -1,29 +1,28 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
-import net.petafuel.jsepa.model.PaymentInstructionInformation;
-import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.jsepa.model.CCTInitiation;
 import net.petafuel.jsepa.model.CreditTransferTransactionInformation;
 import net.petafuel.jsepa.model.GroupHeader;
+import net.petafuel.jsepa.model.PAIN00100303Document;
+import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
+import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
+import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
 import net.petafuel.styx.core.xs2a.sca.OAuth2;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
 import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
-import net.petafuel.styx.core.xs2a.oauth.OAuthService;
-import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
-import net.petafuel.styx.core.xs2a.utils.Config;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.util.Vector;
 import java.util.Collections;
+import java.util.Vector;
 
 public class OAuthSCATest {
 
@@ -97,7 +96,7 @@ public class OAuthSCATest {
         String psuIpAddress = "192.168.1.1";
 
         PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
-        PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, new PSU("PSU-1234"));
+                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, new PSU("PSU-1234"));
         request.setTppRedirectPreferred(true);
         request.getPsu().setIp(psuIpAddress);
 

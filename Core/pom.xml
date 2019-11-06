@@ -37,9 +37,9 @@
                         <configuration>
                             <groupId>net.petafuel.library</groupId>
                             <artifactId>JSEPA</artifactId>
-                            <version>1.454-SNAPSHOT</version>
+                            <version>1.455</version>
                             <packaging>jar</packaging>
-                            <file>lib/JSEPA.jar</file>
+                            <file>lib/JSEPA-1.455.jar</file>
                         </configuration>
                     </execution>
                 </executions>
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>net.petafuel.library</groupId>
             <artifactId>JSEPA</artifactId>
-            <version>1.454-SNAPSHOT</version>
+            <version>1.455</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

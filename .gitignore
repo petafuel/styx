@@ -1,6 +1,6 @@
 styx*.iml
 .idea/*
 API/target/*
-API/log*
+API/log/*
 Core/target/*
 log/*

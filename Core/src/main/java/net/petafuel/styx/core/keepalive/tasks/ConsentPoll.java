@@ -59,7 +59,7 @@ public class ConsentPoll extends WorkableTask {
             //TODO maybe define exit codes for monitoring -> get saved as exit code in the database
             return;
         }
-
+//TODO make the request type as a parameter
         StatusConsentRequest statusConsentRequest = new StatusConsentRequest();
         statusConsentRequest.setConsentId(consent.getId());
         statusConsentRequest.setPsu(consent.getPsu());
@@ -72,7 +72,7 @@ public class ConsentPoll extends WorkableTask {
                     if (currentStatus == Consent.State.VALID) {
                         LOG.debug("Consent is valid, SCA was successful");
                         throw new TaskSuccessException("Consent status changed to valid");
-                    } else if (currentStatus != Consent.State.RECEIVED) {
+                    } else if (!(currentStatus.equals(Consent.State.RECEIVED) || currentStatus.equals(Consent.State.PARTIALLY_AUTHORISED))) {
                         currentConsent.setState(currentStatus);
                         persistentConsent.update(currentConsent);
                         throw new TaskFinalFailureException("Consent cannot be polled anymore due to unrecoverable status: " + currentStatus.toString(), TaskFinalFailureCode.UNRECOVERABLE_STATUS);
@@ -83,7 +83,6 @@ public class ConsentPoll extends WorkableTask {
                     LOG.warn("Trying to poll consent resulted in an error: {} status: {} retry-iteration: {}", e.getMessage(), e.getHttpStatusCode(), retryIterator.next());
                 }
                 try {
-
                     Thread.sleep(timeoutBetweenRetries);
                 } catch (InterruptedException e) {
                     LOG.error("Unable to sleep until next retry");
@@ -92,6 +91,7 @@ public class ConsentPoll extends WorkableTask {
             }
         } catch (TaskSuccessException success) {
             LOG.info("Polling was successful -> getting consent informations");
+            //TODO make this as a parameter
             GetConsentRequest getConsentRequest = new GetConsentRequest();
             getConsentRequest.setConsentId(consent.getId());
             try {

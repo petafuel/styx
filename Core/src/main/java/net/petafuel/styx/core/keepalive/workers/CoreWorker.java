@@ -10,8 +10,9 @@ import net.petafuel.styx.core.keepalive.threads.ThreadManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Date;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Basic Worker that will execute Tasks from the coreQueue
@@ -20,12 +21,13 @@ public class CoreWorker extends RunnableWorker {
     private static final Logger LOG = LogManager.getLogger(CoreWorker.class);
 
     private boolean running;
-    private AtomicInteger currentTaskStartTime;
+    private AtomicLong currentTaskStartTime;
 
     public CoreWorker() {
         this.setId(UUID.randomUUID());
         this.setType(WorkerType.CORE);
         this.running = true;
+        this.currentTaskStartTime = new AtomicLong();
     }
 
     @Override
@@ -47,19 +49,22 @@ public class CoreWorker extends RunnableWorker {
             WorkableTask task;
             synchronized (ThreadManager.getInstance().getCoreQueue()) {
                 task = ThreadManager.getInstance().getCoreQueue().poll();
-                LOG.info("Core Queue size: {}", ThreadManager.getInstance().getCoreQueue().size());
             }
             if (task == null) {
                 continue;
             }
-            LOG.info("Polled from queue: Task id:{} signature:{} is going to be executed", task.getId(), task.getSignature());
+            LOG.info("Task id:{} signature:{} polled from queue", task.getId(), task.getSignature());
             try {
                 TaskRecoveryDB.setRunning(task);
+                currentTaskStartTime.set(new Date().getTime());
                 task.execute();
+                LOG.info("Task id:{} signature: {} finished successfully", task.getId(), task.getSignature());
+                currentTaskStartTime.set(0);
                 TaskRecoveryDB.setDone(task);
             } catch (TaskRetryFailureException retryFailure) {
-                //TODO Error handling
+                LOG.warn("Task id: {} signature: {} failed but will be requeued as RETRY_FAILURE -> {}", task.getId(), task.getSignature(), retryFailure.getMessage());
                 TaskRecoveryDB.changeWorker(task, WorkerType.RETRY_FAILURE);
+                ThreadManager.getInstance().queueTask(task, WorkerType.RETRY_FAILURE);
             } catch (TaskFinalFailureException finalFailure) {
                 LOG.error("Task id: {} signature: {} finally failed with code:{} -> {}", task.getId(), task.getSignature(), finalFailure.getCode(), finalFailure.getMessage());
                 TaskRecoveryDB.setFinallyFailed(task, finalFailure.getMessage(), finalFailure.getCode());

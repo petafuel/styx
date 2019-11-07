@@ -20,18 +20,16 @@ public class RecoveryRoutine {
 
     public static void runTaskRecovery() {
         LOG.info("Running Task Recovery Routine");
-        LinkedHashMap<WorkerType, WorkableTask> interruptedTasks = TaskRecoveryDB.getInterruptedTasks();
-        LinkedHashMap<WorkerType, WorkableTask> queuedTasks = TaskRecoveryDB.getQueuedTasks();
+        LinkedHashMap<WorkableTask, WorkerType> interruptedTasks = TaskRecoveryDB.getInterruptedTasks();
+        LinkedHashMap<WorkableTask, WorkerType> queuedTasks = TaskRecoveryDB.getQueuedTasks();
         LOG.info("Found {} queued tasks and {} interrupted tasks that need to be recovered", queuedTasks.size(), interruptedTasks.size());
         if (queuedTasks.isEmpty() && interruptedTasks.isEmpty()) {
             LOG.info("No tasks need to be recovered, Recovery is done");
             return;
         }
         LOG.info("Queueing recovered interrupted tasks amount: {}", interruptedTasks.size());
-        interruptedTasks.forEach((workerType, task) -> {
-            ThreadManager.getInstance().queueTask(task, workerType);
-        });
+        interruptedTasks.forEach((task, workerType ) -> ThreadManager.getInstance().queueTask(task, workerType));
         LOG.info("Queueing recovered queued tasks amount: {}", queuedTasks.size());
-        queuedTasks.forEach((workerType, task) -> ThreadManager.getInstance().queueTask(task, workerType));
+        queuedTasks.forEach((task, workerType) -> ThreadManager.getInstance().queueTask(task, workerType));
     }
 }

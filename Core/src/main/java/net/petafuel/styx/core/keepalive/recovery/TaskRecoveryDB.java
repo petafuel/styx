@@ -129,9 +129,9 @@ public class TaskRecoveryDB {
      * within the previous application runtime
      * @return
      */
-    public static LinkedHashMap<WorkerType, WorkableTask> getInterruptedTasks() {
+    public static LinkedHashMap<WorkableTask, WorkerType> getInterruptedTasks() {
         Connection connection = Persistence.getInstance().getConnection();
-        LinkedHashMap<WorkerType, WorkableTask> interruptedTasks = new LinkedHashMap<>();
+        LinkedHashMap<WorkableTask, WorkerType> interruptedTasks = new LinkedHashMap<>();
         try (CallableStatement query = connection.prepareCall("{call get_interrupted_tasks()}")) {
 
             try (ResultSet resultSet = query.executeQuery()) {
@@ -150,9 +150,9 @@ public class TaskRecoveryDB {
      * by a Worker Thread within the previous application runtime
      * @return
      */
-    public static LinkedHashMap<WorkerType, WorkableTask> getQueuedTasks() {
+    public static LinkedHashMap<WorkableTask, WorkerType> getQueuedTasks() {
         Connection connection = Persistence.getInstance().getConnection();
-        LinkedHashMap<WorkerType, WorkableTask> queuedTasks = new LinkedHashMap<>();
+        LinkedHashMap<WorkableTask, WorkerType> queuedTasks = new LinkedHashMap<>();
         try (CallableStatement query = connection.prepareCall("{call get_queued_tasks()}")) {
 
             try (ResultSet resultSet = query.executeQuery()) {

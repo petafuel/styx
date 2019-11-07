@@ -41,8 +41,8 @@ public class TaskRecoveryFactory {
         return recoveredTask;
     }
 
-    public static LinkedHashMap<WorkerType, WorkableTask> modelFromDatabase(ResultSet resultSet) throws SQLException {
-        LinkedHashMap<WorkerType, WorkableTask> tasks = new LinkedHashMap<>();
+    public static LinkedHashMap<WorkableTask, WorkerType> modelFromDatabase(ResultSet resultSet) throws SQLException {
+        LinkedHashMap<WorkableTask, WorkerType> tasks = new LinkedHashMap<>();
         while (resultSet.next()) {
             UUID id = UUID.fromString(resultSet.getString("id"));
             String goal = resultSet.getString("goal");
@@ -52,7 +52,7 @@ public class TaskRecoveryFactory {
                 Gson gson = new GsonBuilder().serializeNulls().create();
                 recoveredTask = TaskRecoveryFactory.factory(gson.fromJson(goal, JsonObject.class));
                 TaskRecoveryDB.setFinallyFailed(id, "Task was recovered and re-queued as new Task", TaskFinalFailureCode.RECOVERED_AND_QUEUED);
-                tasks.put(type, recoveredTask);
+                tasks.put(recoveredTask, type);
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                 LOG.error("Unable to recover Task {}: {}", id, e.getMessage());
             } catch (Exception unknown) {

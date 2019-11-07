@@ -60,6 +60,13 @@ public class ThreadManager {
         RecoveryRoutine.runTaskRecovery();
         //TODO add thread that checks for Worker Timeouts by task signature(Too long for one task) and also checks the workload to spawn or despawn Workers
         //TODO Configurate threshold for new worker spawnings in config.properties
+
+        /**
+         * main loop:
+         * check queue size -> spawn or terminate workers
+         * check worker task execution time -> copy task, terminate worker, restart worker and queue task
+         * check amount workers and spawn/despawn workers to fit the current runtime conditions
+         */
     }
 
     public void queueTask(WorkableTask task) {

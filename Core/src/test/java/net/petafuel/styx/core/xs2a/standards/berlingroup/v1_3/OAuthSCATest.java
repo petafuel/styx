@@ -9,6 +9,7 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
+import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
@@ -96,7 +97,8 @@ public class OAuthSCATest {
         String psuIpAddress = "192.168.1.1";
 
         PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
-                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, new PSU("PSU-1234"));
+                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, PaymentService.PAYMENTS, document, new PSU("PSU-1234")
+        );
         request.setTppRedirectPreferred(true);
         request.getPsu().setIp(psuIpAddress);
 

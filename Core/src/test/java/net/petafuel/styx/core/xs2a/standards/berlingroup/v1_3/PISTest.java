@@ -20,6 +20,7 @@ import net.petafuel.styx.core.xs2a.sca.OAuth2;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
 import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
@@ -30,6 +31,8 @@ import org.junit.jupiter.api.Test;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 
 public class PISTest {
@@ -37,7 +40,7 @@ public class PISTest {
     private static final String SPARKASSE_BASE_API = "https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/xs2a-api/12345678";
     private static final String PAYMENT_ID = "1e5ac400-cb7c-42fe-830d-6991517d26c7";
     private static final String FIDUCIA_GAD_BASE_API = "https://xs2a-test.fiduciagad.de/xs2a";
-    public static final String FIDUCIA_PAYMENT_ID = "3631391318101910234***REMOVED***PA4960JJ";
+    private static final String FIDUCIA_PAYMENT_ID = "3631391318101910234***REMOVED***PA4960JJ";
     public static final String DEUTSCHE_BANK_BASE_API ="https://simulator-xs2a.db.com:443/sb/sandbox";
     public static final String FIDOR_BANK_BASE_API = "https://xs2a.sandbox.fidorsolutions.cloud";
 
@@ -219,7 +222,8 @@ public class PISTest {
         String psuIpAddress = "192.168.1.1";
 
         PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
-                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, new PSU("PSU-1234"));
+                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, PaymentService.PAYMENTS, document, new PSU("PSU-1234")
+        );
         request.setTppRedirectPreferred(true);
         request.getPsu().setIp(psuIpAddress);
 
@@ -230,6 +234,75 @@ public class PISTest {
             SCAApproach approach = SCAHandler.decision(payment);
             System.out.println(((OAuth2) approach).getAuthoriseLink());
             Assert.assertTrue(true);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+
+    @Test
+    @Tag("integration")
+    public void initiateJsonBulkPayment() {
+        XS2AStandard standard = new XS2AStandard();
+        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+
+        /** Debtor information*/
+        String debtorIban = "DE86999999990000001000"; //Sparkasse
+        Currency debtorCurrency = Currency.EUR;
+        Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
+
+        /** Payment 1 information*/
+        String creditorIban1 = "DE75999999990000001004"; //Sparkasse
+        Currency creditorCurrency1 = Currency.EUR;
+        String creditorName1 = "Creditor One";
+        String instructedAmount1 = "0.99";
+        Currency instructedCurrency1 = Currency.EUR;
+        String reference1 = "Beispiel Verwendungszweck 1";
+
+        Account creditor1 = new Account(creditorIban1, creditorCurrency1, Account.Type.IBAN);
+        creditor1.setName(creditorName1);
+
+        Payment p1 = new Payment();
+
+        p1.setDebtor(debtor);
+        p1.setCreditor(creditor1);
+        p1.setAmount(instructedAmount1);
+        p1.setCurrency(instructedCurrency1);
+        p1.setReference(reference1);
+        p1.setEndToEndIdentification("RI-234567890");
+
+
+        /** Payment 2 information*/
+        String creditorIban2 = "DE12999999990000001002"; //Sparkasse
+        Currency creditorCurrency2 = Currency.EUR;
+        String creditorName2 = "Creditor Two";
+        String instructedAmount2 = "1.50";
+        Currency instructedCurrency2 = Currency.EUR;
+        String reference2 = "Beispiel Verwendungszweck 2";
+
+        Account creditor2 = new Account(creditorIban2, creditorCurrency2, Account.Type.IBAN);
+        creditor2.setName(creditorName2);
+
+        Payment p2 = new Payment();
+
+        p2.setDebtor(debtor);
+        p2.setCreditor(creditor2);
+        p2.setAmount(instructedAmount2);
+        p2.setCurrency(instructedCurrency2);
+        p2.setReference(reference2);
+        p2.setEndToEndIdentification("WBG-123456789");
+
+        List<Payment> payments = new LinkedList<>();
+        payments.add(p1);
+        payments.add(p2);
+
+        PSU psu = new PSU("PSU-1234");
+        BulkPaymentInitiationJsonRequest request = new BulkPaymentInitiationJsonRequest(
+                PaymentProduct.SEPA_CREDIT_TRANSFERS, payments, psu, false);
+
+        try {
+            InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
+            Assert.assertNotNull(initiatedPayment);
         } catch (Exception e) {
             Assert.fail();
         }

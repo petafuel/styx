@@ -3,7 +3,11 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.*;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 

@@ -7,6 +7,7 @@ public class Payment
 	private String amount;
 	private Currency currency;
 	private String reference;
+	private String endToEndIdentification;
 
 	public Account getCreditor() { return creditor; }
 
@@ -44,5 +45,13 @@ public class Payment
 
 	public void setReference(String reference) {
 		this.reference = reference;
+	}
+
+	public String getEndToEndIdentification() {
+		return endToEndIdentification;
+	}
+
+	public void setEndToEndIdentification(String endToEndIdentification) {
+		this.endToEndIdentification = endToEndIdentification;
 	}
 }

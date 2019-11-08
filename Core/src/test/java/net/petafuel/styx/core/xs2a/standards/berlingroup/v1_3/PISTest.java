@@ -24,7 +24,6 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentIn
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
-import net.petafuel.styx.core.xs2a.utils.jsepa.CdtTrfTxInf;
 import net.petafuel.styx.core.xs2a.utils.jsepa.PmtInf;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
@@ -324,14 +323,12 @@ public class PISTest {
         GroupHeader groupHeader = new GroupHeader();
         Vector<PaymentInstructionInformation> pmtInfos = new Vector<>();
         // TODO
-        //  PmtInf and CdtTrfTxInf classes are created for temporary usage until JSEPA supports the added attibutes (InstrId and BtchBookg)
-        //  use PaymentInstructionInformation & CreditTransferTransactionInformation instances once JSEPA is released
+        //  PmtInf.java is created for temporary usage, until JSEPA supports the added attibute (BtchBookg)
+        //  use PaymentInstructionInformation instances once JSEPA is released
 //        PaymentInstructionInformation pii = new PaymentInstructionInformation();
         PmtInf pii = new PmtInf();
-//        CreditTransferTransactionInformation cdtTrfTxInf1 = new CreditTransferTransactionInformation();
-//        CreditTransferTransactionInformation cdtTrfTxInf2 = new CreditTransferTransactionInformation();
-        CdtTrfTxInf cdtTrfTxInf1 = new CdtTrfTxInf();
-        CdtTrfTxInf cdtTrfTxInf2 = new CdtTrfTxInf();
+        CreditTransferTransactionInformation cdtTrfTxInf1 = new CreditTransferTransactionInformation();
+        CreditTransferTransactionInformation cdtTrfTxInf2 = new CreditTransferTransactionInformation();
 
         // Necessary variables for creating a PAIN00100303Document
         String messageId = "messageId";
@@ -355,7 +352,6 @@ public class PISTest {
         String creditorIBAN1 = "DE98999999990000009999";
         String purpose1 = "purpose string";
         String creditorAgent1 = "AGENT1";
-        String insrtid1 = "INSRTID1";
 
         // PAYMENT 2
         double amount2 = 100.00;
@@ -364,7 +360,6 @@ public class PISTest {
         String creditorIBAN2 = "DE98999999990000009999";
         String purpose2 = "purpose string";
         String creditorAgent2 = "AGENT2";
-        String insrtid2 = "INSRTID2";
 
         // Setting values for each instance
         groupHeader.setMessageId(messageId);
@@ -379,7 +374,6 @@ public class PISTest {
         cdtTrfTxInf1.setCreditorIBAN(creditorIBAN1);
         cdtTrfTxInf1.setVwz(purpose1);
         cdtTrfTxInf1.setCreditorAgent(creditorAgent1);
-        cdtTrfTxInf1.setInstrId(insrtid1);
 
         cdtTrfTxInf2.setEndToEndID(endToEndID2);
         cdtTrfTxInf2.setAmount(amount2);
@@ -387,7 +381,7 @@ public class PISTest {
         cdtTrfTxInf2.setCreditorIBAN(creditorIBAN2);
         cdtTrfTxInf2.setVwz(purpose2);
         cdtTrfTxInf2.setCreditorAgent(creditorAgent2);
-        cdtTrfTxInf2.setInstrId(insrtid2);
+
         ArrayList<CreditTransferTransactionInformation> list = new ArrayList<>();
         list.add(cdtTrfTxInf1);
         list.add(cdtTrfTxInf2);

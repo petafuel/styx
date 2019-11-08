@@ -43,7 +43,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
     @Override
     public InitiatedPayment initiatePayment(XS2APaymentInitiationRequest xs2ARequest) throws BankRequestFailedException {
 
-        if (xs2ARequest instanceof PaymentInitiationPain001Request) {
+        if (xs2ARequest.getPaymentProduct().isXml()) {
             this.createBody(RequestType.POST, XML, xs2ARequest);
         } else {
             this.createBody(RequestType.POST, JSON, xs2ARequest);

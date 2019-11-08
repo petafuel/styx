@@ -24,11 +24,14 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentIn
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
+import net.petafuel.styx.core.xs2a.utils.jsepa.CdtTrfTxInf;
+import net.petafuel.styx.core.xs2a.utils.jsepa.PmtInf;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -303,6 +306,119 @@ public class PISTest {
         try {
             InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
             Assert.assertNotNull(initiatedPayment);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    @Tag("integration")
+    public void initializeXMLBulkPayment() {
+
+        XS2AStandard standard = new XS2AStandard();
+        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+
+        // Necessary instances for creating a PAIN00100303Document
+        PAIN00100303Document document = new PAIN00100303Document();
+        CCTInitiation ccInitation = new CCTInitiation();
+        GroupHeader groupHeader = new GroupHeader();
+        Vector<PaymentInstructionInformation> pmtInfos = new Vector<>();
+        // TODO
+        //  PmtInf and CdtTrfTxInf classes are created for temporary usage until JSEPA supports the added attibutes (InstrId and BtchBookg)
+        //  use PaymentInstructionInformation & CreditTransferTransactionInformation instances once JSEPA is released
+//        PaymentInstructionInformation pii = new PaymentInstructionInformation();
+        PmtInf pii = new PmtInf();
+//        CreditTransferTransactionInformation cdtTrfTxInf1 = new CreditTransferTransactionInformation();
+//        CreditTransferTransactionInformation cdtTrfTxInf2 = new CreditTransferTransactionInformation();
+        CdtTrfTxInf cdtTrfTxInf1 = new CdtTrfTxInf();
+        CdtTrfTxInf cdtTrfTxInf2 = new CdtTrfTxInf();
+
+        // Necessary variables for creating a PAIN00100303Document
+        String messageId = "messageId";
+        String creationTime = "2019-11-11";
+        int numberOfTransactions = 2;
+        double controlSum = 200.00;
+        String initiatingPartyName = "initiatingPartyName";
+        String paymentInformationId = "NOTPROVIDED";
+        String paymentMethod = "TRF";
+        String requestedExecutionDate = "2019-11-11";
+        String debtorName = "Debtor Name";
+        String debtorIban = "DE86999999990000001000";
+        String debtorBic = "TESTDETT421";
+        String chargeBearer = "SLEV";
+        boolean batchBooking = true;
+
+        // PAYMENT 1
+        double amount1 = 100.00;
+        String endToEndID1 = "EndToEndId";
+        String creditorName1 = "Hans Handbuch";
+        String creditorIBAN1 = "DE98999999990000009999";
+        String purpose1 = "purpose string";
+        String creditorAgent1 = "AGENT1";
+        String insrtid1 = "INSRTID1";
+
+        // PAYMENT 2
+        double amount2 = 100.00;
+        String endToEndID2 = "EndToEndId";
+        String creditorName2 = "Hans Handbuch";
+        String creditorIBAN2 = "DE98999999990000009999";
+        String purpose2 = "purpose string";
+        String creditorAgent2 = "AGENT2";
+        String insrtid2 = "INSRTID2";
+
+        // Setting values for each instance
+        groupHeader.setMessageId(messageId);
+        groupHeader.setCreationTime(creationTime);
+        groupHeader.setNoOfTransactions(numberOfTransactions);
+        groupHeader.setControlSum(controlSum);
+        groupHeader.setInitiatingPartyName(initiatingPartyName);
+
+        cdtTrfTxInf1.setEndToEndID(endToEndID1);
+        cdtTrfTxInf1.setAmount(amount1);
+        cdtTrfTxInf1.setCreditorName(creditorName1);
+        cdtTrfTxInf1.setCreditorIBAN(creditorIBAN1);
+        cdtTrfTxInf1.setVwz(purpose1);
+        cdtTrfTxInf1.setCreditorAgent(creditorAgent1);
+        cdtTrfTxInf1.setInstrId(insrtid1);
+
+        cdtTrfTxInf2.setEndToEndID(endToEndID2);
+        cdtTrfTxInf2.setAmount(amount2);
+        cdtTrfTxInf2.setCreditorName(creditorName2);
+        cdtTrfTxInf2.setCreditorIBAN(creditorIBAN2);
+        cdtTrfTxInf2.setVwz(purpose2);
+        cdtTrfTxInf2.setCreditorAgent(creditorAgent2);
+        cdtTrfTxInf2.setInstrId(insrtid2);
+        ArrayList<CreditTransferTransactionInformation> list = new ArrayList<>();
+        list.add(cdtTrfTxInf1);
+        list.add(cdtTrfTxInf2);
+
+        pii.setPmtInfId(paymentInformationId);
+        pii.setPaymentMethod(paymentMethod);
+        pii.setNoTxns(numberOfTransactions);
+        pii.setCtrlSum(controlSum);
+        pii.setRequestedExecutionDate(requestedExecutionDate);
+        pii.setDebtorName(debtorName);
+        pii.setDebtorAccountIBAN(debtorIban);
+        pii.setDebitorBic(debtorBic);
+        pii.setChargeBearer(chargeBearer);
+        pii.setBatchBooking(batchBooking);
+        pii.setCreditTransferTransactionInformationVector(list);
+
+        pmtInfos.add(pii);
+        ccInitation.setGrpHeader(groupHeader);
+        ccInitation.setPmtInfos(pmtInfos);
+        document.setCctInitiation(ccInitation);
+
+        PSU psu = new PSU("PSU-1234");
+
+        // Creating the request instance
+        PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
+                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, PaymentService.BULK_PAYMENTS, document, psu
+        );
+
+        try {
+            InitiatedPayment payment = standard.getPis().initiatePayment(request);
+            Assert.assertNotNull(payment);
         } catch (Exception e) {
             Assert.fail();
         }

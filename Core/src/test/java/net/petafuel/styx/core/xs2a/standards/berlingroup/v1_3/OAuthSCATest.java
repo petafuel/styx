@@ -10,6 +10,7 @@ import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
+import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
@@ -32,7 +33,7 @@ public class OAuthSCATest {
 
     @Tag("integration")
     @Test
-    public void initializeSinglePayment() {
+    public void initializeSinglePayment() throws BankRequestFailedException {
 
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BANK_BASE_API, new BerlinGroupSigner()));
@@ -102,36 +103,22 @@ public class OAuthSCATest {
         request.setTppRedirectPreferred(true);
         request.getPsu().setIp(psuIpAddress);
 
-        // Generating the code_verifier, code_challenge & state
-        try {
-
-            InitiatedPayment payment = standard.getPis().initiatePayment(request);
-            SCAApproach approach = SCAHandler.decision(payment);
-            System.out.println(((OAuth2) approach).getAuthoriseLink());
-            Assert.assertTrue(true);
-        } catch (Exception e) {
-            Assert.fail();
-        }
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        SCAApproach approach = SCAHandler.decision(payment);
+        System.out.println(((OAuth2) approach).getAuthoriseLink());
+        Assert.assertNotNull(payment);
     }
 
     @Tag("integration")
     @Test
-    public void getTokenRequest() {
+    public void getTokenRequest() throws BankRequestFailedException {
 
         String code = "E5E0949D3DA2CFAC80581BE843D55003";
         String code_verifier = "Sa699pmGwDsJX5IxaojDZ282euq8HGvQP_cT1Z4rHdw";
 
         TokenRequest request = new TokenRequest(code, code_verifier);
         OAuthService service = new OAuthService();
-        try {
-            OAuthSession t3 = service.accessTokenRequest("https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/oauth/12345678/token", request);
-        } catch (Exception ignored) {}
-        Assert.assertTrue(true);
-    }
-
-    @Tag("integration")
-    @Test
-    public void authorizeConsent() {
-        Assert.assertTrue(true);
+        OAuthSession t3 = service.accessTokenRequest("https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/oauth/12345678/token", request);
+        Assert.assertNotNull(t3);
     }
 }

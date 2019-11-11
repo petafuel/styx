@@ -17,7 +17,7 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -73,7 +73,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
             LOG.error("Unable to digest message: " + e.getMessage());
         }
 
-        LinkedHashMap<String, String> headers = xs2aRequest.getHeaders();
+        HashMap<String, String> headers = xs2aRequest.getHeaders();
 
         StringJoiner signatureStructureJoiner = new StringJoiner(" ");
         StringJoiner signatureContentJoiner = new StringJoiner("\n");
@@ -84,12 +84,13 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
         supportedHeaders.add(XS2AHeader.PSU_ID);
         supportedHeaders.add(XS2AHeader.PSU_CORPORATE_ID);
         supportedHeaders.add(XS2AHeader.TPP_REDIRECT_URL);
-        supportedHeaders.add(XS2AHeader.DIGEST);
 
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            if (supportedHeaders.contains(entry.getKey())) {
-                signatureStructureJoiner.add(entry.getKey());
-                signatureContentJoiner.add(entry.getKey() + ": " + entry.getValue());
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (supportedHeaders.contains(key)) {
+                signatureStructureJoiner.add(key);
+                signatureContentJoiner.add(key + ": " + value);
             }
         }
         String headerOrder = signatureStructureJoiner.toString();

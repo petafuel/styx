@@ -29,7 +29,6 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -78,7 +77,7 @@ public class PISTest {
 
     @Test
     @Tag("integration")
-    public void initiateJSONPayment() {
+    public void initiateJSONPayment() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
 
@@ -106,20 +105,14 @@ public class PISTest {
         PaymentInitiationJsonRequest request = new PaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
         request.setTppRedirectPreferred(true);
 
-        try {
-            InitiatedPayment payment = standard.getPis().initiatePayment(request);
-            SCAApproach approach = SCAHandler.decision(payment);
-            Assert.assertTrue(true);
-        }
-        catch (Exception e)
-        {
-            Assert.assertTrue(false);
-        }
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        SCAApproach approach = SCAHandler.decision(payment);
+        Assert.assertNotNull(payment);
     }
 
     @Test
     @Tag("integration")
-    public void initiateJSONFuturePayment() throws ParseException {
+    public void initiateJSONFuturePayment() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
 
@@ -147,19 +140,14 @@ public class PISTest {
         PaymentInitiationJsonRequest request = new PaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
         request.setRequestedExecutionDate(executionData);
 
-        try {
-            InitiatedPayment payment = standard.getPis().initiatePayment(request);
-            Assert.assertTrue(true);
-        }
-        catch (Exception e)
-        {
-            Assert.assertTrue(false);
-        }
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        Assert.assertNotNull(payment);
+
     }
 
     @Tag("integration")
     @Test
-    public void initializeSingleFuturePayment() {
+    public void initializeSingleFuturePayment() throws BankRequestFailedException {
 
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
@@ -229,22 +217,17 @@ public class PISTest {
         request.setTppRedirectPreferred(true);
         request.getPsu().setIp(psuIpAddress);
 
-        // Generating the code_verifier, code_challenge & state
-        try {
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        SCAApproach approach = SCAHandler.decision(payment);
+        System.out.println(((OAuth2) approach).getAuthoriseLink());
+        Assert.assertNotNull(payment);
 
-            InitiatedPayment payment = standard.getPis().initiatePayment(request);
-            SCAApproach approach = SCAHandler.decision(payment);
-            System.out.println(((OAuth2) approach).getAuthoriseLink());
-            Assert.assertTrue(true);
-        } catch (Exception e) {
-            Assert.fail();
-        }
     }
 
 
     @Test
     @Tag("integration")
-    public void initiateJsonBulkPayment() {
+    public void initiateJsonBulkPayment() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
 
@@ -302,17 +285,13 @@ public class PISTest {
         BulkPaymentInitiationJsonRequest request = new BulkPaymentInitiationJsonRequest(
                 PaymentProduct.SEPA_CREDIT_TRANSFERS, payments, psu, false);
 
-        try {
-            InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
-            Assert.assertNotNull(initiatedPayment);
-        } catch (Exception e) {
-            Assert.fail();
-        }
+        InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
+        Assert.assertNotNull(initiatedPayment);
     }
 
     @Test
     @Tag("integration")
-    public void initializeXMLBulkPayment() {
+    public void initializeXMLBulkPayment() throws BankRequestFailedException {
 
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
@@ -324,7 +303,7 @@ public class PISTest {
         Vector<PaymentInstructionInformation> pmtInfos = new Vector<>();
         // TODO
         //  PmtInf.java is created for temporary usage, until JSEPA supports the added attibute (BtchBookg)
-        //  use PaymentInstructionInformation instances once JSEPA is released
+        //  use PaymentInstructionInformation instances and delete PmtInf.java once JSEPA is released
 //        PaymentInstructionInformation pii = new PaymentInstructionInformation();
         PmtInf pii = new PmtInf();
         CreditTransferTransactionInformation cdtTrfTxInf1 = new CreditTransferTransactionInformation();
@@ -410,11 +389,7 @@ public class PISTest {
                 PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, PaymentService.BULK_PAYMENTS, document, psu
         );
 
-        try {
-            InitiatedPayment payment = standard.getPis().initiatePayment(request);
-            Assert.assertNotNull(payment);
-        } catch (Exception e) {
-            Assert.fail();
-        }
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        Assert.assertNotNull(payment);
     }
 }

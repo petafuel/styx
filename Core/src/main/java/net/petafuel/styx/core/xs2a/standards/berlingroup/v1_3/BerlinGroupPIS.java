@@ -11,6 +11,7 @@ import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
+import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
@@ -24,7 +25,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.SCA;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.InitiatedPaymentSerializer;
 
 import java.util.UUID;
@@ -43,17 +43,16 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
     @Override
     public InitiatedPayment initiatePayment(XS2APaymentInitiationRequest xs2ARequest) throws BankRequestFailedException {
 
-        if (xs2ARequest instanceof PaymentInitiationPain001Request) {
+        PaymentProduct product = xs2ARequest.getPaymentProduct();
+        PaymentService service = xs2ARequest.getPaymentService();
+
+        if (product.isXml()) {
             this.createBody(RequestType.POST, XML, xs2ARequest);
         } else {
             this.createBody(RequestType.POST, JSON, xs2ARequest);
         }
 
-        this.setUrl(this.url + String.format(
-                INITIATE_PAYMENT,
-                xs2ARequest.getPaymentService().toString(),
-                xs2ARequest.getPaymentProduct().toString())
-        );
+        this.setUrl(this.url + String.format(INITIATE_PAYMENT, service.toString(), product.toString()));
         this.createHeaders(xs2ARequest);
 
         try (Response response = this.execute()) {

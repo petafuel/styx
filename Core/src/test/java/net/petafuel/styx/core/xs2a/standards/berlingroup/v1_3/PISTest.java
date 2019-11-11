@@ -24,11 +24,12 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentIn
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
+import net.petafuel.styx.core.xs2a.utils.jsepa.PmtInf;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -76,7 +77,7 @@ public class PISTest {
 
     @Test
     @Tag("integration")
-    public void initiateJSONPayment() {
+    public void initiateJSONPayment() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
 
@@ -104,20 +105,14 @@ public class PISTest {
         PaymentInitiationJsonRequest request = new PaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
         request.setTppRedirectPreferred(true);
 
-        try {
-            InitiatedPayment payment = standard.getPis().initiatePayment(request);
-            SCAApproach approach = SCAHandler.decision(payment);
-            Assert.assertTrue(true);
-        }
-        catch (Exception e)
-        {
-            Assert.assertTrue(false);
-        }
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        SCAApproach approach = SCAHandler.decision(payment);
+        Assert.assertNotNull(payment);
     }
 
     @Test
     @Tag("integration")
-    public void initiateJSONFuturePayment() throws ParseException {
+    public void initiateJSONFuturePayment() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
 
@@ -145,19 +140,14 @@ public class PISTest {
         PaymentInitiationJsonRequest request = new PaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
         request.setRequestedExecutionDate(executionData);
 
-        try {
-            InitiatedPayment payment = standard.getPis().initiatePayment(request);
-            Assert.assertTrue(true);
-        }
-        catch (Exception e)
-        {
-            Assert.assertTrue(false);
-        }
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        Assert.assertNotNull(payment);
+
     }
 
     @Tag("integration")
     @Test
-    public void initializeSingleFuturePayment() {
+    public void initializeSingleFuturePayment() throws BankRequestFailedException {
 
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
@@ -227,22 +217,17 @@ public class PISTest {
         request.setTppRedirectPreferred(true);
         request.getPsu().setIp(psuIpAddress);
 
-        // Generating the code_verifier, code_challenge & state
-        try {
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        SCAApproach approach = SCAHandler.decision(payment);
+        System.out.println(((OAuth2) approach).getAuthoriseLink());
+        Assert.assertNotNull(payment);
 
-            InitiatedPayment payment = standard.getPis().initiatePayment(request);
-            SCAApproach approach = SCAHandler.decision(payment);
-            System.out.println(((OAuth2) approach).getAuthoriseLink());
-            Assert.assertTrue(true);
-        } catch (Exception e) {
-            Assert.fail();
-        }
     }
 
 
     @Test
     @Tag("integration")
-    public void initiateJsonBulkPayment() {
+    public void initiateJsonBulkPayment() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
 
@@ -300,11 +285,111 @@ public class PISTest {
         BulkPaymentInitiationJsonRequest request = new BulkPaymentInitiationJsonRequest(
                 PaymentProduct.SEPA_CREDIT_TRANSFERS, payments, psu, false);
 
-        try {
-            InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
-            Assert.assertNotNull(initiatedPayment);
-        } catch (Exception e) {
-            Assert.fail();
-        }
+        InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
+        Assert.assertNotNull(initiatedPayment);
+    }
+
+    @Test
+    @Tag("integration")
+    public void initializeXMLBulkPayment() throws BankRequestFailedException {
+
+        XS2AStandard standard = new XS2AStandard();
+        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+
+        // Necessary instances for creating a PAIN00100303Document
+        PAIN00100303Document document = new PAIN00100303Document();
+        CCTInitiation ccInitation = new CCTInitiation();
+        GroupHeader groupHeader = new GroupHeader();
+        Vector<PaymentInstructionInformation> pmtInfos = new Vector<>();
+        // TODO
+        //  PmtInf.java is created for temporary usage, until JSEPA supports the added attibute (BtchBookg)
+        //  use PaymentInstructionInformation instances and delete PmtInf.java once JSEPA is released
+//        PaymentInstructionInformation pii = new PaymentInstructionInformation();
+        PmtInf pii = new PmtInf();
+        CreditTransferTransactionInformation cdtTrfTxInf1 = new CreditTransferTransactionInformation();
+        CreditTransferTransactionInformation cdtTrfTxInf2 = new CreditTransferTransactionInformation();
+
+        // Necessary variables for creating a PAIN00100303Document
+        String messageId = "messageId";
+        String creationTime = "2019-11-11";
+        int numberOfTransactions = 2;
+        double controlSum = 200.00;
+        String initiatingPartyName = "initiatingPartyName";
+        String paymentInformationId = "NOTPROVIDED";
+        String paymentMethod = "TRF";
+        String requestedExecutionDate = "2019-11-11";
+        String debtorName = "Debtor Name";
+        String debtorIban = "DE86999999990000001000";
+        String debtorBic = "TESTDETT421";
+        String chargeBearer = "SLEV";
+        boolean batchBooking = true;
+
+        // PAYMENT 1
+        double amount1 = 100.00;
+        String endToEndID1 = "EndToEndId";
+        String creditorName1 = "Hans Handbuch";
+        String creditorIBAN1 = "DE98999999990000009999";
+        String purpose1 = "purpose string";
+        String creditorAgent1 = "AGENT1";
+
+        // PAYMENT 2
+        double amount2 = 100.00;
+        String endToEndID2 = "EndToEndId";
+        String creditorName2 = "Hans Handbuch";
+        String creditorIBAN2 = "DE98999999990000009999";
+        String purpose2 = "purpose string";
+        String creditorAgent2 = "AGENT2";
+
+        // Setting values for each instance
+        groupHeader.setMessageId(messageId);
+        groupHeader.setCreationTime(creationTime);
+        groupHeader.setNoOfTransactions(numberOfTransactions);
+        groupHeader.setControlSum(controlSum);
+        groupHeader.setInitiatingPartyName(initiatingPartyName);
+
+        cdtTrfTxInf1.setEndToEndID(endToEndID1);
+        cdtTrfTxInf1.setAmount(amount1);
+        cdtTrfTxInf1.setCreditorName(creditorName1);
+        cdtTrfTxInf1.setCreditorIBAN(creditorIBAN1);
+        cdtTrfTxInf1.setVwz(purpose1);
+        cdtTrfTxInf1.setCreditorAgent(creditorAgent1);
+
+        cdtTrfTxInf2.setEndToEndID(endToEndID2);
+        cdtTrfTxInf2.setAmount(amount2);
+        cdtTrfTxInf2.setCreditorName(creditorName2);
+        cdtTrfTxInf2.setCreditorIBAN(creditorIBAN2);
+        cdtTrfTxInf2.setVwz(purpose2);
+        cdtTrfTxInf2.setCreditorAgent(creditorAgent2);
+
+        ArrayList<CreditTransferTransactionInformation> list = new ArrayList<>();
+        list.add(cdtTrfTxInf1);
+        list.add(cdtTrfTxInf2);
+
+        pii.setPmtInfId(paymentInformationId);
+        pii.setPaymentMethod(paymentMethod);
+        pii.setNoTxns(numberOfTransactions);
+        pii.setCtrlSum(controlSum);
+        pii.setRequestedExecutionDate(requestedExecutionDate);
+        pii.setDebtorName(debtorName);
+        pii.setDebtorAccountIBAN(debtorIban);
+        pii.setDebitorBic(debtorBic);
+        pii.setChargeBearer(chargeBearer);
+        pii.setBatchBooking(batchBooking);
+        pii.setCreditTransferTransactionInformationVector(list);
+
+        pmtInfos.add(pii);
+        ccInitation.setGrpHeader(groupHeader);
+        ccInitation.setPmtInfos(pmtInfos);
+        document.setCctInitiation(ccInitation);
+
+        PSU psu = new PSU("PSU-1234");
+
+        // Creating the request instance
+        PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
+                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, PaymentService.BULK_PAYMENTS, document, psu
+        );
+
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        Assert.assertNotNull(payment);
     }
 }

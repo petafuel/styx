@@ -16,6 +16,7 @@ public class ThreadSpawner {
         switch (worker.getType()) {
             case CORE:
                 ThreadManager.getInstance().getCorePool().execute(worker);
+                ThreadManager.getInstance().getWorkers().add(worker);
                 break;
             case DEDICATED:
                 break;

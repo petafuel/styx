@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -20,20 +21,22 @@ import java.util.concurrent.atomic.AtomicLong;
 public class CoreWorker extends RunnableWorker {
     private static final Logger LOG = LogManager.getLogger(CoreWorker.class);
 
-    private boolean running;
+    private AtomicBoolean running;
     private AtomicLong currentTaskStartTime;
 
     public CoreWorker() {
         this.setId(UUID.randomUUID());
         this.setType(WorkerType.CORE);
-        this.running = true;
+        this.running = new AtomicBoolean(false);
         this.currentTaskStartTime = new AtomicLong();
     }
 
     @Override
     public void run() {
         Thread.currentThread().setName("KeepAlive-Worker-" + getType().toString() + "-" + getId().toString());
-        while (running) {
+        LOG.info("Started CoreWorker id: {}", this.getId());
+        this.setRunning(true);
+        while (running.get()) {
             if (ThreadManager.getInstance().getCoreQueue().isEmpty()) {
                 LOG.info("No polling from queue: Queue is empty -> ideling/waiting");
                 try {
@@ -70,10 +73,11 @@ public class CoreWorker extends RunnableWorker {
                 TaskRecoveryDB.setFinallyFailed(task, finalFailure.getMessage(), finalFailure.getCode());
             }
         }
+        LOG.info("Terminated CoreWorker id: {}", this.getId());
     }
 
     @Override
     public void setRunning(boolean running) {
-        this.running = running;
+        this.running.set(running);
     }
 }

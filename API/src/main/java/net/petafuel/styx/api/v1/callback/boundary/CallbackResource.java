@@ -27,7 +27,7 @@ public class CallbackResource extends Application {
             output.append(" ").append(field).append(": ").append(httpHeaders.getRequestHeader(field)).append("\n");
         }
         LOG.info("\n Request Header \n" + output + "\n Request Body \n" + body);
-        String message = "Gettings Callbacks with x-request-id: " + xRequestId;
+        String message = "Getting Callbacks with x-request-id: " + xRequestId;
         return Response.status(200).entity(message).build();
     }
 }

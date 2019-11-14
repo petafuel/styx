@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -48,7 +48,11 @@ public abstract class BasicService {
     }
 
     protected void createBody(RequestType requestType, MediaType mediaType, XS2ARequest request) {
-        this.builder.method(requestType.name(), request != null ? RequestBody.create(request.getRawBody(), mediaType) : null);
+        createBody(requestType, RequestBody.create(request.getRawBody(), mediaType));
+    }
+
+    protected void createBody(RequestType requestType, RequestBody body) {
+        this.builder.method(requestType.name(), body);
     }
 
     protected void createBody(RequestType requestType) {
@@ -94,7 +98,7 @@ public abstract class BasicService {
             throw new CertificateException("There is no default Trust store available");
         }
 
-        OkHttpClient client = new OkHttpClient().newBuilder().protocols(Arrays.asList(Protocol.HTTP_1_1)).sslSocketFactory(sslContext.getSocketFactory(), x509Tm).build();
+        OkHttpClient client = new OkHttpClient().newBuilder().protocols(Collections.singletonList(Protocol.HTTP_1_1)).sslSocketFactory(sslContext.getSocketFactory(), x509Tm).build();
         return client.newCall(request).execute();
     }
 

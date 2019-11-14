@@ -3,7 +3,6 @@ package net.petafuel.styx.core.banklookup;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 class XS2AStandardTest {
 

@@ -16,6 +16,7 @@ import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentStatusSerializer;
 import okhttp3.Response;
@@ -47,7 +48,12 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
         PaymentService service = xs2ARequest.getPaymentService();
 
         if (product.isXml()) {
-            this.createBody(RequestType.POST, XML, xs2ARequest);
+            if(xs2ARequest instanceof PeriodicPaymentInitiationXMLRequest){
+                //in case of multipart http message requestBody already created in request object
+                this.createBody(RequestType.POST, ((PeriodicPaymentInitiationXMLRequest) xs2ARequest).getBody());
+            }else {
+                this.createBody(RequestType.POST, XML, xs2ARequest);
+            }
         } else {
             this.createBody(RequestType.POST, JSON, xs2ARequest);
         }
@@ -56,6 +62,11 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
         this.createHeaders(xs2ARequest);
 
         try (Response response = this.execute()) {
+
+            if (response.code() != 201) {
+                throwBankRequestException(response);
+            }
+
             String body = response.body().string();
 
             Gson gson = new GsonBuilder()

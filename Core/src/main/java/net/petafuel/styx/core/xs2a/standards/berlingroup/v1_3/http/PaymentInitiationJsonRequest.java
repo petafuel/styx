@@ -7,13 +7,11 @@ import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentInitiationJsonRequestSerializer;
-import java.util.Date;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentSerializer;
 
 public class PaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
 
 	private Payment payment;
-	private Date requestedExecutionDate;
 
 	public PaymentInitiationJsonRequest(PaymentProduct paymentProduct, Payment payment, PSU psu) {
 		super(paymentProduct, PaymentService.PAYMENTS, psu);
@@ -22,16 +20,8 @@ public class PaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
 
 	@Override
 	public String getRawBody() {
-		Gson gson = new GsonBuilder().registerTypeAdapter(PaymentInitiationJsonRequest.class, new PaymentInitiationJsonRequestSerializer()).create();
-		return gson.toJson(this);
-	}
-
-	public Date getRequestedExecutionDate() {
-		return requestedExecutionDate;
-	}
-
-	public void setRequestedExecutionDate(Date requestedExecutionDate) {
-		this.requestedExecutionDate = requestedExecutionDate;
+		Gson gson = new GsonBuilder().registerTypeAdapter(Payment.class, new PaymentSerializer()).create();
+		return gson.toJson(this.payment);
 	}
 
 	public Payment getPayment() {

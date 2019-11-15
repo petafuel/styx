@@ -56,7 +56,11 @@ public abstract class BasicService {
     }
 
     protected void createBody(RequestType requestType, MediaType mediaType, XS2ARequest request) {
-        this.builder.method(requestType.name(), request != null ? RequestBody.create(request.getRawBody(), mediaType) : null);
+        createBody(requestType, RequestBody.create(request.getRawBody(), mediaType));
+    }
+
+    protected void createBody(RequestType requestType, RequestBody body) {
+        this.builder.method(requestType.name(), body);
     }
 
     protected void createBody(RequestType requestType) {

@@ -135,7 +135,11 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
      */
     private void digest(XS2ARequest request) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        byte[] digestHeader = messageDigest.digest(request.getRawBody().getBytes(StandardCharsets.UTF_8));
+        byte[] requestBodyBytes = request.getRawBody().getBytes(StandardCharsets.UTF_8);
+        if(requestBodyBytes.length < 1) {
+            LOG.warn("RequestBody is empty when body digest hash is created for signature");
+        }
+        byte[] digestHeader = messageDigest.digest(requestBodyBytes);
         request.setHeader(XS2AHeader.DIGEST, "SHA-256=" + Base64.getEncoder().encodeToString(digestHeader));
     }
 

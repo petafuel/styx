@@ -1,5 +1,7 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import java.util.Date;
+
 public class Payment
 {
 	private Account creditor;
@@ -8,6 +10,11 @@ public class Payment
 	private Currency currency;
 	private String reference;
 	private String endToEndIdentification;
+	private Date requestedExecutionDate;
+
+	public Payment() {
+		this.requestedExecutionDate = new Date();
+	}
 
 	public Account getCreditor() { return creditor; }
 
@@ -53,5 +60,21 @@ public class Payment
 
 	public void setEndToEndIdentification(String endToEndIdentification) {
 		this.endToEndIdentification = endToEndIdentification;
+	}
+
+	/**
+	 * get date of bank-side payment execution
+	 * @return Date
+	 */
+	public Date getRequestedExecutionDate() {
+		return requestedExecutionDate;
+	}
+
+	/**
+	 * set date of bank-side payment execution
+	 * @param requestedExecutionDate Date
+	 */
+	public void setRequestedExecutionDate(Date requestedExecutionDate) {
+		this.requestedExecutionDate = requestedExecutionDate;
 	}
 }

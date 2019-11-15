@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 
 public class PaymentSerializer implements JsonSerializer<Payment>{
 
-	public static final String CURRENCY = "currency";
+	private static final String CURRENCY = "currency";
 
 	@Override
 	public JsonElement serialize(Payment payment, Type typeOfSrc, JsonSerializationContext context) {

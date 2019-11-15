@@ -63,7 +63,7 @@ public class RedirectSCATest {
         SCAApproach redirectSCA = SCAHandler.decision(consent);
         if(redirectSCA instanceof Redirect)
         {
-            Assert.assertNotNull(((Redirect) redirectSCA).getRedirectLink());
+            Assert.assertNotNull(((Redirect) redirectSCA).getAuthoriseLink());
         }
         //TODO call sca link
         //return redirect link to client

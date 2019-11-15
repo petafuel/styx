@@ -1,26 +1,30 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
-import net.petafuel.jsepa.model.PaymentInstructionInformation;
-import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.jsepa.model.CCTInitiation;
 import net.petafuel.jsepa.model.CreditTransferTransactionInformation;
 import net.petafuel.jsepa.model.GroupHeader;
+import net.petafuel.jsepa.model.PAIN00100303Document;
+import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
-import net.petafuel.styx.core.xs2a.oauth.entities.Token;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.entities.PaymentService;
+import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
+import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
+import net.petafuel.styx.core.xs2a.sca.OAuth2;
+import net.petafuel.styx.core.xs2a.sca.SCAApproach;
+import net.petafuel.styx.core.xs2a.sca.SCAHandler;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
-import net.petafuel.styx.core.xs2a.utils.Config;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.util.Vector;
 import java.util.Collections;
+import java.util.Vector;
 
 public class OAuthSCATest {
 
@@ -29,7 +33,7 @@ public class OAuthSCATest {
 
     @Tag("integration")
     @Test
-    public void initializeSinglePayment() {
+    public void initializeSinglePayment() throws BankRequestFailedException {
 
         XS2AStandard standard = new XS2AStandard();
         standard.setPis(new BerlinGroupPIS(SPARKASSE_BANK_BASE_API, new BerlinGroupSigner()));
@@ -92,57 +96,29 @@ public class OAuthSCATest {
 
         // Creating the request instance
         String psuIpAddress = "192.168.1.1";
-        String callbackUrl = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl");
 
         PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
-        PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, document, new PSU("PSU-1234"));
+                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, PaymentService.PAYMENTS, document, new PSU("PSU-1234")
+        );
         request.setTppRedirectPreferred(true);
-        request.setTppRedirectUri(callbackUrl);
         request.getPsu().setIp(psuIpAddress);
 
-        // Generating the code_verifier, code_challenge & state
-        try {
-
-            String state = OAuthService.generateState();
-            String codeVerifier = OAuthService.generateCodeVerifier();
-            String codeChallenge = OAuthService.generateCodeChallenge(codeVerifier);
-            String clientId = Config.getInstance().getProperties().getProperty("keystore.client_id");
-
-            InitiatedPayment payment = standard.getPis().initiatePayment(request);
-            String urlToSca = SPARKASSE_BANK_AUTHORIZATION_SERVER + "/authorize?" +
-                    "client_id=" + clientId +
-                    "&response_type=" + "code" +
-                    "&scope=PIS: " + payment.getPaymentId() +
-                    "&redirect_uri=" + callbackUrl +
-                    "&state=" + state +
-                    "&code_challenge_method=" + "S256" +
-                    "&code_challenge=" + codeChallenge;
-
-            System.out.println(urlToSca);
-            Assert.assertTrue(true);
-        } catch (Exception e) {
-            Assert.fail();
-        }
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        SCAApproach approach = SCAHandler.decision(payment);
+        System.out.println(((OAuth2) approach).getAuthoriseLink());
+        Assert.assertNotNull(payment);
     }
 
     @Tag("integration")
     @Test
-    public void getTokenRequest() {
+    public void getTokenRequest() throws BankRequestFailedException {
 
         String code = "E5E0949D3DA2CFAC80581BE843D55003";
         String code_verifier = "Sa699pmGwDsJX5IxaojDZ282euq8HGvQP_cT1Z4rHdw";
 
         TokenRequest request = new TokenRequest(code, code_verifier);
-        OAuthService service = new OAuthService(SPARKASSE_BANK_AUTHORIZATION_SERVER, new BerlinGroupSigner());
-        try {
-            Token t1 = service.accessTokenRequest(request);
-        } catch (Exception ignored) {}
-        Assert.assertTrue(true);
-    }
-
-    @Tag("integration")
-    @Test
-    public void authorizeConsent() {
-        Assert.assertTrue(true);
+        OAuthService service = new OAuthService();
+        OAuthSession t3 = service.accessTokenRequest("https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/oauth/12345678/token", request);
+        Assert.assertNotNull(t3);
     }
 }

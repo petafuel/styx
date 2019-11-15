@@ -62,13 +62,17 @@ public class Payment
 		this.endToEndIdentification = endToEndIdentification;
 	}
 
+	/**
+	 * get date of bank-side payment execution
+	 * @return Date
+	 */
 	public Date getRequestedExecutionDate() {
 		return requestedExecutionDate;
 	}
 
 	/**
-	 * Set date for bank-side payment execution
-	 * @param requestedExecutionDate
+	 * set date of bank-side payment execution
+	 * @param requestedExecutionDate Date
 	 */
 	public void setRequestedExecutionDate(Date requestedExecutionDate) {
 		this.requestedExecutionDate = requestedExecutionDate;

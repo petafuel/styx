@@ -8,7 +8,6 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>Core</artifactId>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -24,10 +23,29 @@
                     <target>8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>net.petafuel.library</groupId>
+                            <artifactId>JSEPA</artifactId>
+                            <version>1.455</version>
+                            <packaging>jar</packaging>
+                            <file>lib/JSEPA-1.455.jar</file>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <groupId>net.petafuel.styx.core</groupId>
-
     <repositories>
         <repository>
             <id>nexus</id>
@@ -66,15 +84,18 @@
         <dependency>
             <groupId>net.petafuel.library</groupId>
             <artifactId>JSEPA</artifactId>
-            <version>1.454-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/JSEPA.jar</systemPath>
+            <version>1.455</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.5</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
         </dependency>
     </dependencies>
 </project>

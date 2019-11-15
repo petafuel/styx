@@ -9,11 +9,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -65,42 +70,27 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
         try {
             this.digest(xs2aRequest);
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Unable to digest message: " + e.getMessage());
+            LOG.error("Unable to digest message: {}", e.getMessage());
         }
 
-        LinkedHashMap<String, String> headers = xs2aRequest.getHeaders();
+        HashMap<String, String> headers = xs2aRequest.getHeaders();
 
         StringJoiner signatureStructureJoiner = new StringJoiner(" ");
         StringJoiner signatureContentJoiner = new StringJoiner("\n");
+        LinkedList<String> supportedHeaders = new LinkedList<>();
+        supportedHeaders.add(XS2AHeader.DIGEST);
+        supportedHeaders.add(XS2AHeader.X_REQUEST_ID);
+        supportedHeaders.add(XS2AHeader.DATE);
+        supportedHeaders.add(XS2AHeader.PSU_ID);
+        supportedHeaders.add(XS2AHeader.PSU_CORPORATE_ID);
+        supportedHeaders.add(XS2AHeader.TPP_REDIRECT_URL);
+
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            switch (entry.getKey()) {
-                case XS2AHeader.DIGEST:
-                    signatureStructureJoiner.add(XS2AHeader.DIGEST);
-                    signatureContentJoiner.add(XS2AHeader.DIGEST + ": " + entry.getValue());
-                    break;
-                case XS2AHeader.X_REQUEST_ID:
-                    signatureStructureJoiner.add(XS2AHeader.X_REQUEST_ID);
-                    signatureContentJoiner.add(XS2AHeader.X_REQUEST_ID + ": " + entry.getValue());
-                    break;
-                case XS2AHeader.DATE:
-                    signatureStructureJoiner.add(XS2AHeader.DATE);
-                    signatureContentJoiner.add(XS2AHeader.DATE + ": " + entry.getValue());
-                    break;
-                case XS2AHeader.PSU_ID:
-                    signatureStructureJoiner.add(XS2AHeader.PSU_ID);
-                    signatureContentJoiner.add(XS2AHeader.PSU_ID + ": " + entry.getValue());
-                    break;
-                case XS2AHeader.PSU_CORPORATE_ID:
-                    signatureStructureJoiner.add(XS2AHeader.PSU_CORPORATE_ID);
-                    signatureContentJoiner.add(XS2AHeader.PSU_CORPORATE_ID + ": " + entry.getValue());
-                    break;
-                case XS2AHeader.TPP_REDIRECT_URL:
-                    signatureStructureJoiner.add(XS2AHeader.TPP_REDIRECT_URL);
-                    signatureContentJoiner.add(XS2AHeader.TPP_REDIRECT_URL + ": " + entry.getValue());
-                    break;
-                default:
-                    //can't handle unknown headers
-                    break;
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (supportedHeaders.contains(key)) {
+                signatureStructureJoiner.add(key);
+                signatureContentJoiner.add(key + ": " + value);
             }
         }
         String headerOrder = signatureStructureJoiner.toString();

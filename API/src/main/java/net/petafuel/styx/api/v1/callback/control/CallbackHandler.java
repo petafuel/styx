@@ -14,10 +14,10 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+
+import java.net.URI;
 
 public class CallbackHandler {
 
@@ -33,13 +33,19 @@ public class CallbackHandler {
         return this.returnHTMLPage();
     }
 
-    public Response handleOAuth2(String code, String state, String error, String errorMessage) throws URISyntaxException {
+    public Response handleOAuth2(String code, String state, String error, String errorMessage) {
         String linkToRedirect;
-        if (error == null && handleSuccessfulOAuth2(code, state)) {
-            return this.returnHTMLPage();
-        } else {
-            linkToRedirect = handleFailedOAuth2(state);
-            return Response.temporaryRedirect(new URI(linkToRedirect)).build();
+
+        try {
+            if (error == null && handleSuccessfulOAuth2(code, state)) {
+                return this.returnHTMLPage();
+            } else {
+                linkToRedirect = handleFailedOAuth2(state);
+                return Response.temporaryRedirect(new URI(linkToRedirect)).build();
+            }
+        } catch (Exception e) {
+            String message = "Handling callback with code: " + code + " and state: " + state;
+            return Response.status(200).entity(message).build();
         }
     }
 

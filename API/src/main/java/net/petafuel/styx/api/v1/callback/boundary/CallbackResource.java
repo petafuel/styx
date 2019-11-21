@@ -14,6 +14,7 @@ public class CallbackResource extends Application {
 
     @GET
     @Path("/callbacks/{x-request-id}")
+    @Produces(MediaType.TEXT_HTML)
     public Response processCallback(@Context HttpHeaders httpHeaders,
                                     @PathParam("x-request-id") String xRequestId,
                                     @QueryParam("code") String code,

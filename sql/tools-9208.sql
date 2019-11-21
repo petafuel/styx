@@ -58,7 +58,7 @@ CREATE TABLE aspsps
   CONSTRAINT config_id_fk FOREIGN KEY (config_id)
       REFERENCES configs (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT production_url_id FOREIGN KEY (production_url_id)
+  CONSTRAINT production_url_id_fk FOREIGN KEY (production_url_id)
       REFERENCES urls (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT sandbox_url_id_fk FOREIGN KEY (sandbox_url_id)

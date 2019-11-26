@@ -20,7 +20,7 @@ public abstract class WorkableTask {
      * Taskid
      * @return Returns the task id
      */
-    public UUID getId() {
+    public final UUID getId() {
         return id;
     }
 

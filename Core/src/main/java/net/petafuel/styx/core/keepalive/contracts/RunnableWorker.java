@@ -8,19 +8,19 @@ public abstract class RunnableWorker implements Runnable {
     protected UUID id;
     protected WorkerType type;
 
-    public UUID getId() {
+    public final UUID getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public final void setId(UUID id) {
         this.id = id;
     }
 
-    public WorkerType getType() {
+    public final WorkerType getType() {
         return type;
     }
 
-    public void setType(WorkerType type) {
+    public final void setType(WorkerType type) {
         this.type = type;
     }
 

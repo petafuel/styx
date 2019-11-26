@@ -5,7 +5,6 @@ import net.petafuel.styx.core.keepalive.contracts.WorkableTask;
 import net.petafuel.styx.core.keepalive.entities.TaskFinalFailureCode;
 import net.petafuel.styx.core.keepalive.entities.TaskFinalFailureException;
 import net.petafuel.styx.core.keepalive.entities.TaskRetryFailureException;
-import net.petafuel.styx.core.keepalive.entities.TaskSuccessException;
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
@@ -26,7 +25,7 @@ import java.util.stream.IntStream;
 /**
  * Task to poll for a consent
  */
-public class ConsentPoll extends WorkableTask {
+public final class ConsentPoll extends WorkableTask {
 
     private static final Logger LOG = LogManager.getLogger(ConsentPoll.class);
     private UUID id;
@@ -68,10 +67,10 @@ public class ConsentPoll extends WorkableTask {
             Iterator<Integer> retryIterator = IntStream.range(0, maxRetries).iterator();
             while (retryIterator.hasNext()) {
                 try {
-                    Consent.State currentStatus = csInterface.getStatus(statusConsentRequest);
+                    Consent.State currentStatus = this.csInterface.getStatus(statusConsentRequest);
                     if (currentStatus == Consent.State.VALID) {
                         LOG.debug("Consent is valid, SCA was successful");
-                        throw new TaskSuccessException("Consent status changed to valid");
+                        break;
                     } else if (!(currentStatus.equals(Consent.State.RECEIVED) || currentStatus.equals(Consent.State.PARTIALLY_AUTHORISED))) {
                         currentConsent.setState(currentStatus);
                         persistentConsent.update(currentConsent);
@@ -86,30 +85,31 @@ public class ConsentPoll extends WorkableTask {
                     Thread.sleep(timeoutBetweenRetries);
                 } catch (InterruptedException e) {
                     LOG.error("Unable to sleep until next retry");
+                    //TODO change this
                     Thread.currentThread().interrupt();
+                    throw new TaskRetryFailureException("Request retry during task execution could not be completed, scheduleing as RetryFailureTask: " + e.getMessage());
                 }
             }
-        } catch (TaskSuccessException success) {
-            LOG.info("Polling was successful -> getting consent informations");
-            //TODO make this as a parameter
-            GetConsentRequest getConsentRequest = new GetConsentRequest();
-            getConsentRequest.setConsentId(consent.getId());
-            try {
-                Consent aspspConsent = csInterface.getConsent(getConsentRequest);
-                currentConsent.setFrequencyPerDay(aspspConsent.getFrequencyPerDay());
-                currentConsent.setValidUntil(aspspConsent.getValidUntil());
-                currentConsent.setState(aspspConsent.getState());
-                persistentConsent.update(currentConsent);
-                LOG.info("Successfully updated consent");
-                return;
-            } catch (BankRequestFailedException e) {
-                LOG.error("Unable to get consent information after polling was successful -> task marked as failed");
-                throw new TaskRetryFailureException("Unable to get consent information after polling was successful", e);
-            }
         } catch (Exception unknown) {
+            //TODO should this be a final failure ?
             throw new TaskRetryFailureException("An unknown exception occured while executing the task: " + unknown.getMessage(), unknown);
         }
-        throw new TaskRetryFailureException("Task ultimately failed, no success condition was satisfied", new Throwable());
+
+        LOG.info("Polling was successful -> getting consent informations");
+        //TODO make GetConsentRequest class as a parameter
+        GetConsentRequest getConsentRequest = new GetConsentRequest();
+        getConsentRequest.setConsentId(consent.getId());
+        try {
+            Consent aspspConsent = csInterface.getConsent(getConsentRequest);
+            currentConsent.setFrequencyPerDay(aspspConsent.getFrequencyPerDay());
+            currentConsent.setValidUntil(aspspConsent.getValidUntil());
+            currentConsent.setState(aspspConsent.getState());
+            persistentConsent.update(currentConsent);
+            LOG.info("Successfully updated consent");
+        } catch (BankRequestFailedException e) {
+            LOG.error("Unable to get consent information after polling was successful -> task marked as failed");
+            throw new TaskRetryFailureException("Unable to get consent information after polling was successful", e);
+        }
     }
 
     @Override
@@ -143,18 +143,13 @@ public class ConsentPoll extends WorkableTask {
         String url = goal.get("url").getAsString();
         String consentId = goal.get("consentId").getAsString();
 
-        Class clazzCsInterface = Class.forName(csServiceClass);
-        Class clazzSigner = Class.forName(signerClass);
+        Class<?> clazzCsInterface = Class.forName(csServiceClass);
+        Class<?> clazzSigner = Class.forName(signerClass);
         IBerlinGroupSigner signer = (IBerlinGroupSigner) clazzSigner.getDeclaredConstructor().newInstance();
-        CSInterface csInterface = (CSInterface) clazzCsInterface.getDeclaredConstructor(String.class, IBerlinGroupSigner.class).newInstance(url, signer);
+        CSInterface csInterfaceEx = (CSInterface) clazzCsInterface.getDeclaredConstructor(String.class, IBerlinGroupSigner.class).newInstance(url, signer);
         Consent getFromDB = new Consent();
         getFromDB.setId(consentId);
-        return new ConsentPoll(new PersistentConsent().get(getFromDB), csInterface);
-    }
-
-    @Override
-    public UUID getId() {
-        return id;
+        return new ConsentPoll(new PersistentConsent().get(getFromDB), csInterfaceEx);
     }
 
     @Override

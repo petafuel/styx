@@ -11,6 +11,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -22,7 +24,7 @@ import java.util.stream.IntStream;
 /**
  * Manages the task queues and worker threads
  */
-public class ThreadManager {
+public final class ThreadManager {
     private static final String PROPERTY_THREAD_COREQUEUE_MIN_WORKERS = "keepalive.threads.coreQueue.minWorkers";
     private static final String PROPERTY_THREAD_COREQUEUE_MAX_WORKERS = "keepalive.threads.coreQueue.maxWorkers";
     private static final String PROPERTY_THREAD_COREQUEUE_SPAWN_THRESHOLD = "keepalive.threads.coreQueue.spawnThresholdTasksPerWorker";
@@ -35,7 +37,7 @@ public class ThreadManager {
     private final ConcurrentLinkedQueue<WorkableTask> coreQueue;
     private ConcurrentLinkedQueue<WorkableTask> failureQueue;
     private ThreadPoolExecutor corePool;
-    private ArrayList<RunnableWorker> workers;
+    private List<RunnableWorker> workers;
 
     private int minCoreWorkers;
     private int maxCoreWorkers;
@@ -93,11 +95,13 @@ public class ThreadManager {
                 LOG.info("Core Queue size: {}", this.coreQueue.size());
                 break;
             case DEDICATED:
+                //TODO remove ?!
                 break;
             case RETRY_FAILURE:
                 this.failureQueue.add(task);
                 break;
             case INSTANT_SPAWN:
+                //TODO remove ?!
                 break;
             default:
                 LOG.warn("Task id:{} name:{} was queued with an unknown priority, executing as BASIC", task.getId(), task.getSignature());
@@ -106,7 +110,7 @@ public class ThreadManager {
         }
     }
 
-    public ConcurrentLinkedQueue<WorkableTask> getCoreQueue() {
+    public Queue<WorkableTask> getCoreQueue() {
         return coreQueue;
     }
 
@@ -123,15 +127,7 @@ public class ThreadManager {
         return corePool;
     }
 
-    private static class Holder {
-        private static final ThreadManager INSTANCE = new ThreadManager();
-    }
-
     private void probeWorkers() {
-        /**
-         * main loop:
-         * check worker task execution time -> copy task, terminate worker, restart worker and queue task
-         */
         float workerAmount = (float) this.corePool.getActiveCount();
         float taskAmount = (float) this.coreQueue.size();
         float threshold = (taskAmount / this.coreWorkerSpawnThreshold);
@@ -162,12 +158,16 @@ public class ThreadManager {
         }
     }
 
-    public ArrayList<RunnableWorker> getWorkers() {
+    List<RunnableWorker> getWorkers() {
         return workers;
     }
 
-    public void setWorkers(ArrayList<RunnableWorker> workers) {
+    public void setWorkers(List<RunnableWorker> workers) {
         this.workers = workers;
+    }
+
+    private static class Holder {
+        private static final ThreadManager INSTANCE = new ThreadManager();
     }
 }
 

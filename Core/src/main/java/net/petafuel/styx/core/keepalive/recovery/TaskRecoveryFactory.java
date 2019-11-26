@@ -14,12 +14,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Factory for WorkableTasks. This can create Task Objects for recovered Tasks
  */
-public class TaskRecoveryFactory {
+final class TaskRecoveryFactory {
     private static final Logger LOG = LogManager.getLogger(TaskRecoveryFactory.class);
 
     private TaskRecoveryFactory() {
@@ -41,7 +42,7 @@ public class TaskRecoveryFactory {
         return recoveredTask;
     }
 
-    public static LinkedHashMap<WorkableTask, WorkerType> modelFromDatabase(ResultSet resultSet) throws SQLException {
+    public static Map<WorkableTask, WorkerType> modelFromDatabase(ResultSet resultSet) throws SQLException {
         LinkedHashMap<WorkableTask, WorkerType> tasks = new LinkedHashMap<>();
         while (resultSet.next()) {
             UUID id = UUID.fromString(resultSet.getString("id"));

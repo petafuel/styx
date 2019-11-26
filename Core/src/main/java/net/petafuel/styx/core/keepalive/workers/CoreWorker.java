@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Basic Worker that will execute Tasks from the coreQueue
  */
-public class CoreWorker extends RunnableWorker {
+public final class CoreWorker extends RunnableWorker {
     private static final Logger LOG = LogManager.getLogger(CoreWorker.class);
 
     private AtomicBoolean running;

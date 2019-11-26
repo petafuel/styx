@@ -14,13 +14,17 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * DB Layer for Task related stored functions
  */
-public class TaskRecoveryDB {
-    private final static Logger LOG = LogManager.getLogger(TaskRecoveryDB.class);
+public final class TaskRecoveryDB {
+    private static final Logger LOG = LogManager.getLogger(TaskRecoveryDB.class);
+
+    private TaskRecoveryDB() {
+    }
 
     /**
      * Mark a task as positioned in an execution queue
@@ -49,6 +53,7 @@ public class TaskRecoveryDB {
 
     /**
      * Marks a task as currently being executed by a Worker Thread
+     *
      * @param task
      */
     public static void setRunning(WorkableTask task) {
@@ -64,6 +69,7 @@ public class TaskRecoveryDB {
 
     /**
      * Marks a task as being successfully done
+     *
      * @param task
      */
     public static void setDone(WorkableTask task) {
@@ -109,6 +115,7 @@ public class TaskRecoveryDB {
 
     /**
      * Changes the Worker type of the coresponding task
+     *
      * @param task
      * @param workerType
      */
@@ -127,11 +134,12 @@ public class TaskRecoveryDB {
     /**
      * Returns all persisted tasks that were previously marked as running/executing and were unable to be resolved
      * within the previous application runtime
+     *
      * @return
      */
-    public static LinkedHashMap<WorkableTask, WorkerType> getInterruptedTasks() {
+    public static Map<WorkableTask, WorkerType> getInterruptedTasks() {
         Connection connection = Persistence.getInstance().getConnection();
-        LinkedHashMap<WorkableTask, WorkerType> interruptedTasks = new LinkedHashMap<>();
+        Map<WorkableTask, WorkerType> interruptedTasks = new LinkedHashMap<>();
         try (CallableStatement query = connection.prepareCall("{call get_interrupted_tasks()}")) {
 
             try (ResultSet resultSet = query.executeQuery()) {
@@ -145,14 +153,16 @@ public class TaskRecoveryDB {
         }
         return interruptedTasks;
     }
+
     /**
      * Returns all persisted tasks that were previously marked as queued/waiting for execution and were not yet executed
      * by a Worker Thread within the previous application runtime
+     *
      * @return
      */
-    public static LinkedHashMap<WorkableTask, WorkerType> getQueuedTasks() {
+    public static Map<WorkableTask, WorkerType> getQueuedTasks() {
         Connection connection = Persistence.getInstance().getConnection();
-        LinkedHashMap<WorkableTask, WorkerType> queuedTasks = new LinkedHashMap<>();
+        Map<WorkableTask, WorkerType> queuedTasks = new LinkedHashMap<>();
         try (CallableStatement query = connection.prepareCall("{call get_queued_tasks()}")) {
 
             try (ResultSet resultSet = query.executeQuery()) {

@@ -9,12 +9,11 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TestSleepTask extends WorkableTask {
-    private final static Logger LOG = LogManager.getLogger(TestSleepTask.class);
+    private static final Logger LOG = LogManager.getLogger(TestSleepTask.class);
 
     private String signature;
 
-    public TestSleepTask()
-    {
+    public TestSleepTask() {
         this.signature = "TestSleepTask" + UUID.randomUUID().toString();
     }
 
@@ -30,7 +29,7 @@ public class TestSleepTask extends WorkableTask {
             int randomNum = ThreadLocalRandom.current().nextInt(500, 10000 + 1);
             Thread.sleep(randomNum);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
         LOG.debug("Test sleep task is done");
     }

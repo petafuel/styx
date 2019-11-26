@@ -5,7 +5,10 @@ import net.petafuel.styx.core.keepalive.entities.WorkerType;
 
 import java.util.UUID;
 
-public class ThreadSpawner {
+public final class ThreadSpawner {
+
+    private ThreadSpawner(){}
+
     public static void spawn(RunnableWorker worker) {
         if (worker.getId() == null) {
             worker.setId(UUID.randomUUID());

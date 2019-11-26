@@ -12,8 +12,8 @@ import java.util.LinkedHashMap;
  * Runs the Recovery routine on application startup
  * Checks previously queued and interrupted task from a previous execution
  */
-public class RecoveryRoutine {
-    private final static Logger LOG = LogManager.getLogger(RecoveryRoutine.class);
+public final class RecoveryRoutine {
+    private static final Logger LOG = LogManager.getLogger(RecoveryRoutine.class);
 
     private RecoveryRoutine() {
     }
@@ -28,7 +28,7 @@ public class RecoveryRoutine {
             return;
         }
         LOG.info("Queueing recovered interrupted tasks amount: {}", interruptedTasks.size());
-        interruptedTasks.forEach((task, workerType ) -> ThreadManager.getInstance().queueTask(task, workerType));
+        interruptedTasks.forEach((task, workerType) -> ThreadManager.getInstance().queueTask(task, workerType));
         LOG.info("Queueing recovered queued tasks amount: {}", queuedTasks.size());
         queuedTasks.forEach((task, workerType) -> ThreadManager.getInstance().queueTask(task, workerType));
     }

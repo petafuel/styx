@@ -169,6 +169,7 @@ public class AISTest {
         Assert.assertEquals(reason1, t1.getRemittanceInformationUnstructured());
 
         Assert.assertEquals(Transaction.Type.DEBIT, t2.getType());
+        Assert.assertEquals(debtorName, t2.getAccount().getName());
         Assert.assertEquals(Account.Type.IBAN, t2.getAccount().getType());
         Assert.assertEquals(debtorIban, t2.getAccount().getIdentifier());
         Assert.assertEquals(currency, t2.getCurrency());

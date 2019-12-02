@@ -6,7 +6,7 @@ import net.petafuel.styx.core.keepalive.threads.ThreadManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Runs the Recovery routine on application startup
@@ -20,8 +20,8 @@ public final class RecoveryRoutine {
 
     public static void runTaskRecovery() {
         LOG.info("Running Task Recovery Routine");
-        LinkedHashMap<WorkableTask, WorkerType> interruptedTasks = TaskRecoveryDB.getInterruptedTasks();
-        LinkedHashMap<WorkableTask, WorkerType> queuedTasks = TaskRecoveryDB.getQueuedTasks();
+        Map<WorkableTask, WorkerType> interruptedTasks = TaskRecoveryDB.getInterruptedTasks();
+        Map<WorkableTask, WorkerType> queuedTasks = TaskRecoveryDB.getQueuedTasks();
         LOG.info("Found {} queued tasks and {} interrupted tasks that need to be recovered", queuedTasks.size(), interruptedTasks.size());
         if (queuedTasks.isEmpty() && interruptedTasks.isEmpty()) {
             LOG.info("No tasks need to be recovered, Recovery is done");

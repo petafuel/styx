@@ -1,11 +1,12 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonDeserializationContext;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.SCA;
+import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 
 import java.lang.reflect.Type;
@@ -16,7 +17,7 @@ public class InitiatedPaymentSerializer implements JsonDeserializer<InitiatedPay
     public InitiatedPayment deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
         try {
             JsonObject object = json.getAsJsonObject();
-            InitiatedPayment.Status transactionStatus = InitiatedPayment.Status.valueOf(object.get("transactionStatus").getAsString().toUpperCase());
+            TransactionStatus transactionStatus = TransactionStatus.valueOf(object.get("transactionStatus").getAsString().toUpperCase());
             String paymentId = object.get("paymentId").getAsString();
             InitiatedPayment payment = new InitiatedPayment(paymentId, transactionStatus);
             JsonObject links = object.get("_links").getAsJsonObject();

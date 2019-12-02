@@ -7,7 +7,8 @@ public enum TaskFinalFailureCode {
     UNKNOWN(0),
     UNRECOVERABLE_STATUS(1),
     RECOVERED_AND_QUEUED(2),
-    POLL_ON_NOT_EXISTING_CONSENT(3);
+    POLL_ON_NOT_EXISTING_CONSENT(3),
+    UNABLE_TO_RECOVER(4);
 
     private final int value;
 

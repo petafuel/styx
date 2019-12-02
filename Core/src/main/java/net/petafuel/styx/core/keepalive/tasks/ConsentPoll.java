@@ -28,19 +28,18 @@ import java.util.stream.IntStream;
 public final class ConsentPoll extends WorkableTask {
 
     private static final Logger LOG = LogManager.getLogger(ConsentPoll.class);
-    private UUID id;
-    private String signature;
-    private Consent consent;
-    private CSInterface csInterface;
-    private PersistentConsent persistentConsent;
-    private int maxRetries;
-    private int timeoutBetweenRetries;
+    private final String signature;
+    private final Consent consent;
+    private final CSInterface csInterface;
+    private final PersistentConsent persistentConsent;
+    private final int maxRetries;
+    private final int timeoutBetweenRetries;
 
 
     public ConsentPoll(Consent consent, CSInterface csInterface) {
         this.consent = consent;
         this.csInterface = csInterface;
-        id = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
         signature = id.toString() + "-" + consent.getId();
         maxRetries = Integer.parseInt(Config.getInstance().getProperties().getProperty("keepalive.tasks.consentpoll.amountRetries", "12"));
         timeoutBetweenRetries = Integer.parseInt(Config.getInstance().getProperties().getProperty("keepalive.tasks.consentpoll.timoutBetweenRetriesMS", "5000"));
@@ -66,6 +65,7 @@ public final class ConsentPoll extends WorkableTask {
         try {
             Iterator<Integer> retryIterator = IntStream.range(0, maxRetries).iterator();
             while (retryIterator.hasNext()) {
+                LOG.debug("Retry {} of {}", retryIterator.next(), maxRetries);
                 try {
                     Consent.State currentStatus = this.csInterface.getStatus(statusConsentRequest);
                     if (currentStatus == Consent.State.VALID) {
@@ -85,9 +85,8 @@ public final class ConsentPoll extends WorkableTask {
                     Thread.sleep(timeoutBetweenRetries);
                 } catch (InterruptedException e) {
                     LOG.error("Unable to sleep until next retry");
-                    //TODO change this
+                    //TODO change this -> set task for retryfailure or finalfailure
                     Thread.currentThread().interrupt();
-                    throw new TaskRetryFailureException("Request retry during task execution could not be completed, scheduleing as RetryFailureTask: " + e.getMessage());
                 }
             }
         } catch (Exception unknown) {
@@ -95,12 +94,14 @@ public final class ConsentPoll extends WorkableTask {
             throw new TaskRetryFailureException("An unknown exception occured while executing the task: " + unknown.getMessage(), unknown);
         }
 
-        LOG.info("Polling was successful -> getting consent informations");
         //TODO make GetConsentRequest class as a parameter
         GetConsentRequest getConsentRequest = new GetConsentRequest();
         getConsentRequest.setConsentId(consent.getId());
         try {
             Consent aspspConsent = csInterface.getConsent(getConsentRequest);
+            if (!aspspConsent.getState().equals(Consent.State.VALID)) {
+                throw new TaskRetryFailureException("Upon Consent Poll completion, consent is still not authorized by PSU");
+            }
             currentConsent.setFrequencyPerDay(aspspConsent.getFrequencyPerDay());
             currentConsent.setValidUntil(aspspConsent.getValidUntil());
             currentConsent.setState(aspspConsent.getState());
@@ -114,7 +115,7 @@ public final class ConsentPoll extends WorkableTask {
 
     @Override
     public JsonObject getGoal() {
-        String fullClassName = this.csInterface.getClass().getName();
+        final String fullClassName = this.csInterface.getClass().getName();
         String[] classParts = fullClassName.split("\\.");
         String className = classParts[classParts.length - 1];
         String versionPackage = classParts[classParts.length - 2];

@@ -17,18 +17,18 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Basic Worker that will execute Tasks from the coreQueue
+ * Retry Failure Worker to process Task which failed on first try
  */
-public final class CoreWorker extends RunnableWorker {
-    private static final Logger LOG = LogManager.getLogger(CoreWorker.class);
+public final class RetryFailureWorker extends RunnableWorker {
+    private static final Logger LOG = LogManager.getLogger(RetryFailureWorker.class);
 
     private AtomicBoolean running;
     private AtomicLong currentTaskStartTime;
     private AtomicReference<WorkableTask> currentTask;
 
-    public CoreWorker() {
+    public RetryFailureWorker() {
         this.setId(UUID.randomUUID());
-        this.setType(WorkerType.CORE);
+        this.setType(WorkerType.RETRY_FAILURE);
         this.running = new AtomicBoolean(false);
         this.currentTaskStartTime = new AtomicLong();
         this.currentTask = new AtomicReference<>();
@@ -37,14 +37,14 @@ public final class CoreWorker extends RunnableWorker {
     @Override
     public void run() {
         Thread.currentThread().setName("KeepAlive-Worker-" + getType().toString() + "-" + getId().toString());
-        LOG.info("Started CoreWorker id: {}", this.getId());
+        LOG.info("Started RetryFailureWorker id: {}", this.getId());
         this.setRunning(true);
         while (running.get()) {
-            if (ThreadManager.getInstance().getCoreQueue().isEmpty()) {
+            if (ThreadManager.getInstance().getRetryFailureQueue().isEmpty()) {
                 LOG.info("No polling from queue: Queue is empty -> ideling/waiting");
                 try {
-                    synchronized (ThreadManager.getInstance().getCoreQueue()) {
-                        ThreadManager.getInstance().getCoreQueue().wait();
+                    synchronized (ThreadManager.getInstance().getRetryFailureQueue()) {
+                        ThreadManager.getInstance().getRetryFailureQueue().wait();
                     }
                 } catch (InterruptedException e) {
                     //TODO Error handling
@@ -53,8 +53,8 @@ public final class CoreWorker extends RunnableWorker {
                 }
             }
             WorkableTask task;
-            synchronized (ThreadManager.getInstance().getCoreQueue()) {
-                task = ThreadManager.getInstance().getCoreQueue().poll();
+            synchronized (ThreadManager.getInstance().getRetryFailureQueue()) {
+                task = ThreadManager.getInstance().getRetryFailureQueue().poll();
             }
             if (task == null) {
                 continue;
@@ -77,7 +77,7 @@ public final class CoreWorker extends RunnableWorker {
                 TaskRecoveryDB.setFinallyFailed(task, finalFailure.getMessage(), finalFailure.getCode());
             }
         }
-        LOG.info("Terminated CoreWorker id: {}", this.getId());
+        LOG.info("Terminated RetryFailureWorker id: {}", this.getId());
     }
 
     @Override

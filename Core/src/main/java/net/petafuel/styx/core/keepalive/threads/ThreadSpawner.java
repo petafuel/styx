@@ -2,6 +2,8 @@ package net.petafuel.styx.core.keepalive.threads;
 
 import net.petafuel.styx.core.keepalive.contracts.RunnableWorker;
 import net.petafuel.styx.core.keepalive.entities.WorkerType;
+import net.petafuel.styx.core.keepalive.workers.CoreWorker;
+import net.petafuel.styx.core.keepalive.workers.RetryFailureWorker;
 
 import java.util.UUID;
 
@@ -19,9 +21,11 @@ public final class ThreadSpawner {
         switch (worker.getType()) {
             case CORE:
                 ThreadManager.getInstance().getCorePool().execute(worker);
-                ThreadManager.getInstance().getWorkers().add(worker);
+                ThreadManager.getInstance().getCoreWorkers().add((CoreWorker) worker);
                 break;
-            case DEDICATED:
+            case RETRY_FAILURE:
+                ThreadManager.getInstance().getRetryFailurePool().execute(worker);
+                ThreadManager.getInstance().getRetryFailureWorkers().add((RetryFailureWorker) worker);
                 break;
             case INSTANT_SPAWN:
                 break;

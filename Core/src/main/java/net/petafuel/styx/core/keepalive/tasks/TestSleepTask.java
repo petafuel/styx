@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class TestSleepTask extends WorkableTask {
     private static final Logger LOG = LogManager.getLogger(TestSleepTask.class);
 
-    private String signature;
+    private final String signature;
 
     public TestSleepTask() {
         this.signature = "TestSleepTask" + UUID.randomUUID().toString();

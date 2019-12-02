@@ -10,7 +10,7 @@ import java.util.UUID;
  */
 public abstract class WorkableTask {
 
-    private UUID id;
+    private final UUID id;
 
     protected WorkableTask() {
         id = UUID.randomUUID();

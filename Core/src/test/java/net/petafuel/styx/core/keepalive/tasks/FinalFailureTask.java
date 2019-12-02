@@ -3,7 +3,6 @@ package net.petafuel.styx.core.keepalive.tasks;
 import com.google.gson.JsonObject;
 import net.petafuel.styx.core.keepalive.contracts.WorkableTask;
 import net.petafuel.styx.core.keepalive.entities.TaskFinalFailureException;
-import net.petafuel.styx.core.keepalive.entities.TaskRetryFailureException;
 
 import java.util.UUID;
 

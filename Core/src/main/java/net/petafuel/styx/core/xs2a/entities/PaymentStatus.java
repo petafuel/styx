@@ -2,19 +2,19 @@ package net.petafuel.styx.core.xs2a.entities;
 
 public class PaymentStatus {
 
-    private Transaction.Status transactionStatus;
+    private TransactionStatus transactionStatus;
     private Boolean fundsAvailable;
 
-    public PaymentStatus(Transaction.Status transactionStatus, Boolean fundsAvailable) {
+    public PaymentStatus(TransactionStatus transactionStatus, Boolean fundsAvailable) {
         this.transactionStatus = transactionStatus;
         this.fundsAvailable = fundsAvailable;
     }
 
-    public Transaction.Status getTransactionStatus() {
+    public TransactionStatus getTransactionStatus() {
         return transactionStatus;
     }
 
-    public void setTransactionStatus(Transaction.Status transactionStatus) {
+    public void setTransactionStatus(TransactionStatus transactionStatus) {
         this.transactionStatus = transactionStatus;
     }
 

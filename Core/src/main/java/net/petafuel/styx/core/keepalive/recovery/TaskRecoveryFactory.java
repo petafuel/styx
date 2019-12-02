@@ -27,7 +27,7 @@ final class TaskRecoveryFactory {
     }
 
     private static WorkableTask factory(JsonObject jsonGoal) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        Class<?> clazz = null;
+        Class<?> clazz;
         Gson gson = new GsonBuilder()
                 .serializeNulls()
                 .registerTypeAdapter(WorkableTask.class, new WorkableSerializer())
@@ -48,7 +48,7 @@ final class TaskRecoveryFactory {
             UUID id = UUID.fromString(resultSet.getString("id"));
             String goal = resultSet.getString("goal");
             WorkerType type = WorkerType.valueOf(resultSet.getString("worker_type"));
-            WorkableTask recoveredTask = null;
+            WorkableTask recoveredTask;
             try {
                 Gson gson = new GsonBuilder().serializeNulls().create();
                 recoveredTask = TaskRecoveryFactory.factory(gson.fromJson(goal, JsonObject.class));
@@ -57,6 +57,7 @@ final class TaskRecoveryFactory {
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                 LOG.error("Unable to recover Task {}: {}", id, e.getMessage());
             } catch (Exception unknown) {
+                TaskRecoveryDB.setFinallyFailed(id, "Unable to recover Task: " + unknown.getMessage(), TaskFinalFailureCode.UNABLE_TO_RECOVER);
                 LOG.error("Unable to recover Task {} due to an unexpected exception: {}", id, unknown.getMessage());
             }
         }

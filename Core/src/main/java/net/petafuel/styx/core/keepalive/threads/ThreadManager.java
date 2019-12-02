@@ -2,10 +2,12 @@ package net.petafuel.styx.core.keepalive.threads;
 
 import net.petafuel.styx.core.keepalive.contracts.RunnableWorker;
 import net.petafuel.styx.core.keepalive.contracts.WorkableTask;
+import net.petafuel.styx.core.keepalive.entities.KeepAliveProperties;
 import net.petafuel.styx.core.keepalive.entities.WorkerType;
 import net.petafuel.styx.core.keepalive.recovery.RecoveryRoutine;
 import net.petafuel.styx.core.keepalive.recovery.TaskRecoveryDB;
 import net.petafuel.styx.core.keepalive.workers.CoreWorker;
+import net.petafuel.styx.core.keepalive.workers.RetryFailureWorker;
 import net.petafuel.styx.core.xs2a.utils.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,39 +21,49 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
  * Manages the task queues and worker threads
  */
 public final class ThreadManager {
-    private static final String PROPERTY_THREAD_COREQUEUE_MIN_WORKERS = "keepalive.threads.coreQueue.minWorkers";
-    private static final String PROPERTY_THREAD_COREQUEUE_MAX_WORKERS = "keepalive.threads.coreQueue.maxWorkers";
-    private static final String PROPERTY_THREAD_COREQUEUE_SPAWN_THRESHOLD = "keepalive.threads.coreQueue.spawnThresholdTasksPerWorker";
-
     private static final Logger LOG = LogManager.getLogger(ThreadManager.class);
 
-    /**
-     * Failed tasks / too many retries irgend was machen damit
-     */
-    private final ConcurrentLinkedQueue<WorkableTask> coreQueue;
-    private ConcurrentLinkedQueue<WorkableTask> failureQueue;
-    private ThreadPoolExecutor corePool;
-    private List<RunnableWorker> workers;
 
-    private int minCoreWorkers;
-    private int maxCoreWorkers;
-    private int coreWorkerSpawnThreshold;
+    private final ConcurrentLinkedQueue<WorkableTask> retryFailureQueue;
+    private final int minCoreWorkers;
+    private final int maxCoreWorkers;
+    private final int coreWorkerSpawnThreshold;
+    private final int coreWorkerFrozenThreshold;
+    private final boolean useRecovery;
+    private final int probeFrequency;
+    private final int probeInitialDelay;
+    private final ConcurrentLinkedQueue<WorkableTask> coreQueue;
+    private ThreadPoolExecutor retryFailurePool;
+    private List<RetryFailureWorker> retryFailureWorkers;
+    private ThreadPoolExecutor corePool;
+    private List<CoreWorker> coreWorkers;
 
     private ThreadManager() {
         LOG.info("Starting KeepAlive ThreadManager");
-        this.coreQueue = new ConcurrentLinkedQueue<>();
-        this.failureQueue = new ConcurrentLinkedQueue<>();
-        this.workers = new ArrayList<>();
 
-        this.minCoreWorkers = Integer.parseInt(Config.getInstance().getProperties().getProperty(PROPERTY_THREAD_COREQUEUE_MIN_WORKERS, "4"));
-        this.maxCoreWorkers = Integer.parseInt(Config.getInstance().getProperties().getProperty(PROPERTY_THREAD_COREQUEUE_MAX_WORKERS, "12"));
-        this.coreWorkerSpawnThreshold = Integer.parseInt(Config.getInstance().getProperties().getProperty(PROPERTY_THREAD_COREQUEUE_SPAWN_THRESHOLD, "10"));
+        //loading all necessary config flags into memory
+        this.minCoreWorkers = Integer.parseInt(Config.getInstance().getProperties().getProperty(KeepAliveProperties.THREAD_COREQUEUE_MIN_WORKERS.getPropertyPath(), "4"));
+        this.maxCoreWorkers = Integer.parseInt(Config.getInstance().getProperties().getProperty(KeepAliveProperties.THREAD_COREQUEUE_MAX_WORKERS.getPropertyPath(), "12"));
+        this.coreWorkerSpawnThreshold = Integer.parseInt(Config.getInstance().getProperties().getProperty(KeepAliveProperties.THREAD_COREQUEUE_SPAWN_THRESHOLD.getPropertyPath(), "10"));
+        this.coreWorkerFrozenThreshold = Integer.parseInt(Config.getInstance().getProperties().getProperty(KeepAliveProperties.THREAD_COREQUEUE_WORKER_FROZEN_THRESHOLD.getPropertyPath(), "10"));
+
+        this.coreWorkers = new ArrayList<>();
+        this.coreQueue = new ConcurrentLinkedQueue<>();
+
+        this.retryFailureWorkers = new ArrayList<>();
+        this.retryFailureQueue = new ConcurrentLinkedQueue<>();
+
+        this.probeFrequency = Integer.parseInt(Config.getInstance().getProperties().getProperty(KeepAliveProperties.THREAD_PROBE_FREQUENCY.getPropertyPath(), "3000"));
+        this.probeInitialDelay = Integer.parseInt(Config.getInstance().getProperties().getProperty(KeepAliveProperties.THREAD_PROBE_INITIAL_DELAY.getPropertyPath(), "0"));
+        this.useRecovery = Boolean.parseBoolean(Config.getInstance().getProperties().getProperty(KeepAliveProperties.USE_RECOVERY.getPropertyPath(), "true"));
+
 
         if (this.minCoreWorkers <= 0 || maxCoreWorkers < 1) {
             throw new IllegalArgumentException("Threadmmanager cannot be initialized with zero workers, see config.properties");
@@ -64,6 +76,13 @@ public final class ThreadManager {
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>());
         LOG.info("KeepAlive Setup~ min/max CoreWorker Threads: {}/{}", minCoreWorkers, maxCoreWorkers);
+
+        this.retryFailurePool = new ThreadPoolExecutor(
+                4,
+                10,
+                0,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>());
     }
 
     public static ThreadManager getInstance() {
@@ -72,12 +91,13 @@ public final class ThreadManager {
 
     public void start() {
         spawnStartupThreads();
-        RecoveryRoutine.runTaskRecovery();
+        if (useRecovery) {
+            RecoveryRoutine.runTaskRecovery();
+        }
         //TODO add thread that checks for Worker Timeouts by task signature(Too long for one task) and also checks the workload to spawn or despawn Workers
-        //TODO Configurate threshold for new worker spawnings in config.properties
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(this::probeWorkers, 0, 3, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(this::probeWorkers, probeInitialDelay, probeFrequency, TimeUnit.MILLISECONDS);
     }
 
     public void queueTask(WorkableTask task) {
@@ -94,17 +114,18 @@ public final class ThreadManager {
                 }
                 LOG.info("Core Queue size: {}", this.coreQueue.size());
                 break;
-            case DEDICATED:
-                //TODO remove ?!
-                break;
             case RETRY_FAILURE:
-                this.failureQueue.add(task);
+                this.retryFailureQueue.add(task);
+                TaskRecoveryDB.setQueued(task, workerType);
+                synchronized (this.retryFailureQueue) {
+                    this.retryFailureQueue.notifyAll();
+                }
                 break;
             case INSTANT_SPAWN:
                 //TODO remove ?!
                 break;
             default:
-                LOG.warn("Task id:{} name:{} was queued with an unknown priority, executing as BASIC", task.getId(), task.getSignature());
+                LOG.warn("Task id:{} name:{} was queued with an unknown priority, executing as CORE", task.getId(), task.getSignature());
                 this.coreQueue.add(task);
                 break;
         }
@@ -143,27 +164,37 @@ public final class ThreadManager {
             } else {
                 LOG.warn("Cannot spawn new Workers, limit reached. Amount CoreWorkers: {} Queue-size: {}", workerAmount, taskAmount);
             }
-        } else if (workerAmount > this.minCoreWorkers && this.workers.size() > this.minCoreWorkers) {
-            LOG.info("Despawning worker, new pool size {}", (int) workerAmount - 1);
+        } else if (workerAmount > this.minCoreWorkers && this.coreWorkers.size() > this.minCoreWorkers) {
+            LOG.debug("Despawning worker, new pool size {}", (int) workerAmount - 1);
             this.corePool.setCorePoolSize(this.corePool.getPoolSize() - 1);
-            RunnableWorker worker = this.workers.get(0);
+            RunnableWorker worker = this.coreWorkers.get(0);
             worker.setRunning(false);
-            this.workers.remove(worker);
+            this.coreWorkers.remove(worker);
 /*            synchronized (coreQueue) {
                 coreQueue.notifyAll();
             }*/
         }
         if (workerAmount >= this.maxCoreWorkers) {
-            LOG.warn("Reached hard limit for core Workers. Amount CoreWorkers: {} Queue-size: {}", workerAmount, taskAmount);
+            LOG.warn("Reached hard limit of {} for core Workers. Amount CoreWorkers: {} Queue-size: {}", maxCoreWorkers, workerAmount, taskAmount);
         }
+        List<CoreWorker> frozenWorkers = this.coreWorkers.parallelStream().filter(worker -> worker.getCurrentTaskStartTime().get() >= this.coreWorkerFrozenThreshold).collect(Collectors.toList());
+        //frozenWorkers.parallelStream().forEach(frozenWorker -> frozenWorker.get);
     }
 
-    List<RunnableWorker> getWorkers() {
-        return workers;
+    List<CoreWorker> getCoreWorkers() {
+        return coreWorkers;
     }
 
-    public void setWorkers(List<RunnableWorker> workers) {
-        this.workers = workers;
+    public ConcurrentLinkedQueue<WorkableTask> getRetryFailureQueue() {
+        return retryFailureQueue;
+    }
+
+    public ThreadPoolExecutor getRetryFailurePool() {
+        return retryFailurePool;
+    }
+
+    public List<RetryFailureWorker> getRetryFailureWorkers() {
+        return retryFailureWorkers;
     }
 
     private static class Holder {

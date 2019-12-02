@@ -3,19 +3,14 @@ package net.petafuel.styx.core.xs2a.entities;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class InitiatedPayment implements Serializable {
+public class InitiatedPayment extends StrongAuthenticatableResource implements Serializable {
 
     private String paymentId;
-    private Status status;
-    private SCA sca;
+    private TransactionStatus status;
     private UUID xRequestId;
     private PSU psu;
 
-    public enum Status {
-        ACCP, ACSC, ACSP, ACTC, ACWC, ACWP, CANC, PNDG, RCVD, RJCT
-    }
-
-    public InitiatedPayment(String paymentId, Status status) {
+    public InitiatedPayment(String paymentId, TransactionStatus status) {
         this.paymentId = paymentId;
         this.status = status;
         this.sca = new SCA();
@@ -29,20 +24,12 @@ public class InitiatedPayment implements Serializable {
         this.paymentId = paymentId;
     }
 
-    public Status getStatus() {
+    public TransactionStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(TransactionStatus status) {
         this.status = status;
-    }
-
-    public SCA getSca() {
-        return sca;
-    }
-
-    public void setSca(SCA sca) {
-        this.sca = sca;
     }
 
     public UUID getxRequestId() {

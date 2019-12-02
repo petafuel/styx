@@ -15,7 +15,7 @@ import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
-import net.petafuel.styx.core.xs2a.entities.Transaction;
+import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.OAuth2;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
@@ -61,7 +61,7 @@ public class PISTest {
                 PAYMENT_ID);
 
         PaymentStatus status = standard.getPis().getPaymentStatus(r1);
-        Assert.assertEquals(Transaction.Status.RCVD, status.getTransactionStatus());
+        Assert.assertEquals(TransactionStatus.RCVD, status.getTransactionStatus());
     }
 
     @Test
@@ -76,7 +76,7 @@ public class PISTest {
                 FIDUCIA_PAYMENT_ID);
 
         PaymentStatus status = standard.getPis().getPaymentStatus(r1);
-        Assert.assertEquals(Transaction.Status.RCVD, status.getTransactionStatus());
+        Assert.assertEquals(TransactionStatus.RCVD, status.getTransactionStatus());
     }
 
     @Test
@@ -448,7 +448,7 @@ public class PISTest {
 
         InitiatedPayment payment = standard.getPis().initiatePayment(request);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(InitiatedPayment.Status.RCVD, payment.getStatus());
+        Assert.assertEquals(TransactionStatus.RCVD, payment.getStatus());
     }
 
     @Test
@@ -555,6 +555,6 @@ public class PISTest {
 
         InitiatedPayment payment = standard.getPis().initiatePayment(request);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(InitiatedPayment.Status.RCVD, payment.getStatus());
+        Assert.assertEquals(TransactionStatus.RCVD, payment.getStatus());
     }
 }

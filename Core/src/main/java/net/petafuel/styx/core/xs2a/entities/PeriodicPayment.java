@@ -43,6 +43,7 @@ public class PeriodicPayment extends Payment {
      * day of execution depending on frequency
      * <br>should be explicit day in month (twoDigitText) on which periodic payment should be executed
      * <br>f.e. frequency = "MNTH" and dayOfExecution = "20" - payment is executed every month on the 20th day
+     * @see https://www.iso20022.org/standardsrepository/public/wqt/Description/mx/dico/codesets/_VsZaMf70EeCKvdA5_Kg7Aw
      * @return String
      */
     public String getDayOfExecution() {
@@ -53,6 +54,7 @@ public class PeriodicPayment extends Payment {
      * day of execution depending on frequency
      * <br>should be explicit day in month (twoDigitText) on which periodic payment should be executed
      * <br>f.e. frequency = "MNTH" and dayOfExecution = "20" - payment is executed every month on the 20th day
+     * @see https://www.iso20022.org/standardsrepository/public/wqt/Description/mx/dico/codesets/_VsZaMf70EeCKvdA5_Kg7Aw
      * @param dayOfExecution String
      */
     public void setDayOfExecution(String dayOfExecution) {

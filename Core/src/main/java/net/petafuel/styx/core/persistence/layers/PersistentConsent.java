@@ -67,6 +67,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
             }
         } catch (SQLException e) {
             logSQLError(e);
+            return null;
         }
         return consent;
     }

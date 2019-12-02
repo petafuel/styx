@@ -26,6 +26,7 @@ public class CallbackResource extends Application {
         if (state == null) {
             return  handler.handleRedirect(xRequestId, httpHeaders, body);
         }
+        LOG.info("\n Request Header \n" + output + "\n Request Body \n" + body);
         return handler.handleOAuth2(code, state, error, errorMessage);
     }
 }

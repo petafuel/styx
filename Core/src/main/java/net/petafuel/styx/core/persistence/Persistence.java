@@ -25,6 +25,10 @@ public class Persistence {
 
     private Connection databaseConnection;
 
+    private static class Holder {
+        private static final Persistence INSTANCE = new Persistence();
+    }
+
     private Persistence() {
         try {
             this.databaseConnection = new DbHelper().getConnection(DATASOURCE_NAME);
@@ -35,24 +39,7 @@ public class Persistence {
     }
 
     public static Persistence getInstance() {
-
-        if (Persistence.singletonInstance == null) {
-            Persistence.singletonInstance = new Persistence();
-        }
-
-        try {
-            //if connection was closed/interrupted within the singleton instance
-            //try to reconnect to the database server
-            if (!Persistence.singletonInstance.databaseConnection.isValid(1)) {
-                Persistence.singletonInstance.databaseConnection.close();
-                LOG.warn("Database connection was invalid, trying to reconnect...");
-                Persistence.singletonInstance = new Persistence();
-            }
-        } catch (SQLException e) {
-            LOG.error("Error trying to validate the database connection: {} \n {}", e.getMessage(), e.getCause());
-            throw new PersistenceException(e.getMessage(), e);
-        }
-        return Persistence.singletonInstance;
+        return Holder.INSTANCE;
     }
 
     public Connection getConnection() {

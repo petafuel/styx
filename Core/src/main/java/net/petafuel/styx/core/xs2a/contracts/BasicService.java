@@ -47,6 +47,14 @@ public abstract class BasicService {
         this.builder.url(url);
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public IBerlinGroupSigner getSigner() {
+        return signer;
+    }
+
     protected void createBody(RequestType requestType, MediaType mediaType, XS2ARequest request) {
         createBody(requestType, RequestBody.create(request.getRawBody(), mediaType));
     }

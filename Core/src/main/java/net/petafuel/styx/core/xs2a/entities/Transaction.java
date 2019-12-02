@@ -8,10 +8,6 @@ public class Transaction {
     private final Type type;
     private String transactionId;
     /**
-     * Could be the name of the creditor or debtor, depending on the type of the transaction
-     */
-    private String name;
-    /**
      * Could be the account of the creditor or debtor, depending on the type of the transaction
      */
     private Account account;
@@ -23,12 +19,11 @@ public class Transaction {
     private String mandateId;
     private String bankTransactionCode;
 
-    public Transaction(String transactionId, BookingStatus bookingStatus, Type type, String name, Account account, Currency currency, float amount, String remittanceInformationUnstructured) {
+    public Transaction(String transactionId, BookingStatus bookingStatus, Type type, Account account, Currency currency, float amount, String remittanceInformationUnstructured) {
 
         this.transactionId = transactionId;
         this.bookingStatus = bookingStatus;
         this.type = type;
-        this.name = name;
         this.account = account;
         this.currency = currency;
         this.amount = amount;
@@ -49,14 +44,6 @@ public class Transaction {
 
     public Type getType() {
         return type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Account getAccount() {

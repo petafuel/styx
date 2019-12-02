@@ -17,7 +17,7 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransacti
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.AccountSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.BalancesSerializer;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.TransactionsSerializer;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.TransactionsSerializer;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

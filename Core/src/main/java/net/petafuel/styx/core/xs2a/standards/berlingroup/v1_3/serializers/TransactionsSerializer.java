@@ -1,4 +1,4 @@
-package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers;
+package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers;
 
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonDeserializationContext;
@@ -27,11 +27,15 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
             JsonObject response = json.getAsJsonObject().getAsJsonObject("transactions");
             JsonArray booked = response.getAsJsonArray("booked");
             JsonArray pending = response.getAsJsonArray("pending");
-            for (JsonElement element : booked) {
-                result.add(this.mapToModel((JsonObject) element, Transaction.BookingStatus.BOOKED));
+            if (booked != null) {
+                for (JsonElement element : booked) {
+                    result.add(this.mapToModel((JsonObject) element, Transaction.BookingStatus.BOOKED));
+                }
             }
-            for (JsonElement element : pending) {
-                result.add(this.mapToModel((JsonObject) element, Transaction.BookingStatus.PENDING));
+            if (pending != null) {
+                for (JsonElement element : pending) {
+                    result.add(this.mapToModel((JsonObject) element, Transaction.BookingStatus.PENDING));
+                }
             }
         } else {
             JsonObject object = json.getAsJsonObject().getAsJsonObject("transactionsDetails");
@@ -78,6 +82,7 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
         }
         String accountIdentifier = accountObj.get(accountType.getJsonKey()).getAsString();
         account = new Account(accountIdentifier, currency, accountType);
+        account.setName(name);
 
         try {
             String bookingDateString = object.get("valueDate").getAsString();
@@ -93,7 +98,7 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
             }
         }
 
-        Transaction t1 = new Transaction(transactionId, bookingStatus, type, name, account, currency, amount, remittanceInformationUnstructured);
+        Transaction t1 = new Transaction(transactionId, bookingStatus, type, account, currency, amount, remittanceInformationUnstructured);
         t1.setValueDate(valueDate);
         t1.setBookingDate(bookingDate);
         t1.setMandateId(mandateId);

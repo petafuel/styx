@@ -92,13 +92,18 @@ public class AISTest {
 
     @Test
     @Tag("integration")
-    public void testTransactionSerializer(){
+    public void testTransactionSerializer() throws Exception{
+        String transactionId1 = "1234567";
         String creditorName = "John Miles";
         String creditorIban = "DE67100100101306118605";
         Currency currency = Currency.EUR;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date bookingDate = format.parse("2017-10-25");
+        Date valueDate = format.parse("2017-10-26");
         float amount1 = (float) 256.67;
         String reason1 = "Example 1";
 
+        String transactionId2 = "1234568";
         String debtorName = "Paul Simpson";
         String debtorIban = "DE67100100101306118605";
         float amount2 = (float) 343.01;
@@ -111,7 +116,7 @@ public class AISTest {
                 "  \"transactions\": {\n" +
                 "    \"booked\": [\n" +
                 "      {\n" +
-                "        \"transactionId\": \"1234567\",\n" +
+                "        \"transactionId\": \"" + transactionId1 + "\",\n" +
                 "        \"creditorName\": \"" + creditorName + "\",\n" +
                 "        \"creditorAccount\": {\n" +
                 "          \"iban\": \"" + creditorIban + "\"\n" +
@@ -120,12 +125,12 @@ public class AISTest {
                 "          \"currency\": \"" + currency.toString() + "\",\n" +
                 "          \"amount\": \"" + amount1 + "\"\n" +
                 "        },\n" +
-                "        \"bookingDate\": \"2017-10-25\",\n" +
-                "        \"valueDate\": \"2017-10-26\",\n" +
+                "        \"bookingDate\": \"" + format.format(bookingDate) + "\",\n" +
+                "        \"valueDate\": \"" + format.format(valueDate) + "\",\n" +
                 "        \"remittanceInformationUnstructured\": \"" + reason1 + "\"\n" +
                 "      },\n" +
                 "      {\n" +
-                "        \"transactionId\": \"1234568\",\n" +
+                "        \"transactionId\": \"" + transactionId2 + "\",\n" +
                 "        \"debtorName\": \"" + debtorName + "\",\n" +
                 "        \"debtorAccount\": {\n" +
                 "          \"iban\": \"" + debtorIban + "\"\n" +
@@ -134,9 +139,9 @@ public class AISTest {
                 "          \"currency\": \"" + currency.toString() + "\",\n" +
                 "          \"amount\": \"" + amount2 + "\"\n" +
                 "        },\n" +
-                "        \"bookingDate\": \"2017-10-25\",\n" +
-                "        \"valueDate\": \"2017-10-26\",\n" +
-                "        \"remittanceInformationUnstructured\": \"" + reason2 +"\"\n" +
+                "        \"bookingDate\": \"" + format.format(bookingDate) + "\",\n" +
+                "        \"valueDate\": \"" + format.format(valueDate) + "\",\n" +
+                "        \"remittanceInformationUnstructured\": \"" + reason2 + "\"\n" +
                 "      }\n" +
                 "    ],\n" +
                 "    \"_links\": {\n" +
@@ -149,31 +154,32 @@ public class AISTest {
 
         Type type = new TypeToken<ArrayList<Transaction>>(){}.getType();
         Gson gson = new GsonBuilder().registerTypeAdapter(type, new TransactionsSerializer()).create();
-        Object o = gson.fromJson(json, type);
-
-        Assert.assertTrue(o instanceof ArrayList);
-
-        ArrayList<Transaction> transactions = (ArrayList<Transaction>) o;
+        ArrayList<Transaction> transactions = gson.fromJson(json, type);
+        Transaction transaction1 = transactions.get(0);
+        Transaction transaction2 = transactions.get(1);
 
         Assert.assertEquals(2, transactions.size());
 
-        Transaction t1 = transactions.get(0);
-        Transaction t2 = transactions.get(1);
+        Assert.assertEquals(transactionId1, transaction1.getTransactionId());
+        Assert.assertEquals(Transaction.Type.CREDIT, transaction1.getType());
+        Assert.assertEquals(creditorName, transaction1.getAccount().getName());
+        Assert.assertEquals(Account.Type.IBAN, transaction1.getAccount().getType());
+        Assert.assertEquals(creditorIban, transaction1.getAccount().getIdentifier());
+        Assert.assertEquals(currency, transaction1.getCurrency());
+        Assert.assertEquals(0, Float.compare(amount1, transaction1.getAmount()));
+        Assert.assertEquals(reason1, transaction1.getRemittanceInformationUnstructured());
+        Assert.assertEquals(bookingDate, transaction1.getBookingDate());
+        Assert.assertEquals(valueDate, transaction1.getValueDate());
 
-        Assert.assertEquals(Transaction.Type.CREDIT, t1.getType());
-        Assert.assertEquals(creditorName, t1.getAccount().getName());
-        Assert.assertEquals(Account.Type.IBAN, t1.getAccount().getType());
-        Assert.assertEquals(creditorIban, t1.getAccount().getIdentifier());
-        Assert.assertEquals(currency, t1.getCurrency());
-        Assert.assertEquals(0, Float.compare(amount1, t1.getAmount()));
-        Assert.assertEquals(reason1, t1.getRemittanceInformationUnstructured());
-
-        Assert.assertEquals(Transaction.Type.DEBIT, t2.getType());
-        Assert.assertEquals(debtorName, t2.getAccount().getName());
-        Assert.assertEquals(Account.Type.IBAN, t2.getAccount().getType());
-        Assert.assertEquals(debtorIban, t2.getAccount().getIdentifier());
-        Assert.assertEquals(currency, t2.getCurrency());
-        Assert.assertEquals(0, Float.compare(amount2, t2.getAmount()));
-        Assert.assertEquals(reason2, t2.getRemittanceInformationUnstructured());
+        Assert.assertEquals(transactionId2, transaction2.getTransactionId());
+        Assert.assertEquals(Transaction.Type.DEBIT, transaction2.getType());
+        Assert.assertEquals(debtorName, transaction2.getAccount().getName());
+        Assert.assertEquals(Account.Type.IBAN, transaction2.getAccount().getType());
+        Assert.assertEquals(debtorIban, transaction2.getAccount().getIdentifier());
+        Assert.assertEquals(currency, transaction2.getCurrency());
+        Assert.assertEquals(0, Float.compare(amount2, transaction2.getAmount()));
+        Assert.assertEquals(reason2, transaction2.getRemittanceInformationUnstructured());
+        Assert.assertEquals(bookingDate, transaction2.getBookingDate());
+        Assert.assertEquals(valueDate, transaction2.getValueDate());
     }
 }

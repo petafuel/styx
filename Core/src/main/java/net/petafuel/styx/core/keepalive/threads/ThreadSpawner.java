@@ -27,8 +27,6 @@ public final class ThreadSpawner {
                 ThreadManager.getInstance().getRetryFailurePool().execute(worker);
                 ThreadManager.getInstance().getRetryFailureWorkers().add((RetryFailureWorker) worker);
                 break;
-            case INSTANT_SPAWN:
-                break;
             default:
                 break;
         }

@@ -2,11 +2,15 @@ package net.petafuel.styx.core.keepalive.workers;
 
 import net.petafuel.styx.core.keepalive.contracts.RunnableWorker;
 import net.petafuel.styx.core.keepalive.contracts.WorkableTask;
+import net.petafuel.styx.core.keepalive.entities.KeepAliveProperties;
+import net.petafuel.styx.core.keepalive.entities.TaskFinalFailureCode;
 import net.petafuel.styx.core.keepalive.entities.TaskFinalFailureException;
 import net.petafuel.styx.core.keepalive.entities.TaskRetryFailureException;
+import net.petafuel.styx.core.keepalive.entities.TaskState;
 import net.petafuel.styx.core.keepalive.entities.WorkerType;
 import net.petafuel.styx.core.keepalive.recovery.TaskRecoveryDB;
 import net.petafuel.styx.core.keepalive.threads.ThreadManager;
+import net.petafuel.styx.core.xs2a.utils.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,9 +26,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class RetryFailureWorker extends RunnableWorker {
     private static final Logger LOG = LogManager.getLogger(RetryFailureWorker.class);
 
-    private AtomicBoolean running;
-    private AtomicLong currentTaskStartTime;
-    private AtomicReference<WorkableTask> currentTask;
+    private final AtomicBoolean running;
+    private final AtomicLong currentTaskStartTime;
+    private final AtomicReference<WorkableTask> currentTask;
+    private final int maxRetriesPerTask;
 
     public RetryFailureWorker() {
         this.setId(UUID.randomUUID());
@@ -32,6 +37,7 @@ public final class RetryFailureWorker extends RunnableWorker {
         this.running = new AtomicBoolean(false);
         this.currentTaskStartTime = new AtomicLong();
         this.currentTask = new AtomicReference<>();
+        this.maxRetriesPerTask = Integer.parseInt(Config.getInstance().getProperties().getProperty(KeepAliveProperties.THREADS_RETRYFAILUREWORKER_MAX_EXEC_RETRIES.getPropertyPath(), "3"));
     }
 
     @Override
@@ -47,8 +53,7 @@ public final class RetryFailureWorker extends RunnableWorker {
                         ThreadManager.getInstance().getRetryFailureQueue().wait();
                     }
                 } catch (InterruptedException e) {
-                    //TODO Error handling
-                    LOG.error("Interrupted");
+                    LOG.error("RetryFailure Worker {} was interrupted", this.getId());
                     Thread.currentThread().interrupt();
                 }
             }
@@ -62,19 +67,23 @@ public final class RetryFailureWorker extends RunnableWorker {
             currentTask.set(task);
             LOG.info("Task id:{} signature:{} polled from queue", task.getId(), task.getSignature());
             try {
-                TaskRecoveryDB.setRunning(task);
+                if (TaskRecoveryDB.incrementExecutionCounter(task.getId()) >= maxRetriesPerTask) {
+                    throw new TaskFinalFailureException("Maximum amount of executions by a finalFailureWorker was reached for task: " + task.getId(), TaskFinalFailureCode.EXCEEDED_MAX_RETRIES_THROUGH_RETRYFAILUREWORKER);
+                }
+
+                TaskRecoveryDB.updateState(task.getId(), TaskState.RUNNING);
                 currentTaskStartTime.set(new Date().getTime());
                 task.execute();
                 LOG.info("Task id:{} signature: {} finished successfully", task.getId(), task.getSignature());
                 currentTaskStartTime.set(0);
-                TaskRecoveryDB.setDone(task);
+                TaskRecoveryDB.updateState(task.getId(), TaskState.DONE);
             } catch (TaskRetryFailureException retryFailure) {
                 LOG.warn("Task id: {} signature: {} failed but will be requeued as RETRY_FAILURE -> {}", task.getId(), task.getSignature(), retryFailure.getMessage());
-                TaskRecoveryDB.changeWorker(task, WorkerType.RETRY_FAILURE);
+                TaskRecoveryDB.updateWorker(task.getId(), WorkerType.RETRY_FAILURE);
                 ThreadManager.getInstance().queueTask(task, WorkerType.RETRY_FAILURE);
             } catch (TaskFinalFailureException finalFailure) {
                 LOG.error("Task id: {} signature: {} finally failed with code:{} -> {}", task.getId(), task.getSignature(), finalFailure.getCode(), finalFailure.getMessage());
-                TaskRecoveryDB.setFinallyFailed(task, finalFailure.getMessage(), finalFailure.getCode());
+                TaskRecoveryDB.setFinallyFailed(task.getId(), finalFailure.getMessage(), finalFailure.getCode());
             }
         }
         LOG.info("Terminated RetryFailureWorker id: {}", this.getId());

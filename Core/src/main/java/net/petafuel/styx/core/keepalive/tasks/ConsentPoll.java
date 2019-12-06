@@ -19,8 +19,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
-import java.util.UUID;
 import java.util.stream.IntStream;
+
+import static net.petafuel.styx.core.keepalive.entities.KeepAliveProperties.TASKS_CONSENTPOLL_AMOUNT_RETRIES;
+import static net.petafuel.styx.core.keepalive.entities.KeepAliveProperties.TASKS_CONSENTPOLL_TIMEOUT_BETWEEN_RETRIES;
 
 /**
  * Task to poll for a consent
@@ -28,21 +30,23 @@ import java.util.stream.IntStream;
 public final class ConsentPoll extends WorkableTask {
 
     private static final Logger LOG = LogManager.getLogger(ConsentPoll.class);
-    private final String signature;
-    private final Consent consent;
-    private final CSInterface csInterface;
-    private final PersistentConsent persistentConsent;
-    private final int maxRetries;
-    private final int timeoutBetweenRetries;
+    private String signature;
+    private Consent consent;
+    private CSInterface csInterface;
+    private PersistentConsent persistentConsent;
+    private int maxRequestRetries;
+    private int timeoutBetweenRetries;
 
+    //Empty constructor for TaskRecovery instantiation from Reflection
+    public ConsentPoll() {
+    }
 
     public ConsentPoll(Consent consent, CSInterface csInterface) {
         this.consent = consent;
         this.csInterface = csInterface;
-        UUID id = UUID.randomUUID();
-        signature = id.toString() + "-" + consent.getId();
-        maxRetries = Integer.parseInt(Config.getInstance().getProperties().getProperty("keepalive.tasks.consentpoll.amountRetries", "12"));
-        timeoutBetweenRetries = Integer.parseInt(Config.getInstance().getProperties().getProperty("keepalive.tasks.consentpoll.timoutBetweenRetriesMS", "5000"));
+        signature = getId() + "-" + consent.getId();
+        maxRequestRetries = Integer.parseInt(Config.getInstance().getProperties().getProperty(TASKS_CONSENTPOLL_AMOUNT_RETRIES.getPropertyPath(), "12"));
+        timeoutBetweenRetries = Integer.parseInt(Config.getInstance().getProperties().getProperty(TASKS_CONSENTPOLL_TIMEOUT_BETWEEN_RETRIES.getPropertyPath(), "5000"));
         persistentConsent = new PersistentConsent();
     }
 
@@ -53,45 +57,40 @@ public final class ConsentPoll extends WorkableTask {
         if (currentConsent == null) {
             throw new TaskFinalFailureException("Consent queued for polling does not exist in the styx database, cannot poll", TaskFinalFailureCode.POLL_ON_NOT_EXISTING_CONSENT);
         } else if (currentConsent.getState() == Consent.State.VALID) {
-            LOG.debug("Consent with id {} is already on state valid, no polling required", consent.getId());
-            //TODO maybe define exit codes for monitoring -> get saved as exit code in the database
-            return;
+            throw new TaskFinalFailureException("Consent with id " + currentConsent.getId() + " is already on state valid, no polling required", TaskFinalFailureCode.POLL_ON_ALREADY_VALID_CONSENT);
         }
-//TODO make the request type as a parameter
+        //TODO make the request type as a parameter
         StatusConsentRequest statusConsentRequest = new StatusConsentRequest();
         statusConsentRequest.setConsentId(consent.getId());
         statusConsentRequest.setPsu(consent.getPsu());
 
-        try {
-            Iterator<Integer> retryIterator = IntStream.range(0, maxRetries).iterator();
-            while (retryIterator.hasNext()) {
-                LOG.debug("Retry {} of {}", retryIterator.next(), maxRetries);
-                try {
-                    Consent.State currentStatus = this.csInterface.getStatus(statusConsentRequest);
-                    if (currentStatus == Consent.State.VALID) {
-                        LOG.debug("Consent is valid, SCA was successful");
-                        break;
-                    } else if (!(currentStatus.equals(Consent.State.RECEIVED) || currentStatus.equals(Consent.State.PARTIALLY_AUTHORISED))) {
-                        currentConsent.setState(currentStatus);
-                        persistentConsent.update(currentConsent);
-                        throw new TaskFinalFailureException("Consent cannot be polled anymore due to unrecoverable status: " + currentStatus.toString(), TaskFinalFailureCode.UNRECOVERABLE_STATUS);
-                    }
-                    LOG.debug("Consent status was not valid: {}", currentStatus);
-
-                } catch (BankRequestFailedException e) {
-                    LOG.warn("Trying to poll consent resulted in an error: {} status: {} retry-iteration: {}", e.getMessage(), e.getHttpStatusCode(), retryIterator.next());
-                }
-                try {
-                    Thread.sleep(timeoutBetweenRetries);
-                } catch (InterruptedException e) {
-                    LOG.error("Unable to sleep until next retry");
-                    //TODO change this -> set task for retryfailure or finalfailure
-                    Thread.currentThread().interrupt();
-                }
+        Iterator<Integer> retryIterator = IntStream.range(0, maxRequestRetries).iterator();
+        while (retryIterator.hasNext()) {
+            if (Thread.interrupted()) {
+                throw new TaskFinalFailureException("Task Thread was interrupted");
             }
-        } catch (Exception unknown) {
-            //TODO should this be a final failure ?
-            throw new TaskRetryFailureException("An unknown exception occured while executing the task: " + unknown.getMessage(), unknown);
+            try {
+                Consent.State currentStatus = this.csInterface.getStatus(statusConsentRequest);
+                if (currentStatus == Consent.State.VALID) {
+                    LOG.debug("Consent is valid, SCA was successful");
+                    break;
+                } else if (!(currentStatus.equals(Consent.State.RECEIVED) || currentStatus.equals(Consent.State.PARTIALLY_AUTHORISED))) {
+                    currentConsent.setState(currentStatus);
+                    persistentConsent.update(currentConsent);
+                    throw new TaskFinalFailureException("Consent cannot be polled anymore due to unrecoverable status: " + currentStatus.toString(), TaskFinalFailureCode.UNRECOVERABLE_STATUS);
+                }
+                LOG.debug("Consent status was not valid: {}", currentStatus);
+
+            } catch (BankRequestFailedException e) {
+                LOG.warn("Trying to poll consent resulted in an error: {} status: {} retry-iteration: {}", e.getMessage(), e.getHttpStatusCode(), retryIterator.next());
+            }
+
+            try {
+                Thread.sleep(timeoutBetweenRetries);
+            } catch (InterruptedException e) {
+                LOG.error("Task {} execution was interrupted: {}", getId(), e.getMessage());
+                Thread.currentThread().interrupt();
+            }
         }
 
         //TODO make GetConsentRequest class as a parameter

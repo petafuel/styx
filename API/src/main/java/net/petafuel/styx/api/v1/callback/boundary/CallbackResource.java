@@ -2,8 +2,17 @@ package net.petafuel.styx.api.v1.callback.boundary;
 
 import net.petafuel.styx.api.v1.callback.control.CallbackHandler;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @ApplicationPath("/")
 @Path("/v1")
@@ -26,7 +35,6 @@ public class CallbackResource extends Application {
         if (state == null) {
             return  handler.handleRedirect(xRequestId, httpHeaders, body);
         }
-        LOG.info("\n Request Header \n" + output + "\n Request Body \n" + body);
         return handler.handleOAuth2(code, state, error, errorMessage);
     }
 }

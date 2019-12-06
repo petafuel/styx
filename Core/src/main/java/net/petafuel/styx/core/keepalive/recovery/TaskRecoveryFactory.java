@@ -27,7 +27,6 @@ final class TaskRecoveryFactory {
     }
 
     private static WorkableTask factory(JsonObject jsonGoal) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        Class<?> clazz;
         Gson gson = new GsonBuilder()
                 .serializeNulls()
                 .registerTypeAdapter(WorkableTask.class, new WorkableSerializer())
@@ -35,14 +34,14 @@ final class TaskRecoveryFactory {
 
         JsonElement goal = gson.fromJson(jsonGoal, JsonElement.class);
         String fullClassName = "net.petafuel.styx.core.keepalive.tasks." + goal.getAsJsonObject().get("class").getAsString();
-        clazz = Class.forName(fullClassName);
+        Class<?> clazz = Class.forName(fullClassName);
         WorkableTask recoveredTask = (WorkableTask) clazz.getDeclaredConstructor().newInstance();
 
         recoveredTask = recoveredTask.buildFromRecovery(goal.getAsJsonObject().get("goal").getAsJsonObject());
         return recoveredTask;
     }
 
-    public static Map<WorkableTask, WorkerType> modelFromDatabase(ResultSet resultSet) throws SQLException {
+    static Map<WorkableTask, WorkerType> modelFromDatabase(ResultSet resultSet) throws SQLException {
         LinkedHashMap<WorkableTask, WorkerType> tasks = new LinkedHashMap<>();
         while (resultSet.next()) {
             UUID id = UUID.fromString(resultSet.getString("id"));
@@ -56,6 +55,8 @@ final class TaskRecoveryFactory {
                 tasks.put(recoveredTask, type);
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                 LOG.error("Unable to recover Task {}: {}", id, e.getMessage());
+            } catch (NoSuchMethodException unavailableConstructor) {
+                LOG.error("Unable to recover Task {}: Seems as if there is no empty public constructor available for reflection -> {}", id, unavailableConstructor.getMessage());
             } catch (Exception unknown) {
                 TaskRecoveryDB.setFinallyFailed(id, "Unable to recover Task: " + unknown.getMessage(), TaskFinalFailureCode.UNABLE_TO_RECOVER);
                 LOG.error("Unable to recover Task {} due to an unexpected exception: {}", id, unknown.getMessage());

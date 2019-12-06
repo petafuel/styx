@@ -22,9 +22,9 @@ public final class RecoveryRoutine {
         LOG.info("Running Task Recovery Routine");
         Map<WorkableTask, WorkerType> interruptedTasks = TaskRecoveryDB.getInterruptedTasks();
         Map<WorkableTask, WorkerType> queuedTasks = TaskRecoveryDB.getQueuedTasks();
-        LOG.info("Found {} queued tasks and {} interrupted tasks that need to be recovered", queuedTasks.size(), interruptedTasks.size());
+        LOG.info("Found {} queued tasks and {} interrupted tasks that can be recovered", queuedTasks.size(), interruptedTasks.size());
         if (queuedTasks.isEmpty() && interruptedTasks.isEmpty()) {
-            LOG.info("No tasks need to be recovered, Recovery is done");
+            LOG.info("No tasks were recovered, Recovery is done");
             return;
         }
         LOG.info("Queueing recovered interrupted tasks amount: {}", interruptedTasks.size());

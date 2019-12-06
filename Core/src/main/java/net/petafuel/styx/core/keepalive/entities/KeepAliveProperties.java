@@ -1,15 +1,22 @@
 package net.petafuel.styx.core.keepalive.entities;
 
 public enum KeepAliveProperties {
-    THREAD_COREQUEUE_MIN_WORKERS("keepalive.threads.coreQueue.minWorkers"),
-    THREAD_COREQUEUE_MAX_WORKERS("keepalive.threads.coreQueue.maxWorkers"),
-    THREAD_COREQUEUE_SPAWN_THRESHOLD("keepalive.threads.coreQueue.spawnThresholdTasksPerWorker"),
-    THREAD_COREQUEUE_WORKER_FROZEN_THRESHOLD("keepalive.threads.coreQueue.workerFrozenThresholdMS"),
-    USE_RECOVERY("keepalive.useRecovery"),
-    THREAD_PROBE_FREQUENCY("keepalive.threads.probeFrequencyMS"),
-    THREAD_PROBE_INITIAL_DELAY("keepalive.threads.probeInitialDelay");
+    THREADS_COREWORKER_MIN_AMOUNT("keepalive.threads.coreWorker.minAmount"),
+    THREADS_COREWORKER_MAX_AMOUNT("keepalive.threads.coreWorker.maxAmount"),
+    THREADS_COREWORKER_SPAWN_THRESHOLD("keepalive.threads.coreWorker.spawnThresholdTasksPerWorker"),
+    THREADS_COREWORKER_MAX_TASK_EXECUTION_TIME("keepalive.threads.coreWorker.maxTaskExecutionTimeMS"),
 
-    private String propertyPath;
+    THREADS_RETRYFAILUREWORKER_MAX_EXEC_RETRIES("keepalive.threads.retryFailureWorker.maxExecutionRetries"),
+    THREADS_RETRYFAILUREWORKER_MAX_AMOUNT("keepalive.threads.retryFailureWorker.maxAmount"),
+
+    MANAGER_USE_RECOVERY("keepalive.manager.useRecovery"),
+    MANAGER_PROBE_FREQUENCY("keepalive.manager.probeFrequencyMS"),
+    MANAGER_PROBE_INITIAL_DELAY("keepalive.manager.probeInitialDelay"),
+
+    TASKS_CONSENTPOLL_AMOUNT_RETRIES("keepalive.tasks.consentpoll.amountRetries"),
+    TASKS_CONSENTPOLL_TIMEOUT_BETWEEN_RETRIES("keepalive.tasks.consentpoll.timoutBetweenRetriesMS");
+
+    private final String propertyPath;
 
     KeepAliveProperties(String path) {
         this.propertyPath = path;

@@ -18,6 +18,7 @@ public abstract class WorkableTask {
 
     /**
      * Taskid
+     *
      * @return Returns the task id
      */
     public final UUID getId() {
@@ -26,6 +27,7 @@ public abstract class WorkableTask {
 
     /**
      * Should contain a unique signature of the task
+     *
      * @return TaskSignature
      */
     public abstract String getSignature();

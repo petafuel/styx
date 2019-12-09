@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -28,7 +27,6 @@ import static net.petafuel.styx.core.keepalive.entities.KeepAliveProperties.MANA
 import static net.petafuel.styx.core.keepalive.entities.KeepAliveProperties.MANAGER_PROBE_INITIAL_DELAY;
 import static net.petafuel.styx.core.keepalive.entities.KeepAliveProperties.MANAGER_USE_RECOVERY;
 import static net.petafuel.styx.core.keepalive.entities.KeepAliveProperties.THREADS_COREWORKER_MAX_AMOUNT;
-import static net.petafuel.styx.core.keepalive.entities.KeepAliveProperties.THREADS_COREWORKER_MAX_TASK_EXECUTION_TIME;
 import static net.petafuel.styx.core.keepalive.entities.KeepAliveProperties.THREADS_COREWORKER_MIN_AMOUNT;
 import static net.petafuel.styx.core.keepalive.entities.KeepAliveProperties.THREADS_COREWORKER_SPAWN_THRESHOLD;
 import static net.petafuel.styx.core.keepalive.entities.KeepAliveProperties.THREADS_RETRYFAILUREWORKER_MAX_AMOUNT;
@@ -43,7 +41,6 @@ public final class ThreadManager {
     private final int minCoreWorkers;
     private final int maxCoreWorkers;
     private final int coreWorkerSpawnThreshold;
-    private final int coreWorkerMaxExecutionTime;
     private final int maxRetryFailureWorkers;
     private final boolean useRecovery;
     private final int probeFrequency;
@@ -63,7 +60,6 @@ public final class ThreadManager {
         this.minCoreWorkers = Integer.parseInt(Config.getInstance().getProperties().getProperty(THREADS_COREWORKER_MIN_AMOUNT.getPropertyPath(), "4"));
         this.maxCoreWorkers = Integer.parseInt(Config.getInstance().getProperties().getProperty(THREADS_COREWORKER_MAX_AMOUNT.getPropertyPath(), "12"));
         this.coreWorkerSpawnThreshold = Integer.parseInt(Config.getInstance().getProperties().getProperty(THREADS_COREWORKER_SPAWN_THRESHOLD.getPropertyPath(), "10"));
-        this.coreWorkerMaxExecutionTime = Integer.parseInt(Config.getInstance().getProperties().getProperty(THREADS_COREWORKER_MAX_TASK_EXECUTION_TIME.getPropertyPath(), "10"));
 
         this.maxRetryFailureWorkers = Integer.parseInt(Config.getInstance().getProperties().getProperty(THREADS_RETRYFAILUREWORKER_MAX_AMOUNT.getPropertyPath(), "20"));
         this.retryFailureWorkers = new ArrayList<>();
@@ -209,15 +205,6 @@ public final class ThreadManager {
         if (workerAmount >= this.maxCoreWorkers) {
             LOG.warn("Reached hard limit of {} for parallel running CoreWorkers. Amount CoreWorkers: {} Queue-size: {}", maxCoreWorkers, workerAmount, taskAmount);
         }
-
-        //Check if a task executed by a worker exceeds the maximum execution time in milliseconds if execution time >= 0
-        this.coreWorkers.parallelStream().forEach(worker -> LOG.warn(worker.getCurrentTaskStartTime().get()));
-        this.coreWorkers.parallelStream()
-                .filter(worker -> (worker.getCurrentTaskStartTime().get() != 0) && (new Date().getTime() >= (worker.getCurrentTaskStartTime().get() + this.coreWorkerMaxExecutionTime)))
-                .forEach(frozenWorker -> {
-                    frozenWorker.setRunning(false);
-                    LOG.warn("Task {} executed by CoreWorker exceeded the maximum execution time of {} -> terminating", frozenWorker.getCurrentTask().get().getId(), this.coreWorkerMaxExecutionTime);
-                });
     }
 
     private void checkRetryFailureRuntime() {

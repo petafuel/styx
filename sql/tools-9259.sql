@@ -27,7 +27,7 @@ create unique index tasks_id_uindex
 --
 -- create a task in the tasks table. Creted tasks are queued as default
 --
-create function create_task(id uuid, signature text, worker_type character varying, goal text) returns void
+create or replace function create_task(id uuid, signature text, worker_type character varying, goal text) returns void
     security definer
     language sql
 as
@@ -40,7 +40,7 @@ $$;
 -- Select all tasks that were actively executed by a worker and were not finished successfully in the previous
 -- application runtime
 --
-create function get_interrupted_tasks()
+create or replace function get_interrupted_tasks()
     returns TABLE
             (
                 id          uuid,
@@ -64,7 +64,7 @@ $$;
 --
 -- Select all tasks that were await execution within a Queue in the previous application runtime
 --
-create function get_queued_tasks()
+create or replace function get_queued_tasks()
     returns TABLE
             (
                 id          uuid,
@@ -89,7 +89,7 @@ $$;
 -- Increment the execution counter for a task. Used to determine whether a task is still allowed to be executed by a
 -- RetryFailureWorker
 --
-create function increment_task_execution(id uuid) returns integer
+create or replace function increment_task_execution_counter(id uuid) returns integer
     security definer
     language sql
 as
@@ -103,7 +103,7 @@ $$;
 --
 -- Set a task to be finally failed. The corresponding task will not be executed anymore by any worker
 --
-create function update_task_finally_failed(id uuid, failure_code integer, failure_text text) returns void
+create or replace function update_task_finally_failed(id uuid, failure_code integer, failure_text text) returns void
     security definer
     language sql
 as
@@ -119,7 +119,7 @@ $$;
 --
 -- Change the current state of a task. States can be QUEUED, RUNNING or DONE
 --
-create function update_task_state(id uuid, state character varying) returns void
+create or replace function update_task_state(id uuid, state character varying) returns void
     security definer
     language plpgsql
 as
@@ -137,7 +137,7 @@ $$;
 -- Change the worker which should execute this task. Necessary to preserve this information for correct execution
 -- after recovery
 --
-create function update_task_worker(id uuid, worker_type character varying) returns void
+create or replace function update_task_worker(id uuid, worker_type character varying) returns void
     security definer
     language sql
 as

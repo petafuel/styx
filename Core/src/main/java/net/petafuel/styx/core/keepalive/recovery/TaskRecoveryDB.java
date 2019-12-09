@@ -124,11 +124,11 @@ public final class TaskRecoveryDB {
 
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
-                    retryAmount = resultSet.getInt("increment_task_execution");
+                    retryAmount = resultSet.getInt("increment_task_execution_counter");
                 }
             }
         } catch (SQLException e) {
-            LOG.error("Unable to update task worker type: SQLState: {} Error: {}", e.getSQLState(), e.getMessage());
+            LOG.error("Unable to increment execution counter: SQLState: {} Error: {}", e.getSQLState(), e.getMessage());
         }
         return retryAmount;
     }

@@ -4,3 +4,4 @@ API/target/*
 API/log/*
 Core/target/*
 log/*
+connectionpool.properties

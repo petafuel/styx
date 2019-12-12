@@ -14,9 +14,7 @@ public class XS2AHeaderParser {
     }
 
     public static void parse(XS2ARequest annotated) {
-
         mapFields(annotated, annotated);
-
     }
 
     private static void mapFields(Object o, XS2ARequest xs2aRequest) {

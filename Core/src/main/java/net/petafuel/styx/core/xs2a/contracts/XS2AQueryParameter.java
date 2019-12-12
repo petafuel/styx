@@ -13,4 +13,6 @@ public @interface XS2AQueryParameter {
     String value() default "";
 
     boolean nested() default false;
+
+    String CONSENT_ID = "consentId";
 }

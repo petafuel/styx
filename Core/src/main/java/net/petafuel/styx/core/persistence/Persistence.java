@@ -21,9 +21,6 @@ import java.sql.SQLException;
  */
 public class Persistence {
     private static final Logger LOG = LogManager.getLogger(Persistence.class);
-
-    private static Persistence singletonInstance;
-
     private Connection databaseConnection;
 
     private Persistence() {

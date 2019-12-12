@@ -4,6 +4,7 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
+import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
 import net.petafuel.styx.core.xs2a.sca.SCAHandler;
@@ -11,6 +12,8 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsent
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentCreateAuthResourceRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
 import org.junit.Assert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -26,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class TargobankTest {
 
     private static final String URL = "https://www.sandbox-bvxs2a.de/targobank/";
+    private static final String BANK_VERLAG_TOKEN = "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE";
 
     @Test
     @Tag("integration")
@@ -36,12 +40,13 @@ public class TargobankTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE40100100103307118608"));
+        balances.add(new Account("DE70300209005320320678"));
 
         List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE67100100101306118605"));
+        transactions.add(new Account("DE70300209005320320678"));
 
-        PSU psu = new PSU("1234-wertiq-983");
+        PSU psu = new PSU("PSD2TEST4");
+        psu.setIp("255.255.255.0");
         Consent consent = new Consent();
         consent.getAccess().setBalances(balances);
         consent.getAccess().setTransactions(transactions);
@@ -52,7 +57,8 @@ public class TargobankTest {
         consent.setValidUntil(new Date());
         // build Request Body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
-        createConsentRequest.setTppRedirectPreferred(true);
+        createConsentRequest.setTppRedirectPreferred(false);
+        createConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
         consent = standard.getCs().createConsent(createConsentRequest);
 
@@ -69,7 +75,8 @@ public class TargobankTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         GetConsentRequest getConsentRequest = new GetConsentRequest();
-        getConsentRequest.setConsentId("983fa01f-eedb-467d-849b-e81e1c8bf47a");
+        getConsentRequest.setConsentId("rT2emZQ8mxH2VBPApZosBV9TiUsweAzkL0zFIPVCIVBc2-Pgi7MEMMIVlGwzdp3-AwsTYAZkvKgYQwZavZ1pB_SdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q");
+        getConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
         Consent consent = standard.getCs().getConsent(getConsentRequest);
     }
@@ -223,4 +230,37 @@ public class TargobankTest {
         }
     }
 
+    @Test
+    @Tag("integration")
+    public void authoriseConsent() throws BankRequestFailedException {
+        XS2AStandard standard = new XS2AStandard();
+        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+
+        PSU psu = new PSU("PSD2TEST4");
+        psu.setIp("255.255.255.0");
+        ConsentCreateAuthResourceRequest consentCreateAuthResourceRequest =
+                new ConsentCreateAuthResourceRequest("ioW1KUuefUzI_1LlM3qUd-6MzKMzjcaWwGTTG4GnPhrZB5wrJwUOjrROTKut-ViLQO3mGabdmvlZWBT56CplvvSdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q");
+        consentCreateAuthResourceRequest.setPsu(psu);
+        consentCreateAuthResourceRequest.getHeaders().put("X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+
+        SCA sca = standard.getCs().startAuthorisationProcess(consentCreateAuthResourceRequest);
+    }
+
+    @Test
+    @Tag("integration")
+    public void updatePSUDataConsent() throws BankRequestFailedException {
+        XS2AStandard standard = new XS2AStandard();
+        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+
+        PSU psu = new PSU("PSD2TEST4");
+        psu.setIp("255.255.255.0");
+        ConsentUpdatePSUDataRequest consentUpdatePSUDataRequest =
+                new ConsentUpdatePSUDataRequest(
+                        "Ub8XkbUGJVmbESyjFZqZzoj_PluPwrbZJiUTjTXlJCOF16E1zu1iJRNNZPUliEgLHQfChL30WsEvET_RBu9FfPSdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q",
+                        "03f88668-06a3-406b-af1c-436979ad04cf");
+        consentUpdatePSUDataRequest.setPsu(psu);
+        consentUpdatePSUDataRequest.getHeaders().put("X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+
+        standard.getCs().updatePSUData(consentUpdatePSUDataRequest);
+    }
 }

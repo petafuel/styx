@@ -2,19 +2,22 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSerializer;
 import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.BulkPaymentInitiationJsonRequestSerializer;
+
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class BulkPaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
 
-    /** Body attributes */
+    /**
+     * Body attributes
+     */
     private List<Payment> payments;
     private boolean batchBookingPreferred;
     private Date requestedExecutionDate;
@@ -26,11 +29,9 @@ public class BulkPaymentInitiationJsonRequest extends XS2APaymentInitiationReque
     }
 
     @Override
-    public String getRawBody() {
-
-        JsonSerializer serializer = new BulkPaymentInitiationJsonRequestSerializer();
-        Gson gson = new GsonBuilder().registerTypeAdapter(this.getClass(), serializer).create();
-        return gson.toJson(this);
+    public Optional<String> getRawBody() {
+        Gson gson = new GsonBuilder().registerTypeAdapter(this.getClass(), new BulkPaymentInitiationJsonRequestSerializer()).create();
+        return Optional.ofNullable(gson.toJson(this));
     }
 
     public List<Payment> getPayments() {

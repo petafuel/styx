@@ -91,6 +91,7 @@ public final class ConsentPoll extends WorkableTask {
                 LOG.error("Task {} execution was interrupted: {}", getId(), e.getMessage());
                 Thread.currentThread().interrupt();
             }
+            retryIterator.next();
         }
 
         //TODO make GetConsentRequest class as a parameter

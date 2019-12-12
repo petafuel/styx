@@ -94,6 +94,7 @@ public final class ThreadManager {
     }
 
     public void start() {
+        LOG.info("Starting KeepAlive ThreadManagement");
         spawnStartupThreads();
         initialized = true;
         if (useRecovery) {
@@ -121,7 +122,6 @@ public final class ThreadManager {
                 synchronized (this.coreQueue) {
                     this.coreQueue.notifyAll();
                 }
-                LOG.info("Core Queue size: {}", this.coreQueue.size());
                 break;
             case RETRY_FAILURE:
                 this.retryFailureQueue.add(task);

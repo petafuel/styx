@@ -55,6 +55,8 @@ INSERT INTO public.sca_methods (id, name)
 VALUES (3, 'REDIRECT');
 INSERT INTO public.sca_methods (id, name)
 VALUES (4, 'OAUTH2');
+INSERT INTO public.sca_methods (id, name)
+VALUES (5, 'REQUIRE_AUTHORISATION_RESOURCE');
 
 -- auto-generated definition
 create table tokens

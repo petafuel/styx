@@ -1,15 +1,12 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http;
 
-import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AQueryParameter;
+import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 
 import java.util.Date;
+import java.util.Optional;
 
-public class ReadTransactionsRequest extends XS2AGetRequest {
-
-    /**
-     * Body
-     */
+public class ReadTransactionsRequest extends XS2ARequest {
 
     private String accountId;
 
@@ -34,18 +31,18 @@ public class ReadTransactionsRequest extends XS2AGetRequest {
 
 
     public ReadTransactionsRequest(String accountId, String consentId, String bookingStatus, Date dateFrom, Date dateTo) {
-        super(consentId);
         this.accountId = accountId;
         this.bookingStatus = bookingStatus;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
+        this.setConsentId(consentId);
     }
 
     public ReadTransactionsRequest(String accountId, String consentId, String bookingStatus, boolean deltaList) {
-        super(consentId);
         this.accountId = accountId;
         this.bookingStatus = bookingStatus;
         this.deltaList = deltaList;
+        this.setConsentId(consentId);
     }
 
     public String getAccountId() {
@@ -102,5 +99,10 @@ public class ReadTransactionsRequest extends XS2AGetRequest {
 
     public void setWithBalance(boolean withBalance) {
         this.withBalance = withBalance;
+    }
+
+    @Override
+    public Optional<String> getRawBody() {
+        return Optional.empty();
     }
 }

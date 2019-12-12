@@ -42,6 +42,9 @@ public class SCAHandler {
             case REDIRECT:
                 scaMethod = new Redirect(sca.getLinks().get(SCA.LinkType.SCA_REDIRECT));
                 break;
+            case REQUIRE_AUTHORISATION_RESOURCE:
+                //Do nothing
+                break;
             default:
                 throw new InvalidSCAMethodException("Found SCA Method is unsupported");
         }

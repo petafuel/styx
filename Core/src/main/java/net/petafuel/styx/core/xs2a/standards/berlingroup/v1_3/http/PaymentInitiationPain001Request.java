@@ -10,9 +10,13 @@ import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 
+import java.util.Optional;
+
 public class PaymentInitiationPain001Request extends XS2APaymentInitiationRequest {
 
-    /** Body */
+    /**
+     * Body
+     */
     private PAIN00100303Document body;
 
     public PaymentInitiationPain001Request(PaymentProduct paymentProduct, PaymentService paymentService, PAIN00100303Document body, PSU psu) {
@@ -22,21 +26,19 @@ public class PaymentInitiationPain001Request extends XS2APaymentInitiationReques
         PaymentInstructionInformation payment = body.getCctInitiation().getPmtInfos().get(0);
         GroupHeader groupHeader = body.getCctInitiation().getGrpHeader();
 
-        if (this.getPaymentProduct().equals(PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS)) {
-            if (payment.getRequestedExecutionDate() == null || "".equals(payment.getRequestedExecutionDate())){
-                payment.setRequestedExecutionDate(groupHeader.getCreationTime());
-            }
+        if (this.getPaymentProduct().equals(PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS) && (payment.getRequestedExecutionDate() == null || "".equals(payment.getRequestedExecutionDate()))) {
+            payment.setRequestedExecutionDate(groupHeader.getCreationTime());
         }
     }
 
     @Override
-    public String getRawBody() {
+    public Optional<String> getRawBody() {
 
         SEPAWriter writer = new SEPAWriter(body);
         try {
-            return new String(writer.writeSEPA());
+            return Optional.of(new String(writer.writeSEPA()));
         } catch (SEPAWriteException exception) {
-            return "";
+            return Optional.empty();
         }
     }
 

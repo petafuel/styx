@@ -29,7 +29,7 @@ public class ConsentTest {
 
     @Test
     @Tag("integration")
-    public void createConsent() throws SignatureException, BankRequestFailedException {
+    public void createConsent() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setCs(new BerlinGroupCS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
         //standard.setCs(new BerlinGroupCS("https://simulator-xs2a.db.com/", new BerlinGroupSigner()));
@@ -72,7 +72,7 @@ public class ConsentTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         GetConsentRequest getConsentRequest = new GetConsentRequest();
-        getConsentRequest.setConsentId("983fa01f-eedb-467d-849b-e81e1c8bf47a");
+        getConsentRequest.setConsentId("b7c58287-5612-4b43-b837-8b2800917186");
 
         Consent consent = standard.getCs().getConsent(getConsentRequest);
     }
@@ -86,7 +86,7 @@ public class ConsentTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         StatusConsentRequest statusConsentRequest = new StatusConsentRequest();
-        statusConsentRequest.setConsentId("983fa01f-eedb-467d-849b-e81e1c8bf47a");
+        statusConsentRequest.setConsentId("b7c58287-5612-4b43-b837-8b2800917186");
 
         assertThrows(BankRequestFailedException.class, () -> {
             standard.getCs().getStatus(statusConsentRequest);
@@ -97,12 +97,12 @@ public class ConsentTest {
     @Tag("integration")
     public void deleteConsent() throws BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+        standard.setCs(new BerlinGroupCS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
 
         DeleteConsentRequest deleteConsentRequest = new DeleteConsentRequest();
-        deleteConsentRequest.setConsentId("sometest-BAFIN-125314CO4960JJ");
+        deleteConsentRequest.setConsentId("b7c58287-5612-4b43-b837-8b2800917186");
 
         assertThrows(BankRequestFailedException.class, () -> {
             standard.getCs().deleteConsent(deleteConsentRequest);

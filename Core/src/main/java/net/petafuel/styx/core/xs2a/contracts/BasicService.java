@@ -9,8 +9,8 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.apache.logging.log4j.Logger;
 
@@ -56,7 +56,7 @@ public abstract class BasicService {
     }
 
     protected void createBody(RequestType requestType, MediaType mediaType, XS2ARequest request) {
-        createBody(requestType, RequestBody.create(request.getRawBody(), mediaType));
+        createBody(requestType, RequestBody.create(request.getRawBody().orElse(""), mediaType));
     }
 
     protected void createBody(RequestType requestType, RequestBody body) {
@@ -101,8 +101,7 @@ public abstract class BasicService {
         } catch (NullPointerException e) {
             LOG.error("Unable to get Trust Managers from TrustManager Factory");
         }
-        if(x509Tm == null)
-        {
+        if (x509Tm == null) {
             throw new CertificateException("There is no default Trust store available");
         }
 
@@ -110,10 +109,9 @@ public abstract class BasicService {
         return client.newCall(request).execute();
     }
 
-    protected enum RequestType {
-        POST,
-        GET,
-        DELETE
+    protected String getHttpQueryString(XS2ARequest request) {
+        XS2AQueryParameterParser.parse(request);
+        return BasicService.httpBuildQuery(request.getQueryParameters());
     }
 
     protected static String httpBuildQuery(Map<String, String> data) {
@@ -127,9 +125,11 @@ public abstract class BasicService {
         return query.toString();
     }
 
-    protected String getHttpQueryString(XS2AGetRequest request) {
-        XS2AQueryParameterParser.parse(request);
-        return BasicService.httpBuildQuery(request.getQueryParameters());
+    protected enum RequestType {
+        POST,
+        GET,
+        DELETE,
+        PUT
     }
 
     protected void throwBankRequestException(Response response) throws BankRequestFailedException, IOException {

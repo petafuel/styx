@@ -5,12 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.petafuel.styx.core.xs2a.contracts.AISInterface;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
-import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
+import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Balance;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsRequest;
@@ -41,7 +41,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public List<Account> getAccountList(XS2AGetRequest request) throws BankRequestFailedException {
+    public List<Account> getAccountList(XS2ARequest request) throws BankRequestFailedException {
         this.setUrl(this.url + GET_ACCOUNT_LIST + this.getHttpQueryString(request));
         this.createBody(RequestType.GET);
         this.createHeaders(request);
@@ -65,8 +65,8 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public Account getAccount(XS2AGetRequest request) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(GET_ACCOUNT_DETAILS, ((ReadAccountDetailsRequest) request).getAccountId())  + this.getHttpQueryString(request));
+    public Account getAccount(XS2ARequest request) throws BankRequestFailedException {
+        this.setUrl(this.url + String.format(GET_ACCOUNT_DETAILS, ((ReadAccountDetailsRequest) request).getAccountId()) + this.getHttpQueryString(request));
 
         this.createBody(RequestType.GET);
         this.createHeaders(request);
@@ -91,7 +91,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public List<Balance> getBalancesByAccount(XS2AGetRequest request) throws BankRequestFailedException {
+    public List<Balance> getBalancesByAccount(XS2ARequest request) throws BankRequestFailedException {
 
         this.setUrl(this.url + String.format(GET_BALANCES, ((ReadBalancesRequest) request).getAccountId()) + this.getHttpQueryString(request));
 
@@ -117,7 +117,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public List<Transaction> getTransactionsByAccount(XS2AGetRequest request) throws BankRequestFailedException {
+    public List<Transaction> getTransactionsByAccount(XS2ARequest request) throws BankRequestFailedException {
         ReadTransactionsRequest r1 = (ReadTransactionsRequest) request;
         this.setUrl(this.url + String.format(GET_TRANSACTIONS, r1.getAccountId()) + this.getHttpQueryString(request));
         this.createBody(RequestType.GET);
@@ -142,7 +142,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public Transaction getTransaction(XS2AGetRequest request) throws BankRequestFailedException {
+    public Transaction getTransaction(XS2ARequest request) throws BankRequestFailedException {
 
         ReadTransactionDetailsRequest r1 = (ReadTransactionDetailsRequest) request;
         this.setUrl(this.url + String.format(GET_TRANSACTION_DETAILS, r1.getAccountId(), r1.getTransactionId()));

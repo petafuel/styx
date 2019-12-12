@@ -68,7 +68,7 @@ public final class RetryFailureWorker extends RunnableWorker {
             LOG.info("Task id:{} signature:{} polled from queue", task.getId(), task.getSignature());
             try {
                 if (TaskRecoveryDB.incrementExecutionCounter(task.getId()) >= maxRetriesPerTask) {
-                    throw new TaskFinalFailureException("Maximum amount of executions by a finalFailureWorker was reached for task: " + task.getId(), TaskFinalFailureCode.EXCEEDED_MAX_RETRIES_THROUGH_RETRYFAILUREWORKER);
+                    throw new TaskFinalFailureException("Maximum amount of executions by a RetryFailureWorker was reached for task: " + task.getId(), TaskFinalFailureCode.EXCEEDED_MAX_RETRIES_THROUGH_RETRYFAILUREWORKER);
                 }
 
                 TaskRecoveryDB.updateState(task.getId(), TaskState.RUNNING);

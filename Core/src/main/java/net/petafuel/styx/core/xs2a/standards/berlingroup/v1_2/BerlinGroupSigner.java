@@ -17,13 +17,13 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.StringJoiner;
 
 /**
  * Berlin Group Signer to sign HTTP Requests on an Application Layer
+ *
  * @version 1.2
  * @see IBerlinGroupSigner
  */
@@ -73,7 +73,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
             LOG.error("Unable to digest message: {}", e.getMessage());
         }
 
-        HashMap<String, String> headers = xs2aRequest.getHeaders();
+        Map<String, String> headers = xs2aRequest.getHeaders();
 
         StringJoiner signatureStructureJoiner = new StringJoiner(" ");
         StringJoiner signatureContentJoiner = new StringJoiner("\n");
@@ -108,7 +108,7 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
             LOG.error(e.getStackTrace());
         }
 
-        xs2aRequest.setHeader(XS2AHeader.SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,
+        xs2aRequest.addHeader(XS2AHeader.SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,
                 this.serialHex,
                 this.issuerDN,
                 this.algorithm,
@@ -125,9 +125,9 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
      */
     private void digest(XS2ARequest request) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        byte[] requestBodyBytes = request.getRawBody().getBytes(StandardCharsets.UTF_8);
+        byte[] requestBodyBytes = request.getRawBody().orElse("").getBytes(StandardCharsets.UTF_8);
         byte[] digestHeader = messageDigest.digest(requestBodyBytes);
-        request.setHeader(XS2AHeader.DIGEST, "SHA-256=" + Base64.getEncoder().encodeToString(digestHeader));
+        request.addHeader(XS2AHeader.DIGEST, "SHA-256=" + Base64.getEncoder().encodeToString(digestHeader));
     }
 
     /**
@@ -136,6 +136,6 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
      * @param request The full XS2ARequest that should contain the certificate
      */
     private void addCertificate(XS2ARequest request) {
-        request.setHeader(XS2AHeader.TPP_SIGNATURE_CERTIFICATE, Base64.getEncoder().encodeToString(this.certificate));
+        request.addHeader(XS2AHeader.TPP_SIGNATURE_CERTIFICATE, Base64.getEncoder().encodeToString(this.certificate));
     }
 }

@@ -1,60 +1,25 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http;
 
-import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.UUID;
+import java.util.Optional;
 
-public class DeleteConsentRequest implements XS2ARequest {
-    /**
-     * Headers
-     */
-    @XS2AHeader(XS2AHeader.X_REQUEST_ID)
-    private String xRequestId;
+public class DeleteConsentRequest extends XS2ARequest {
+    //This is a path parameter and should not be parsed for header lines or query params
+    private String consentIdentifier;
 
-    @XS2AHeader(XS2AHeader.DATE)
-    private String date;
-
-    @XS2AHeader(XS2AHeader.CONSENT_ID)
-    private String consentId;
-
-    //Accumulated Headers
-    private LinkedHashMap<String, String> headers;
-
-    /**
-     * Body
-     */
-
-    public DeleteConsentRequest() {
-        this.headers = new LinkedHashMap<>();
-        this.xRequestId = String.valueOf(UUID.randomUUID());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, dd MM yyyy HH:mm:ss zz");
-        this.date = simpleDateFormat.format(new Date());
+    @Override
+    public Optional<String> getRawBody() {
+        return Optional.empty();
     }
 
     @Override
-    public String getRawBody() {
-        return "";
-    }
-
-    @Override
-    public void setHeader(String key, String value) {
-        this.headers.put(key, value);
-    }
-
-    @Override
-    public LinkedHashMap<String, String> getHeaders() {
-        return this.headers;
-    }
-
     public String getConsentId() {
-        return consentId;
+        return consentIdentifier;
     }
 
+    @Override
     public void setConsentId(String consentId) {
-        this.consentId = consentId;
+        this.consentIdentifier = consentId;
     }
 }

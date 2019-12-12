@@ -124,7 +124,7 @@ public final class TaskRecoveryDB {
 
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
-                    retryAmount = resultSet.getInt("increment_task_execution_counter");
+                    retryAmount = resultSet.getInt(1);
                 }
             }
         } catch (SQLException e) {

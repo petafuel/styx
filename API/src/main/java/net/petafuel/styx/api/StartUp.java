@@ -14,7 +14,6 @@ public class StartUp {
         WebServer server = new WebServer();
         try {
             server.startHttpServer();
-
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error("Server could not be started: " + e.getMessage());

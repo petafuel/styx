@@ -1,5 +1,7 @@
 package net.petafuel.styx.api;
 
+import net.petafuel.styx.api.filters.AuthorizedFilter;
+import net.petafuel.styx.api.filters.MasterTokenFilter;
 import net.petafuel.styx.api.v1.account.boundary.AccountResource;
 import net.petafuel.styx.api.v1.auth.boundary.AuthResource;
 import net.petafuel.styx.api.v1.callback.boundary.CallbackResource;
@@ -12,7 +14,6 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import java.net.URI;
-
 
 public class WebServer {
 
@@ -35,7 +36,9 @@ public class WebServer {
                     .register(AccountResource.class)
                     .register(AuthResource.class)
                     .register(ConsentResource.class)
-                    .register(PaymentResource.class);
+                    .register(PaymentResource.class)
+                    .register(AuthorizedFilter.class)
+                    .register(MasterTokenFilter.class);
 
             try {
                 String url = schema + ip + ":" + port + "/";

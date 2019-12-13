@@ -61,12 +61,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
         this.createHeaders(xs2ARequest);
 
         try (Response response = this.execute()) {
-
-            if (response.code() != 201) {
-                throwBankRequestException(response);
-            }
-
-            String body = response.body().string();
+            String body = extractResponseBody(response, 201);
 
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(InitiatedPayment.class, new InitiatedPaymentSerializer())
@@ -99,11 +94,12 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
         }
         this.createHeaders(request);
         try (Response response = this.execute()) {
-            String contentType = response.headers().get("content-type");
-            if (response.code() != 200 || contentType == null) {
-                throwBankRequestException(response);
+            String contentType;
+            if ((contentType = response.headers().get("content-type")) == null) {
+                throw new BankRequestFailedException("Content-Type Header is not set, parsing of json or xml is not possible", response.code());
             }
-            String responseBody = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
+
             if (JSON.toString().equalsIgnoreCase(contentType)) {
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(PaymentStatus.class, new PaymentStatusSerializer())

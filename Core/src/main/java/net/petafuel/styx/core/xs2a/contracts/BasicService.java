@@ -11,7 +11,6 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
@@ -132,16 +131,23 @@ public abstract class BasicService {
         PUT
     }
 
-    protected void throwBankRequestException(Response response) throws BankRequestFailedException, IOException {
-        String msg = "Request failed with ResponseCode {} -> {}";
-        ResponseBody body = response.body();
-        if (body == null) {
-            LOG.error(msg, response.code(), "empty response body");
-            throw new BankRequestFailedException("empty response body", response.code());
-        } else {
-            String responseMessage = body.string();
-            LOG.error(msg, response.code(), responseMessage);
-            throw new BankRequestFailedException(responseMessage, response.code());
+    protected String extractResponseBody(Response response, int expectedResponseCode) throws BankRequestFailedException, IOException {
+        return extractResponseBody(response, expectedResponseCode, true);
+    }
+
+    protected String extractResponseBody(Response response, int expectedResponseCode, boolean expectBody) throws BankRequestFailedException, IOException {
+        String responseBody = response.body() != null ? response.body().string() : null;
+
+        if ((expectBody && responseBody == null) || response.code() != expectedResponseCode) {
+            String msg = "Request failed with ResponseCode {} -> {}";
+            if (responseBody == null) {
+                LOG.error(msg, response.code(), "empty response body");
+                throw new BankRequestFailedException("empty response body", response.code());
+            } else {
+                LOG.error(msg, response.code(), responseBody);
+                throw new BankRequestFailedException(responseBody, response.code());
+            }
         }
+        return responseBody;
     }
 }

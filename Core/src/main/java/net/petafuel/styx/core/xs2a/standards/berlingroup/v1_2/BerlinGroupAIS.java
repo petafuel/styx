@@ -48,17 +48,14 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            String body = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
             Type type = new TypeToken<ArrayList<Account>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new AccountSerializer())
                     .create();
 
-            return gson.fromJson(body, type);
+            return gson.fromJson(responseBody, type);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
@@ -72,18 +69,14 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
         this.createHeaders(request);
 
         try (Response response = this.execute()) {
-
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            String body = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
             Type type = new TypeToken<ArrayList<Account>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new AccountSerializer())
                     .create();
 
-            List<Account> accounts = gson.fromJson(body, type);
+            List<Account> accounts = gson.fromJson(responseBody, type);
             return accounts.get(0);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
@@ -100,17 +93,14 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            String body = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
             Type type = new TypeToken<ArrayList<Balance>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new BalancesSerializer())
                     .create();
 
-            return gson.fromJson(body, type);
+            return gson.fromJson(responseBody, type);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
@@ -125,17 +115,14 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            String body = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
             Type type = new TypeToken<ArrayList<Transaction>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new TransactionsSerializer())
                     .create();
 
-            return gson.fromJson(body, type);
+            return gson.fromJson(responseBody, type);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
@@ -151,17 +138,14 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            String body = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
             Type type = new TypeToken<ArrayList<Transaction>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new TransactionsSerializer())
                     .create();
 
-            List<Transaction> transactions = gson.fromJson(body, type);
+            List<Transaction> transactions = gson.fromJson(responseBody, type);
             return transactions.get(0);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);

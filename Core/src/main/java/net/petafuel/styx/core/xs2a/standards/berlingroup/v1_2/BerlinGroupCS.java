@@ -13,16 +13,12 @@ import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.AccountSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentStatusSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.SCASerializer;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,12 +46,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
         this.createHeaders(consentRequest);
 
         try (Response response = this.execute()) {
-
-            String responseBody = response.body() != null ? response.body().string() : null;
-
-            if (response.code() != 201 || responseBody == null) {
-                throwBankRequestException(response);
-            }
+            String responseBody = extractResponseBody(response, 201);
 
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(Consent.class, new ConsentSerializer())
@@ -75,16 +66,12 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
 
     @Override
     public Consent getConsent(XS2ARequest consentGetRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(GET_CONSENT, ((GetConsentRequest) consentGetRequest).getConsentId()));
+        this.setUrl(this.url + String.format(GET_CONSENT, consentGetRequest.getConsentId()));
         this.createBody(RequestType.GET);
         this.createHeaders(consentGetRequest);
 
         try (Response response = this.execute()) {
-
-            String responseBody = response.body() != null ? response.body().string() : null;
-            if (response.code() != 200 || responseBody == null) {
-                throwBankRequestException(response);
-            }
+            String responseBody = extractResponseBody(response, 200);
 
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(Consent.class, new ConsentSerializer())
@@ -92,7 +79,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
                     .create();
 
             Consent consent = gson.fromJson(responseBody, Consent.class);
-            consent.setId(((GetConsentRequest) consentGetRequest).getConsentId());
+            consent.setId(consentGetRequest.getConsentId());
             return consent;
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
@@ -101,16 +88,12 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
 
     @Override
     public Consent.State getStatus(XS2ARequest consentStatusRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(GET_CONSENT_STATUS, ((StatusConsentRequest) consentStatusRequest).getConsentId()));
+        this.setUrl(this.url + String.format(GET_CONSENT_STATUS, consentStatusRequest.getConsentId()));
         this.createBody(RequestType.GET);
         this.createHeaders(consentStatusRequest);
 
         try (Response response = this.execute()) {
-
-            String responseBody = response.body() != null ? response.body().string() : null;
-            if (response.code() != 200 || responseBody == null) {
-                throwBankRequestException(response);
-            }
+            String responseBody = extractResponseBody(response, 200);
 
             Gson gson = new GsonBuilder()
                     .serializeNulls()
@@ -124,17 +107,15 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
 
     @Override
     public Consent deleteConsent(XS2ARequest consentDeleteRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(DELETE_CONSENT, ((DeleteConsentRequest) consentDeleteRequest).getConsentId()));
+        this.setUrl(this.url + String.format(DELETE_CONSENT, consentDeleteRequest.getConsentId()));
         this.createBody(RequestType.DELETE);
         this.createHeaders(consentDeleteRequest);
 
         try (Response response = this.execute()) {
+            extractResponseBody(response, 204, false);
 
-            if (response.code() != 204) {
-                throwBankRequestException(response);
-            }
             Consent consent = new Consent();
-            consent.setId(((DeleteConsentRequest) consentDeleteRequest).getConsentId());
+            consent.setId(consentDeleteRequest.getConsentId());
             return new PersistentConsent().updateState(consent, Consent.State.TERMINATED_BY_TPP);
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
@@ -155,11 +136,8 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
         this.createHeaders(consentCreateAuthResourceRequest);
 
         try (Response response = this.execute()) {
+            String responseBody = extractResponseBody(response, 201);
 
-            String responseBody = response.body() != null ? response.body().string() : null;
-            if (responseBody == null || response.code() != 201) {
-                throwBankRequestException(response);
-            }
             Gson gson = new GsonBuilder().registerTypeAdapter(SCA.class, new SCASerializer()).create();
             SCA sca = gson.fromJson(responseBody, SCA.class);
             SCAUtils.parseSCAApproach(sca, response);
@@ -171,16 +149,12 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
 
     @Override
     public void updatePSUData(XS2ARequest consentUpdatePSUDataRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(UPDATE_PSU_DATA, ((ConsentUpdatePSUDataRequest) consentUpdatePSUDataRequest).getConsentId(), ((ConsentUpdatePSUDataRequest) consentUpdatePSUDataRequest).getAuthorisationId()));
+        this.setUrl(this.url + String.format(UPDATE_PSU_DATA, consentUpdatePSUDataRequest.getConsentId(), ((ConsentUpdatePSUDataRequest) consentUpdatePSUDataRequest).getAuthorisationId()));
         this.createBody(RequestType.PUT, JSON, consentUpdatePSUDataRequest);
         this.createHeaders(consentUpdatePSUDataRequest);
 
         try (Response response = this.execute()) {
-
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            ResponseBody responseBody = response.body();
+            String responseBody = extractResponseBody(response, 200);
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }

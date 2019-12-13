@@ -36,7 +36,7 @@ public abstract class XS2ARequest {
     /*
      * Query Parameter
      * */
-    @XS2AQueryParameter(XS2AQueryParameter.CONSENT_ID)
+    @XS2AHeader(XS2AHeader.CONSENT_ID)
     private String consentId;
 
     @XS2AHeader(XS2AHeader.AUTHORIZATION)

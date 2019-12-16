@@ -154,7 +154,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
         this.createHeaders(consentUpdatePSUDataRequest);
 
         try (Response response = this.execute()) {
-            String responseBody = extractResponseBody(response, 200);
+            //TODO Für den EMBEDDED Approach muss hier vervollständigt werden
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }

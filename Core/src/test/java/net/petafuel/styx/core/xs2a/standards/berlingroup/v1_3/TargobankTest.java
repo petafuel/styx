@@ -15,6 +15,7 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsent
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentCreateAuthResourceRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ public class TargobankTest {
 
     private static final String URL = "https://www.sandbox-bvxs2a.de/targobank/";
     private static final String BANK_VERLAG_TOKEN = "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE";
-    private static final String CONSENT = "GbC_YyTjveBABvfZ_hgCzkKauuhQSvdHm-s7N0zFS-pzWZ3Xg4bHY4JyPEbmmj0vxgcMfGv6-3UsaiUflNg8APSdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q";
+    private static final String CONSENT = "P6wMwv2MAlyqHLxiQ0W9Jao0rBZp90l7RoRUWHW5YG2tvuV4UiKKo5eMVlEsrA-VCSmy8mjGAmN707bED6NC__SdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q";
 
     @Test
     @Tag("integration")
@@ -72,8 +73,10 @@ public class TargobankTest {
         standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
-
+        PSU psu = new PSU("PSD2TEST4");
+        psu.setIp("255.255.255.0");
         GetConsentRequest getConsentRequest = new GetConsentRequest();
+        getConsentRequest.setPsu(psu);
         getConsentRequest.setConsentId(CONSENT);
 
         getConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
@@ -88,9 +91,11 @@ public class TargobankTest {
         standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
-
+        PSU psu = new PSU("PSD2TEST4");
+        psu.setIp("255.255.255.0");
         StatusConsentRequest statusConsentRequest = new StatusConsentRequest();
         statusConsentRequest.setConsentId(CONSENT);
+        statusConsentRequest.setPsu(psu);
         statusConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         Consent.State status = standard.getCs().getStatus(statusConsentRequest);
@@ -105,8 +110,10 @@ public class TargobankTest {
         standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
-
+        PSU psu = new PSU("PSD2TEST4");
+        psu.setIp("255.255.255.0");
         DeleteConsentRequest deleteConsentRequest = new DeleteConsentRequest();
+        deleteConsentRequest.setPsu(psu);
         deleteConsentRequest.setConsentId(CONSENT);
         deleteConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
@@ -125,7 +132,7 @@ public class TargobankTest {
         List<Account> balances = new LinkedList<>();
         balances.add(new Account("DE40100100103307118608"));
 
-        PSU psu = new PSU("4321-87654321-4321");
+        PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");
         Consent consent = new Consent();
         consent.getAccess().setBalances(balances);
@@ -154,7 +161,7 @@ public class TargobankTest {
         List<Account> transactions = new LinkedList<>();
         transactions.add(new Account("DE40100100103307118608"));
 
-        PSU psu = new PSU("4321-87654321-4321");
+        PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");
         Consent consent = new Consent();
         consent.getAccess().setTransactions(transactions);
@@ -175,13 +182,14 @@ public class TargobankTest {
     @Test
     @DisplayName("Create consent without balances or transactions")
     @Tag("integration")
-    public void createNoAccountsConsent() throws SignatureException {
+    public void createNoAccountsConsent() throws SignatureException, BankRequestFailedException {
         XS2AStandard standard = new XS2AStandard();
         standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        PSU psu = new PSU("4321-87654321-4321");
+        PSU psu = new PSU("PSD2TEST4");
+        psu.setIp("255.255.255.0");
         Consent consent = new Consent();
         consent.setPsu(psu);
         consent.setCombinedServiceIndicator(false);
@@ -191,12 +199,7 @@ public class TargobankTest {
         // Build request body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
         createConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
-        try {
-            consent = standard.getCs().createConsent(createConsentRequest);
-            Assert.fail("BankRequestFailedException exception not thrown.");  // This line should never be reached.
-        } catch (BankRequestFailedException e) {
-            Assert.assertEquals(400, e.getHttpStatusCode());
-        }
+        Assertions.assertThrows(BankRequestFailedException.class, () -> standard.getCs().createConsent(createConsentRequest));
     }
 
     @Test
@@ -226,12 +229,7 @@ public class TargobankTest {
         // Build request body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
         createConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
-        try {
-            consent = standard.getCs().createConsent(createConsentRequest);
-            Assert.fail("BankRequestFailedException exception not thrown.");  // This line should never be reached.
-        } catch (BankRequestFailedException e) {
-            Assert.assertEquals(400, e.getHttpStatusCode());
-        }
+        Assertions.assertThrows(BankRequestFailedException.class, () -> standard.getCs().createConsent(createConsentRequest));
     }
 
     @Test

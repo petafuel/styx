@@ -5,7 +5,7 @@ import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 /**
  * PSU model for xs2a users
  * <p>
- *     <b>P</b>ayment <b>S</b>ervice <b>U</b>ser
+ * <b>P</b>ayment <b>S</b>ervice <b>U</b>ser
  * </p>
  */
 public class PSU {
@@ -36,6 +36,9 @@ public class PSU {
 
     public PSU(String id) {
         this.id = id;
+    }
+
+    public PSU() {
     }
 
     public String getId() {

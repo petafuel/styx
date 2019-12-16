@@ -1,14 +1,15 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers;
 
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonSerializer;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
+import net.petafuel.styx.core.xs2a.entities.XS2AJsonKeys;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 
 import java.lang.reflect.Type;
@@ -18,13 +19,11 @@ import java.util.List;
 
 public class AccountSerializer implements JsonSerializer<Account>, JsonDeserializer<List<Account>> {
 
-    private static final String CURRENCY = "currency";
-
     @Override
     public JsonElement serialize(Account src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject encoded = new JsonObject();
         encoded.addProperty(src.getType().getJsonKey(), src.getIdentifier());
-        encoded.addProperty(CURRENCY, src.getCurrency().toString());
+        encoded.addProperty(XS2AJsonKeys.CURRENCY.value(), src.getCurrency().toString());
         return encoded;
     }
 
@@ -76,10 +75,10 @@ public class AccountSerializer implements JsonSerializer<Account>, JsonDeseriali
         }
         String identifier = object.get(accountType.getJsonKey()).getAsString();
 
-        if (object.get(CURRENCY) == null) {
+        if (object.get(XS2AJsonKeys.CURRENCY.value()) == null) {
             throw new SerializerException("Unable to deserialize the Account Object: Attribute currency not given");
         }
-        Currency currency = Currency.valueOf(object.get(CURRENCY).getAsString().toUpperCase());
+        Currency currency = Currency.valueOf(object.get(XS2AJsonKeys.CURRENCY.value()).getAsString().toUpperCase());
 
         if (object.get("resourceId") != null) {
             resourceId = object.get("resourceId").getAsString();

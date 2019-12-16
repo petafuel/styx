@@ -9,9 +9,8 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
+import okhttp3.Response;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
@@ -47,8 +46,16 @@ public abstract class BasicService {
         this.builder.url(url);
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public IBerlinGroupSigner getSigner() {
+        return signer;
+    }
+
     protected void createBody(RequestType requestType, MediaType mediaType, XS2ARequest request) {
-        createBody(requestType, RequestBody.create(request.getRawBody(), mediaType));
+        createBody(requestType, RequestBody.create(request.getRawBody().orElse(""), mediaType));
     }
 
     protected void createBody(RequestType requestType, RequestBody body) {
@@ -93,8 +100,7 @@ public abstract class BasicService {
         } catch (NullPointerException e) {
             LOG.error("Unable to get Trust Managers from TrustManager Factory");
         }
-        if(x509Tm == null)
-        {
+        if (x509Tm == null) {
             throw new CertificateException("There is no default Trust store available");
         }
 
@@ -102,10 +108,9 @@ public abstract class BasicService {
         return client.newCall(request).execute();
     }
 
-    protected enum RequestType {
-        POST,
-        GET,
-        DELETE
+    protected String getHttpQueryString(XS2ARequest request) {
+        XS2AQueryParameterParser.parse(request);
+        return BasicService.httpBuildQuery(request.getQueryParameters());
     }
 
     protected static String httpBuildQuery(Map<String, String> data) {
@@ -119,21 +124,30 @@ public abstract class BasicService {
         return query.toString();
     }
 
-    protected String getHttpQueryString(XS2AGetRequest request) {
-        XS2AQueryParameterParser.parse(request);
-        return BasicService.httpBuildQuery(request.getQueryParameters());
+    protected enum RequestType {
+        POST,
+        GET,
+        DELETE,
+        PUT
     }
 
-    protected void throwBankRequestException(Response response) throws BankRequestFailedException, IOException {
-        String msg = "Request failed with ResponseCode {} -> {}";
-        ResponseBody body = response.body();
-        if (body == null) {
-            LOG.error(msg, response.code(), "empty response body");
-            throw new BankRequestFailedException("empty response body", response.code());
-        } else {
-            String responseMessage = body.string();
-            LOG.error(msg, response.code(), responseMessage);
-            throw new BankRequestFailedException(responseMessage, response.code());
+    protected String extractResponseBody(Response response, int expectedResponseCode) throws BankRequestFailedException, IOException {
+        return extractResponseBody(response, expectedResponseCode, true);
+    }
+
+    protected String extractResponseBody(Response response, int expectedResponseCode, boolean expectBody) throws BankRequestFailedException, IOException {
+        String responseBody = response.body() != null ? response.body().string() : null;
+
+        if ((expectBody && responseBody == null) || response.code() != expectedResponseCode) {
+            String msg = "Request failed with ResponseCode {} -> {}";
+            if (responseBody == null) {
+                LOG.error(msg, response.code(), "empty response body");
+                throw new BankRequestFailedException("empty response body", response.code());
+            } else {
+                LOG.error(msg, response.code(), responseBody);
+                throw new BankRequestFailedException(responseBody, response.code());
+            }
         }
+        return responseBody;
     }
 }

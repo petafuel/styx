@@ -9,6 +9,8 @@ import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PeriodicPaymentSerializer;
 
+import java.util.Optional;
+
 public class PeriodicPaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
 
     private PeriodicPayment payment;
@@ -19,9 +21,9 @@ public class PeriodicPaymentInitiationJsonRequest extends XS2APaymentInitiationR
     }
 
     @Override
-    public String getRawBody() {
+    public Optional<String> getRawBody() {
         Gson gson = new GsonBuilder().registerTypeAdapter(PeriodicPayment.class, new PeriodicPaymentSerializer()).create();
-        return gson.toJson(this.payment);
+        return Optional.ofNullable(gson.toJson(this.payment));
     }
 
     public PeriodicPayment getPayment() {

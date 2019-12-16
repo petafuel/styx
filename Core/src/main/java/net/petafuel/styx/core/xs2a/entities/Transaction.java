@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Transaction {
     private final BookingStatus bookingStatus;
-    private Status status;
+    private TransactionStatus status;
     private final Type type;
     private String transactionId;
     /**
@@ -106,7 +106,7 @@ public class Transaction {
         this.bankTransactionCode = bankTransactionCode;
     }
 
-    public Status getStatus() {
+    public TransactionStatus getStatus() {
         return status;
     }
 
@@ -116,31 +116,5 @@ public class Transaction {
 
     public enum Type {
         CREDIT, DEBIT
-    }
-
-    public enum Status {
-        ACCC("AcceptedSettlementCompleted"),
-        ACCP("AcceptedCustomerProfile"),
-        ACSC("AcceptedSettlementCompleted"),
-        ACSP("AcceptedSettlementInProcess"),
-        ACTC("AcceptedTechnicalValidation"),
-        ACWC("AcceptedWithChange"),
-        ACWP("AcceptedWithoutPosting"),
-        RCVD("Received"),
-        PDNG("Pending"),
-        RJCT("Rejected"),
-        CANC("Cancelled"),
-        ACFC("AcceptedFundsChecked"),
-        PATC("PartiallyAcceptedTechnicalCorrect"),
-        PART("PartiallyAccepted");
-
-        private String name;
-        Status(String fullName) {
-            this.name = fullName;
-        }
-
-        public String getName() {
-            return name;
-        }
     }
 }

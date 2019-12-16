@@ -1,8 +1,10 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http;
 
-import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 
-public class ReadTransactionDetailsRequest extends XS2AGetRequest {
+import java.util.Optional;
+
+public class ReadTransactionDetailsRequest extends XS2ARequest {
 
     /**
      * Body
@@ -15,9 +17,9 @@ public class ReadTransactionDetailsRequest extends XS2AGetRequest {
     private String transactionId;
 
     public ReadTransactionDetailsRequest(String accountId, String transactionId, String consentId) {
-        super(consentId);
         this.accountId = accountId;
         this.transactionId = transactionId;
+        this.setConsentId(consentId);
     }
 
     public String getAccountId() {
@@ -34,5 +36,10 @@ public class ReadTransactionDetailsRequest extends XS2AGetRequest {
 
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
+    }
+
+    @Override
+    public Optional<String> getRawBody() {
+        return Optional.empty();
     }
 }

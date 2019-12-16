@@ -5,6 +5,7 @@
         <Property name="log-directory">log/</Property>
         <Property name="log-filename">styxapi.log</Property>
         <Property name="date-suffix">.%d{yyyy-MM-dd}</Property>
+        <Property name="log-filename-keep-alive">keepalive.log</Property>
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
@@ -15,11 +16,21 @@
             <PatternLayout pattern="${sys:log-pattern}"/>
             <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
         </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="keepalive" fileName="${sys:log-directory}${sys:log-filename-keep-alive}"
+                                 filePattern="${sys:log-directory}${sys:log-filename-keep-alive}${sys:date-suffix}"
+                                 append="true">
+            <PatternLayout pattern="${sys:log-pattern}"/>
+            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        </RollingRandomAccessFile>
     </Appenders>
     <Loggers>
-        <Root level="info">
+        <Root level="ALL">
             <AppenderRef ref="File"/>
             <AppenderRef ref="Console"/>
         </Root>
+        <Logger level="ALL" name="net.petafuel.styx.core.keepalive" additivity="false">
+            <AppenderRef ref="keepalive"/>
+        </Logger>
     </Loggers>
 </Configuration>

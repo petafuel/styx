@@ -30,6 +30,7 @@ public class TargobankTest {
 
     private static final String URL = "https://www.sandbox-bvxs2a.de/targobank/";
     private static final String BANK_VERLAG_TOKEN = "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE";
+    private static final String CONSENT = "GbC_YyTjveBABvfZ_hgCzkKauuhQSvdHm-s7N0zFS-pzWZ3Xg4bHY4JyPEbmmj0vxgcMfGv6-3UsaiUflNg8APSdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q";
 
     @Test
     @Tag("integration")
@@ -58,7 +59,7 @@ public class TargobankTest {
         // build Request Body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
         createConsentRequest.setTppRedirectPreferred(false);
-        createConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+        createConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         consent = standard.getCs().createConsent(createConsentRequest);
 
@@ -75,8 +76,9 @@ public class TargobankTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         GetConsentRequest getConsentRequest = new GetConsentRequest();
-        getConsentRequest.setConsentId("rT2emZQ8mxH2VBPApZosBV9TiUsweAzkL0zFIPVCIVBc2-Pgi7MEMMIVlGwzdp3-AwsTYAZkvKgYQwZavZ1pB_SdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q");
-        getConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+        getConsentRequest.setConsentId(CONSENT);
+
+        getConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         Consent consent = standard.getCs().getConsent(getConsentRequest);
     }
@@ -90,11 +92,12 @@ public class TargobankTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         StatusConsentRequest statusConsentRequest = new StatusConsentRequest();
-        statusConsentRequest.setConsentId("983fa01f-eedb-467d-849b-e81e1c8bf47a");
+        statusConsentRequest.setConsentId(CONSENT);
 
-        assertThrows(BankRequestFailedException.class, () -> {
-            standard.getCs().getStatus(statusConsentRequest);
-        });
+        statusConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
+        Consent.State status = standard.getCs().getStatus(statusConsentRequest);
+        Assert.assertTrue(status.equals(Consent.State.VALID) || status.equals(Consent.State.RECEIVED));
+
     }
 
     @Test
@@ -106,7 +109,8 @@ public class TargobankTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         DeleteConsentRequest deleteConsentRequest = new DeleteConsentRequest();
-        deleteConsentRequest.setConsentId("sometest-BAFIN-125314CO4960JJ");
+        deleteConsentRequest.setConsentId(CONSENT);
+        deleteConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         assertThrows(BankRequestFailedException.class, () -> {
             standard.getCs().deleteConsent(deleteConsentRequest);
@@ -135,6 +139,7 @@ public class TargobankTest {
         consent.setValidUntil(new Date());
         // Build request body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
+        createConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         consent = standard.getCs().createConsent(createConsentRequest);
 
@@ -164,6 +169,7 @@ public class TargobankTest {
         // Build request body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
         consent = standard.getCs().createConsent(createConsentRequest);
+        createConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         Assert.assertNotNull(consent.getId());
     }
@@ -186,7 +192,7 @@ public class TargobankTest {
         consent.setValidUntil(new Date());
         // Build request body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
-
+        createConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
         try {
             consent = standard.getCs().createConsent(createConsentRequest);
             Assert.fail("BankRequestFailedException exception not thrown.");  // This line should never be reached.
@@ -221,7 +227,7 @@ public class TargobankTest {
         consent.setValidUntil(new Date());
         // Build request body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
-
+        createConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
         try {
             consent = standard.getCs().createConsent(createConsentRequest);
             Assert.fail("BankRequestFailedException exception not thrown.");  // This line should never be reached.
@@ -239,11 +245,14 @@ public class TargobankTest {
         PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");
         ConsentCreateAuthResourceRequest consentCreateAuthResourceRequest =
-                new ConsentCreateAuthResourceRequest("ioW1KUuefUzI_1LlM3qUd-6MzKMzjcaWwGTTG4GnPhrZB5wrJwUOjrROTKut-ViLQO3mGabdmvlZWBT56CplvvSdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q");
+                new ConsentCreateAuthResourceRequest(CONSENT);
         consentCreateAuthResourceRequest.setPsu(psu);
-        consentCreateAuthResourceRequest.getHeaders().put("X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
-
+        consentCreateAuthResourceRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
         SCA sca = standard.getCs().startAuthorisationProcess(consentCreateAuthResourceRequest);
+        Assert.assertNotNull(sca);
+        Assert.assertNotNull(sca.getAuthorisationId());
+        Assert.assertNotNull(sca.getApproach());
+        Assert.assertEquals(SCA.Status.PSUIDENTIFIED, sca.getStatus());
     }
 
     @Test
@@ -256,10 +265,10 @@ public class TargobankTest {
         psu.setIp("255.255.255.0");
         ConsentUpdatePSUDataRequest consentUpdatePSUDataRequest =
                 new ConsentUpdatePSUDataRequest(
-                        "Ub8XkbUGJVmbESyjFZqZzoj_PluPwrbZJiUTjTXlJCOF16E1zu1iJRNNZPUliEgLHQfChL30WsEvET_RBu9FfPSdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q",
+                        CONSENT,
                         "03f88668-06a3-406b-af1c-436979ad04cf");
         consentUpdatePSUDataRequest.setPsu(psu);
-        consentUpdatePSUDataRequest.getHeaders().put("X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+        consentUpdatePSUDataRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         standard.getCs().updatePSUData(consentUpdatePSUDataRequest);
     }

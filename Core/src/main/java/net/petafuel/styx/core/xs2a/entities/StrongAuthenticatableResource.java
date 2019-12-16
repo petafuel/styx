@@ -1,6 +1,6 @@
 package net.petafuel.styx.core.xs2a.entities;
 
-abstract public class StrongAuthenticatableResource {
+public abstract class StrongAuthenticatableResource {
     protected SCA sca;
 
     public final SCA getSca() {

@@ -124,10 +124,10 @@ public class BerlinGroupSigner implements IBerlinGroupSigner {
      * @throws NoSuchAlgorithmException Throws the exception in case the SHA-256 Algorithm is not supported
      */
     private void digest(XS2ARequest request) throws NoSuchAlgorithmException {
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+        MessageDigest messageDigest = MessageDigest.getInstance("SHA-512");
         byte[] requestBodyBytes = request.getRawBody().orElse("").getBytes(StandardCharsets.UTF_8);
         byte[] digestHeader = messageDigest.digest(requestBodyBytes);
-        request.addHeader(XS2AHeader.DIGEST, "SHA-256=" + Base64.getEncoder().encodeToString(digestHeader));
+        request.addHeader(XS2AHeader.DIGEST, "SHA-512=" + Base64.getEncoder().encodeToString(digestHeader));
     }
 
     /**

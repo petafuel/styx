@@ -28,7 +28,7 @@ public class TargobankTest {
 
     private static final String URL = "https://www.sandbox-bvxs2a.de/targobank/";
     private static final String BANK_VERLAG_TOKEN = "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE";
-    private static final String CONSENT = "_Dtaw6mRL9O3U8mDR3RlX9UPyMWWxcQ7XP3BaWq_8LvTmD5NW-4VZF-UohD5r0GYGmyXjKIiEKviLS2-DqFZ8vSdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q";
+    private static final String CONSENT = "GbC_YyTjveBABvfZ_hgCzkKauuhQSvdHm-s7N0zFS-pzWZ3Xg4bHY4JyPEbmmj0vxgcMfGv6-3UsaiUflNg8APSdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q";
 
     @Test
     @Tag("integration")

@@ -7,11 +7,8 @@ CREATE TABLE client_apps (
   updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
-INSERT INTO client_apps (master_token, name, redirect_url, enabled) VALUES
-('e5caa32d-b14b-4894-8de6-c70d2d43bb97', 'VIMpay', '***REMOVED***', TRUE);
-
 ALTER TABLE tokens
-ADD COLUMN client_master_token INTEGER NOT NULL DEFAULT 'e5caa32d-b14b-4894-8de6-c70d2d43bb97' CONSTRAINT client_app_id_fk REFERENCES client_apps,
+ADD COLUMN client_master_token INTEGER NOT NULL CONSTRAINT client_app_id_fk REFERENCES client_apps,
 ADD COLUMN valid BOOLEAN NOT NULL DEFAULT TRUE,
 ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT now(),
 ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT now();

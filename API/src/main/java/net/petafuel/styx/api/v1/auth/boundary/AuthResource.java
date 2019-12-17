@@ -3,7 +3,6 @@ package net.petafuel.styx.api.v1.auth.boundary;
 import com.google.gson.JsonElement;
 import net.petafuel.styx.api.filters.CheckMasterToken;
 import net.petafuel.styx.api.v1.auth.control.AuthHandler;
-import net.petafuel.styx.api.filters.MasterTokenFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,8 +15,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @ApplicationPath("/")
@@ -27,7 +24,7 @@ import java.util.UUID;
 public class AuthResource extends Application {
 
     private static final Logger LOG = LogManager.getLogger(AuthResource.class);
-    private AuthHandler handler = new AuthHandler();
+    public AuthHandler handler = new AuthHandler();
 
     @POST
     @Path("/auth")
@@ -39,10 +36,4 @@ public class AuthResource extends Application {
         return Response.status(200).entity(response.toString()).build();
     }
 
-    @Override
-    public Set<Class<?>> getClasses() {
-        final Set<Class<?>> classes = new HashSet<>();
-        classes.add(MasterTokenFilter.class);
-        return classes;
-    }
 }

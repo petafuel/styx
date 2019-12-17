@@ -4,8 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.petafuel.styx.core.persistence.layers.PersistentAccessToken;
 import net.petafuel.styx.core.persistence.models.AccessToken;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.UUID;
 

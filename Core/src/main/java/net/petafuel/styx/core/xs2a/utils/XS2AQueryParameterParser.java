@@ -1,12 +1,15 @@
 package net.petafuel.styx.core.xs2a.utils;
 
-import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AQueryParameter;
+import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.XS2AHeaderParserException;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class XS2AQueryParameterParser {
 
@@ -14,29 +17,34 @@ public class XS2AQueryParameterParser {
         //To hide constructor from static Parser
     }
 
-    public static void parse(XS2AGetRequest annotated) {
+    public static void parse(XS2ARequest annotated) {
         mapFields(annotated, annotated);
     }
 
-    private static void mapFields(Object o, XS2AGetRequest request) {
+    private static void mapFields(Object o, XS2ARequest request) {
         Class<?> c = o.getClass();
+        ArrayList<Field> fields = new ArrayList<>(Arrays.asList(c.getDeclaredFields()));
+        List<Field> parentFields = XS2AHeaderParser.getParentAllFields(c);
+        fields.addAll(parentFields);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        for (Field field : c.getDeclaredFields()) {
-            field.setAccessible(true);
-            if (field.isAnnotationPresent(XS2AQueryParameter.class)) {
-                try {
-                    if (field.get(o) != null && !String.valueOf(field.get(o)).isEmpty()) {
+        try {
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (field.isAnnotationPresent(XS2AQueryParameter.class) && field.get(o) != null) {
+                    if (field.getAnnotation(XS2AQueryParameter.class).nested()) {
+                        mapFields(field.get(o), request);
+                    } else if (!String.valueOf(field.get(o)).isEmpty()) {
                         if (field.get(o) instanceof Date) {
                             String isoDate = sdf.format(field.get(o));
-                            request.setQueryParameter(field.getAnnotation(XS2AQueryParameter.class).value(), isoDate);
+                            request.addQueryParameter(field.getAnnotation(XS2AQueryParameter.class).value(), isoDate);
                         } else {
-                            request.setQueryParameter(field.getAnnotation(XS2AQueryParameter.class).value(), String.valueOf(field.get(o)));
+                            request.addQueryParameter(field.getAnnotation(XS2AQueryParameter.class).value(), String.valueOf(field.get(o)));
                         }
                     }
-                } catch (IllegalAccessException e) {
-                    throw new XS2AHeaderParserException(e.getMessage(), e);
                 }
             }
+        } catch (IllegalAccessException e) {
+            throw new XS2AHeaderParserException(e.getMessage(), e);
         }
     }
 }

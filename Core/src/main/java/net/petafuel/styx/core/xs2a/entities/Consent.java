@@ -6,9 +6,9 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * A basic consent model as created in AIS conext or in combined service context with AIS and PIS
+ * A basic consent model as created in AIS context or in combined service context with AIS and PIS
  */
-public class Consent {
+public class Consent extends StrongAuthenticatableResource {
 
     private String id;
     private UUID xRequestId;
@@ -18,7 +18,6 @@ public class Consent {
     private Date validUntil;
     private Date lastUpdated;
     private Date createdAt;
-    private SCA sca;
     private Access access;
     private PSU psu;
     private State state;
@@ -46,44 +45,55 @@ public class Consent {
     public void setxRequestId(UUID xRequestId) {
         this.xRequestId = xRequestId;
     }
+
     public State getState() {
         return state;
     }
+
     public void setState(State state) {
         this.state = state;
     }
+
     public boolean isRecurringIndicator() {
         return recurringIndicator;
     }
+
     public void setRecurringIndicator(boolean recurringIndicator) {
         this.recurringIndicator = recurringIndicator;
     }
+
     public Date getValidUntil() {
         return validUntil;
     }
+
     public void setValidUntil(Date validUntil) {
         this.validUntil = validUntil;
     }
+
     public Date getLastUpdated() {
         return lastUpdated;
     }
+
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public int getFrequencyPerDay() {
         return frequencyPerDay;
     }
+
     public void setFrequencyPerDay(int frequencyPerDay) {
         this.frequencyPerDay = frequencyPerDay;
     }
-    public SCA getSca() {
-        return sca;
-    }
-    public void setSca(SCA sca) {
-        this.sca = sca;
-    }
+
     public Access getAccess() {
         return access;
     }

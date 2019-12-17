@@ -24,7 +24,7 @@ public interface AISInterface {
      * @return Returns a list of the possible accounts
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    List<Account> getAccountList(XS2AGetRequest request) throws BankRequestFailedException;
+    List<Account> getAccountList(XS2ARequest request) throws BankRequestFailedException;
 
     /**
      * Returns the Account found by the given Account ID (path parameter resourceId)
@@ -33,7 +33,7 @@ public interface AISInterface {
      * @return Returns a full Account object
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    Account getAccount(XS2AGetRequest request) throws BankRequestFailedException;
+    Account getAccount(XS2ARequest request) throws BankRequestFailedException;
 
     /**
      * Returns a List of type Balance which belong to the given Account ID (path parameter account-id)
@@ -42,17 +42,17 @@ public interface AISInterface {
      * @return Returns a list of Balance objects associated with the given account id
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    List<Balance> getBalancesByAccount(XS2AGetRequest request) throws BankRequestFailedException;
+    List<Balance> getBalancesByAccount(XS2ARequest request) throws BankRequestFailedException;
 
     /**
      * Returns a List of type Transaction which belong to the given Account ID (path parameter account-id)
      *
-     * @see AISInterface#getBalancesByAccount(XS2AGetRequest)
      * @param request XS2AGetRequest which should contain the account id
      * @return Returns a list of Transaction objects associated with the given account id
      * @throws BankRequestFailedException If the request towards the bank fails
+     * @see AISInterface#getBalancesByAccount(XS2ARequest)
      */
-    List<Transaction> getTransactionsByAccount(XS2AGetRequest request) throws BankRequestFailedException;
+    List<Transaction> getTransactionsByAccount(XS2ARequest request) throws BankRequestFailedException;
 
     /**
      * Returns the Transaction which belongs to the given Account ID and Transaction ID (path parameters account-id and transactionId)
@@ -61,5 +61,5 @@ public interface AISInterface {
      * @return Returns a single Transaction object associated with the account id and transaction id
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    Transaction getTransaction(XS2AGetRequest request) throws BankRequestFailedException;
+    Transaction getTransaction(XS2ARequest request) throws BankRequestFailedException;
 }

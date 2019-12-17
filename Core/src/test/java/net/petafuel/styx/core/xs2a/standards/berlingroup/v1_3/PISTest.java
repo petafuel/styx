@@ -15,7 +15,7 @@ import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
-import net.petafuel.styx.core.xs2a.entities.Transaction;
+import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.OAuth2;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
@@ -43,7 +43,7 @@ import java.util.Vector;
 public class PISTest {
 
     private static final String SPARKASSE_BASE_API = "https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/xs2a-api/12345678";
-    private static final String PAYMENT_ID = "1e5ac400-cb7c-42fe-830d-6991517d26c7";
+    private static final String PAYMENT_ID = "681275b3-9dc3-41a0-addd-cfc4764519c4";
     private static final String FIDUCIA_GAD_BASE_API = "https://xs2a-test.fiduciagad.de/xs2a";
     private static final String FIDUCIA_PAYMENT_ID = "3631391318101910234***REMOVED***PA4960JJ";
     public static final String DEUTSCHE_BANK_BASE_API ="https://simulator-xs2a.db.com:443/sb/sandbox";
@@ -61,7 +61,7 @@ public class PISTest {
                 PAYMENT_ID);
 
         PaymentStatus status = standard.getPis().getPaymentStatus(r1);
-        Assert.assertEquals(Transaction.Status.RCVD, status.getTransactionStatus());
+        Assert.assertEquals(TransactionStatus.RCVD, status.getTransactionStatus());
     }
 
     @Test
@@ -76,7 +76,7 @@ public class PISTest {
                 FIDUCIA_PAYMENT_ID);
 
         PaymentStatus status = standard.getPis().getPaymentStatus(r1);
-        Assert.assertEquals(Transaction.Status.RCVD, status.getTransactionStatus());
+        Assert.assertEquals(TransactionStatus.RCVD, status.getTransactionStatus());
     }
 
     @Test
@@ -448,7 +448,7 @@ public class PISTest {
 
         InitiatedPayment payment = standard.getPis().initiatePayment(request);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(InitiatedPayment.Status.RCVD, payment.getStatus());
+        Assert.assertEquals(TransactionStatus.RCVD, payment.getStatus());
     }
 
     @Test
@@ -555,6 +555,6 @@ public class PISTest {
 
         InitiatedPayment payment = standard.getPis().initiatePayment(request);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(InitiatedPayment.Status.RCVD, payment.getStatus());
+        Assert.assertEquals(TransactionStatus.RCVD, payment.getStatus());
     }
 }

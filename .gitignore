@@ -3,4 +3,7 @@ styx*.iml
 API/target/*
 API/log/*
 Core/target/*
+Core/src/main/resources/config.properties
 log/*
+connectionpool.properties
+config.properties

@@ -7,12 +7,14 @@ import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
+import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationJsonRequest;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -66,6 +68,6 @@ public class ConsorsbankPISTest {
 
         InitiatedPayment payment = standard.getPis().initiatePayment(request);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(InitiatedPayment.Status.RCVD, payment.getStatus());
+        Assert.assertEquals(TransactionStatus.RCVD, payment.getStatus());
     }
 }

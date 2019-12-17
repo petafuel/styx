@@ -15,9 +15,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -86,8 +86,7 @@ public class XS2AHeaderParserTest {
             }
         }
 
-        class Request implements XS2ARequest
-        {
+        class Request extends XS2ARequest {
 
             @XS2AHeader(nested = true)
             ClassDataMember classDataMember;
@@ -98,30 +97,18 @@ public class XS2AHeaderParserTest {
             @XS2AHeader("empty")
             private String empty;
 
-            private LinkedHashMap<String, String> headers;
-
             public Request()
             {
-                this.headers = new LinkedHashMap<>();
                 this.notNested = "notNested";
                 this.empty = "";
                 this.classDataMember = new ClassDataMember();
             }
 
             @Override
-            public String getRawBody() {
-                return null;
+            public Optional<String> getRawBody() {
+                return Optional.empty();
             }
 
-            @Override
-            public void setHeader(String key, String value) {
-                this.headers.put(key, value);
-            }
-
-            @Override
-            public LinkedHashMap<String, String> getHeaders() {
-                return this.headers;
-            }
         }
         Request request = new Request();
         XS2AHeaderParser.parse(request);

@@ -11,22 +11,26 @@ create table consent_states
     name varchar(50) not null
 );
 
-alter table consent_states
-    owner to prep_styx;
-
 create unique index consent_state_id_uindex
     on consent_states (id);
 
 create unique index consent_state_name_uindex
     on consent_states (name);
 
-INSERT INTO public.consent_states (id, name) VALUES (1, 'received');
-INSERT INTO public.consent_states (id, name) VALUES (2, 'rejected');
-INSERT INTO public.consent_states (id, name) VALUES (3, 'partiallyAuthorised');
-INSERT INTO public.consent_states (id, name) VALUES (4, 'valid');
-INSERT INTO public.consent_states (id, name) VALUES (5, 'revokedByPsu');
-INSERT INTO public.consent_states (id, name) VALUES (6, 'expired');
-INSERT INTO public.consent_states (id, name) VALUES (7, 'terminatedByTpp');
+INSERT INTO public.consent_states (id, name)
+VALUES (1, 'received');
+INSERT INTO public.consent_states (id, name)
+VALUES (2, 'rejected');
+INSERT INTO public.consent_states (id, name)
+VALUES (3, 'partiallyAuthorised');
+INSERT INTO public.consent_states (id, name)
+VALUES (4, 'valid');
+INSERT INTO public.consent_states (id, name)
+VALUES (5, 'revokedByPsu');
+INSERT INTO public.consent_states (id, name)
+VALUES (6, 'expired');
+INSERT INTO public.consent_states (id, name)
+VALUES (7, 'terminatedByTpp');
 
 -- auto-generated definition
 create table sca_methods
@@ -37,19 +41,22 @@ create table sca_methods
     name varchar(50) not null
 );
 
-alter table sca_methods
-    owner to prep_styx;
-
 create unique index sca_methods_id_uindex
     on sca_methods (id);
 
 create unique index sca_methods_name_uindex
     on sca_methods (name);
 
-INSERT INTO public.sca_methods (id, name) VALUES (1, 'DECOUPLED');
-INSERT INTO public.sca_methods (id, name) VALUES (2, 'EMBEDDED');
-INSERT INTO public.sca_methods (id, name) VALUES (3, 'REDIRECT');
-INSERT INTO public.sca_methods (id, name) VALUES (4, 'OAUTH2');
+INSERT INTO public.sca_methods (id, name)
+VALUES (1, 'DECOUPLED');
+INSERT INTO public.sca_methods (id, name)
+VALUES (2, 'EMBEDDED');
+INSERT INTO public.sca_methods (id, name)
+VALUES (3, 'REDIRECT');
+INSERT INTO public.sca_methods (id, name)
+VALUES (4, 'OAUTH2');
+INSERT INTO public.sca_methods (id, name)
+VALUES (5, 'REQUIRE_AUTHORISATION_RESOURCE');
 
 -- auto-generated definition
 create table tokens
@@ -61,13 +68,9 @@ create table tokens
 
 comment on table tokens is 'dummy';
 
-alter table tokens
-    owner to prep_styx;
-
 create unique index tokens_id_uindex
     on tokens (id);
 
--- auto-generated definition
 create table consents
 (
     id                         text                       not null
@@ -94,13 +97,11 @@ create table consents
     psu_corporate_id           varchar(255) default NULL::character varying,
     psu_corporate_id_type      varchar(255) default NULL::character varying,
     x_request_id               uuid                       not null,
-    session                      uuid
+    token                      uuid
         constraint consents_tokens_id_fk
-            references tokens
+            references tokens,
+    created_at                 timestamp    default now() not null
 );
-
-alter table consents
-    owner to prep_styx;
 
 create unique index consents_consent_id_uindex
     on consents (id);
@@ -108,16 +109,17 @@ create unique index consents_consent_id_uindex
 create unique index consents_x_request_id_uindex
     on consents (x_request_id);
 
-
 --
 --  Functions
 --
-create function create_consent(id text, state integer, access text, recurring_indicator boolean,
-                               valid_until timestamp without time zone, frequency_per_day integer,
-                               chosen_sca_method integer, combined_service_indicator boolean, psu_id character varying,
-                               psu_ip_address character varying, psu_ip_port integer, psu_user_agent text,
-                               psu_geo_location text, psu_id_type character varying, psu_corporate_id character varying,
-                               psu_corporate_id_type character varying, x_request_id uuid)
+create or replace function create_consent(id text, state integer, access text, recurring_indicator boolean,
+                                          valid_until timestamp without time zone, frequency_per_day integer,
+                                          chosen_sca_method integer, combined_service_indicator boolean,
+                                          psu_id character varying,
+                                          psu_ip_address character varying, psu_ip_port integer, psu_user_agent text,
+                                          psu_geo_location text, psu_id_type character varying,
+                                          psu_corporate_id character varying,
+                                          psu_corporate_id_type character varying, x_request_id uuid)
     returns TABLE
             (
                 id                         text,
@@ -137,7 +139,8 @@ create function create_consent(id text, state integer, access text, recurring_in
                 psu_geo_location           text,
                 psu_corporate_id           character varying,
                 psu_corporate_id_type      character varying,
-                x_request_id               uuid
+                x_request_id               uuid,
+                created_at                 timestamp
             )
     security definer
     language sql
@@ -149,14 +152,14 @@ INSERT INTO consents (id, state, access, recurring_indicator, valid_until, frequ
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 
 RETURNING id,
-    (SELECT name FROM consent_states WHERE consent_states.id = state) as state,
+        (SELECT name FROM consent_states WHERE consent_states.id = state) as state,
     access,
     recurring_indicator,
     valid_until,
     last_updated,
     frequency_per_day,
     combined_service_indicator,
-    (SELECT name FROM sca_methods WHERE sca_methods.id = chosen_sca_method) as chosen_sca_method,
+        (SELECT name FROM sca_methods WHERE sca_methods.id = chosen_sca_method) as chosen_sca_method,
     psu_id,
     psu_id_type,
     psu_ip_address,
@@ -165,13 +168,12 @@ RETURNING id,
     psu_geo_location,
     psu_corporate_id,
     psu_corporate_id_type,
-    x_request_id;
+    x_request_id,
+    created_at;
 $$;
 
-alter function create_consent(text, integer, text, boolean, timestamp, integer, integer, boolean, varchar, varchar, integer, text, text, varchar, varchar, varchar, uuid) owner to prep_styx;
 
-
-create function delete_consent(id text)
+create or replace function delete_consent(id text)
     returns TABLE
             (
                 id                         text,
@@ -191,7 +193,8 @@ create function delete_consent(id text)
                 psu_geo_location           text,
                 psu_corporate_id           character varying,
                 psu_corporate_id_type      character varying,
-                x_request_id               uuid
+                x_request_id               uuid,
+                created_at                 timestamp
             )
     security definer
     language sql
@@ -201,14 +204,14 @@ DELETE
 FROM consents
 WHERE consents.id = $1
 RETURNING id,
-    (SELECT name FROM consent_states WHERE consent_states.id = state) as state,
+        (SELECT name FROM consent_states WHERE consent_states.id = state) as state,
     access,
     recurring_indicator,
     valid_until,
     last_updated,
     frequency_per_day,
     combined_service_indicator,
-    (SELECT name FROM sca_methods WHERE sca_methods.id = chosen_sca_method) as chosen_sca_method,
+        (SELECT name FROM sca_methods WHERE sca_methods.id = chosen_sca_method) as chosen_sca_method,
     psu_id,
     psu_id_type,
     psu_ip_address,
@@ -217,14 +220,34 @@ RETURNING id,
     psu_geo_location,
     psu_corporate_id,
     psu_corporate_id_type,
-    x_request_id;
+    x_request_id,
+    created_at;
 
 $$;
 
-alter function delete_consent(text) owner to prep_styx;
-
-create function get_consent(id text)
-    returns TABLE(id text, access text, recurring_indicator boolean, valid_until timestamp without time zone, last_updated timestamp without time zone, frequency_per_day integer, combined_service_indicator boolean, psu_id character varying, psu_id_type character varying, psu_ip_address character varying, psu_ip_port integer, psu_user_agent text, psu_geo_location text, psu_corporate_id character varying, psu_corporate_id_type character varying, state character varying, chosen_sca_method character varying, x_request_id uuid)
+create or replace function get_consent(id text)
+    returns TABLE
+            (
+                id                         text,
+                access                     text,
+                recurring_indicator        boolean,
+                valid_until                timestamp without time zone,
+                last_updated               timestamp without time zone,
+                frequency_per_day          integer,
+                combined_service_indicator boolean,
+                psu_id                     character varying,
+                psu_id_type                character varying,
+                psu_ip_address             character varying,
+                psu_ip_port                integer,
+                psu_user_agent             text,
+                psu_geo_location           text,
+                psu_corporate_id           character varying,
+                psu_corporate_id_type      character varying,
+                state                      character varying,
+                chosen_sca_method          character varying,
+                x_request_id               uuid,
+                created_at                 timestamp
+            )
     security definer
     language sql
 as
@@ -246,17 +269,37 @@ SELECT consents.id,
        psu_corporate_id_type,
        cs.name as state,
        sm.name as chosen_sca_method,
-       x_request_id
+       x_request_id,
+       created_at
 FROM consents
          JOIN consent_states cs on consents.state = cs.id
          JOIN sca_methods sm on consents.chosen_sca_method = sm.id
 WHERE consents.id = $1;
 $$;
 
-alter function get_consent(text) owner to prep_styx;
-
-create function get_consent_by_x_request_id(x_request_id uuid)
-    returns TABLE(id text, access text, recurring_indicator boolean, valid_until timestamp without time zone, last_updated timestamp without time zone, frequency_per_day integer, combined_service_indicator boolean, psu_id character varying, psu_id_type character varying, psu_ip_address character varying, psu_ip_port integer, psu_user_agent text, psu_geo_location text, psu_corporate_id character varying, psu_corporate_id_type character varying, state character varying, chosen_sca_method character varying, x_request_id uuid)
+create or replace function get_consent_by_x_request_id(x_request_id uuid)
+    returns TABLE
+            (
+                id                         text,
+                access                     text,
+                recurring_indicator        boolean,
+                valid_until                timestamp without time zone,
+                last_updated               timestamp without time zone,
+                frequency_per_day          integer,
+                combined_service_indicator boolean,
+                psu_id                     character varying,
+                psu_id_type                character varying,
+                psu_ip_address             character varying,
+                psu_ip_port                integer,
+                psu_user_agent             text,
+                psu_geo_location           text,
+                psu_corporate_id           character varying,
+                psu_corporate_id_type      character varying,
+                state                      character varying,
+                chosen_sca_method          character varying,
+                x_request_id               uuid,
+                created_at                 timestamp
+            )
     security definer
     language sql
 as
@@ -278,21 +321,44 @@ SELECT consents.id,
        psu_corporate_id_type,
        cs.name as state,
        sm.name as chosen_sca_method,
-       x_request_id
+       x_request_id,
+       created_at
 FROM consents
          JOIN consent_states cs on consents.state = cs.id
          JOIN sca_methods sm on consents.chosen_sca_method = sm.id
 WHERE consents.x_request_id = $1;
 $$;
 
-alter function get_consent_by_x_request_id(uuid) owner to prep_styx;
-
-create function update_consent(id text, state integer, access text, recurring_indicator boolean,
-                               valid_until timestamp without time zone, frequency_per_day integer,
-                               chosen_sca_method integer, combined_service_indicator boolean, psu_id character varying,
-                               psu_ip_address character varying, psu_ip_port integer, psu_user_agent text,
-                               psu_geo_location text, psu_id_type character varying, psu_corporate_id character varying,
-                               psu_corporate_id_type character varying, x_request_id uuid) returns TABLE(id text, state character varying, access text, recurring_indicator boolean, valid_until timestamp without time zone, last_updated timestamp without time zone, frequency_per_day integer, combined_service_indicator boolean, chosen_sca_method character varying, psu_id character varying, psu_id_type character varying, psu_ip_address character varying, psu_ip_port integer, psu_user_agent text, psu_geo_location text, psu_corporate_id character varying, psu_corporate_id_type character varying, x_request_id uuid)
+create or replace function update_consent(id text, state integer, access text, recurring_indicator boolean,
+                                          valid_until timestamp without time zone, frequency_per_day integer,
+                                          chosen_sca_method integer, combined_service_indicator boolean,
+                                          psu_id character varying,
+                                          psu_ip_address character varying, psu_ip_port integer, psu_user_agent text,
+                                          psu_geo_location text, psu_id_type character varying,
+                                          psu_corporate_id character varying,
+                                          psu_corporate_id_type character varying, x_request_id uuid)
+    returns TABLE
+            (
+                id                         text,
+                state                      character varying,
+                access                     text,
+                recurring_indicator        boolean,
+                valid_until                timestamp without time zone,
+                last_updated               timestamp without time zone,
+                frequency_per_day          integer,
+                combined_service_indicator boolean,
+                chosen_sca_method          character varying,
+                psu_id                     character varying,
+                psu_id_type                character varying,
+                psu_ip_address             character varying,
+                psu_ip_port                integer,
+                psu_user_agent             text,
+                psu_geo_location           text,
+                psu_corporate_id           character varying,
+                psu_corporate_id_type      character varying,
+                x_request_id               uuid,
+                created_at                 timestamp
+            )
     security definer
     language sql
 as
@@ -317,14 +383,14 @@ SET state                      = $2,
     last_updated               = now()
 WHERE consents.id = $1
 RETURNING id,
-    (SELECT name FROM consent_states WHERE consent_states.id = state) as state,
+        (SELECT name FROM consent_states WHERE consent_states.id = state) as state,
     access,
     recurring_indicator,
     valid_until,
     last_updated,
     frequency_per_day,
     combined_service_indicator,
-    (SELECT name FROM sca_methods WHERE sca_methods.id = chosen_sca_method) as chosen_sca_method,
+        (SELECT name FROM sca_methods WHERE sca_methods.id = chosen_sca_method) as chosen_sca_method,
     psu_id,
     psu_id_type,
     psu_ip_address,
@@ -333,12 +399,33 @@ RETURNING id,
     psu_geo_location,
     psu_corporate_id,
     psu_corporate_id_type,
-    x_request_id;
+    x_request_id,
+    created_at;
 $$;
 
-alter function update_consent(text, integer, text, boolean, timestamp, integer, integer, boolean, varchar, varchar, integer, text, text, varchar, varchar, varchar, uuid) owner to prep_styx;
-
-create function update_consent_state(id text, state integer) returns TABLE(id text, state character varying, access text, recurring_indicator boolean, valid_until timestamp without time zone, last_updated timestamp without time zone, frequency_per_day integer, combined_service_indicator boolean, chosen_sca_method character varying, psu_id character varying, psu_id_type character varying, psu_ip_address character varying, psu_ip_port integer, psu_user_agent text, psu_geo_location text, psu_corporate_id character varying, psu_corporate_id_type character varying, x_request_id uuid)
+create or replace function update_consent_state(id text, state integer)
+    returns TABLE
+            (
+                id                         text,
+                state                      character varying,
+                access                     text,
+                recurring_indicator        boolean,
+                valid_until                timestamp without time zone,
+                last_updated               timestamp without time zone,
+                frequency_per_day          integer,
+                combined_service_indicator boolean,
+                chosen_sca_method          character varying,
+                psu_id                     character varying,
+                psu_id_type                character varying,
+                psu_ip_address             character varying,
+                psu_ip_port                integer,
+                psu_user_agent             text,
+                psu_geo_location           text,
+                psu_corporate_id           character varying,
+                psu_corporate_id_type      character varying,
+                x_request_id               uuid,
+                created_at                 timestamp
+            )
     security definer
     language sql
 as
@@ -355,7 +442,7 @@ RETURNING id,
     last_updated,
     frequency_per_day,
     combined_service_indicator,
-    (SELECT name FROM sca_methods WHERE sca_methods.id = chosen_sca_method) as chosen_sca_method,
+        (SELECT name FROM sca_methods WHERE sca_methods.id = chosen_sca_method) as chosen_sca_method,
     psu_id,
     psu_id_type,
     psu_ip_address,
@@ -364,7 +451,6 @@ RETURNING id,
     psu_geo_location,
     psu_corporate_id,
     psu_corporate_id_type,
-    x_request_id;
+    x_request_id,
+    created_at;
 $$;
-
-alter function update_consent_state(text, integer) owner to prep_styx;

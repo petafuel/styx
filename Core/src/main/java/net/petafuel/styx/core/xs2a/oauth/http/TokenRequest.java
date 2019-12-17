@@ -5,10 +5,11 @@ import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.oauth.serializers.TokenSerializer;
 import net.petafuel.styx.core.xs2a.utils.Config;
-import java.util.LinkedHashMap;
+
+import java.util.Optional;
 
 
-public class TokenRequest implements XS2ARequest {
+public class TokenRequest extends XS2ARequest {
 
     private String code;
     private String grantType = "authorization_code";
@@ -16,8 +17,7 @@ public class TokenRequest implements XS2ARequest {
     private String codeVerifier;
     private String redirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl");
 
-    public TokenRequest(String code, String codeVerifier)
-    {
+    public TokenRequest(String code, String codeVerifier) {
         this.code = code;
         this.codeVerifier = codeVerifier;
     }
@@ -63,18 +63,8 @@ public class TokenRequest implements XS2ARequest {
     }
 
     @Override
-    public String getRawBody() {
+    public Optional<String> getRawBody() {
         Gson gson = new GsonBuilder().registerTypeAdapter(TokenRequest.class, new TokenSerializer()).create();
-        return gson.toJson(this);
-    }
-
-    @Override
-    public void setHeader(String key, String value) {
-        // Headers are not required for this request
-    }
-
-    @Override
-    public LinkedHashMap<String, String> getHeaders() {
-        return new LinkedHashMap<>();
+        return Optional.ofNullable(gson.toJson(this));
     }
 }

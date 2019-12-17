@@ -5,12 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.petafuel.styx.core.xs2a.contracts.AISInterface;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
-import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
+import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Balance;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsRequest;
@@ -41,49 +41,42 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public List<Account> getAccountList(XS2AGetRequest request) throws BankRequestFailedException {
+    public List<Account> getAccountList(XS2ARequest request) throws BankRequestFailedException {
         this.setUrl(this.url + GET_ACCOUNT_LIST + this.getHttpQueryString(request));
         this.createBody(RequestType.GET);
         this.createHeaders(request);
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            String body = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
             Type type = new TypeToken<ArrayList<Account>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new AccountSerializer())
                     .create();
 
-            return gson.fromJson(body, type);
+            return gson.fromJson(responseBody, type);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
     @Override
-    public Account getAccount(XS2AGetRequest request) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(GET_ACCOUNT_DETAILS, ((ReadAccountDetailsRequest) request).getAccountId())  + this.getHttpQueryString(request));
+    public Account getAccount(XS2ARequest request) throws BankRequestFailedException {
+        this.setUrl(this.url + String.format(GET_ACCOUNT_DETAILS, ((ReadAccountDetailsRequest) request).getAccountId()) + this.getHttpQueryString(request));
 
         this.createBody(RequestType.GET);
         this.createHeaders(request);
 
         try (Response response = this.execute()) {
-
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            String body = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
             Type type = new TypeToken<ArrayList<Account>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new AccountSerializer())
                     .create();
 
-            List<Account> accounts = gson.fromJson(body, type);
+            List<Account> accounts = gson.fromJson(responseBody, type);
             return accounts.get(0);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
@@ -91,7 +84,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public List<Balance> getBalancesByAccount(XS2AGetRequest request) throws BankRequestFailedException {
+    public List<Balance> getBalancesByAccount(XS2ARequest request) throws BankRequestFailedException {
 
         this.setUrl(this.url + String.format(GET_BALANCES, ((ReadBalancesRequest) request).getAccountId()) + this.getHttpQueryString(request));
 
@@ -100,24 +93,21 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            String body = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
             Type type = new TypeToken<ArrayList<Balance>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new BalancesSerializer())
                     .create();
 
-            return gson.fromJson(body, type);
+            return gson.fromJson(responseBody, type);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
     @Override
-    public List<Transaction> getTransactionsByAccount(XS2AGetRequest request) throws BankRequestFailedException {
+    public List<Transaction> getTransactionsByAccount(XS2ARequest request) throws BankRequestFailedException {
         ReadTransactionsRequest r1 = (ReadTransactionsRequest) request;
         this.setUrl(this.url + String.format(GET_TRANSACTIONS, r1.getAccountId()) + this.getHttpQueryString(request));
         this.createBody(RequestType.GET);
@@ -125,24 +115,21 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            String body = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
             Type type = new TypeToken<ArrayList<Transaction>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new TransactionsSerializer())
                     .create();
 
-            return gson.fromJson(body, type);
+            return gson.fromJson(responseBody, type);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
     @Override
-    public Transaction getTransaction(XS2AGetRequest request) throws BankRequestFailedException {
+    public Transaction getTransaction(XS2ARequest request) throws BankRequestFailedException {
 
         ReadTransactionDetailsRequest r1 = (ReadTransactionDetailsRequest) request;
         this.setUrl(this.url + String.format(GET_TRANSACTION_DETAILS, r1.getAccountId(), r1.getTransactionId()));
@@ -151,17 +138,14 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
         try (Response response = this.execute()) {
 
-            if (response.code() != 200) {
-                throwBankRequestException(response);
-            }
-            String body = response.body().string();
+            String responseBody = extractResponseBody(response, 200);
             Type type = new TypeToken<ArrayList<Transaction>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new TransactionsSerializer())
                     .create();
 
-            List<Transaction> transactions = gson.fromJson(body, type);
+            List<Transaction> transactions = gson.fromJson(responseBody, type);
             return transactions.get(0);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);

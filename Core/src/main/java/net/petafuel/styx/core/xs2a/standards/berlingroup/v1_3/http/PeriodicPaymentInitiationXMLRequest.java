@@ -10,7 +10,9 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okio.Buffer;
+
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PeriodicPaymentInitiationXMLRequest extends XS2APaymentInitiationRequest {
@@ -23,7 +25,7 @@ public class PeriodicPaymentInitiationXMLRequest extends XS2APaymentInitiationRe
         Headers headersXml = new Headers.Builder()
                 .add("Content-Disposition", "form-data; name=\"xml_sct\"")
                 .build();
-        MultipartBody.Part xmlPart = MultipartBody.Part.create(headersXml, RequestBody.create(xmlRequest.getRawBody(), MediaType.get("application/xml; charset=utf-8")));
+        MultipartBody.Part xmlPart = MultipartBody.Part.create(headersXml, RequestBody.create(xmlRequest.getRawBody().orElse(""), MediaType.get("application/xml; charset=utf-8")));
 
         Gson gson = new GsonBuilder().registerTypeAdapter(PeriodicPayment.class, new PeriodicPaymentMultipartBodySerializer()).create();
 
@@ -41,14 +43,15 @@ public class PeriodicPaymentInitiationXMLRequest extends XS2APaymentInitiationRe
     }
 
     @Override
-    public String getRawBody() {
+    public Optional<String> getRawBody() {
         final Buffer buffer = new Buffer();
         try {
             //build raw multipartBody with xml and json
             body.writeTo(buffer);
-            return buffer.readUtf8();
+            return Optional.of(buffer.readUtf8());
         } catch (IOException e) {
-            return "";
+            //TODO error handling
+            return Optional.empty();
         }
     }
 

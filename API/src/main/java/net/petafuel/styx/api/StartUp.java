@@ -1,5 +1,6 @@
 package net.petafuel.styx.api;
 
+import net.petafuel.styx.core.keepalive.threads.ThreadManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,6 +13,7 @@ public class StartUp {
         propertyReader.loadProperties();
 
         WebServer server = new WebServer();
+        ThreadManager.getInstance().start();
         try {
             server.startHttpServer();
         } catch (Exception e) {

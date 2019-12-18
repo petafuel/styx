@@ -8,7 +8,7 @@ CREATE TABLE client_apps (
 );
 
 ALTER TABLE tokens
-ADD COLUMN client_master_token INTEGER NOT NULL CONSTRAINT client_app_id_fk REFERENCES client_apps,
+ADD COLUMN client_master_token UUID NOT NULL CONSTRAINT client_app_id_fk REFERENCES client_apps,
 ADD COLUMN valid BOOLEAN NOT NULL DEFAULT TRUE,
 ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT now(),
 ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT now();

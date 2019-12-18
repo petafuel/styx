@@ -12,22 +12,26 @@ import java.util.UUID;
 public class AuthResourceTest {
 
     private AuthResource cut = new AuthResource();
-    private UUID masterToken = UUID.fromString(System.getProperty("masterToken"));
+    private String masterToken = System.getProperty("masterToken");
 
     @Test
     @Tag("integration")
     public void testAuth() {
 
-        //  handle the request
-        JsonElement element = cut.handler.createAccessToken(masterToken);
+        if (masterToken == null) {
+            return;
+        } else {
+            //  handle the request
+            JsonElement element = cut.handler.createAccessToken(UUID.fromString(masterToken));
 
-        // expect that there is a "token" in the response and it's a valid UUID
-        String accessTokenString = element.getAsJsonObject().get("token").getAsString();
-        UUID accessTokenUuid = UUID.fromString(accessTokenString);
+            // expect that there is a "token" in the response and it's a valid UUID
+            String accessTokenString = element.getAsJsonObject().get("token").getAsString();
+            UUID accessTokenUuid = UUID.fromString(accessTokenString);
 
-        // expect that the accessToken is stored in the database
-        PersistentAccessToken persistentAccessToken = new PersistentAccessToken();
-        AccessToken accessToken = persistentAccessToken.get(accessTokenUuid);
-        Assert.assertEquals(accessToken.getId().toString(), accessTokenString);
+            // expect that the accessToken is stored in the database
+            PersistentAccessToken persistentAccessToken = new PersistentAccessToken();
+            AccessToken accessToken = persistentAccessToken.get(accessTokenUuid);
+            Assert.assertEquals(accessToken.getId().toString(), accessTokenString);
+        }
     }
 }

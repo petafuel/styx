@@ -19,7 +19,6 @@ public class PropertyReader {
             final Properties props = new Properties();
             final File propertiesFile = new File(PROP_FILENAME);
 
-
             LOG.info("Loading '{}' from resources directory: {}", PROP_FILENAME, propertiesFile.getAbsolutePath());
             try (FileInputStream stream = new FileInputStream("./" + PROP_FILENAME)) {
                 props.load(stream); // loads all properties of the config.properties - file

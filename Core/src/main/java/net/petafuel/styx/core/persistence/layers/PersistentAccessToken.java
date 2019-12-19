@@ -78,6 +78,6 @@ public class PersistentAccessToken {
 
     private void logSQLError(SQLException e) {
         LOG.error("Error executing SQL Query: {} SQL State: {}", e.getMessage(), e.getSQLState());
-        throw new PersistenceException(e.getMessage(), e.getCause());
+        throw new PersistenceException(e.getMessage(), e);
     }
 }

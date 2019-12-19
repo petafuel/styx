@@ -24,7 +24,7 @@ import java.util.UUID;
 public class AuthResource extends Application {
 
     private static final Logger LOG = LogManager.getLogger(AuthResource.class);
-    public AuthHandler handler = new AuthHandler();
+    private AuthHandler handler = new AuthHandler();
 
     @POST
     @Path("/auth")
@@ -32,7 +32,7 @@ public class AuthResource extends Application {
 
         String masterToken = httpHeaders.getRequestHeader("token").get(0);
         JsonElement response = this.handler.createAccessToken(UUID.fromString(masterToken));
-        LOG.info("An access_token was created using this master token: {}", masterToken);
+        LOG.info("An access_token was created");
         return Response.status(200).entity(response.toString()).build();
     }
 

@@ -87,7 +87,7 @@
 			</activation>
 			<properties>
 				<sonar.host.url>https://sonarqube.petafuel.intern</sonar.host.url>
-				<sonar.projectName>StyxReporting</sonar.projectName>
+				<sonar.projectName>TeamTools.Integration.styx.Reporting</sonar.projectName>
 				<sonar.projectKey>ToolsGit_SonarqubeReporting_StyxPrivateReporting</sonar.projectKey>
 				<sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
 			</properties>
@@ -132,6 +132,9 @@
 			</activation>
 			<properties>
 				<sonar.host.url>https://sonarqube.petafuel.intern</sonar.host.url>
+				<sonar.projectName>TeamTools.ValidatePullRequest.styx.Validation</sonar.projectName>
+				<sonar.projectKey>TeamTools.ValidatePullRequest.styx.Validation</sonar.projectKey>
+				<sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
 			</properties>
 			<build>
 				<plugins>

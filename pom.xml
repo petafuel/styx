@@ -133,6 +133,8 @@
 			<properties>
 				<sonar.host.url>https://sonarqube.petafuel.intern</sonar.host.url>
 				<sonar.projectName>TeamTools.ValidatePullRequest.styx.Validation</sonar.projectName>
+				<sonar.projectKey>TeamTools.ValidatePullRequest.styx.Validation</sonar.projectKey>
+				<sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
 			</properties>
 			<build>
 				<plugins>

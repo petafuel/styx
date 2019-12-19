@@ -87,7 +87,6 @@
 			</activation>
 			<properties>
 				<sonar.host.url>https://sonarqube.petafuel.intern</sonar.host.url>
-				<sonar.projectName>StyxReporting</sonar.projectName>
 				<sonar.projectKey>ToolsGit_SonarqubeReporting_StyxPrivateReporting</sonar.projectKey>
 				<sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
 			</properties>

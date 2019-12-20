@@ -1,20 +1,19 @@
 package net.petafuel.styx.api.filters;
 
-import net.petafuel.styx.core.persistence.layers.PersistentClientApp;
+import net.petafuel.styx.core.persistence.layers.PersistentAccessToken;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.ext.Provider;
+import java.util.UUID;
 
 @Provider
 @CheckMasterToken
 @Priority(Priorities.AUTHORIZATION)
-public class MasterTokenFilter implements ContainerRequestFilter {
+public class MasterTokenFilter extends AbstractTokenFilter {
 
     @Override
-    public void filter(ContainerRequestContext containerRequestContext) {
-        FilterHelper.checkToken(containerRequestContext, new PersistentClientApp());
+    public boolean checkToken(UUID uuid) {
+        return new PersistentAccessToken().get(uuid).isValid();
     }
 }

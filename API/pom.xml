@@ -129,8 +129,27 @@
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${basedir}/src/main</directory>
+                                    <directory>${basedir}/src/main/resources</directory>
                                     <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-connectionpools-to-target</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/../</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>connectionpool.properties</include>
+                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>

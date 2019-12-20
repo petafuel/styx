@@ -48,7 +48,7 @@ public class PersistentOAuthSession {
             throw new PersistenceException("No OAuth session found for the given state");
         } catch (SQLException e) {
             logSQLError(e);
-            throw new PersistenceException(e.getMessage(), e.getCause());
+            throw new PersistenceException(e.getMessage(), e);
         }
     }
 
@@ -67,7 +67,7 @@ public class PersistentOAuthSession {
             throw new PersistenceException("No OAuthSession found for the given state");
         } catch (SQLException e) {
             logSQLError(e);
-            throw new PersistenceException(e.getMessage(), e.getCause());
+            throw new PersistenceException(e.getMessage(), e);
         }
     }
 
@@ -90,6 +90,6 @@ public class PersistentOAuthSession {
 
     private void logSQLError(SQLException e) {
         LOG.error("Error executing SQL Query: {} SQL State: {}, StackTrace: {}", e.getMessage(), e.getSQLState(), e.getStackTrace());
-        throw new PersistenceException(e.getMessage(), e.getCause());
+        throw new PersistenceException(e.getMessage(), e);
     }
 }

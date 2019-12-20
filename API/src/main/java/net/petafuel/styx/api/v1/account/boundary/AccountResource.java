@@ -1,5 +1,6 @@
 package net.petafuel.styx.api.v1.account.boundary;
 
+import net.petafuel.styx.api.filters.CheckAccessToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -9,6 +10,7 @@ import javax.ws.rs.core.*;
 @ApplicationPath("/")
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
+@CheckAccessToken
 public class AccountResource extends Application {
 
     private static final Logger LOG = LogManager.getLogger(AccountResource.class);

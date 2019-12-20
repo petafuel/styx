@@ -13,6 +13,7 @@ import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupCS;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupSigner;
+import net.petafuel.styx.api.filters.CheckAccessToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +31,7 @@ import java.util.List;
 @ApplicationPath("/")
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
+@CheckAccessToken
 public class ConsentResource extends Application {
 
     private static final Logger LOG = LogManager.getLogger(ConsentResource.class);

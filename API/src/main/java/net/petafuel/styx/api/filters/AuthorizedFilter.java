@@ -1,6 +1,6 @@
 package net.petafuel.styx.api.filters;
 
-import net.petafuel.styx.core.persistence.layers.PersistentClientApp;
+import net.petafuel.styx.core.persistence.layers.PersistentAccessToken;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
@@ -14,6 +14,6 @@ public class AuthorizedFilter extends AbstractTokenFilter {
 
     @Override
     public boolean checkToken(UUID uuid) {
-       return new PersistentClientApp().get(uuid).isEnabled();
+       return new PersistentAccessToken().get(uuid).isValid();
     }
 }

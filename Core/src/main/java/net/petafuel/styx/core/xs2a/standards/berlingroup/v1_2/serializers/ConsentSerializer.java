@@ -38,6 +38,13 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
             }.getType());
             jsonAccess.add(XS2AJsonKeys.BALANCES.value(), jsonBalances);
         }
+
+        if (src.getConsent().getAccess().getAccounts() != null && !src.getConsent().getAccess().getAccounts().isEmpty()) {
+            JsonElement jsonBalances = gson.toJsonTree(src.getConsent().getAccess().getAccounts(), new TypeToken<ArrayList<Account>>() {
+            }.getType());
+            jsonAccess.add(XS2AJsonKeys.ACCOUNTS.value(), jsonBalances);
+        }
+
         if (src.getConsent().getAccess().getTransactions() != null && !src.getConsent().getAccess().getTransactions().isEmpty()) {
             JsonElement jsonTransactions = gson.toJsonTree(src.getConsent().getAccess().getTransactions(), new TypeToken<ArrayList<Account>>() {
             }.getType());
@@ -87,6 +94,11 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
                 JsonArray transactionAccounts = consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.TRANSACTIONS.value()).getAsJsonArray();
                 transactionAccounts.forEach(transactionAccount
                         -> consent.getAccess().addTransactionAccounts(context.deserialize(transactionAccount, Account.class)));
+            }
+            if (consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.ACCOUNTS.value()) != null) {
+                JsonArray accounts = consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.ACCOUNTS.value()).getAsJsonArray();
+                accounts.forEach(account
+                        -> consent.getAccess().addAccounts(context.deserialize(account, Account.class)));
             }
         }
         if (consentResponse.get(XS2AJsonKeys.LINKS.value()) != null && !consentResponse.get(XS2AJsonKeys.LINKS.value()).isJsonNull()) {

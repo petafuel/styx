@@ -1,8 +1,8 @@
 package net.petafuel.styx.core.banklookup;
 
-public interface BankLookUpInterface
-{
-    XS2AStandard getBankByIBAN(String iban);
-    XS2AStandard getBankByBIC(String bic);
+import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
+import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 
+public interface BankLookUpInterface {
+    XS2AStandard getBankByBIC(String bic) throws BankNotFoundException, BankLookupFailedException;
 }

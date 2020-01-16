@@ -7,17 +7,20 @@ import java.util.List;
  * Wrapper for Account objects
  *
  * <p>
- *     Access is used to describe all Accounts that are involved in consent-creation
+ * Access is used to describe all Accounts that are involved in consent-creation
  * </p>
+ *
  * @see Account
  */
 public class Access {
     private List<Account> balances;
     private List<Account> transactions;
+    private List<Account> accounts;
 
     public Access() {
-        this.balances = new ArrayList<>();
-        this.transactions = new ArrayList<>();
+        balances = new ArrayList<>();
+        transactions = new ArrayList<>();
+        accounts = new ArrayList<>();
     }
 
     public void addBalanceAccounts(List<Account> accounts) {
@@ -50,5 +53,21 @@ public class Access {
 
     public void setTransactions(List<Account> transactions) {
         this.transactions = transactions;
+    }
+
+    public void addAccounts(List<Account> accounts) {
+        this.accounts.addAll(accounts);
+    }
+
+    public void addAccount(Account account) {
+        this.accounts.add(account);
+    }
+
+    public List<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(List<Account> accounts) {
+        this.accounts = accounts;
     }
 }

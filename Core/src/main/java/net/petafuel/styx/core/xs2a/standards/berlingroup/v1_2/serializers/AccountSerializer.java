@@ -99,9 +99,9 @@ public class AccountSerializer implements JsonSerializer<Account>, JsonDeseriali
         account.setCashAccountType(cashAccountType);
         account.setProduct(product);
 
-        if (object.get("balances") != null) {
+        if (object.get(XS2AJsonKeys.BALANCES.value()) != null && !object.get(XS2AJsonKeys.BALANCES.value()).isJsonNull()) {
             BalancesSerializer balancesSerializer = new BalancesSerializer();
-            JsonArray balances = object.get("balances").getAsJsonArray();
+            JsonArray balances = object.get(XS2AJsonKeys.BALANCES.value()).getAsJsonArray();
             for (JsonElement element : balances) {
                 account.addBalance(balancesSerializer.mapToModel((JsonObject) element));
             }

@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
-import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
@@ -36,7 +36,7 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
     private static final String CREATE_AUTHORISATION_RESOURCE = "/v1/consents/%s/authorisations";
     private static final String UPDATE_PSU_DATA = "/v1/consents/%s/authorisations/%s";
 
-    public BerlinGroupCS(String url, IBerlinGroupSigner signer) {
+    public BerlinGroupCS(String url, IXS2AHttpSigner signer) {
         super(LOG, url, signer);
     }
 

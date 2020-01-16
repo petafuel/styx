@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.petafuel.styx.core.xs2a.contracts.AISInterface;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
-import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Balance;
@@ -36,7 +36,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
 
     private static final Logger LOG = LogManager.getLogger(BerlinGroupAIS.class);
 
-    public BerlinGroupAIS(String url, IBerlinGroupSigner signer) {
+    public BerlinGroupAIS(String url, IXS2AHttpSigner signer) {
         super(LOG, url, signer);
     }
 

@@ -4,6 +4,7 @@ public enum XS2AJsonKeys {
 
     BALANCES("balances"),
     TRANSACTIONS("transactions"),
+    ACCOUNTS("accounts"),
     ACCESS("access"),
     RECURRING_INDICATOR("recurringIndicator"),
     CONSENT_STATUS("consentStatus"),

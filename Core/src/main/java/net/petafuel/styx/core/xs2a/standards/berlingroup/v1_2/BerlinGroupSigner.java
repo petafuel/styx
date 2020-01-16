@@ -1,6 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
-import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.SigningException;
@@ -25,9 +25,9 @@ import java.util.StringJoiner;
  * Berlin Group Signer to sign HTTP Requests on an Application Layer
  *
  * @version 1.2
- * @see IBerlinGroupSigner
+ * @see IXS2AHttpSigner
  */
-public class BerlinGroupSigner implements IBerlinGroupSigner {
+public class BerlinGroupSigner implements IXS2AHttpSigner {
     private static final Logger LOG = LogManager.getLogger(BerlinGroupSigner.class);
 
     /**

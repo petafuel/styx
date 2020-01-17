@@ -26,6 +26,7 @@ import java.util.Map;
 
 public class SAD implements BankLookUpInterface {
     private static final Logger LOG = LogManager.getLogger(SAD.class);
+    private static final String SAD_BANK_NOT_FOUND = "SAD_BANK_NOT_FOUND";
 
     private Map<XS2AReflection, String> urlMap = new EnumMap<>(XS2AReflection.class);
     private String xs2aClassAsterix;
@@ -47,7 +48,7 @@ public class SAD implements BankLookUpInterface {
         //Read aspsp data from SAD database into Aspsp.class model
         Aspsp aspsp = PersistentSAD.getByBIC(bic);
         if (aspsp == null) {
-            LOG.error("The requested bank for bic={} is not avaiable in SAD ", bic);
+            LOG.error("The requested bank for bic={} is not avaiable in SAD {}", bic, SAD_BANK_NOT_FOUND);
             throw new BankNotFoundException("The requested aspsp for bic " + bic + " is not not available in SAD");
         }
         XS2AStandard xs2AStandard = new XS2AStandard();
@@ -81,21 +82,18 @@ public class SAD implements BankLookUpInterface {
             }
             //initializing all service classes per service type and setting them into the xs2aStandard
             CSInterface csServiceInstance = (CSInterface) reflectServiceInstance(
-                    CSInterface.class,
                     httpSignerInstance,
                     XS2AReflection.CS
             );
             xs2AStandard.setCs(csServiceInstance);
 
             AISInterface aisServiceInstance = (AISInterface) reflectServiceInstance(
-                    AISInterface.class,
                     httpSignerInstance,
                     XS2AReflection.AIS
             );
             xs2AStandard.setAis(aisServiceInstance);
 
             PISInterface pisServiceInstance = (PISInterface) reflectServiceInstance(
-                    PISInterface.class,
                     httpSignerInstance,
                     XS2AReflection.PIS
 
@@ -103,7 +101,6 @@ public class SAD implements BankLookUpInterface {
             xs2AStandard.setPis(pisServiceInstance);
 
             PIISInterface piisServiceInstance = (PIISInterface) reflectServiceInstance(
-                    PIISInterface.class,
                     httpSignerInstance,
                     XS2AReflection.PIIS
 
@@ -164,7 +161,6 @@ public class SAD implements BankLookUpInterface {
     /**
      * Create an instance of a XS2AService class for the specified service type
      *
-     * @param clazz
      * @param httpSignerInstance
      * @param xs2AReflection
      * @return
@@ -173,7 +169,7 @@ public class SAD implements BankLookUpInterface {
      * @throws InvocationTargetException
      * @throws InstantiationException
      */
-    private Object reflectServiceInstance(Class<?> clazz, IXS2AHttpSigner httpSignerInstance, XS2AReflection xs2AReflection) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    private Object reflectServiceInstance(IXS2AHttpSigner httpSignerInstance, XS2AReflection xs2AReflection) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Class<?> serviceClazz = getServiceClass(this.xs2aClassAsterix + xs2AReflection.getValue());
         Object serviceInstance = null;
         if (serviceClazz != null) {
@@ -182,7 +178,7 @@ public class SAD implements BankLookUpInterface {
                     .newInstance(this.urlMap.get(xs2AReflection), httpSignerInstance);
         }
 
-        return clazz.cast(serviceInstance);
+        return serviceInstance;
     }
 
     /**

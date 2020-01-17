@@ -6,6 +6,9 @@ import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
+import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
+import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
+import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
@@ -13,7 +16,6 @@ import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
 import net.petafuel.styx.core.xs2a.utils.jsepa.PmtInf;
@@ -27,14 +29,12 @@ import java.util.Date;
 import java.util.Vector;
 
 public class FiduciaPISTest {
-
-    private static final String FIDUCIA_GAD_BASE_API = "https://xs2a-test.fiduciagad.de/xs2a";
+    private static final String BIC = "GENODEF1M03";
 
     @Test
     @Tag("integration")
-    public void initiateXMLPeriodicPayment() throws BankRequestFailedException{
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(FIDUCIA_GAD_BASE_API, new BerlinGroupSigner()));
+    public void initiateXMLPeriodicPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         // Necessary instances for creating a PAIN00100303Document
         PAIN00100303Document document = new PAIN00100303Document();

@@ -1,6 +1,9 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
 import net.petafuel.styx.core.banklookup.XS2AStandard;
+import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
+import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
+import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
@@ -27,15 +30,14 @@ import java.util.List;
 
 public class TargobankTest {
 
-    private static final String URL = "https://www.sandbox-bvxs2a.de/targobank/";
+    private static final String BIC = "CMCIDEDD";
     private static final String BANK_VERLAG_TOKEN = "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE";
     private static final String CONSENT = "P6wMwv2MAlyqHLxiQ0W9Jao0rBZp90l7RoRUWHW5YG2tvuV4UiKKo5eMVlEsrA-VCSmy8mjGAmN707bED6NC__SdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q";
 
     @Test
     @Tag("integration")
-    public void createConsent() throws SignatureException, BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+    public void createConsent() throws SignatureException, BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
@@ -68,9 +70,8 @@ public class TargobankTest {
 
     @Test
     @Tag("integration")
-    public void getConsent() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+    public void getConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
         PSU psu = new PSU("PSD2TEST4");
@@ -86,9 +87,8 @@ public class TargobankTest {
 
     @Test
     @Tag("integration")
-    public void getConsentStatus() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+    public void getConsentStatus() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
         PSU psu = new PSU("PSD2TEST4");
@@ -105,9 +105,8 @@ public class TargobankTest {
 
     @Test
     @Tag("integration")
-    public void deleteConsent() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+    public void deleteConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
         PSU psu = new PSU("PSD2TEST4");
@@ -123,9 +122,8 @@ public class TargobankTest {
 
     @Test
     @Tag("integration")
-    public void createOnlyBalancesConsent() throws SignatureException, BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+    public void createOnlyBalancesConsent() throws SignatureException, BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
@@ -152,9 +150,8 @@ public class TargobankTest {
 
     @Test
     @Tag("integration")
-    public void createOnlyTransactionsConsent() throws SignatureException, BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+    public void createOnlyTransactionsConsent() throws SignatureException, BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
@@ -182,9 +179,8 @@ public class TargobankTest {
     @Test
     @DisplayName("Create consent without balances or transactions")
     @Tag("integration")
-    public void createNoAccountsConsent() throws SignatureException, BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+    public void createNoAccountsConsent() throws SignatureException, BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
@@ -205,9 +201,8 @@ public class TargobankTest {
     @Test
     @DisplayName("Create consent without PSU")
     @Tag("integration")
-    public void createNoPsuConsent() throws SignatureException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+    public void createNoPsuConsent() throws SignatureException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
@@ -234,9 +229,8 @@ public class TargobankTest {
 
     @Test
     @Tag("integration")
-    public void authoriseConsent() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+    public void authoriseConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");
@@ -253,9 +247,8 @@ public class TargobankTest {
 
     @Test
     @Tag("integration")
-    public void updatePSUDataConsent() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS(URL, new BerlinGroupSigner()));
+    public void updatePSUDataConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");

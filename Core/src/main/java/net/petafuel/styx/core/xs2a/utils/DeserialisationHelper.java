@@ -1,7 +1,12 @@
 package net.petafuel.styx.core.xs2a.utils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
+import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
+import net.petafuel.styx.core.xs2a.entities.XS2AJsonKeys;
 
 public class DeserialisationHelper {
 
@@ -24,6 +29,24 @@ public class DeserialisationHelper {
             if (links.get(linkType.getJsonKey()) != null) {
                 sca.addLink(linkType, links.get(linkType.getJsonKey()).getAsJsonObject().get("href").getAsString());
             }
+        }
+    }
+
+    public static void parseConsentAccessData(JsonObject consentResponse, Consent target, JsonDeserializationContext context) {
+        if (consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.BALANCES.value()) != null) {
+            JsonArray balanceAccounts = consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.BALANCES.value()).getAsJsonArray();
+            balanceAccounts.forEach(balanceAccount
+                    -> target.getAccess().addBalanceAccounts(context.deserialize(balanceAccount, Account.class)));
+        }
+        if (consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.TRANSACTIONS.value()) != null) {
+            JsonArray transactionAccounts = consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.TRANSACTIONS.value()).getAsJsonArray();
+            transactionAccounts.forEach(transactionAccount
+                    -> target.getAccess().addTransactionAccounts(context.deserialize(transactionAccount, Account.class)));
+        }
+        if (consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.ACCOUNTS.value()) != null) {
+            JsonArray accounts = consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.ACCOUNTS.value()).getAsJsonArray();
+            accounts.forEach(account
+                    -> target.getAccess().addAccounts(context.deserialize(account, Account.class)));
         }
     }
 }

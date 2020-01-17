@@ -2,7 +2,6 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -85,21 +84,7 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
             consent.setFrequencyPerDay(consentResponse.get(XS2AJsonKeys.FREQUENCY_PER_DAY.value()).getAsInt());
         }
         if (consentResponse.get(XS2AJsonKeys.ACCESS.value()) != null) {
-            if (consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.BALANCES.value()) != null) {
-                JsonArray balanceAccounts = consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.BALANCES.value()).getAsJsonArray();
-                balanceAccounts.forEach(balanceAccount
-                        -> consent.getAccess().addBalanceAccounts(context.deserialize(balanceAccount, Account.class)));
-            }
-            if (consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.TRANSACTIONS.value()) != null) {
-                JsonArray transactionAccounts = consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.TRANSACTIONS.value()).getAsJsonArray();
-                transactionAccounts.forEach(transactionAccount
-                        -> consent.getAccess().addTransactionAccounts(context.deserialize(transactionAccount, Account.class)));
-            }
-            if (consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.ACCOUNTS.value()) != null) {
-                JsonArray accounts = consentResponse.get(XS2AJsonKeys.ACCESS.value()).getAsJsonObject().get(XS2AJsonKeys.ACCOUNTS.value()).getAsJsonArray();
-                accounts.forEach(account
-                        -> consent.getAccess().addAccounts(context.deserialize(account, Account.class)));
-            }
+            DeserialisationHelper.parseConsentAccessData(consentResponse, consent, context);
         }
         if (consentResponse.get(XS2AJsonKeys.LINKS.value()) != null && !consentResponse.get(XS2AJsonKeys.LINKS.value()).isJsonNull()) {
             JsonObject links = consentResponse.get(XS2AJsonKeys.LINKS.value()).getAsJsonObject();

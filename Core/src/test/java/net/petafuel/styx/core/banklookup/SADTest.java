@@ -25,7 +25,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 
 //😭
-@Tag("Integration")
 public class SADTest {
     static Stream<Arguments> BICProvider() {
         Stream.Builder<Arguments> streamBuilder = Stream.builder();
@@ -49,6 +48,7 @@ public class SADTest {
 
     @ParameterizedTest
     @MethodSource("BICProvider")
+    @Tag("Integration")
     public void testPersistentSAD(String bic) {
         Aspsp bank = PersistentSAD.getByBIC(bic);
         Assert.assertNotNull(bank);
@@ -69,6 +69,7 @@ public class SADTest {
     @MethodSource("BICProvider")
     @DisplayName(
             "testXS2AStandardInitialisationProduction() -> Check if PRODUCTION XS2AStandards can be created for all available BICs in SAD")
+    @Tag("Integration")
     public void testXS2AStandardInitialisationProduction(String bic) throws BankNotFoundException, BankLookupFailedException {
         SAD sad = new SAD();
         Aspsp bank = PersistentSAD.getByBIC(bic);
@@ -97,6 +98,7 @@ public class SADTest {
     @MethodSource("BICProvider")
     @DisplayName(
             "testXS2AStandardInitialisationSandbox() -> Check if SANDBOX XS2AStandards can be created for all available BICs in SAD")
+    @Tag("Integration")
     public void testXS2AStandardInitialisationSandbox(String bic) throws BankNotFoundException, BankLookupFailedException {
         SAD sad = new SAD();
         Aspsp bank = PersistentSAD.getByBIC(bic);
@@ -123,6 +125,7 @@ public class SADTest {
 
     @Test
     @DisplayName("testUnknowBank() -> Error Log is expected")
+    @Tag("Integration")
     public void testUnknowBank() throws BankNotFoundException {
         SAD sad = new SAD();
         Assertions.assertThrows(BankNotFoundException.class, () -> {

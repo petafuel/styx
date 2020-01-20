@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opentest4j.MultipleFailuresError;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -74,23 +75,37 @@ public class SADTest {
         SAD sad = new SAD();
         Aspsp bank = PersistentSAD.getByBIC(bic);
         XS2AStandard xs2AStandard = sad.getBankByBIC(bic);
-        if (bank.getProductionUrl().getCommonUrl() == null) {
-            if (bank.getProductionUrl().getAisUrl() != null) {
-                Assert.assertTrue("AIS Url was specified but no Consent Service was initialized", xs2AStandard.isCSImplemented());
-                Assert.assertTrue("AIS Url was specified but no related Service was initialized", xs2AStandard.isAISImplemented());
+        try {
+            Assertions.assertAll(() -> {
+                if (bank.getProductionUrl().getCommonUrl() == null) {
+                    if (bank.getProductionUrl().getAisUrl() != null) {
+                        Assert.assertTrue("AIS Url was specified but no Consent Service was initialized", xs2AStandard.isCSImplemented());
+                        Assert.assertTrue("AIS Url was specified but no related Service was initialized", xs2AStandard.isAISImplemented());
+                    }
+                    if (bank.getProductionUrl().getPisUrl() != null) {
+                        Assert.assertTrue("PIS Url was specified but no related Service was initialized", xs2AStandard.isPISImplemented());
+                    }
+                    if (bank.getProductionUrl().getPiisUrl() != null) {
+                        Assert.assertTrue("PIIS Url was specified but no related Service was initialized", xs2AStandard.isPIISImplemented());
+                    }
+                } else {
+                    boolean atLeastOneServiceImplemented = false;
+                    if ((xs2AStandard.isAISImplemented() && xs2AStandard.isCSImplemented()) || xs2AStandard.isPIISImplemented() || xs2AStandard.isPISImplemented()) {
+                        atLeastOneServiceImplemented = true;
+                    }
+                    Assert.assertTrue("General Url was specified but no related Service was initialized", atLeastOneServiceImplemented);
+                }
+            });
+        } catch (MultipleFailuresError e) {
+            if (!bank.isActive()) {
+                System.err.println("Test failed for bic=" + bic + " but bank is deactivated in styx: ");
+                e.getFailures().forEach(throwable -> System.err.println(throwable.getMessage()));
+                Assert.assertTrue(true);
+            } else {
+                System.err.println("Test failed for bic=" + bic + ": " + e.getMessage());
+                e.getFailures().forEach(throwable -> System.err.println(throwable.getMessage()));
+                Assert.fail();
             }
-            if (bank.getProductionUrl().getPisUrl() != null) {
-                Assert.assertTrue("PIS Url was specified but no related Service was initialized", xs2AStandard.isPISImplemented());
-            }
-            if (bank.getProductionUrl().getPiisUrl() != null) {
-                Assert.assertTrue("PIIS Url was specified but no related Service was initialized", xs2AStandard.isPIISImplemented());
-            }
-        } else {
-            boolean atLeastOneServiceImplemented = false;
-            if ((xs2AStandard.isAISImplemented() && xs2AStandard.isCSImplemented()) || xs2AStandard.isPIISImplemented() || xs2AStandard.isPISImplemented()) {
-                atLeastOneServiceImplemented = true;
-            }
-            Assert.assertTrue("General Url was specified but no related Service was initialized", atLeastOneServiceImplemented);
         }
     }
 
@@ -103,23 +118,37 @@ public class SADTest {
         SAD sad = new SAD();
         Aspsp bank = PersistentSAD.getByBIC(bic);
         XS2AStandard xs2AStandard = sad.getBankByBIC(bic, true);
-        if (bank.getSandboxUrl().getCommonUrl() == null) {
-            if (bank.getSandboxUrl().getAisUrl() != null) {
-                Assert.assertTrue("AIS Url was specified but no Consent Service was initialized", xs2AStandard.isCSImplemented());
-                Assert.assertTrue("AIS Url was specified but no related Service was initialized", xs2AStandard.isAISImplemented());
+        try {
+            Assertions.assertAll(() -> {
+                if (bank.getSandboxUrl().getCommonUrl() == null) {
+                    if (bank.getSandboxUrl().getAisUrl() != null) {
+                        Assert.assertTrue("AIS Url was specified but no Consent Service was initialized", xs2AStandard.isCSImplemented());
+                        Assert.assertTrue("AIS Url was specified but no related Service was initialized", xs2AStandard.isAISImplemented());
+                    }
+                    if (bank.getSandboxUrl().getPisUrl() != null) {
+                        Assert.assertTrue("PIS Url was specified but no related Service was initialized", xs2AStandard.isPISImplemented());
+                    }
+                    if (bank.getSandboxUrl().getPiisUrl() != null) {
+                        Assert.assertTrue("PIIS Url was specified but no related Service was initialized", xs2AStandard.isPIISImplemented());
+                    }
+                } else {
+                    boolean atLeastOneServiceImplemented = false;
+                    if ((xs2AStandard.isAISImplemented() && xs2AStandard.isCSImplemented()) || xs2AStandard.isPIISImplemented() || xs2AStandard.isPISImplemented()) {
+                        atLeastOneServiceImplemented = true;
+                    }
+                    Assert.assertTrue("General Url was specified but no related Service was initialized", atLeastOneServiceImplemented);
+                }
+            });
+        } catch (MultipleFailuresError e) {
+            if (!bank.isActive()) {
+                System.err.println("Test failed for bic=" + bic + " but bank is deactivated in styx: ");
+                e.getFailures().forEach(throwable -> System.err.println(throwable.getMessage()));
+                Assert.assertTrue(true);
+            } else {
+                System.err.println("Test failed for bic=" + bic + ": " + e.getMessage());
+                e.getFailures().forEach(throwable -> System.err.println(throwable.getMessage()));
+                Assert.fail();
             }
-            if (bank.getSandboxUrl().getPisUrl() != null) {
-                Assert.assertTrue("PIS Url was specified but no related Service was initialized", xs2AStandard.isPISImplemented());
-            }
-            if (bank.getSandboxUrl().getPiisUrl() != null) {
-                Assert.assertTrue("PIIS Url was specified but no related Service was initialized", xs2AStandard.isPIISImplemented());
-            }
-        } else {
-            boolean atLeastOneServiceImplemented = false;
-            if ((xs2AStandard.isAISImplemented() && xs2AStandard.isCSImplemented()) || xs2AStandard.isPIISImplemented() || xs2AStandard.isPISImplemented()) {
-                atLeastOneServiceImplemented = true;
-            }
-            Assert.assertTrue("General Url was specified but no related Service was initialized", atLeastOneServiceImplemented);
         }
     }
 

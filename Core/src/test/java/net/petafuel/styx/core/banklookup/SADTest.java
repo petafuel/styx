@@ -50,19 +50,58 @@ public class SADTest {
     @ParameterizedTest
     @MethodSource("BICProvider")
     @Tag("Integration")
-    public void testPersistentSAD(String bic) {
+    public void testPersistentSAD(String bic) throws SQLException {
         Aspsp bank = PersistentSAD.getByBIC(bic);
+
         Assert.assertNotNull(bank);
         Assert.assertEquals(bic, bank.getBic());
         Assert.assertNotNull(bank.getAspspGroup());
         Assert.assertNotNull(bank.getConfig());
-        Assert.assertNotNull(bank.getProductionUrl());
-        Assert.assertNotNull(bank.getSandboxUrl());
-        if (bank.getSandboxUrl().getCommonUrl() == null) {
-            Assert.assertNotNull(bank.getSandboxUrl().getAisUrl());
-            Assert.assertNotNull(bank.getSandboxUrl().getPisUrl());
-        } else {
-            Assert.assertNotNull(bank.getSandboxUrl().getCommonUrl());
+
+        Connection connection = Persistence.getInstance().getConnection();
+        ResultSet resultSet;
+
+        int sandboxUrlsId = bank.getSandboxUrl().getId();
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * from urls WHERE id = ?")) {
+            preparedStatement.setInt(1, sandboxUrlsId);
+            resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            Assert.assertNotNull(bank.getSandboxUrl());
+            if (bank.getSandboxUrl().getCommonUrl() == null) {
+                Assert.assertNotNull(bank.getSandboxUrl().getAisUrl());
+                Assert.assertEquals(resultSet.getString("ais_url"), bank.getSandboxUrl().getAisUrl());
+
+                Assert.assertNotNull(bank.getSandboxUrl().getPisUrl());
+                Assert.assertEquals(resultSet.getString("pis_url"), bank.getSandboxUrl().getPisUrl());
+
+                Assert.assertNotNull(bank.getSandboxUrl().getPiisUrl());
+                Assert.assertEquals(resultSet.getString("piis_url"), bank.getSandboxUrl().getPiisUrl());
+            } else {
+                Assert.assertNotNull(bank.getSandboxUrl().getCommonUrl());
+                Assert.assertEquals(resultSet.getString("url"), bank.getSandboxUrl().getCommonUrl());
+            }
+        }
+
+        int productionUrlsId = bank.getProductionUrl().getId();
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * from urls WHERE id = ?")) {
+            preparedStatement.setInt(1, productionUrlsId);
+            resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+
+            Assert.assertNotNull(bank.getProductionUrl());
+            if (bank.getProductionUrl().getCommonUrl() == null) {
+                Assert.assertNotNull(bank.getProductionUrl().getAisUrl());
+                Assert.assertEquals(resultSet.getString("ais_url"), bank.getProductionUrl().getAisUrl());
+
+                Assert.assertNotNull(bank.getProductionUrl().getPisUrl());
+                Assert.assertEquals(resultSet.getString("pis_url"), bank.getProductionUrl().getPisUrl());
+
+                Assert.assertNotNull(bank.getProductionUrl().getPiisUrl());
+                Assert.assertEquals(resultSet.getString("piis_url"), bank.getProductionUrl().getPiisUrl());
+            } else {
+                Assert.assertNotNull(bank.getProductionUrl().getCommonUrl());
+                Assert.assertEquals(resultSet.getString("url"), bank.getProductionUrl().getCommonUrl());
+            }
         }
     }
 

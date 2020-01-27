@@ -1,6 +1,6 @@
 package net.petafuel.styx.core.xs2a.utils;
 
-import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.exceptions.CertificateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,8 +87,9 @@ public class CertificateManager {
 
     /**
      * Return the client certificate specified by the config.properties property keystore.styxalias
-     * @see IBerlinGroupSigner
+     *
      * @return X509Certificate
+     * @see IXS2AHttpSigner
      */
     public X509Certificate getCertificate() {
         try {
@@ -110,7 +111,7 @@ public class CertificateManager {
             keyManagerFactory.init(this.clientKeyStore, this.password);
             KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
 
-            sslContext = SSLContext.getInstance("TLS");
+            sslContext = SSLContext.getInstance("TLSv1.2");
             sslContext.init(keyManagers, null, new SecureRandom());
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyManagementException e) {
             LOG.error(e.getMessage());

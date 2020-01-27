@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
+import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
+import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
+import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
@@ -19,35 +22,34 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
-public class AISTest {
-    private static final String FIDUCIA_GAD_BASE_API = "https://xs2a-test.fiduciagad.de/xs2a";
-    private static final String DEUTSCHE_BANK_BASE_API = "https://simulator-xs2a.db.com/";
+public class ConsorsAISTest {
 
-    private static final String CONSENT_ID = "3869582906101910204***REMOVED***CO4960JJ";
-    private static final String ACCOUNT_ID = "3dc3d5b3-7023-4848-9853-f5400a64e80f";
+    private static final String BIC = "CSDBDE71";
+    private static final String CONSENT = "YTYcQTMAWsNhJL-iAJ5DRSvD4Wkq4-rI0vZuXPGnTrBLwxruB4iBC2rLdxe_JmLVmNUZrDfhkFiwk2pKoYyLcw==_=_bS6p6XvTWI";
+    private static final String ACCOUNT_ID = "9b86539d-589b-4082-90c2-d725c019777f";
+    private static final String TRANSACTION_ID = "9b86539d-589b-4082-90c2-d725c019777f";
 
     @Test
     @Tag("integration")
-    public void testAccountList() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API, new BerlinGroupSigner()));
-        ReadAccountListRequest r1 = new ReadAccountListRequest(CONSENT_ID);
+    public void testAccountList() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
+        ReadAccountListRequest r1 = new ReadAccountListRequest(CONSENT);
         r1.setWithBalance(true);
         List<Account> list = standard.getAis().getAccountList(r1);
     }
 
     @Test
     @Tag("integration")
-    public void testAccountDetails() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API, new BerlinGroupSigner()));
-        ReadAccountDetailsRequest r1 = new ReadAccountDetailsRequest(ACCOUNT_ID, CONSENT_ID);
+    public void testAccountDetails() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
+        ReadAccountDetailsRequest r1 = new ReadAccountDetailsRequest(ACCOUNT_ID, CONSENT);
         r1.setWithBalance(true);
 
         Account result = standard.getAis().getAccount(r1);
@@ -55,38 +57,33 @@ public class AISTest {
 
     @Test
     @Tag("integration")
-    public void testBalances() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setAis(new BerlinGroupAIS(FIDUCIA_GAD_BASE_API, new BerlinGroupSigner()));
+    public void testBalances() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
-        ReadBalancesRequest r1 = new ReadBalancesRequest(ACCOUNT_ID, CONSENT_ID);
+        ReadBalancesRequest r1 = new ReadBalancesRequest(ACCOUNT_ID, CONSENT);
 
         Object result = standard.getAis().getBalancesByAccount(r1);
     }
 
     @Test
     @Tag("integration")
-    public void testTransactions() {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setAis(new BerlinGroupAIS(DEUTSCHE_BANK_BASE_API, new BerlinGroupSigner()));
+    public void testTransactions() throws BankLookupFailedException, BankNotFoundException, ParseException, BankRequestFailedException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
-        try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date from = format.parse("2019-03-03");
-            Date to = new Date();
-            ReadTransactionsRequest r1 = new ReadTransactionsRequest(ACCOUNT_ID, CONSENT_ID, "booked", from, to);
-            Object result = standard.getAis().getTransactionsByAccount(r1);
-        } catch (Exception ignored) {
-        }
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date from = format.parse("2019-03-03");
+        Date to = new Date();
+        ReadTransactionsRequest r1 = new ReadTransactionsRequest(ACCOUNT_ID, CONSENT, "booked", from, to);
+        Object result = standard.getAis().getTransactionsByAccount(r1);
+
     }
 
     @Test
     @Tag("integration")
-    public void testTransactionDetails() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setAis(new BerlinGroupAIS("https://xs2a.banking.co.at/xs2a-sandbox/m002", new BerlinGroupSigner()));
-
-        ReadTransactionDetailsRequest r1 = new ReadTransactionDetailsRequest(ACCOUNT_ID, "3603140611280910256***REMOVED***CO4960JJ", CONSENT_ID);
+    public void testTransactionDetails() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
+        ReadTransactionDetailsRequest r1 = new ReadTransactionDetailsRequest(ACCOUNT_ID, TRANSACTION_ID, CONSENT);
         Object result = standard.getAis().getTransaction(r1);
     }
 

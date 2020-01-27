@@ -8,7 +8,7 @@ import net.petafuel.styx.core.keepalive.entities.TaskRetryFailureException;
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
-import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
@@ -146,8 +146,8 @@ public final class ConsentPoll extends WorkableTask {
 
         Class<?> clazzCsInterface = Class.forName(csServiceClass);
         Class<?> clazzSigner = Class.forName(signerClass);
-        IBerlinGroupSigner signer = (IBerlinGroupSigner) clazzSigner.getDeclaredConstructor().newInstance();
-        CSInterface csInterfaceEx = (CSInterface) clazzCsInterface.getDeclaredConstructor(String.class, IBerlinGroupSigner.class).newInstance(url, signer);
+        IXS2AHttpSigner signer = (IXS2AHttpSigner) clazzSigner.getDeclaredConstructor().newInstance();
+        CSInterface csInterfaceEx = (CSInterface) clazzCsInterface.getDeclaredConstructor(String.class, IXS2AHttpSigner.class).newInstance(url, signer);
         Consent getFromDB = new Consent();
         getFromDB.setId(consentId);
         return new ConsentPoll(new PersistentConsent().get(getFromDB), csInterfaceEx);

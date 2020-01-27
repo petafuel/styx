@@ -1,6 +1,9 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
 import net.petafuel.styx.core.banklookup.XS2AStandard;
+import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
+import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
+import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
@@ -14,20 +17,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.security.SignatureException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+public class FeduciaConsentTest {
 
-public class ConsentTest {
+    private static final String BIC = "GENODEF1M03";
+    private static final String CONSENT = "8612563016110020244***REMOVED***CO4960JJ";
 
     @Test
     @Tag("integration")
-    public void createConsent() throws SignatureException, BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
-
+    public void createConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> balances = new LinkedList<>();
@@ -59,56 +60,50 @@ public class ConsentTest {
 
     @Test
     @Tag("integration")
-    public void getConsent() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+    public void getConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
         GetConsentRequest getConsentRequest = new GetConsentRequest();
-        getConsentRequest.setConsentId("5267164802280910235***REMOVED***CO4960JJ");
+        getConsentRequest.setConsentId(CONSENT);
 
         Consent consent = standard.getCs().getConsent(getConsentRequest);
+        Assert.assertEquals(CONSENT, consent.getId());
     }
 
     @Test
     @Tag("integration")
-    public void getConsentStatus() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+    public void getConsentStatus() throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
         StatusConsentRequest statusConsentRequest = new StatusConsentRequest();
-        statusConsentRequest.setConsentId("2337125702280910210***REMOVED***CO4960JJ");
-
-        assertThrows(BankRequestFailedException.class, () -> {
-            standard.getCs().getStatus(statusConsentRequest);
-        });
+        statusConsentRequest.setConsentId(CONSENT);
+        Consent.State state = standard.getCs().getStatus(statusConsentRequest);
+        Assert.assertTrue(Consent.State.RECEIVED.equals(state) || Consent.State.VALID.equals(state));
     }
 
     @Test
     @Tag("integration")
-    public void deleteConsent() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+    public void deleteConsent() throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
         DeleteConsentRequest deleteConsentRequest = new DeleteConsentRequest();
-        deleteConsentRequest.setConsentId("sometest-BAFIN-125314CO4960JJ");
+        deleteConsentRequest.setConsentId(CONSENT);
 
-        assertThrows(BankRequestFailedException.class, () -> {
-            standard.getCs().deleteConsent(deleteConsentRequest);
-        });
+        Consent terminatedByTPP = standard.getCs().deleteConsent(deleteConsentRequest);
+        Assert.assertEquals(Consent.State.TERMINATED_BY_TPP, terminatedByTPP.getState());
     }
 
     @Test
     @DisplayName("Create consent just with balances")
     @Tag("integration")
-    public void createOnlyBalancesConsent() throws SignatureException, BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+    public void createOnlyBalancesConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
@@ -133,9 +128,8 @@ public class ConsentTest {
     @Test
     @DisplayName("Create consent just with transactions")
     @Tag("integration")
-    public void createOnlyTransactionsConsent() throws SignatureException, BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+    public void createOnlyTransactionsConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
@@ -160,9 +154,8 @@ public class ConsentTest {
     @Test
     @DisplayName("Create consent without balances or transactions")
     @Tag("integration")
-    public void createNoAccountsConsent() throws SignatureException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+    public void createNoAccountsConsent() throws BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
@@ -186,9 +179,8 @@ public class ConsentTest {
     @Test
     @DisplayName("Create consent without PSU")
     @Tag("integration")
-    public void createNoPsuConsent() throws SignatureException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setCs(new BerlinGroupCS("https://xs2a-test.fiduciagad.de/xs2a", new BerlinGroupSigner()));
+    public void createNoPsuConsent() throws BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 

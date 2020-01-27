@@ -1,4 +1,4 @@
-package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
+package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
@@ -8,8 +8,6 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.sca.SCAApproach;
-import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
@@ -23,105 +21,108 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+public class ConsorsConsentTest {
 
-public class ConsentTest {
-    private static final String BIC_SPARKASSE = "BYLADEM1FSI";
-    private static final String BIC_FIDUCIA = "GENODEF1M03";
+    private static final String BIC = "CSDBDE71";
+    private static final String CONSENT = "YTYcQTMAWsNhJL-iAJ5DRSvD4Wkq4-rI0vZuXPGnTrBLwxruB4iBC2rLdxe_JmLVmNUZrDfhkFiwk2pKoYyLcw==_=_bS6p6XvTWI";
 
     @Test
     @Tag("integration")
     public void createConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
-
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE86999999990000001000"));
+        balances.add(new Account("DE60760300800500123456"));
 
         List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE86999999990000001000"));
+        transactions.add(new Account("DE60760300800500123456"));
 
-        PSU psu = new PSU("4321-87654321-4321");
+        List<Account> accounts = new LinkedList<>();
+        accounts.add(new Account("DE60760300800500123456"));
+
+        PSU psu = new PSU("PSU-Successful");
+        psu.setIp("192.168.8.78");
+
         Consent consent = new Consent();
         consent.getAccess().setBalances(balances);
         consent.getAccess().setTransactions(transactions);
+        consent.getAccess().setAccounts(transactions);
         consent.setPsu(psu);
         consent.setCombinedServiceIndicator(false);
-        consent.setRecurringIndicator(false);
+        consent.setRecurringIndicator(true);
         consent.setFrequencyPerDay(4);
         consent.setValidUntil(new Date());
+
         // build Request Body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
         createConsentRequest.setTppRedirectPreferred(true);
 
         consent = standard.getCs().createConsent(createConsentRequest);
 
-        SCAApproach approach = SCAHandler.decision(consent);
         Assert.assertNotNull(consent.getId());
     }
 
     @Test
     @Tag("integration")
     public void getConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
         GetConsentRequest getConsentRequest = new GetConsentRequest();
-        getConsentRequest.setConsentId("b7c58287-5612-4b43-b837-8b2800917186");
+        getConsentRequest.setConsentId(CONSENT);
 
         Consent consent = standard.getCs().getConsent(getConsentRequest);
+        Assert.assertEquals(CONSENT, consent.getId());
     }
 
     @Test
     @Tag("integration")
-    public void getConsentStatus() throws BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
+    public void getConsentStatus() throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
         StatusConsentRequest statusConsentRequest = new StatusConsentRequest();
-        statusConsentRequest.setConsentId("b7c58287-5612-4b43-b837-8b2800917186");
-
-        assertThrows(BankRequestFailedException.class, () -> {
-            standard.getCs().getStatus(statusConsentRequest);
-        });
+        statusConsentRequest.setConsentId(CONSENT);
+        Consent.State state = standard.getCs().getStatus(statusConsentRequest);
+        Assert.assertTrue(Consent.State.RECEIVED.equals(state) || Consent.State.VALID.equals(state));
     }
 
     @Test
     @Tag("integration")
-    public void deleteConsent() throws BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
+    public void deleteConsent() throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
         DeleteConsentRequest deleteConsentRequest = new DeleteConsentRequest();
-        deleteConsentRequest.setConsentId("b7c58287-5612-4b43-b837-8b2800917186");
+        deleteConsentRequest.setConsentId(CONSENT);
 
-        assertThrows(BankRequestFailedException.class, () -> {
-            standard.getCs().deleteConsent(deleteConsentRequest);
-        });
+        Consent terminatedByTPP = standard.getCs().deleteConsent(deleteConsentRequest);
+        Assert.assertEquals(Consent.State.TERMINATED_BY_TPP, terminatedByTPP.getState());
     }
 
     @Test
     @DisplayName("Create consent just with balances")
     @Tag("integration")
     public void createOnlyBalancesConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_FIDUCIA, true);
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
+
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE40100100103307118608"));
+        balances.add(new Account("DE60760300800500123456"));
 
-        PSU psu = new PSU("4321-87654321-4321");
+        PSU psu = new PSU("PSU-Successful");
+        psu.setIp("192.168.8.78");
         Consent consent = new Consent();
         consent.getAccess().setBalances(balances);
         consent.setPsu(psu);
         consent.setCombinedServiceIndicator(false);
         consent.setRecurringIndicator(false);
         consent.setFrequencyPerDay(4);
-        consent.setValidUntil(new Date());
         // Build request body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
 
@@ -134,23 +135,24 @@ public class ConsentTest {
     @DisplayName("Create consent just with transactions")
     @Tag("integration")
     public void createOnlyTransactionsConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_FIDUCIA, true);
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE40100100103307118608"));
+        transactions.add(new Account("DE60760300800500123456"));
 
-        PSU psu = new PSU("4321-87654321-4321");
+        PSU psu = new PSU("PSU-Successful");
+        psu.setIp("192.168.8.78");
         Consent consent = new Consent();
         consent.getAccess().setTransactions(transactions);
         consent.setPsu(psu);
         consent.setCombinedServiceIndicator(false);
         consent.setRecurringIndicator(false);
         consent.setFrequencyPerDay(4);
-        consent.setValidUntil(new Date());
         // Build request body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
+
         consent = standard.getCs().createConsent(createConsentRequest);
 
         Assert.assertNotNull(consent.getId());
@@ -160,16 +162,17 @@ public class ConsentTest {
     @DisplayName("Create consent without balances or transactions")
     @Tag("integration")
     public void createNoAccountsConsent() throws BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_FIDUCIA, true);
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
+
         Assert.assertTrue(standard.isCSImplemented());
 
-        PSU psu = new PSU("4321-87654321-4321");
+        PSU psu = new PSU("PSU-Successful");
+        psu.setIp("192.168.8.78");
         Consent consent = new Consent();
         consent.setPsu(psu);
         consent.setCombinedServiceIndicator(false);
         consent.setRecurringIndicator(false);
         consent.setFrequencyPerDay(4);
-        consent.setValidUntil(new Date());
         // Build request body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
 
@@ -185,15 +188,15 @@ public class ConsentTest {
     @DisplayName("Create consent without PSU")
     @Tag("integration")
     public void createNoPsuConsent() throws BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_FIDUCIA, true);
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE40100100103307118608"));
+        balances.add(new Account("DE60760300800500123456"));
 
         List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE40100100103307118608"));
+        transactions.add(new Account("DE60760300800500123456"));
 
         PSU psu = new PSU("");
         Consent consent = new Consent();
@@ -203,7 +206,6 @@ public class ConsentTest {
         consent.setCombinedServiceIndicator(false);
         consent.setRecurringIndicator(false);
         consent.setFrequencyPerDay(4);
-        consent.setValidUntil(new Date());
         // Build request body
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
 
@@ -214,5 +216,5 @@ public class ConsentTest {
             Assert.assertEquals(400, e.getHttpStatusCode());
         }
     }
-  
+
 }

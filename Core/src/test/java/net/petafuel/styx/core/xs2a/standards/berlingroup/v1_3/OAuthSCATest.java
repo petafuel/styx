@@ -6,6 +6,9 @@ import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
+import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
+import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
+import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
@@ -17,7 +20,6 @@ import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
 import net.petafuel.styx.core.xs2a.sca.OAuth2;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
 import net.petafuel.styx.core.xs2a.sca.SCAHandler;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
@@ -28,15 +30,13 @@ import java.util.Vector;
 
 public class OAuthSCATest {
 
-    public static final String SPARKASSE_BANK_BASE_API = "https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/xs2a-api/12345678";
-    public static final String SPARKASSE_BANK_AUTHORIZATION_SERVER = "https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/oauth/12345678";
+    public static final String BIC = "BYLADEM1FSI";
 
     @Tag("integration")
     @Test
-    public void initializeSinglePayment() throws BankRequestFailedException {
+    public void initializeSinglePayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
 
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(SPARKASSE_BANK_BASE_API, new BerlinGroupSigner()));
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         // Necessary instances for creating a PAIN00100303Document
         PAIN00100303Document document = new PAIN00100303Document();

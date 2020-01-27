@@ -1,7 +1,7 @@
 package net.petafuel.styx.core.xs2a.contracts;
 
 /**
- * Interface to define a sign function for HTTP Requests
+ * Interface to define a sign function for HTTP Requests on Application Level
  *
  * <p>
  * <br>Signature generation is dependent on the order and case-sensitivity of the Header Field Names and Values
@@ -12,7 +12,7 @@ package net.petafuel.styx.core.xs2a.contracts;
  * <br>RFC 7540 (HTTP/2) - Header Fields remain case-<b>INsensitive</b>
  * </p>
  */
-public interface IBerlinGroupSigner {
+public interface IXS2AHttpSigner {
 
     void sign(XS2ARequest xs2aRequest);
 }

@@ -6,6 +6,9 @@ import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
+import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
+import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
+import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
@@ -15,7 +18,6 @@ import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
@@ -31,13 +33,12 @@ import java.util.Vector;
 
 public class SantanderPISTest {
 
-    private static final String API_SANTANDER_DE_SCB_OPENAPIS_SX = "https://apigateway-sandbox.api.santander.de/scb-openapis/sx/";
+    private static final String BIC = "SCFBDE33XXX";
 
     @Test
     @Tag("integration")
-    public void initiateJsonPeriodicPayment() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(API_SANTANDER_DE_SCB_OPENAPIS_SX, new BerlinGroupSigner()));
+    public void initiateJsonPeriodicPayment() throws BankRequestFailedException, BankNotFoundException, BankLookupFailedException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC);
 
         //payment information
         String creditorIban = "DE15500105172295759744"; //Consorsbank
@@ -85,9 +86,8 @@ public class SantanderPISTest {
 
     @Test
     @Tag("integration")
-    public void initiateXMLPeriodicPayment() throws BankRequestFailedException{
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(API_SANTANDER_DE_SCB_OPENAPIS_SX, new BerlinGroupSigner()));
+    public void initiateXMLPeriodicPayment() throws BankRequestFailedException, BankNotFoundException, BankLookupFailedException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         // Necessary instances for creating a PAIN00100303Document
         PAIN00100303Document document = new PAIN00100303Document();

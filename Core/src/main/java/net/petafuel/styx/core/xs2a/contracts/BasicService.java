@@ -11,6 +11,7 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
@@ -32,9 +33,13 @@ public abstract class BasicService {
     private final Logger LOG;
     protected String url;
     private Request.Builder builder;
-    private IBerlinGroupSigner signer;
+    private IXS2AHttpSigner signer;
 
-    public BasicService(Logger log, String url, IBerlinGroupSigner signer) {
+    public BasicService(String url, IXS2AHttpSigner signer) {
+        this(LogManager.getLogger(BasicService.class), url, signer);
+    }
+
+    public BasicService(Logger log, String url, IXS2AHttpSigner signer) {
         LOG = log;
 
         this.url = url;
@@ -42,15 +47,26 @@ public abstract class BasicService {
         this.signer = signer;
     }
 
-    protected void setUrl(String url) {
-        this.builder.url(url);
+    protected static String httpBuildQuery(Map<String, String> data) {
+        if (data.isEmpty()) {
+            return "";
+        }
+        StringJoiner query = new StringJoiner("&", "?", "");
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            query.add(entry.getKey() + "=" + entry.getValue());
+        }
+        return query.toString();
     }
 
     public String getUrl() {
         return url;
     }
 
-    public IBerlinGroupSigner getSigner() {
+    protected void setUrl(String url) {
+        this.builder.url(url);
+    }
+
+    public IXS2AHttpSigner getSigner() {
         return signer;
     }
 
@@ -70,8 +86,10 @@ public abstract class BasicService {
         // Create Headers
         XS2AHeaderParser.parse(request);
 
-        //Sign Request
-        this.signer.sign(request);
+        //Sign request if there was a Signer class specified for the Service
+        if (this.signer != null) {
+            this.signer.sign(request);
+        }
 
         // Set Request Headers
         for (Map.Entry<String, String> entry : request.getHeaders().entrySet()) {
@@ -113,24 +131,6 @@ public abstract class BasicService {
         return BasicService.httpBuildQuery(request.getQueryParameters());
     }
 
-    protected static String httpBuildQuery(Map<String, String> data) {
-        if (data.isEmpty()) {
-            return "";
-        }
-        StringJoiner query = new StringJoiner("&", "?", "");
-        for (Map.Entry<String, String> entry : data.entrySet()) {
-            query.add(entry.getKey() + "=" + entry.getValue());
-        }
-        return query.toString();
-    }
-
-    protected enum RequestType {
-        POST,
-        GET,
-        DELETE,
-        PUT
-    }
-
     protected String extractResponseBody(Response response, int expectedResponseCode) throws BankRequestFailedException, IOException {
         return extractResponseBody(response, expectedResponseCode, true);
     }
@@ -149,5 +149,12 @@ public abstract class BasicService {
             }
         }
         return responseBody;
+    }
+
+    protected enum RequestType {
+        POST,
+        GET,
+        DELETE,
+        PUT
     }
 }

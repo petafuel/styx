@@ -7,7 +7,7 @@ import net.petafuel.jsepa.facades.ReportConverter;
 import net.petafuel.jsepa.model.pain002.TransactionReport;
 import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
-import net.petafuel.styx.core.xs2a.contracts.IBerlinGroupSigner;
+import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
@@ -36,7 +36,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
     private static final String INITIATE_PAYMENT = "/v1/%s/%s";
     private static final String GET_PAYMENT_STATUS = "/v1/%s/%s/%s/status";
 
-    public BerlinGroupPIS(String url, IBerlinGroupSigner signer) {
+    public BerlinGroupPIS(String url, IXS2AHttpSigner signer) {
         super(LOG, url, signer);
     }
 

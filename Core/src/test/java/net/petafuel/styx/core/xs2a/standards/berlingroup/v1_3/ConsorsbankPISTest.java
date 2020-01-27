@@ -1,6 +1,9 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
 import net.petafuel.styx.core.banklookup.XS2AStandard;
+import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
+import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
+import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
@@ -9,7 +12,6 @@ import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationJsonRequest;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
@@ -20,19 +22,18 @@ import java.util.Date;
 
 public class ConsorsbankPISTest {
 
-    private static final String CONSORSBANK = "https://xs2a-sndbx.consorsbank.de";
+    private static final String BIC = "CSDBDE71";
 
     @Test
     @Tag("integration")
-    public void initiateJsonPeriodicPayment() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(CONSORSBANK, new BerlinGroupSigner()));
+    public void initiateJsonPeriodicPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         //payment information
-        String creditorIban = "DE15500105172295759744"; //Consorsbank
+        String creditorIban = "DE60760300800500123456"; //Consorsbank
         Currency creditorCurrency = Currency.EUR;
         String creditorName = "WBG";
-        String debtorIban = "DE60760300800500123456"; //Consorsbank
+        String debtorIban = "DE23760300800550123451"; //Consorsbank
         Currency debtorCurrency = Currency.EUR;
         String amount = "520.00";
         Currency instructedCurrency = Currency.EUR;

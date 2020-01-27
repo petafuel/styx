@@ -6,6 +6,9 @@ import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
+import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
+import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
+import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
@@ -20,7 +23,6 @@ import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.OAuth2;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
 import net.petafuel.styx.core.xs2a.sca.SCAHandler;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
@@ -42,18 +44,15 @@ import java.util.Vector;
 
 public class PISTest {
 
-    private static final String SPARKASSE_BASE_API = "https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/xs2a-api/12345678";
     private static final String PAYMENT_ID = "681275b3-9dc3-41a0-addd-cfc4764519c4";
-    private static final String FIDUCIA_GAD_BASE_API = "https://xs2a-test.fiduciagad.de/xs2a";
-    private static final String FIDUCIA_PAYMENT_ID = "3631391318101910234***REMOVED***PA4960JJ";
-    public static final String DEUTSCHE_BANK_BASE_API ="https://simulator-xs2a.db.com:443/sb/sandbox";
-    public static final String FIDOR_BANK_BASE_API = "https://xs2a.sandbox.fidorsolutions.cloud";
+    private static final String FIDUCIA_PAYMENT_ID = "";
+    private static final String BIC_SPARKASSE = "BYLADEM1FSI";
+    private static final String BIC_FIDUCIA = "GENODEF1M03";
 
     @Test
     @Tag("integration")
-    public void getPaymentStatus() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+    public void getPaymentStatus() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
 
         ReadPaymentStatusRequest r1 = new ReadPaymentStatusRequest(
                 PaymentService.PAYMENTS,
@@ -66,9 +65,8 @@ public class PISTest {
 
     @Test
     @Tag("integration")
-    public void getPaymentStatusXML() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(FIDUCIA_GAD_BASE_API, new BerlinGroupSigner()));
+    public void getPaymentStatusXML() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
 
         ReadPaymentStatusRequest r1 = new ReadPaymentStatusRequest(
                 PaymentService.PAYMENTS,
@@ -81,9 +79,8 @@ public class PISTest {
 
     @Test
     @Tag("integration")
-    public void initiateJSONPayment() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+    public void initiateJSONPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
 
         //payment information
         String creditorIban = "DE75999999990000001004"; //Sparkasse
@@ -116,9 +113,8 @@ public class PISTest {
 
     @Test
     @Tag("integration")
-    public void initiateJSONFuturePayment() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+    public void initiateJSONFuturePayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
 
         //payment information
         String creditorIban = "DE75999999990000001004"; //Sparkasse
@@ -157,10 +153,9 @@ public class PISTest {
 
     @Tag("integration")
     @Test
-    public void initializeSingleFuturePayment() throws BankRequestFailedException {
+    public void initializeSingleFuturePayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
 
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
 
         // Necessary instances for creating a PAIN00100303Document
         PAIN00100303Document document = new PAIN00100303Document();
@@ -237,9 +232,8 @@ public class PISTest {
 
     @Test
     @Tag("integration")
-    public void initiateJsonBulkPayment() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+    public void initiateJsonBulkPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
 
         /** Debtor information*/
         String debtorIban = "DE86999999990000001000"; //Sparkasse
@@ -301,10 +295,9 @@ public class PISTest {
 
     @Test
     @Tag("integration")
-    public void initializeXMLBulkPayment() throws BankRequestFailedException {
+    public void initializeXMLBulkPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
 
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
 
         // Necessary instances for creating a PAIN00100303Document
         PAIN00100303Document document = new PAIN00100303Document();
@@ -405,9 +398,8 @@ public class PISTest {
 
     @Test
     @Tag("integration")
-    public void initiateJsonPeriodicPayment() throws BankRequestFailedException {
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+    public void initiateJsonPeriodicPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
 
         //payment information
         String creditorIban = "DE75999999990000001004"; //Sparkasse
@@ -453,9 +445,8 @@ public class PISTest {
 
     @Test
     @Tag("integration")
-    public void initiateXMLPeriodicPayment() throws BankRequestFailedException{
-        XS2AStandard standard = new XS2AStandard();
-        standard.setPis(new BerlinGroupPIS(SPARKASSE_BASE_API, new BerlinGroupSigner()));
+    public void initiateXMLPeriodicPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
 
         // Necessary instances for creating a PAIN00100303Document
         PAIN00100303Document document = new PAIN00100303Document();

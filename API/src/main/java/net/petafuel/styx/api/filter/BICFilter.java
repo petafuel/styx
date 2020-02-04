@@ -11,13 +11,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-@RequiresPSU
-public class PSUFilter implements ContainerRequestFilter {
+@RequiresBIC
+public class BICFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext containerRequestContext) {
-        String psuId = containerRequestContext.getHeaderString(XS2AHeader.PSU_ID);
-        if (psuId == null || "".equals(psuId)) {
-            throw new StyxException(new ErrorEntity("PSU-ID is not provided or empty", Response.Status.BAD_REQUEST, ErrorCategory.CLIENT));
+        String bic = containerRequestContext.getHeaderString(XS2AHeader.PSU_BIC);
+        if (bic == null || "".equals(bic)) {
+            throw new StyxException(new ErrorEntity("PSU-BIC is not provided or empty", Response.Status.BAD_REQUEST, ErrorCategory.CLIENT));
         }
     }
 }

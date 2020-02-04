@@ -11,13 +11,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-@RequiresPSU
-public class PSUFilter implements ContainerRequestFilter {
+@RequiresMandatoryHeader
+public class MandatoryHeaderFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext containerRequestContext) {
-        String psuId = containerRequestContext.getHeaderString(XS2AHeader.PSU_ID);
-        if (psuId == null || "".equals(psuId)) {
-            throw new StyxException(new ErrorEntity("PSU-ID is not provided or empty", Response.Status.BAD_REQUEST, ErrorCategory.CLIENT));
+        String redirectPreferred = containerRequestContext.getHeaderString(XS2AHeader.REDIRECT_PREFERRED);
+        if (redirectPreferred == null || "".equals(redirectPreferred)) {
+            throw new StyxException(new ErrorEntity("header redirectPreferred was not set", Response.Status.BAD_REQUEST, ErrorCategory.CLIENT));
         }
     }
 }

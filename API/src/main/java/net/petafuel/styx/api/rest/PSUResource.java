@@ -1,12 +1,11 @@
-package net.petafuel.styx.api.rest.entity;
+package net.petafuel.styx.api.rest;
 
 import net.petafuel.styx.core.xs2a.entities.PSU;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.HeaderParam;
 
-public abstract class PSUResource {
-
+public abstract class PSUResource extends RestResource {
     private PSU psu;
 
     @HeaderParam("PSU-ID")

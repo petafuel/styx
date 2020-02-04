@@ -1,19 +1,22 @@
 package net.petafuel.styx.api;
 
 import net.petafuel.styx.api.exception.BankRequestFailedExceptionHandler;
+import net.petafuel.styx.api.exception.ClientExceptionHandler;
 import net.petafuel.styx.api.exception.ConstraintViolationExceptionHandler;
 import net.petafuel.styx.api.exception.ErrorCategory;
 import net.petafuel.styx.api.exception.ErrorEntity;
 import net.petafuel.styx.api.exception.StyxExceptionHandler;
 import net.petafuel.styx.api.exception.UncaughtExceptionHandler;
 import net.petafuel.styx.api.filter.AuthorizedFilter;
+import net.petafuel.styx.api.filter.BICFilter;
+import net.petafuel.styx.api.filter.MandatoryHeaderFilter;
 import net.petafuel.styx.api.filter.MasterTokenFilter;
 import net.petafuel.styx.api.filter.PSUFilter;
 import net.petafuel.styx.api.v1.account.boundary.AccountResource;
 import net.petafuel.styx.api.v1.auth.boundary.AuthResource;
 import net.petafuel.styx.api.v1.callback.boundary.CallbackResource;
 import net.petafuel.styx.api.v1.consent.boundary.ConsentResource;
-import net.petafuel.styx.api.v1.payment.boundary.PaymentResource;
+import net.petafuel.styx.api.v1.payment.boundary.PaymentInitiationResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Request;
@@ -36,9 +39,8 @@ import java.net.InetSocketAddress;
 
 
 public class WebServer {
-
     private static final Logger LOG = LogManager.getLogger(WebServer.class);
-    private static Boolean isSandbox = Boolean.parseBoolean(System.getProperty("styx.api.sad.enable-sandbox"));
+    private static Boolean isSandbox = Boolean.parseBoolean(System.getProperty("styx.api.sad.enable-sandbox", "true"));
     private String ip;
     private String port;
     private Server server = null;
@@ -52,7 +54,7 @@ public class WebServer {
         return isSandbox;
     }
 
-    void startHttpServer() throws Exception {
+    public void startHttpServer() throws Exception {
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         InetSocketAddress inetSocketAddress = new InetSocketAddress(InetAddress.getByName(ip), Integer.parseInt(port));
@@ -69,15 +71,18 @@ public class WebServer {
                 .register(AccountResource.class)
                 .register(AuthResource.class)
                 .register(ConsentResource.class)
-                .register(PaymentResource.class);                       //Handle PIS calls
+                .register(PaymentInitiationResource.class);                       //Handle PIS calls
         //Register Middlewares / Filters
         config.register(AuthorizedFilter.class)                         // request Requires valid client token and enabled master token
                 .register(PSUFilter.class)                              // request requires PSU data
+                .register(BICFilter.class)                              // request requires PSU data
+                .register(MandatoryHeaderFilter.class)                  // request requires certain header fields
                 .register(MasterTokenFilter.class);                     // Request requires enabled master token
         //Register Errorhandlers
         config.register(UncaughtExceptionHandler.class)                 // handle any uncaught exceptions
                 .register(BankRequestFailedExceptionHandler.class)      // handle xs2a interface exception
                 .register(StyxExceptionHandler.class)                   // handle styx exceptions
+                .register(ClientExceptionHandler.class)                 // handle 4xx client exceptions
                 .register(ConstraintViolationExceptionHandler.class);   // handle validation exceptions
 
         ServletHolder styxRoutes = new ServletHolder(new ServletContainer(config));
@@ -94,7 +99,7 @@ public class WebServer {
         }
     }
 
-    void stopHttpServer() {
+    public void stopHttpServer() {
         if (server != null) {
             server.destroy();
             LOG.warn("Server has been stopped");

@@ -45,11 +45,11 @@ public class ConsorsbankPISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.getValue());
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
         creditor.setName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);

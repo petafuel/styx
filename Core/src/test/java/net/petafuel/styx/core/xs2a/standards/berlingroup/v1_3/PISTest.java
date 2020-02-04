@@ -10,6 +10,7 @@ import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
@@ -287,8 +288,9 @@ public class PISTest {
         payments.add(p2);
 
         PSU psu = new PSU("PSU-1234");
+        //TODO Fix empty Bulkpayment
         BulkPaymentInitiationJsonRequest request = new BulkPaymentInitiationJsonRequest(
-                PaymentProduct.SEPA_CREDIT_TRANSFERS, payments, psu, false);
+                PaymentProduct.SEPA_CREDIT_TRANSFERS, new BulkPayment(), psu);
 
         InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
         Assert.assertNotNull(initiatedPayment);
@@ -418,11 +420,11 @@ public class PISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.name());
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
         creditor.setName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
@@ -493,7 +495,7 @@ public class PISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 
@@ -538,7 +540,7 @@ public class PISTest {
         xmlRequest.setTppRedirectPreferred(true);
 
         //build json request part
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.name());
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
         paymentBody.setDayOfExecution(dayOfExecution);

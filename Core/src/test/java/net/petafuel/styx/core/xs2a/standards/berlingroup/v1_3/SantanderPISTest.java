@@ -57,11 +57,11 @@ public class SantanderPISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.name());
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
         creditor.setName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
@@ -133,7 +133,7 @@ public class SantanderPISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 
@@ -179,7 +179,7 @@ public class SantanderPISTest {
         xmlRequest.setTppRedirectPreferred(true);
 
         //build json request part
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.name());
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
         paymentBody.setDayOfExecution(dayOfExecution);

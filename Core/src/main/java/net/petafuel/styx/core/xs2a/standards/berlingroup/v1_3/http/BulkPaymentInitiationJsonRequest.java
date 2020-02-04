@@ -1,60 +1,40 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
+import net.petafuel.styx.core.xs2a.entities.BulkPayment;
+import net.petafuel.styx.core.xs2a.entities.BulkPaymentAdapter;
 import net.petafuel.styx.core.xs2a.entities.PSU;
-import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.BulkPaymentInitiationJsonRequestSerializer;
 
-import java.util.Date;
-import java.util.List;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
 import java.util.Optional;
 
 public class BulkPaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
+    private BulkPayment bulkPayment;
 
-    /**
-     * Body attributes
-     */
-    private List<Payment> payments;
-    private boolean batchBookingPreferred;
-    private Date requestedExecutionDate;
-
-    public BulkPaymentInitiationJsonRequest(PaymentProduct paymentProduct, List<Payment> payments, PSU psu, boolean batchBookingPreferred) {
+    public BulkPaymentInitiationJsonRequest(PaymentProduct paymentProduct, BulkPayment bulkPayment, PSU psu) {
         super(paymentProduct, PaymentService.BULK_PAYMENTS, psu);
-        this.payments = payments;
-        this.batchBookingPreferred = batchBookingPreferred;
+        this.bulkPayment = bulkPayment;
     }
 
     @Override
     public Optional<String> getRawBody() {
-        Gson gson = new GsonBuilder().registerTypeAdapter(this.getClass(), new BulkPaymentInitiationJsonRequestSerializer()).create();
-        return Optional.ofNullable(gson.toJson(this));
+        try (Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withAdapters(new BulkPaymentAdapter()))) {
+            return Optional.ofNullable(jsonb.toJson(bulkPayment));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+
     }
 
-    public List<Payment> getPayments() {
-        return payments;
+    public BulkPayment getBulkPayment() {
+        return bulkPayment;
     }
 
-    public void setPayments(List<Payment> payments) {
-        this.payments = payments;
-    }
-
-    public boolean isBatchBookingPreferred() {
-        return batchBookingPreferred;
-    }
-
-    public void setBatchBookingPreferred(boolean batchBookingPreferred) {
-        this.batchBookingPreferred = batchBookingPreferred;
-    }
-
-    public Date getRequestedExecutionDate() {
-        return requestedExecutionDate;
-    }
-
-    public void setRequestedExecutionDate(Date requestedExecutionDate) {
-        this.requestedExecutionDate = requestedExecutionDate;
+    public void setBulkPayment(BulkPayment bulkPayment) {
+        this.bulkPayment = bulkPayment;
     }
 }

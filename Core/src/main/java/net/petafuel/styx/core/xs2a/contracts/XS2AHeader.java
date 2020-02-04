@@ -33,4 +33,8 @@ public @interface XS2AHeader {
     String TPP_REDIRECT_URL = "tpp-redirect-uri";
     String TPP_SIGNATURE_CERTIFICATE = "tpp-signature-certificate";
     String X_REQUEST_ID = "x-request-id";
+
+    //Styx specific
+    String PSU_BIC = "psu-bic";
+    String REDIRECT_PREFERRED = "redirectPreferred";
 }

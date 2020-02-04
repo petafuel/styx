@@ -37,6 +37,10 @@ public class Payment {
     @JsonbProperty("remittanceInformationUnstructured")
     private String remittanceInformationUnstructured;
 
+    //Only in case of future dated payments, not supported by all aspsps
+    @JsonbProperty("requestedExecutionDate")
+    private String requestedExecutionDate;
+
 
     public Payment() {
 
@@ -99,4 +103,11 @@ public class Payment {
         this.remittanceInformationUnstructured = remittanceInformationUnstructured;
     }
 
+    public String getRequestedExecutionDate() {
+        return requestedExecutionDate;
+    }
+
+    public void setRequestedExecutionDate(String requestedExecutionDate) {
+        this.requestedExecutionDate = requestedExecutionDate;
+    }
 }

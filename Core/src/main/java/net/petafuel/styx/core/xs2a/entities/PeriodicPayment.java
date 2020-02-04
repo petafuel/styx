@@ -1,22 +1,46 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import net.petafuel.styx.core.xs2a.entities.serializers.ExecutionRuleAdapter;
+
+import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTypeAdapter;
 import java.util.Date;
 
 public class PeriodicPayment extends Payment {
 
+    @JsonbDateFormat("yyyy-MM-dd")
+    @JsonbProperty("startDate")
     private Date startDate;
+
+    @JsonbProperty("executionRule")
+    @JsonbTypeAdapter(ExecutionRuleAdapter.class)
     private ExecutionRule executionRule;
+
+    @JsonbDateFormat("yyyy-MM-dd")
+    @JsonbProperty("endDate")
     private Date endDate;
-    private Frequency frequency;
+
+    @JsonbProperty("frequency")
+    private String frequency;
+
+    @JsonbProperty("dayOfExecution")
     private String dayOfExecution;
 
-    public PeriodicPayment(Date startDate, Frequency frequency) {
+    public PeriodicPayment() {
+    }
+
+    public PeriodicPayment(Date startDate, String frequency) {
         this.startDate = startDate;
         this.frequency = frequency;
     }
 
     public Date getStartDate() {
         return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public ExecutionRule getExecutionRule() {
@@ -35,16 +59,21 @@ public class PeriodicPayment extends Payment {
         this.endDate = endDate;
     }
 
-    public Frequency getFrequency() {
+    public String getFrequency() {
         return frequency;
+    }
+
+    public void setFrequency(String frequency) {
+        this.frequency = frequency;
     }
 
     /**
      * day of execution depending on frequency
      * <br>should be explicit day in month (twoDigitText) on which periodic payment should be executed
      * <br>f.e. frequency = "MNTH" and dayOfExecution = "20" - payment is executed every month on the 20th day
-     * @see https://www.iso20022.org/standardsrepository/public/wqt/Description/mx/dico/codesets/_VsZaMf70EeCKvdA5_Kg7Aw
+     *
      * @return String
+     * @see https://www.iso20022.org/standardsrepository/public/wqt/Description/mx/dico/codesets/_VsZaMf70EeCKvdA5_Kg7Aw
      */
     public String getDayOfExecution() {
         return dayOfExecution;
@@ -54,16 +83,27 @@ public class PeriodicPayment extends Payment {
      * day of execution depending on frequency
      * <br>should be explicit day in month (twoDigitText) on which periodic payment should be executed
      * <br>f.e. frequency = "MNTH" and dayOfExecution = "20" - payment is executed every month on the 20th day
-     * @see https://www.iso20022.org/standardsrepository/public/wqt/Description/mx/dico/codesets/_VsZaMf70EeCKvdA5_Kg7Aw
+     *
      * @param dayOfExecution String
+     * @see https://www.iso20022.org/standardsrepository/public/wqt/Description/mx/dico/codesets/_VsZaMf70EeCKvdA5_Kg7Aw
      */
     public void setDayOfExecution(String dayOfExecution) {
         this.dayOfExecution = dayOfExecution;
     }
 
     public enum ExecutionRule {
-        following,
-        preceding
+        FOLLOWING("following"),
+        PRECEDING("preceding");
+
+        private String value;
+
+        ExecutionRule(String fullName) {
+            this.value = fullName;
+        }
+
+        public String getValue() {
+            return value;
+        }
     }
 
     public enum Frequency {
@@ -80,14 +120,15 @@ public class PeriodicPayment extends Payment {
         INDA("IntraDay"),
         OVNG("Overnight"),
         ONDE("OnDemand");
+        private String value;
 
-        private String name;
         Frequency(String fullName) {
-            this.name = fullName;
+            this.value = fullName;
         }
 
-        public String getName() {
-            return name;
+        public String getValue() {
+            return value;
         }
+
     }
 }

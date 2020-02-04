@@ -1,4 +1,4 @@
-package net.petafuel.styx.api.filters;
+package net.petafuel.styx.api.filter;
 
 import net.petafuel.styx.core.persistence.layers.PersistentClientApp;
 

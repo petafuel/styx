@@ -1,56 +1,30 @@
-package net.petafuel.styx.api.v1.payment.boundary.entity;
+package net.petafuel.styx.api.v1.payment.entity;
 
-import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.List;
 
-public class PaymentInitiationRequest {
-    @JsonbProperty("batchBookingPreferred")
-    private Boolean batchBookingPreferred;
-
-    @JsonbDateFormat(value = "yyyy-MM-dd")
-    @JsonbProperty("requestedExecutionDate")
-    private LocalDate requestedExecutionDate;
+public class PeriodicPaymentInitiation extends PaymentInitiation {
 
     @JsonbDateFormat(value = "yyyy-MM-dd")
     @JsonbProperty("startDate")
+    @NotNull
     private LocalDate startDate;
 
     @JsonbProperty("executionRule")
+    @NotNull
     private PeriodicPayment.ExecutionRule executionRule;
 
     @JsonbProperty("frequency")
+    @NotNull
     private String frequency;
 
     @JsonbProperty("dayOfExecution")
+    @NotNull
     private Integer dayOfExecution;
-
-    @NotEmpty(message = "Cannot initiate payment without payment objects")
-    @JsonbProperty("payments")
-    @Valid
-    private List<Payment> payments;
-
-    public Boolean getBatchBookingPreferred() {
-        return batchBookingPreferred;
-    }
-
-    public void setBatchBookingPreferred(Boolean batchBookingPreferred) {
-        this.batchBookingPreferred = batchBookingPreferred;
-    }
-
-    public LocalDate getRequestedExecutionDate() {
-        return requestedExecutionDate;
-    }
-
-    public void setRequestedExecutionDate(LocalDate requestedExecutionDate) {
-        this.requestedExecutionDate = requestedExecutionDate;
-    }
 
     public LocalDate getStartDate() {
         return startDate;
@@ -82,13 +56,5 @@ public class PaymentInitiationRequest {
 
     public void setDayOfExecution(Integer dayOfExecution) {
         this.dayOfExecution = dayOfExecution;
-    }
-
-    public List<Payment> getPayments() {
-        return payments;
-    }
-
-    public void setPayments(List<Payment> payments) {
-        this.payments = payments;
     }
 }

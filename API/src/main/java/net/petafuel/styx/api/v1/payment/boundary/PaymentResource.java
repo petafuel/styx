@@ -1,17 +1,18 @@
 package net.petafuel.styx.api.v1.payment.boundary;
 
-import net.petafuel.jsepa.model.CCTInitiation;
-import net.petafuel.jsepa.model.CreditTransferTransactionInformation;
-import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.jsepa.model.PAIN00100303Document;
-import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.api.WebServer;
+import net.petafuel.styx.api.exception.ErrorCategory;
+import net.petafuel.styx.api.exception.ErrorEntity;
+import net.petafuel.styx.api.exception.StyxException;
 import net.petafuel.styx.api.filter.CheckAccessToken;
+import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.filter.RequiresPSU;
 import net.petafuel.styx.api.rest.entity.PSUResource;
-import net.petafuel.styx.api.v1.payment.boundary.entity.PaymentInitiationRequest;
-import net.petafuel.styx.api.v1.payment.boundary.entity.PaymentProductBean;
-import net.petafuel.styx.api.v1.payment.boundary.entity.PaymentResponse;
+import net.petafuel.styx.api.v1.payment.entity.BulkPaymentInitiation;
+import net.petafuel.styx.api.v1.payment.entity.PaymentInitiation;
+import net.petafuel.styx.api.v1.payment.entity.PaymentProductBean;
+import net.petafuel.styx.api.v1.payment.entity.PaymentResponse;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
@@ -19,13 +20,16 @@ import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
+import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
-import net.petafuel.styx.core.xs2a.utils.jsepa.PmtInf;
+import net.petafuel.styx.core.xs2a.utils.PaymentXMLSerializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,11 +41,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.Vector;
 
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
@@ -54,11 +55,37 @@ public class PaymentResource extends PSUResource {
     @HeaderParam("token")
     private String token;
 
+    /**
+     * Initiates single and future payments on the aspsp interface
+     *
+     * @param bic
+     * @param paymentProductBean
+     * @param paymentInitiationRequest
+     * @return
+     * @throws BankLookupFailedException
+     * @throws BankNotFoundException
+     * @throws BankRequestFailedException
+     */
     @POST
     @Path("/payments/{paymentProduct}")
-    public Response initiateSinglePayment(@HeaderParam("bic") String bic, @BeanParam PaymentProductBean paymentProductBean, @Valid PaymentInitiationRequest paymentInitiationRequest) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+    @RequiresBIC
+    public Response initiateSinglePayment(@HeaderParam(XS2AHeader.PSU_BIC) String bic, @BeanParam PaymentProductBean paymentProductBean, @Valid PaymentInitiation paymentInitiationRequest) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+        Optional<Payment> singlePayment = paymentInitiationRequest.getPayments().stream().findFirst();
+        if (!singlePayment.isPresent()) {
+            throw new StyxException(new ErrorEntity("No valid payment object was found within the payments array", Response.Status.BAD_REQUEST, ErrorCategory.STYX));
+        }
+
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
-        Payment payment = paymentInitiationRequest.getPayments().get(0);
+        Payment payment = singlePayment.get();
+
+        //Check if payment is a future payment and if aspsp supports this
+        if (payment.getRequestedExecutionDate() != null) {
+            ImplementerOption supportFutureDatedPayments = xs2AStandard.getAspsp().getConfig().getImplementerOptions().get("IO21");
+            if (!supportFutureDatedPayments.getOptions().get("available").getAsBoolean()) {
+                throw new StyxException(new ErrorEntity("ASPSP does not support future-dated payments but requestedExecutionDate was set", Response.Status.BAD_REQUEST, ErrorCategory.STYX));
+            }
+        }
+
         XS2APaymentInitiationRequest singlePaymentInitiation;
         //check IO2 for xml or json
         ImplementerOption supportedSinglePaymentProduct = xs2AStandard.getAspsp().getConfig().getImplementerOptions().get("IO2");
@@ -67,53 +94,7 @@ public class PaymentResource extends PSUResource {
             singlePaymentInitiation = new PaymentInitiationJsonRequest(paymentProductBean.getPaymentProduct(), payment, getPsu());
         } else {
             //aspsp does not support json, use pain001.003
-            PAIN00100303Document document = new PAIN00100303Document();
-            CCTInitiation ccInitation = new CCTInitiation();
-            GroupHeader groupHeader = new GroupHeader();
-            Vector<PaymentInstructionInformation> pmtInfos = new Vector<>();
-            PmtInf pii = new PmtInf();
-            CreditTransferTransactionInformation cdtTrfTxInf = new CreditTransferTransactionInformation();
-
-            // Necessary variables for creating a PAIN00100303Document
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String creationTime = simpleDateFormat.format(new Date());
-            int numberOfTransactions = 1;
-            double controlSum = Double.parseDouble(payment.getInstructedAmount().getAmount());
-            String paymentInformationId = "NOTPROVIDED";
-            String paymentMethod = "TRF";
-            String debtorName = payment.getDebtor().getName();
-            String chargeBearer = "SLEV";
-
-            // Setting values for each instance
-            groupHeader.setMessageId(UUID.randomUUID().toString());
-            groupHeader.setCreationTime(creationTime);
-            groupHeader.setNoOfTransactions(numberOfTransactions);
-            groupHeader.setControlSum(controlSum);
-            groupHeader.setInitiatingPartyName(debtorName);
-
-            cdtTrfTxInf.setEndToEndID(payment.getEndToEndIdentification());
-            cdtTrfTxInf.setAmount(Double.parseDouble(payment.getInstructedAmount().getAmount()));
-            cdtTrfTxInf.setCreditorName(payment.getCreditorName());
-            cdtTrfTxInf.setCreditorIBAN(payment.getCreditor().getIban());
-            cdtTrfTxInf.setVwz(payment.getRemittanceInformationUnstructured());
-
-            ArrayList<CreditTransferTransactionInformation> list = new ArrayList<>();
-            list.add(cdtTrfTxInf);
-
-            pii.setPmtInfId(paymentInformationId);
-            pii.setPaymentMethod(paymentMethod);
-            pii.setNoTxns(numberOfTransactions);
-            pii.setCtrlSum(controlSum);
-            pii.setDebtorName(debtorName);
-            pii.setDebtorAccountIBAN(payment.getDebtor().getIban());
-            pii.setDebitorBic(bic);
-            pii.setChargeBearer(chargeBearer);
-            pii.setCreditTransferTransactionInformationVector(list);
-
-            pmtInfos.add(pii);
-            ccInitation.setGrpHeader(groupHeader);
-            ccInitation.setPmtInfos(pmtInfos);
-            document.setCctInitiation(ccInitation);
+            PAIN00100303Document document = (new PaymentXMLSerializer()).serialize("test", payment);
 
             singlePaymentInitiation = new PaymentInitiationPain001Request(paymentProductBean.getPaymentProduct(), PaymentService.PAYMENTS, document, getPsu());
         }
@@ -125,20 +106,40 @@ public class PaymentResource extends PSUResource {
 
     @POST
     @Path("/bulk-payments/{paymentProduct}")
-    public Response initiateBulkPayment(@HeaderParam("bic") String bic, @BeanParam PaymentProductBean paymentProductBean, @Valid PaymentInitiationRequest paymentInitiationRequest) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+    @RequiresBIC
+    public Response initiateBulkPayment(@HeaderParam(XS2AHeader.PSU_BIC) String bic,
+                                        @BeanParam PaymentProductBean paymentProductBean,
+                                        @Valid BulkPaymentInitiation paymentInitiationRequest) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
-        LOG.info("Initiate bulk payment bic={} aspsp_name={} aspsp_id={}", bic, xs2AStandard.getAspsp().getName(), xs2AStandard.getAspsp().getId());
+        Optional<Payment> singlePayment = paymentInitiationRequest.getPayments().stream().findAny();
+        if (!singlePayment.isPresent()) {
+            throw new StyxException(new ErrorEntity("No valid payment object was found within the payments array", Response.Status.BAD_REQUEST, ErrorCategory.STYX));
+        }
+        XS2APaymentInitiationRequest bulkPaymentInitiation;
 
-        //TODO check IO3 for xml or json
-        BulkPaymentInitiationJsonRequest paymentInitiationJsonRequest = new BulkPaymentInitiationJsonRequest(paymentProductBean.getPaymentProduct(), paymentInitiationRequest.getPayments(), getPsu(), false);
-        PaymentResponse paymentResponse = new PaymentResponse(xs2AStandard.getPis().initiatePayment(paymentInitiationJsonRequest));
+        Account debtor = singlePayment.get().getDebtor();
+        BulkPayment bulkPayment = new BulkPayment();
+        bulkPayment.setBatchBookingPreferred(paymentInitiationRequest.getBatchBookingPreferred());
+        bulkPayment.setDebtorAccount(debtor);
+        bulkPayment.setPayments(paymentInitiationRequest.getPayments());
+        bulkPayment.setRequestedExecutionDate(paymentInitiationRequest.getRequestedExecutionDate());
 
+        ImplementerOption supportedSinglePaymentProduct = xs2AStandard.getAspsp().getConfig().getImplementerOptions().get("IO3");
+        if (supportedSinglePaymentProduct.getOptions().get(paymentProductBean.getPaymentProduct().toString()).getAsBoolean()) {
+            bulkPaymentInitiation = new BulkPaymentInitiationJsonRequest(paymentProductBean.getPaymentProduct(), bulkPayment, getPsu());
+        } else {
+            PAIN00100303Document document = (new PaymentXMLSerializer()).serialize("test", bulkPayment);
+        }
+
+        PaymentResponse paymentResponse = new PaymentResponse(xs2AStandard.getPis().initiatePayment(bulkPaymentInitiation));
+        LOG.info("Initiate bulk payment bic={} aspsp_name={} aspsp_id={} paymentId={}", bic, xs2AStandard.getAspsp().getName(), xs2AStandard.getAspsp().getId(), paymentResponse.getPaymentId());
+        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), bic, paymentResponse.getTransactionStatus());
         return Response.status(200).entity(paymentResponse).build();
     }
 
     @POST
     @Path("/periodic-payments/{paymentProduct}")
-    public Response initiatePeriodicPayment(@HeaderParam("bic") String bic, @BeanParam PaymentProductBean paymentProductBean, @Valid PaymentInitiationRequest paymentInitiationRequest) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+    public Response initiatePeriodicPayment(@HeaderParam("bic") String bic, @BeanParam PaymentProductBean paymentProductBean, @Valid PaymentInitiation paymentInitiationRequest) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
         LOG.info("Initiate periodic payment bic={} aspsp_name={} aspsp_id={}", bic, xs2AStandard.getAspsp().getName(), xs2AStandard.getAspsp().getId());
 

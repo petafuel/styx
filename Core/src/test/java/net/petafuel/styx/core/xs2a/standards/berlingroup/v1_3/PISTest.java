@@ -10,6 +10,7 @@ import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
@@ -287,8 +288,9 @@ public class PISTest {
         payments.add(p2);
 
         PSU psu = new PSU("PSU-1234");
+        //TODO Fix empty Bulkpayment
         BulkPaymentInitiationJsonRequest request = new BulkPaymentInitiationJsonRequest(
-                PaymentProduct.SEPA_CREDIT_TRANSFERS, payments, psu, false);
+                PaymentProduct.SEPA_CREDIT_TRANSFERS, new BulkPayment(), psu);
 
         InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
         Assert.assertNotNull(initiatedPayment);

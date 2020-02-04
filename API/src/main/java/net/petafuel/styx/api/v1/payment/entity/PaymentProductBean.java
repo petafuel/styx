@@ -1,4 +1,4 @@
-package net.petafuel.styx.api.v1.payment.boundary.entity;
+package net.petafuel.styx.api.v1.payment.entity;
 
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 

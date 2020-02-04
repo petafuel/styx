@@ -7,6 +7,7 @@ import net.petafuel.styx.api.exception.ErrorEntity;
 import net.petafuel.styx.api.exception.StyxExceptionHandler;
 import net.petafuel.styx.api.exception.UncaughtExceptionHandler;
 import net.petafuel.styx.api.filter.AuthorizedFilter;
+import net.petafuel.styx.api.filter.BICFilter;
 import net.petafuel.styx.api.filter.MasterTokenFilter;
 import net.petafuel.styx.api.filter.PSUFilter;
 import net.petafuel.styx.api.v1.account.boundary.AccountResource;
@@ -73,6 +74,7 @@ public class WebServer {
         //Register Middlewares / Filters
         config.register(AuthorizedFilter.class)                         // request Requires valid client token and enabled master token
                 .register(PSUFilter.class)                              // request requires PSU data
+                .register(BICFilter.class)                              // request requires PSU-BIC header as mandatory data
                 .register(MasterTokenFilter.class);                     // Request requires enabled master token
         //Register Errorhandlers
         config.register(UncaughtExceptionHandler.class)                 // handle any uncaught exceptions

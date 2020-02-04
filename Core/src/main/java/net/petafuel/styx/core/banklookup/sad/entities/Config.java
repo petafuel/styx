@@ -2,9 +2,9 @@ package net.petafuel.styx.core.banklookup.sad.entities;
 
 import net.petafuel.styx.core.persistence.DatabaseColumn;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * configs database row model
@@ -21,10 +21,10 @@ public class Config {
     @DatabaseColumn("configs_created_at")
     private Date createdAt;
 
-    private List<ImplementerOption> implementerOptions;
+    private Map<String, ImplementerOption> implementerOptions;
 
     public Config() {
-        implementerOptions = new ArrayList<>();
+        implementerOptions = new HashMap<>();
     }
 
     public int getId() {
@@ -47,11 +47,11 @@ public class Config {
         return createdAt;
     }
 
-    public List<ImplementerOption> getImplementerOptions() {
+    public Map<String, ImplementerOption> getImplementerOptions() {
         return implementerOptions;
     }
 
-    public void setImplementerOptions(List<ImplementerOption> implementerOptions) {
+    public void setImplementerOptions(Map<String, ImplementerOption> implementerOptions) {
         this.implementerOptions = implementerOptions;
     }
 }

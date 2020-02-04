@@ -18,8 +18,13 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransacti
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.TransactionsSerializer;
 import org.junit.Assert;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -28,7 +33,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Tag("integration")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ConsorsAISTest {
 
     private static final String BIC = "CSDBDE71";
@@ -36,8 +43,13 @@ public class ConsorsAISTest {
     private static final String ACCOUNT_ID = "9b86539d-589b-4082-90c2-d725c019777f";
     private static final String TRANSACTION_ID = "9b86539d-589b-4082-90c2-d725c019777f";
 
+    @BeforeAll
+    public void prepare() {
+        //TODO setup valid consent
+    }
+
     @Test
-    @Tag("integration")
+    @Order(1)
     public void testAccountList() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
         ReadAccountListRequest r1 = new ReadAccountListRequest(CONSENT);
@@ -46,7 +58,7 @@ public class ConsorsAISTest {
     }
 
     @Test
-    @Tag("integration")
+    @Order(2)
     public void testAccountDetails() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
         ReadAccountDetailsRequest r1 = new ReadAccountDetailsRequest(ACCOUNT_ID, CONSENT);
@@ -56,7 +68,7 @@ public class ConsorsAISTest {
     }
 
     @Test
-    @Tag("integration")
+    @Order(3)
     public void testBalances() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
@@ -66,7 +78,7 @@ public class ConsorsAISTest {
     }
 
     @Test
-    @Tag("integration")
+    @Order(4)
     public void testTransactions() throws BankLookupFailedException, BankNotFoundException, ParseException, BankRequestFailedException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
@@ -80,7 +92,7 @@ public class ConsorsAISTest {
     }
 
     @Test
-    @Tag("integration")
+    @Order(5)
     public void testTransactionDetails() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
         ReadTransactionDetailsRequest r1 = new ReadTransactionDetailsRequest(ACCOUNT_ID, TRANSACTION_ID, CONSENT);
@@ -88,7 +100,7 @@ public class ConsorsAISTest {
     }
 
     @Test
-    @Tag("integration")
+    @Order(6)
     public void testTransactionSerializer() throws Exception{
         String transactionId1 = "1234567";
         String creditorName = "John Miles";

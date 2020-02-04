@@ -1,5 +1,6 @@
 package net.petafuel.styx.api.v1.consent.boundary;
 
+import net.petafuel.styx.api.filter.CheckAccessToken;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.keepalive.tasks.ConsentPoll;
 import net.petafuel.styx.core.keepalive.threads.ThreadManager;
@@ -13,7 +14,6 @@ import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupCS;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupSigner;
-import net.petafuel.styx.api.filters.CheckAccessToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

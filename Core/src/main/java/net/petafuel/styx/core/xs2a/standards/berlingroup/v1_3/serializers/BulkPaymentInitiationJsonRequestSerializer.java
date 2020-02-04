@@ -33,14 +33,14 @@ public class BulkPaymentInitiationJsonRequestSerializer implements JsonSerialize
             JsonObject creditorAccountObj = new JsonObject();
             Account creditor = payment.getCreditor();
             paymentObj.addProperty("endToEndIdentification", payment.getEndToEndIdentification());
-            instructedAmountObj.addProperty("amount", payment.getAmount());
-            instructedAmountObj.addProperty(XS2AJsonKeys.CURRENCY.value(), payment.getCurrency().toString());
+            instructedAmountObj.addProperty("amount", payment.getInstructedAmount().getAmount());
+            instructedAmountObj.addProperty(XS2AJsonKeys.CURRENCY.value(), payment.getInstructedAmount().getCurrency().toString());
             paymentObj.add("instructedAmount", instructedAmountObj);
             creditorAccountObj.addProperty(XS2AJsonKeys.CURRENCY.value(), creditor.getCurrency().toString());
             creditorAccountObj.addProperty(creditor.getType().getJsonKey(), creditor.getIdentifier());
             paymentObj.add("creditorAccount", creditorAccountObj);
             paymentObj.addProperty("creditorName", payment.getCreditor().getName());
-            paymentObj.addProperty("remittanceInformationUnstructured", payment.getReference());
+            paymentObj.addProperty("remittanceInformationUnstructured", payment.getRemittanceInformationUnstructured());
             payments.add(paymentObj);
         }
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");

@@ -1,4 +1,4 @@
-package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
+//package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
 import net.petafuel.jsepa.model.CCTInitiation;
 import net.petafuel.jsepa.model.CreditTransferTransactionInformation;
@@ -12,6 +12,7 @@ import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
@@ -88,19 +89,18 @@ public class PISTest {
         String creditorName = "Max Creditor";
         String debtorIban = "DE86999999990000001000"; //Sparkasse
         Currency debtorCurrency = Currency.EUR;
-        String amount = "0.99";
         Currency instructedCurrency = Currency.EUR;
         String reference = "Beispiel Verwendungszweck";
-
+        InstructedAmount instructedAmount = new InstructedAmount("0.99");
+        instructedAmount.setCurrency(instructedCurrency);
         Payment paymentBody = new Payment();
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
         creditor.setName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
-        paymentBody.setReference(reference);
+        paymentBody.setInstructedAmount(instructedAmount);
+        paymentBody.setRemittanceInformationUnstructured(reference);
 
         PSU psu = new PSU("PSU-1234");
         PaymentInitiationJsonRequest request = new PaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
@@ -138,10 +138,10 @@ public class PISTest {
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
-        paymentBody.setReference(reference);
-        paymentBody.setRequestedExecutionDate(executionDate);
+        InstructedAmount instructedAmount = new InstructedAmount(amount);
+        instructedAmount.setCurrency(instructedCurrency);
+        paymentBody.setInstructedAmount(instructedAmount);
+        paymentBody.setRemittanceInformationUnstructured(reference);
 
         PSU psu = new PSU("PSU-1234");
         PaymentInitiationJsonRequest request = new PaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
@@ -252,12 +252,12 @@ public class PISTest {
         creditor1.setName(creditorName1);
 
         Payment p1 = new Payment();
-
+        InstructedAmount instructedAmountObj1 = new InstructedAmount(instructedAmount1);
+        instructedAmountObj1.setCurrency(instructedCurrency1);
         p1.setDebtor(debtor);
         p1.setCreditor(creditor1);
-        p1.setAmount(instructedAmount1);
-        p1.setCurrency(instructedCurrency1);
-        p1.setReference(reference1);
+        p1.setInstructedAmount(instructedAmountObj1);
+        p1.setRemittanceInformationUnstructured(reference1);
         p1.setEndToEndIdentification("RI-234567890");
 
 
@@ -276,9 +276,10 @@ public class PISTest {
 
         p2.setDebtor(debtor);
         p2.setCreditor(creditor2);
-        p2.setAmount(instructedAmount2);
-        p2.setCurrency(instructedCurrency2);
-        p2.setReference(reference2);
+        InstructedAmount instructedAmountObj2 = new InstructedAmount(instructedAmount2);
+        instructedAmountObj2.setCurrency(instructedCurrency2);
+        p2.setInstructedAmount(instructedAmountObj2);
+        p2.setRemittanceInformationUnstructured(reference2);
         p2.setEndToEndIdentification("WBG-123456789");
 
         List<Payment> payments = new LinkedList<>();
@@ -427,9 +428,10 @@ public class PISTest {
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
-        paymentBody.setReference(reference);
+        InstructedAmount instructedAmount = new InstructedAmount(amount);
+        instructedAmount.setCurrency(instructedCurrency);
+        paymentBody.setInstructedAmount(instructedAmount);
+        paymentBody.setRemittanceInformationUnstructured(reference);
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
         paymentBody.setDayOfExecution(dayOfExecution);

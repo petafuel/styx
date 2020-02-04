@@ -29,11 +29,10 @@ public class CallbackResource extends Application {
                                     @QueryParam("code") String code,
                                     @QueryParam("state") String state,
                                     @QueryParam("error") String error,
-                                    @QueryParam("error_description") String errorMessage,
-                                    String body) {
+                                    @QueryParam("error_description") String errorMessage) {
 
         if (state == null) {
-            return  handler.handleRedirect(xRequestId, httpHeaders, body);
+            return handler.handleRedirect(xRequestId, httpHeaders, "");
         }
         return handler.handleOAuth2(code, state, error, errorMessage);
     }

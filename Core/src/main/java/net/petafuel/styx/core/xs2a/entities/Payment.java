@@ -1,80 +1,102 @@
 package net.petafuel.styx.core.xs2a.entities;
 
-import java.util.Date;
+import javax.json.bind.annotation.JsonbProperty;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
-public class Payment
-{
-	private Account creditor;
-	private Account debtor;
-	private String amount;
-	private Currency currency;
-	private String reference;
-	private String endToEndIdentification;
-	private Date requestedExecutionDate;
+public class Payment {
+    @JsonbProperty("endToEndIdentification")
+    private String endToEndIdentification;
 
-	public Payment() {
-		this.requestedExecutionDate = new Date();
-	}
+    @NotNull
+    @Valid
+    @JsonbProperty("debtorAccount")
+    private Account debtor;
 
-	public Account getCreditor() { return creditor; }
+    @NotNull
+    @Valid
+    @JsonbProperty("instructedAmount")
+    private InstructedAmount instructedAmount;
 
-	public void setCreditor(Account creditor) {
-		this.creditor = creditor;
-	}
+    @NotNull
+    @Valid
+    @JsonbProperty("creditorAccount")
+    private Account creditor;
 
-	public Account getDebtor() {
-		return debtor;
-	}
+    @NotNull
+    @NotEmpty
+    @NotBlank
+    @JsonbProperty("creditorName")
+    private String creditorName;
 
-	public void setDebtor(Account debtor) {
-		this.debtor = debtor;
-	}
+    @JsonbProperty("creditorAddress")
+    private Address creditorAddress;
 
-	public String getAmount() {
-		return amount;
-	}
+    @JsonbProperty("remittanceInformationUnstructured")
+    private String remittanceInformationUnstructured;
 
-	public void setAmount(String amount) {
-		this.amount = amount;
-	}
 
-	public Currency getCurrency() {
-		return currency;
-	}
+    public Payment() {
 
-	public void setCurrency(Currency currency) {
-		this.currency = currency;
-	}
+    }
 
-	public String getReference() {
-		return reference;
-	}
+    public Account getCreditor() {
+        return creditor;
+    }
 
-	public void setReference(String reference) {
-		this.reference = reference;
-	}
+    public void setCreditor(Account creditor) {
+        this.creditor = creditor;
+    }
 
-	public String getEndToEndIdentification() {
-		return endToEndIdentification;
-	}
+    public Account getDebtor() {
+        return debtor;
+    }
 
-	public void setEndToEndIdentification(String endToEndIdentification) {
-		this.endToEndIdentification = endToEndIdentification;
-	}
+    public void setDebtor(Account debtor) {
+        this.debtor = debtor;
+    }
 
-	/**
-	 * get date of bank-side payment execution
-	 * @return Date
-	 */
-	public Date getRequestedExecutionDate() {
-		return requestedExecutionDate;
-	}
+    public InstructedAmount getInstructedAmount() {
+        return instructedAmount;
+    }
 
-	/**
-	 * set date of bank-side payment execution
-	 * @param requestedExecutionDate Date
-	 */
-	public void setRequestedExecutionDate(Date requestedExecutionDate) {
-		this.requestedExecutionDate = requestedExecutionDate;
-	}
+    public void setInstructedAmount(InstructedAmount instructedAmount) {
+        this.instructedAmount = instructedAmount;
+    }
+
+
+    public String getEndToEndIdentification() {
+        return endToEndIdentification;
+    }
+
+    public void setEndToEndIdentification(String endToEndIdentification) {
+        this.endToEndIdentification = endToEndIdentification;
+    }
+
+    public String getCreditorName() {
+        return creditorName;
+    }
+
+    public void setCreditorName(String creditorName) {
+        this.creditorName = creditorName;
+    }
+
+    public Address getCreditorAddress() {
+        return creditorAddress;
+    }
+
+    public void setCreditorAddress(Address creditorAddress) {
+        this.creditorAddress = creditorAddress;
+    }
+
+    public String getRemittanceInformationUnstructured() {
+        return remittanceInformationUnstructured;
+    }
+
+    public void setRemittanceInformationUnstructured(String remittanceInformationUnstructured) {
+        this.remittanceInformationUnstructured = remittanceInformationUnstructured;
+    }
+
 }

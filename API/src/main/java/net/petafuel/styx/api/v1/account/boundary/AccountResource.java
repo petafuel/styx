@@ -1,11 +1,17 @@
 package net.petafuel.styx.api.v1.account.boundary;
 
-import net.petafuel.styx.api.filters.CheckAccessToken;
+import net.petafuel.styx.api.filter.CheckAccessToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @ApplicationPath("/")
 @Path("/v1")

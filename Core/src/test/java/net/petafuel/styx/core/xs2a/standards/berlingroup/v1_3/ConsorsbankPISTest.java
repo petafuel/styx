@@ -7,6 +7,7 @@ import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
@@ -35,7 +36,6 @@ public class ConsorsbankPISTest {
         String creditorName = "WBG";
         String debtorIban = "DE23760300800550123451"; //Consorsbank
         Currency debtorCurrency = Currency.EUR;
-        String amount = "520.00";
         Currency instructedCurrency = Currency.EUR;
         String reference = "Ref. Number WBG-1222";
         //additional periodic payment information
@@ -55,9 +55,10 @@ public class ConsorsbankPISTest {
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
-        paymentBody.setReference(reference);
+        InstructedAmount instructedAmount = new InstructedAmount("520.00");
+        instructedAmount.setCurrency(Currency.EUR);
+        paymentBody.setInstructedAmount(instructedAmount);
+        paymentBody.setRemittanceInformationUnstructured(reference);
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
         paymentBody.setDayOfExecution(dayOfExecution);

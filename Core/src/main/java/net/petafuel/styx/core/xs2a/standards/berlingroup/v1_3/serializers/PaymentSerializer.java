@@ -8,7 +8,6 @@ import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.XS2AJsonKeys;
 
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
 
 public class PaymentSerializer implements JsonSerializer<Payment> {
 
@@ -19,7 +18,6 @@ public class PaymentSerializer implements JsonSerializer<Payment> {
         JsonObject creditorAccount = new JsonObject();
         JsonObject debtorAccount = new JsonObject();
         JsonObject instructedAmount = new JsonObject();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
         creditorAccount.addProperty(payment.getCreditor().getType().getJsonKey(), payment.getCreditor().getIdentifier());
         creditorAccount.addProperty(XS2AJsonKeys.CURRENCY.value(), payment.getCreditor().getCurrency().toString());
@@ -28,16 +26,11 @@ public class PaymentSerializer implements JsonSerializer<Payment> {
         debtorAccount.addProperty(XS2AJsonKeys.CURRENCY.value(), payment.getDebtor().getCurrency().toString());
         object.addProperty("creditorName", payment.getCreditor().getName());
         object.add("debtorAccount", debtorAccount);
-        instructedAmount.addProperty("amount", payment.getAmount());
-        instructedAmount.addProperty(XS2AJsonKeys.CURRENCY.value(), payment.getCurrency().toString());
+        instructedAmount.addProperty("amount", payment.getInstructedAmount().getAmount());
+        instructedAmount.addProperty(XS2AJsonKeys.CURRENCY.value(), payment.getInstructedAmount().getCurrency().name());
         object.add("instructedAmount", instructedAmount);
 
-        if (payment.getRequestedExecutionDate() != null) {
-            String formattedDate = format.format(payment.getRequestedExecutionDate());
-            object.addProperty("requestedExecutionDate", formattedDate);
-        }
-
-        object.addProperty("remittanceInformationUnstructured", payment.getReference());
+        object.addProperty("remittanceInformationUnstructured", payment.getRemittanceInformationUnstructured());
 
         return object;
     }

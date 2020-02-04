@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -11,17 +12,28 @@ public class Account implements Serializable {
     /**
      * This is the universal account identifier as iban or bban
      */
+    @JsonbProperty("identifier")
     private String identifier;
+
+    @JsonbProperty("iban")
+    private String iban;
     /**
      * This is the `account-id` used by the banks
      */
     private String resourceId;
+    @JsonbProperty("name")
     private String name;
+    @JsonbProperty("product")
     private String product;
+    @JsonbProperty("cashAccountType")
     private String cashAccountType;
     private Type type;
     private Currency currency;
     private ArrayList<Balance> balances;
+
+
+    public Account() {
+    }
 
     public Account(String identifier, Currency currency, Type type) {
         this.identifier = identifier;
@@ -114,5 +126,13 @@ public class Account implements Serializable {
 
     public void addBalance(Balance balance) {
         this.balances.add(balance);
+    }
+
+    public String getIban() {
+        return iban;
+    }
+
+    public void setIban(String iban) {
+        this.iban = iban;
     }
 }

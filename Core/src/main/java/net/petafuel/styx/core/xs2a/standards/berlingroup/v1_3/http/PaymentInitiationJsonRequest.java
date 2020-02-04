@@ -1,14 +1,13 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentSerializer;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import java.util.Optional;
 
 public class PaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
@@ -22,8 +21,8 @@ public class PaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
 
     @Override
     public Optional<String> getRawBody() {
-        Gson gson = new GsonBuilder().registerTypeAdapter(Payment.class, new PaymentSerializer()).create();
-        return Optional.ofNullable(gson.toJson(this.payment));
+        Jsonb jsonb = JsonbBuilder.create();
+        return Optional.ofNullable(jsonb.toJson(payment));
     }
 
     public Payment getPayment() {

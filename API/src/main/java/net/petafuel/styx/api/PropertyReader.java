@@ -3,14 +3,14 @@ package net.petafuel.styx.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class PropertyReader {
 
-    private static final String PROP_FILENAME = "config.properties";
+    private static final String PROP_FILENAME = "api.properties";
     private static final Logger LOG = LogManager.getLogger(PropertyReader.class);
 
     public void loadProperties() {

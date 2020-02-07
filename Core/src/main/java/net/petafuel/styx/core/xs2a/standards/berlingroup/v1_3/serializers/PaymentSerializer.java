@@ -111,7 +111,9 @@ public class PaymentSerializer implements JsonSerializer<Initializable>, JsonDes
         return object;
     }
 
-    /** code complexity not possible to avoid at this point **/
+    /**
+     * code complexity not possible to avoid at this point
+     **/
     @SuppressWarnings("squid:S3776")
     @Override
     public Initializable deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
@@ -128,15 +130,9 @@ public class PaymentSerializer implements JsonSerializer<Initializable>, JsonDes
                 .create();
 
         if (paymentService.equals(PaymentService.PAYMENTS)) {
-            JsonElement reInUnElement = jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value());
-            String remittanceInformationUnstructured = reInUnElement != null && !reInUnElement.isJsonNull() ?
-                    reInUnElement.getAsString() :
-                    null;
+            String remittanceInformationUnstructured = jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()).getAsString();
 
-            JsonElement eToEElement = jsonObject.get("endToEndIdentification");
-            String endToEndIdentification = eToEElement != null && !eToEElement.isJsonNull() ?
-                    eToEElement.getAsString() :
-                    null;
+            String endToEndIdentification = jsonObject.get("endToEndIdentification").getAsString();
 
             String amount = jsonObject.get(XS2AJsonKeys.INSTRUCTED_AMOUNT.value()).getAsJsonObject().get(XS2AJsonKeys.AMOUNT.value())
                     .getAsString();
@@ -181,10 +177,7 @@ public class PaymentSerializer implements JsonSerializer<Initializable>, JsonDes
                 Currency currency = Currency.valueOf(instructedAmountJson.get("currency").getAsString().toUpperCase());
                 payment.setCurrency(currency);
 
-                JsonElement eToEElement = paymentJson.get("endToEndIdentification");
-                String endToEndIdentification = eToEElement != null && !eToEElement.isJsonNull() ?
-                        eToEElement.getAsString() :
-                        null;
+                String endToEndIdentification = paymentJson.get("endToEndIdentification").getAsString();
                 payment.setEndToEndIdentification(endToEndIdentification);
 
                 payment.setAmount(instructedAmountJson.get(XS2AJsonKeys.AMOUNT.value()).getAsString());

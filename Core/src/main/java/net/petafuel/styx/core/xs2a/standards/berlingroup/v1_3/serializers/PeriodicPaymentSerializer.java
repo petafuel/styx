@@ -55,15 +55,9 @@ public class PeriodicPaymentSerializer implements JsonSerializer<Initializable>,
                 .registerTypeAdapter(Address.class, new AddressSerializer())
                 .create();
 
-        JsonElement reInUnElement = jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value());
-        String remittanceInformationUnstructured = reInUnElement != null && !reInUnElement.isJsonNull() ?
-                reInUnElement.getAsString() :
-                null;
+        String remittanceInformationUnstructured = jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()).getAsString();
 
-        JsonElement eToEElement = jsonObject.get("endToEndIdentification");
-        String endToEndIdentification = eToEElement != null && !eToEElement.isJsonNull() ?
-                eToEElement.getAsString() :
-                null;
+        String endToEndIdentification = jsonObject.get("endToEndIdentification").getAsString();
 
         String amount = jsonObject.get(XS2AJsonKeys.INSTRUCTED_AMOUNT.value()).getAsJsonObject().get(XS2AJsonKeys.AMOUNT.value())
                 .getAsString();

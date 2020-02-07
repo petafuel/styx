@@ -18,7 +18,6 @@ public class PeriodicPaymentInitiation extends SinglePaymentInitiation {
     private LocalDate startDate;
 
     @NotNull(message = "executionRule cannot be null for periodic payments")
-    //@JsonbTypeAdapter(ExecutionRuleAdapter.class)
     @JsonbProperty("executionRule")
     @ValidateExecutionRule(message = "requires valid ExecutionRule")
     private String executionRule;

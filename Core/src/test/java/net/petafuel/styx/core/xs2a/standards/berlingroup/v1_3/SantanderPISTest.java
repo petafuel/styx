@@ -18,6 +18,9 @@ import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.sca.OAuth2;
+import net.petafuel.styx.core.xs2a.sca.SCAApproach;
+import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
@@ -28,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Vector;
 
@@ -60,7 +64,7 @@ public class SantanderPISTest {
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.name());
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
         creditor.setName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
@@ -68,7 +72,7 @@ public class SantanderPISTest {
         paymentBody.setDebtor(debtor);
         paymentBody.setAmount(amount);
         paymentBody.setCurrency(instructedCurrency);
-        paymentBody.setReference(reference);
+        paymentBody.setRemittanceInformationUnstructured(reference);
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
         paymentBody.setRequestedExecutionDate(null);
@@ -178,7 +182,7 @@ public class SantanderPISTest {
         xmlRequest.setTppRedirectPreferred(true);
 
         //build json request part
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.name());
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
         paymentBody.setDayOfExecution(dayOfExecution);
@@ -189,5 +193,82 @@ public class SantanderPISTest {
         InitiatedPayment payment = standard.getPis().initiatePayment(request);
         Assert.assertNotNull(payment);
         Assert.assertEquals(TransactionStatus.RCVD, payment.getStatus());
+    }
+
+    @Tag("integration")
+    @Test
+    public void initializeSingleFuturePayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
+
+        // Necessary instances for creating a PAIN00100303Document
+        PAIN00100303Document document = new PAIN00100303Document();
+        CCTInitiation ccInitation = new CCTInitiation();
+        GroupHeader groupHeader = new GroupHeader();
+        Vector<PaymentInstructionInformation> pmtInfos = new Vector<>();
+        PaymentInstructionInformation p1 = new PaymentInstructionInformation();
+        CreditTransferTransactionInformation cdtTrfTxInf = new CreditTransferTransactionInformation();
+
+        // Necessary variables for creating a PAIN00100303Document
+        String messageId = "messageId";
+        String creationTime = "2019-10-10";
+        int numberOfTransactions = 1;
+        double controlSum = 100.00;
+        double amount = 100.00;
+        String initiatingPartyName = "initiatingPartyName";
+        String paymentInformationId = "NOTPROVIDED";
+        String paymentMethod = "TRF";
+        String requestedExecutionDate = "2019-10-10";
+        String debtorName = "Debtor Name";
+        String debtorIban = "DE86999999990000001000";
+        String debtorBic = "TESTDETT421";
+        String chargeBearer = "SLEV";
+        String endToEndID = "EndToEndId";
+        String creditorName = "Hans Handbuch";
+        String creditorIBAN = "DE98999999990000009999";
+        String purpose = "purpose string";
+
+        // Setting values for each instance
+        groupHeader.setMessageId(messageId);
+        groupHeader.setCreationTime(creationTime);
+        groupHeader.setNoOfTransactions(numberOfTransactions);
+        groupHeader.setControlSum(controlSum);
+        groupHeader.setInitiatingPartyName(initiatingPartyName);
+
+        cdtTrfTxInf.setEndToEndID(endToEndID);
+        cdtTrfTxInf.setAmount(amount);
+        cdtTrfTxInf.setCreditorName(creditorName);
+        cdtTrfTxInf.setCreditorIBAN(creditorIBAN);
+        cdtTrfTxInf.setVwz(purpose);
+
+        p1.setPmtInfId(paymentInformationId);
+        p1.setPaymentMethod(paymentMethod);
+        p1.setNoTxns(numberOfTransactions);
+        p1.setCtrlSum(controlSum);
+        p1.setRequestedExecutionDate(requestedExecutionDate);
+        p1.setDebtorName(debtorName);
+        p1.setDebtorAccountIBAN(debtorIban);
+        p1.setDebitorBic(debtorBic);
+        p1.setChargeBearer(chargeBearer);
+
+        p1.setCreditTransferTransactionInformationVector(Collections.singletonList(cdtTrfTxInf));
+        pmtInfos.add(p1);
+        ccInitation.setGrpHeader(groupHeader);
+        ccInitation.setPmtInfos(pmtInfos);
+        document.setCctInitiation(ccInitation);
+
+        // Creating the request instance
+        String psuIpAddress = "192.168.1.1";
+
+        PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
+                PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, PaymentService.PAYMENTS, document, new PSU("PSU-1234")
+        );
+        request.setTppRedirectPreferred(true);
+        request.getPsu().setIp(psuIpAddress);
+
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        SCAApproach approach = SCAHandler.decision(payment);
+        System.out.println(((OAuth2) approach).getAuthoriseLink());
+        Assert.assertNotNull(payment);
     }
 }

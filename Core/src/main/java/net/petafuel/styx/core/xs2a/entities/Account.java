@@ -21,7 +21,11 @@ public class Account implements Serializable {
     private String cashAccountType;
     private Type type;
     private Currency currency;
+    private Address address;
+    private String agent;
     private ArrayList<Balance> balances;
+
+    public Account() {}
 
     public Account(String identifier, Currency currency, Type type) {
         this.identifier = identifier;
@@ -114,5 +118,21 @@ public class Account implements Serializable {
 
     public void addBalance(Balance balance) {
         this.balances.add(balance);
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public String getAgent() {
+        return agent;
+    }
+
+    public void setAgent(String agent) {
+        this.agent = agent;
     }
 }

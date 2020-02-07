@@ -1,8 +1,9 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Balance {
+public class Balance implements Serializable {
 
     private Date lastChangeDateTime;
 

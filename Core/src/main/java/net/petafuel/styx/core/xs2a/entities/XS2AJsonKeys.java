@@ -30,7 +30,14 @@ public enum XS2AJsonKeys {
     CHALLENGE_OTP_MAX_LENGTH("optMaxLength"),
     CHALLENGE_OTP_FORMAT("otpFormat"),
     CHALLENGE_ADDITIONAL_INFORMATION("additionalInformation"),
-    CURRENCY("currency");
+    CURRENCY("currency"),
+    INSTRUCTED_AMOUNT("instructedAmount"),
+    DATE_FORMAT("yyyy-MM-dd"),
+    TRANSACTION_STATUS("transactionStatus"),
+    REMITTANCE_INFORMATION_UNSTRUCTURED("remittanceInformationUnstructured"),
+    AMOUNT("amount"),
+    CREDITOR_ACCOUNT("creditorAccount"),
+    CREDITOR_NAME("creditorName");
 
     private String jsonValue;
 

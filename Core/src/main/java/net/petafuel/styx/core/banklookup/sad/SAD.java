@@ -54,6 +54,7 @@ public class SAD implements BankLookUpInterface {
         XS2AStandard xs2AStandard = new XS2AStandard();
         //parse the implementer options into the implementerOptions List of the aspsp object
         parseImplementerOptions(aspsp);
+        xs2AStandard.setAspsp(aspsp);
 
         String standardClassName = aspsp.getConfig().getStandard().getName();
         String standardPackage = standardClassName.toLowerCase();
@@ -153,8 +154,8 @@ public class SAD implements BankLookUpInterface {
             implementerOption.setId(entry.getKey());
             implementerOption.setDescription(content.get("description").getAsString());
             JsonObject options = content.get("options").getAsJsonObject();
-            options.entrySet().parallelStream().forEach(option -> implementerOption.addOption(entry.getKey(), entry.getValue()));
-            aspsp.getConfig().getImplementerOptions().add(implementerOption);
+            options.entrySet().parallelStream().forEach(option -> implementerOption.addOption(option.getKey(), option.getValue()));
+            aspsp.getConfig().getImplementerOptions().put(implementerOption.getId(), implementerOption);
         });
     }
 

@@ -30,7 +30,7 @@ public class PeriodicPaymentInitiationXMLRequest extends XS2APaymentInitiationRe
         Gson gson = new GsonBuilder().registerTypeAdapter(PeriodicPayment.class, new PeriodicPaymentMultipartBodySerializer()).create();
 
         Headers headersJson = new Headers.Builder()
-                .add("Content-Disposition", "form-data; name=\"json_standingorderManagement\"")
+                .add("Content-Disposition", "form-data; name=\"json_standingorderType\"")
                 .build();
         MultipartBody.Part jsonPart = MultipartBody.Part.create(headersJson, RequestBody.create(gson.toJson(periodicPayment), MediaType.get("application/json; charset=utf-8")));
 

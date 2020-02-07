@@ -40,7 +40,7 @@ public class BulkPaymentInitiationJsonRequestSerializer implements JsonSerialize
             creditorAccountObj.addProperty(creditor.getType().getJsonKey(), creditor.getIdentifier());
             paymentObj.add("creditorAccount", creditorAccountObj);
             paymentObj.addProperty("creditorName", payment.getCreditor().getName());
-            paymentObj.addProperty("remittanceInformationUnstructured", payment.getReference());
+            paymentObj.addProperty("remittanceInformationUnstructured", payment.getRemittanceInformationUnstructured());
             payments.add(paymentObj);
         }
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");

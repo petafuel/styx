@@ -41,7 +41,6 @@ public class Payment {
     @JsonbProperty("requestedExecutionDate")
     private String requestedExecutionDate;
 
-
     public Payment() {
         //empty ctor for json binding
     }
@@ -70,6 +69,13 @@ public class Payment {
         this.instructedAmount = instructedAmount;
     }
 
+    public String getRemittanceInformationUnstructured() {
+        return remittanceInformationUnstructured;
+    }
+
+    public void setRemittanceInformationUnstructured(String remittanceInformationUnstructured) {
+        this.remittanceInformationUnstructured = remittanceInformationUnstructured;
+    }
 
     public String getEndToEndIdentification() {
         return endToEndIdentification;
@@ -93,14 +99,6 @@ public class Payment {
 
     public void setCreditorAddress(Address creditorAddress) {
         this.creditorAddress = creditorAddress;
-    }
-
-    public String getRemittanceInformationUnstructured() {
-        return remittanceInformationUnstructured;
-    }
-
-    public void setRemittanceInformationUnstructured(String remittanceInformationUnstructured) {
-        this.remittanceInformationUnstructured = remittanceInformationUnstructured;
     }
 
     public String getRequestedExecutionDate() {

@@ -3,7 +3,7 @@ package net.petafuel.styx.core.xs2a.entities;
 import java.time.LocalDate;
 import java.util.List;
 
-public class BulkPayment {
+public class BulkPayment implements InitializablePayment {
     Account debtorAccount;
     List<Payment> payments;
     private Boolean batchBookingPreferred;

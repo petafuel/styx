@@ -6,7 +6,11 @@ import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
+import net.petafuel.styx.core.xs2a.entities.Currency;
+import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
+import net.petafuel.styx.core.xs2a.entities.Payment;
+import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
@@ -15,8 +19,10 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsent
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentCreateAuthResourceRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -260,5 +266,106 @@ public class TargobankTest {
         consentUpdatePSUDataRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         standard.getCs().updatePSUData(consentUpdatePSUDataRequest);
+    }
+
+    @Test
+    @Tag("integration")
+    public void initiateJsonPayment() throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
+
+        //payment information
+        String creditorIban = "DE75999999990000001004";
+        Currency creditorCurrency = Currency.EUR;
+        String creditorName = "Max Creditor";
+        String debtorIban = "DE40100100103307118608";
+        Currency debtorCurrency = Currency.EUR;
+        String amount = "0.99";
+        Currency instructedCurrency = Currency.EUR;
+        String reference = "Beispiel Verwendungszweck";
+
+        Payment paymentBody = new Payment();
+        Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
+        creditor.setName(creditorName);
+        Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
+        paymentBody.setCreditor(creditor);
+        paymentBody.setDebtor(debtor);
+        paymentBody.setAmount(amount);
+        paymentBody.setCurrency(instructedCurrency);
+        paymentBody.setRemittanceInformationUnstructured(reference);
+
+        PSU psu = new PSU("PSD2TEST4");
+        psu.setIp("255.255.255.0");
+        PaymentInitiationJsonRequest request = new PaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
+        request.setTppRedirectPreferred(true);
+        request.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
+
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        SCAApproach approach = SCAHandler.decision(payment);
+        Assert.assertNotNull(payment);
+    }
+
+    @Test
+    @Tag("integration")
+    public void initiateJsonBulkPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
+
+        /** Debtor information*/
+        String debtorIban = "DE40100100103307118608";
+        Currency debtorCurrency = Currency.EUR;
+        Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
+
+        /** Payment 1 information*/
+        String creditorIban1 = "DE75999999990000001004";
+        Currency creditorCurrency1 = Currency.EUR;
+        String creditorName1 = "Creditor One";
+        String instructedAmount1 = "0.99";
+        Currency instructedCurrency1 = Currency.EUR;
+        String reference1 = "Beispiel Verwendungszweck 1";
+
+        Account creditor1 = new Account(creditorIban1, creditorCurrency1, Account.Type.IBAN);
+        creditor1.setName(creditorName1);
+
+        Payment p1 = new Payment();
+
+        p1.setDebtor(debtor);
+        p1.setCreditor(creditor1);
+        p1.setAmount(instructedAmount1);
+        p1.setCurrency(instructedCurrency1);
+        p1.setRemittanceInformationUnstructured(reference1);
+        p1.setEndToEndIdentification("RI-234567890");
+
+
+        /** Payment 2 information*/
+        String creditorIban2 = "DE75999999990000001004";
+        Currency creditorCurrency2 = Currency.EUR;
+        String creditorName2 = "Creditor Two";
+        String instructedAmount2 = "1.50";
+        Currency instructedCurrency2 = Currency.EUR;
+        String reference2 = "Beispiel Verwendungszweck 2";
+
+        Account creditor2 = new Account(creditorIban2, creditorCurrency2, Account.Type.IBAN);
+        creditor2.setName(creditorName2);
+
+        Payment p2 = new Payment();
+
+        p2.setDebtor(debtor);
+        p2.setCreditor(creditor2);
+        p2.setAmount(instructedAmount2);
+        p2.setCurrency(instructedCurrency2);
+        p2.setRemittanceInformationUnstructured(reference2);
+        p2.setEndToEndIdentification("WBG-123456789");
+
+        List<Payment> payments = new LinkedList<>();
+        payments.add(p1);
+        payments.add(p2);
+
+        PSU psu = new PSU("PSD2TEST4");
+        psu.setIp("255.255.255.0");
+        BulkPaymentInitiationJsonRequest request = new BulkPaymentInitiationJsonRequest(
+                PaymentProduct.SEPA_CREDIT_TRANSFERS, payments, psu, false);
+        request.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
+
+        InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
+        Assert.assertNotNull(initiatedPayment);
     }
 }

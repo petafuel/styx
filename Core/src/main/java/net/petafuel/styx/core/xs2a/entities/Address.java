@@ -1,5 +1,51 @@
 package net.petafuel.styx.core.xs2a.entities;
 
-public class Address {
-    //TODO implement berlin group customer/psu address model
+import java.io.Serializable;
+
+public class Address implements Serializable {
+    private String street;
+    private String buildingNumber;
+    private String city;
+    private Integer postalCode;
+    private String country;
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getBuildingNumber() {
+        return buildingNumber;
+    }
+
+    public void setBuildingNumber(String buildingNumber) {
+        this.buildingNumber = buildingNumber;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public Integer getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(Integer postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 }

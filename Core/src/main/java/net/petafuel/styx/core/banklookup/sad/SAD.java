@@ -155,7 +155,7 @@ public class SAD implements BankLookUpInterface {
             implementerOption.setDescription(content.get("description").getAsString());
             JsonObject options = content.get("options").getAsJsonObject();
             options.entrySet().parallelStream().forEach(option -> implementerOption.addOption(option.getKey(), option.getValue()));
-            aspsp.getConfig().getImplementerOptions().put(entry.getKey(), implementerOption);
+            aspsp.getConfig().getImplementerOptions().put(implementerOption.getId(), implementerOption);
         });
     }
 

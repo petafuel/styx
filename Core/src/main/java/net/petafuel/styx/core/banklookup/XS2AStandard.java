@@ -21,8 +21,7 @@ public class XS2AStandard {
         this.cs = cs;
     }
 
-    public XS2AStandard() {
-    }
+    public XS2AStandard () {}
 
     public Boolean isAISImplemented() {
         return this.ais != null;

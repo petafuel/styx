@@ -21,8 +21,11 @@ public class PaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
 
     @Override
     public Optional<String> getRawBody() {
-        Jsonb jsonb = JsonbBuilder.create();
-        return Optional.ofNullable(jsonb.toJson(payment));
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            return Optional.ofNullable(jsonb.toJson(payment));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public Payment getPayment() {

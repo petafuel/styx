@@ -18,6 +18,9 @@ import java.util.UUID;
 
 public class PersistentPayment {
     private static final Logger LOG = LogManager.getLogger(PersistentPayment.class);
+    private static final String COLUMN_CLIENT_TOKEN = "client_token";
+    private static final String COLUMN_STATUS = "status";
+    private static final String ERROR_MODEL_MAPPING = "Error mapping resultset to PaymentEntry.class message={}";
 
     private PersistentPayment() {
     }
@@ -35,13 +38,13 @@ public class PersistentPayment {
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     paymentEntry = StyxifySQL.fetchModel(PaymentEntry.class, resultSet);
-                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString("client_token")));
+                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString(COLUMN_CLIENT_TOKEN)));
                     paymentEntry.setClientToken(accessToken);
-                    paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString("status")));
+                    paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            LOG.error("Error mapping resultset to PaymentEntry.class message={}", e.getMessage());
+            LOG.error(ERROR_MODEL_MAPPING, e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {
             LOG.error("Error executing create_payment() for paymentId={} bic={} state={} message={}", paymentId, bic, e.getSQLState(), e.getMessage());
@@ -60,17 +63,17 @@ public class PersistentPayment {
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     paymentEntry = StyxifySQL.fetchModel(PaymentEntry.class, resultSet);
-                    if (resultSet.getString("client_token") != null) {
-                        AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString("client_token")));
+                    if (resultSet.getString(COLUMN_CLIENT_TOKEN) != null) {
+                        AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString(COLUMN_CLIENT_TOKEN)));
                         paymentEntry.setClientToken(accessToken);
                     }
-                    if (resultSet.getString("status") != null) {
-                        paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString("status")));
+                    if (resultSet.getString(COLUMN_STATUS) != null) {
+                        paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                     }
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            LOG.error("Error mapping resultset to PaymentEntry.class message={}", e.getMessage());
+            LOG.error(ERROR_MODEL_MAPPING, e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {
             LOG.error("Error executing get_payment() for id={} state={} message={}", paymentId, e.getSQLState(), e.getMessage());
@@ -92,13 +95,13 @@ public class PersistentPayment {
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     paymentEntry = StyxifySQL.fetchModel(PaymentEntry.class, resultSet);
-                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString("client_token")));
+                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString(COLUMN_CLIENT_TOKEN)));
                     paymentEntry.setClientToken(accessToken);
-                    paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString("status")));
+                    paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            LOG.error("Error mapping resultset to PaymentEntry.class message={}", e.getMessage());
+            LOG.error(ERROR_MODEL_MAPPING, e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {
             LOG.error("Error executing update_payment() for paymentId={} bic={} state={} message={}", paymentId, bic, e.getSQLState(), e.getMessage());
@@ -118,13 +121,13 @@ public class PersistentPayment {
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     paymentEntry = StyxifySQL.fetchModel(PaymentEntry.class, resultSet);
-                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString("client_token")));
+                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString(COLUMN_CLIENT_TOKEN)));
                     paymentEntry.setClientToken(accessToken);
-                    paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString("status")));
+                    paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            LOG.error("Error mapping resultset to PaymentEntry.class message={}", e.getMessage());
+            LOG.error(ERROR_MODEL_MAPPING, e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {
             LOG.error("Error executing update_payment_status() for paymentId={} state={} message={}", paymentId, e.getSQLState(), e.getMessage());
@@ -143,13 +146,13 @@ public class PersistentPayment {
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     paymentEntry = StyxifySQL.fetchModel(PaymentEntry.class, resultSet);
-                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString("client_token")));
+                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString(COLUMN_CLIENT_TOKEN)));
                     paymentEntry.setClientToken(accessToken);
-                    paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString("status")));
+                    paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            LOG.error("Error mapping resultset to PaymentEntry.class message={}", e.getMessage());
+            LOG.error(ERROR_MODEL_MAPPING, e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {
             LOG.error("Error executing delete_payment() for paymentId={} state={} message={}", paymentId, e.getSQLState(), e.getMessage());

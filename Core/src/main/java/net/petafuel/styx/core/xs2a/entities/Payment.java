@@ -43,7 +43,7 @@ public class Payment {
 
 
     public Payment() {
-
+        //empty ctor for json binding
     }
 
     public Account getCreditor() {

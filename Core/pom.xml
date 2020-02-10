@@ -49,61 +49,57 @@
                 <version>2.5.2</version>
                 <executions>
                     <execution>
-                        <id>Install local JSEPA jar</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
+                        <id>Install JSEPA jar into local m2</id>
+                        <phase>clean</phase>
                         <configuration>
                             <groupId>net.petafuel.library</groupId>
                             <artifactId>JSEPA</artifactId>
                             <version>1.473</version>
                             <packaging>jar</packaging>
-                            <file>${project.basedir}/lib/JSEPA-1.473.jar</file>
-                            <localRepositoryPath>${project.basedir}/lib</localRepositoryPath>
+                            <file>${basedir}/lib/JSEPA-1.473.jar</file>
+                            <repositoryLayout>default</repositoryLayout>
+                            <generatePom>true</generatePom>
                         </configuration>
-                    </execution>
-                    <execution>
-                        <id>Install local DBUtils jar</id>
-                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>Install DBUtils jar into local m2</id>
+                        <phase>clean</phase>
                         <configuration>
                             <groupId>net.petafuel.prepaid.library</groupId>
                             <artifactId>DBUtils</artifactId>
                             <version>1.461</version>
                             <packaging>jar</packaging>
-                            <file>${project.basedir}/lib/DBUtils-1.461.jar</file>
-                            <localRepositoryPath>${project.basedir}/lib</localRepositoryPath>
+                            <file>${basedir}/lib/DBUtils-1.461.jar</file>
+                            <repositoryLayout>default</repositoryLayout>
+                            <generatePom>true</generatePom>
                         </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>Install ConnectionPool jar into local m2</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <groupId>net.petafuel.prepaid.library</groupId>
+                            <artifactId>ConnectionPool</artifactId>
+                            <version>1.459</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/ConnectionPool-1.459.jar</file>
+                            <repositoryLayout>default</repositoryLayout>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-    <repositories>
-        <repository>
-            <id>nexus</id>
-            <url>https://teamcity.petafuel.intern/nexus/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>petafuelDependencies.local</id>
-            <url>file://${project.basedir}/lib</url>
-        </repository>
-    </repositories>
-    <distributionManagement>
-        <repository>
-            <id>nexus_deployment</id>
-            <name>Releases</name>
-            <url>https://teamcity.petafuel.intern/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>nexus_deployment</id>
-            <name>Snapshots</name>
-            <url>https://teamcity.petafuel.intern/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -116,21 +112,6 @@
             <version>2.8.6</version>
         </dependency>
         <dependency>
-            <groupId>net.petafuel.prepaid.library</groupId>
-            <artifactId>DBUtils</artifactId>
-            <version>1.461</version>
-        </dependency>
-        <dependency>
-            <groupId>net.petafuel.prepaid.library</groupId>
-            <artifactId>ConnectionPool</artifactId>
-            <version>1.458</version>
-        </dependency>
-        <dependency>
-            <groupId>net.petafuel.library</groupId>
-            <artifactId>JSEPA</artifactId>
-            <version>1.473</version>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.5</version>
@@ -139,6 +120,26 @@
             <groupId>org.simpleframework</groupId>
             <artifactId>simple-xml</artifactId>
             <version>2.7.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.petafuel.library</groupId>
+            <artifactId>JSEPA</artifactId>
+            <version>1.473</version>
+        </dependency>
+        <dependency>
+            <groupId>net.petafuel.prepaid.library</groupId>
+            <artifactId>DBUtils</artifactId>
+            <version>1.461</version>
+        </dependency>
+        <dependency>
+            <groupId>net.petafuel.prepaid.library</groupId>
+            <artifactId>ConnectionPool</artifactId>
+            <version>1.459</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
         </dependency>
     </dependencies>
 </project>

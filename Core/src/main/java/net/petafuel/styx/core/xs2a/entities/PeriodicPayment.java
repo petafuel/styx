@@ -7,16 +7,23 @@ public class PeriodicPayment extends Payment {
     private Date startDate;
     private ExecutionRule executionRule;
     private Date endDate;
-    private Frequency frequency;
+    private String frequency;
+
     private String dayOfExecution;
 
-    public PeriodicPayment(Date startDate, Frequency frequency) {
+    public PeriodicPayment() {}
+
+    public PeriodicPayment(Date startDate, String frequency) {
         this.startDate = startDate;
         this.frequency = frequency;
     }
 
     public Date getStartDate() {
         return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public ExecutionRule getExecutionRule() {
@@ -35,8 +42,12 @@ public class PeriodicPayment extends Payment {
         this.endDate = endDate;
     }
 
-    public Frequency getFrequency() {
+    public String getFrequency() {
         return frequency;
+    }
+
+    public void setFrequency(String frequency) {
+        this.frequency = frequency;
     }
 
     /**

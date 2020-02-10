@@ -22,7 +22,7 @@ public class PaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
 
     @Override
     public Optional<String> getRawBody() {
-        Gson gson = new GsonBuilder().registerTypeAdapter(Payment.class, new PaymentSerializer()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Payment.class, new PaymentSerializer(getPaymentService())).create();
         return Optional.ofNullable(gson.toJson(this.payment));
     }
 

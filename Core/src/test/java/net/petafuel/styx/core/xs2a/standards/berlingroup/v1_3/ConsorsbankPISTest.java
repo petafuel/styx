@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
+import com.google.gson.JsonPrimitive;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
@@ -8,15 +9,19 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
+import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationJsonRequest;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -26,7 +31,59 @@ public class ConsorsbankPISTest {
 
     @Test
     @Tag("integration")
-    public void initiateJsonPeriodicPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+    public void initiateJsonPeriodicPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException, ParseException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
+
+        //payment information
+        String creditorIban = "DE15500105172295759744"; //Consorsbank
+        Currency creditorCurrency = Currency.EUR;
+        String creditorName = "WBG";
+        String debtorIban = "DE60760300800500123456"; //Consorsbank
+        Currency debtorCurrency = Currency.EUR;
+        String amount = "520.00";
+        Currency instructedCurrency = Currency.EUR;
+        String reference = "Ref. Number WBG-1222";
+        //additional periodic payment information
+        Calendar day = Calendar.getInstance();
+        day.set(Calendar.DAY_OF_MONTH, day.getActualMinimum(Calendar.DAY_OF_MONTH));
+        day.add(Calendar.MONTH, 1);
+        Date startDate = day.getTime();
+        day.add(Calendar.MONTH, 2);
+        Date endDate = day.getTime();
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        String frequency = PeriodicPayment.Frequency.MNTH.name();
+        if (((JsonPrimitive) standard.getAspsp().getConfig().getImplementerOptions().get("STYX01").getOptions()
+                .get("required")).getAsBoolean()) {
+            frequency = PeriodicPayment.Frequency.MNTH.getName();
+        }
+        String dayOfExecution = "20";
+
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
+        Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
+        creditor.setName(creditorName);
+        Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
+        paymentBody.setCreditor(creditor);
+        paymentBody.setDebtor(debtor);
+        paymentBody.setAmount(amount);
+        paymentBody.setCurrency(instructedCurrency);
+        paymentBody.setRemittanceInformationUnstructured(reference);
+        paymentBody.setExecutionRule(executionRule);
+        paymentBody.setEndDate(endDate);
+        paymentBody.setDayOfExecution(dayOfExecution);
+
+        PSU psu = new PSU("PSU-Successful");
+        psu.setIp("192.168.8.78");
+        PeriodicPaymentInitiationJsonRequest request = new PeriodicPaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
+        request.setTppRedirectPreferred(true);
+
+        InitiatedPayment payment = standard.getPis().initiatePayment(request);
+        Assert.assertNotNull(payment);
+        Assert.assertEquals(TransactionStatus.RCVD, payment.getStatus());
+    }
+
+    @Test
+    @Tag("integration")
+    public void initiateJsonPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException, ParseException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         //payment information
@@ -42,14 +99,13 @@ public class ConsorsbankPISTest {
         Calendar day = Calendar.getInstance();
         day.set(Calendar.DAY_OF_MONTH, day.getActualMinimum(Calendar.DAY_OF_MONTH));
         day.add(Calendar.MONTH, 1);
-        Date startDate = day.getTime();
+        Date startDate = new SimpleDateFormat("yyyy-M-dd").parse(day.getTime().toString());
         day.add(Calendar.MONTH, 2);
-        Date endDate = day.getTime();
+        Date endDate = new SimpleDateFormat("yyyy-M-dd").parse(day.getTime().toString());
         PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
-        PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
+        Payment paymentBody = new Payment();
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
         creditor.setName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
@@ -57,14 +113,11 @@ public class ConsorsbankPISTest {
         paymentBody.setDebtor(debtor);
         paymentBody.setAmount(amount);
         paymentBody.setCurrency(instructedCurrency);
-        paymentBody.setReference(reference);
-        paymentBody.setExecutionRule(executionRule);
-        paymentBody.setEndDate(endDate);
-        paymentBody.setDayOfExecution(dayOfExecution);
+        paymentBody.setRemittanceInformationUnstructured(reference);
 
         PSU psu = new PSU("PSU-Successful");
         psu.setIp("192.168.8.78");
-        PeriodicPaymentInitiationJsonRequest request = new PeriodicPaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
+        PaymentInitiationJsonRequest request = new PaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
         request.setTppRedirectPreferred(true);
 
         InitiatedPayment payment = standard.getPis().initiatePayment(request);

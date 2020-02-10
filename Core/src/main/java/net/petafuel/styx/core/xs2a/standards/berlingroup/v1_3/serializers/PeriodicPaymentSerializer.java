@@ -57,9 +57,9 @@ public class PeriodicPaymentSerializer implements JsonSerializer<InitializablePa
 
         String remittanceInformationUnstructured = jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()).getAsString();
 
-        String endToEndIdentification = jsonObject.get("endToEndIdentification") != null
-                && !jsonObject.get("endToEndIdentification").isJsonNull()
-                ? jsonObject.get("endToEndIdentification").getAsString()
+        String endToEndIdentification = jsonObject.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()) != null
+                && !jsonObject.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()).isJsonNull()
+                ? jsonObject.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()).getAsString()
                 : null;
 
         String amount = jsonObject.get(XS2AJsonKeys.INSTRUCTED_AMOUNT.value()).getAsJsonObject().get(XS2AJsonKeys.AMOUNT.value())

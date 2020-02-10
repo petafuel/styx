@@ -15,7 +15,7 @@ import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
-import net.petafuel.styx.core.xs2a.entities.Initializable;
+import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
@@ -138,7 +138,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
     /**not possible to avoid code complexity at this point**/
     @SuppressWarnings("squid:S3776")
     @Override
-    public Initializable getPayment(XS2AGetRequest xs2AGetRequest) throws BankRequestFailedException {
+    public InitializablePayment getPayment(XS2AGetRequest xs2AGetRequest) throws BankRequestFailedException {
 
         ReadPaymentRequest request = (ReadPaymentRequest) xs2AGetRequest;
 
@@ -168,9 +168,9 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
                     return periodicPaymentGson.fromJson(responseBody, PeriodicPayment.class);
                 }
                 Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(Initializable.class, new PaymentSerializer(request.getPaymentService()))
+                        .registerTypeAdapter(InitializablePayment.class, new PaymentSerializer(request.getPaymentService()))
                         .create();
-                return gson.fromJson(responseBody, Initializable.class);
+                return gson.fromJson(responseBody, InitializablePayment.class);
             } else {
                 if (request.getPaymentService().equals(PaymentService.PERIODIC_PAYMENTS)) {
                     ByteArrayDataSource datasource = new ByteArrayDataSource(responseBody, "multipart/form-data");

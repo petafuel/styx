@@ -11,7 +11,7 @@ import com.google.gson.JsonSerializer;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Address;
 import net.petafuel.styx.core.xs2a.entities.Currency;
-import net.petafuel.styx.core.xs2a.entities.Initializable;
+import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
@@ -21,11 +21,11 @@ import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-public class PeriodicPaymentSerializer implements JsonSerializer<Initializable>, JsonDeserializer<Initializable> {
+public class PeriodicPaymentSerializer implements JsonSerializer<InitializablePayment>, JsonDeserializer<InitializablePayment> {
 
     @Override
-    public JsonElement serialize(Initializable initializable, Type typeOfSrc, JsonSerializationContext context) {
-        Payment payment = (Payment) initializable;
+    public JsonElement serialize(InitializablePayment initializablePayment, Type typeOfSrc, JsonSerializationContext context) {
+        Payment payment = (Payment) initializablePayment;
 
         Gson gson = new GsonBuilder().registerTypeAdapter(PeriodicPayment.class, new PaymentSerializer(PaymentService.PERIODIC_PAYMENTS)).create();
 
@@ -41,7 +41,7 @@ public class PeriodicPaymentSerializer implements JsonSerializer<Initializable>,
     }
 
     @Override
-    public Initializable deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
+    public InitializablePayment deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value());
 
@@ -57,7 +57,10 @@ public class PeriodicPaymentSerializer implements JsonSerializer<Initializable>,
 
         String remittanceInformationUnstructured = jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()).getAsString();
 
-        String endToEndIdentification = jsonObject.get("endToEndIdentification").getAsString();
+        String endToEndIdentification = jsonObject.get("endToEndIdentification") != null
+                && !jsonObject.get("endToEndIdentification").isJsonNull()
+                ? jsonObject.get("endToEndIdentification").getAsString()
+                : null;
 
         String amount = jsonObject.get(XS2AJsonKeys.INSTRUCTED_AMOUNT.value()).getAsJsonObject().get(XS2AJsonKeys.AMOUNT.value())
                 .getAsString();

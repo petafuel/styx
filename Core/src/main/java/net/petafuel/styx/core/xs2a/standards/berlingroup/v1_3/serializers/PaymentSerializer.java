@@ -14,7 +14,7 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Address;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.Currency;
-import net.petafuel.styx.core.xs2a.entities.Initializable;
+import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.XS2AJsonKeys;
@@ -25,14 +25,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class PaymentSerializer implements JsonSerializer<Initializable>, JsonDeserializer<Initializable> {
+public class PaymentSerializer implements JsonSerializer<InitializablePayment>, JsonDeserializer<InitializablePayment> {
     private PaymentService paymentService;
 
     public PaymentSerializer(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
 
-    public static Initializable xmlDeserialize(Document sepaDocument, PaymentService paymentService) throws ParseException {
+    public static InitializablePayment xmlDeserialize(Document sepaDocument, PaymentService paymentService) throws ParseException {
         ArrayList<Payment> payments = new ArrayList<>();
         Account debtorAccount = new Account();
         debtorAccount.setName(sepaDocument.getCctInitiation().getPmtInfos().get(0).getDebitor().getName());
@@ -79,8 +79,8 @@ public class PaymentSerializer implements JsonSerializer<Initializable>, JsonDes
     }
 
     @Override
-    public JsonElement serialize(Initializable initializable, Type typeOfSrc, JsonSerializationContext context) {
-        Payment payment = (Payment) initializable;
+    public JsonElement serialize(InitializablePayment initializablePayment, Type typeOfSrc, JsonSerializationContext context) {
+        Payment payment = (Payment) initializablePayment;
 
         JsonObject object = new JsonObject();
         JsonObject creditorAccount = new JsonObject();
@@ -116,7 +116,7 @@ public class PaymentSerializer implements JsonSerializer<Initializable>, JsonDes
      **/
     @SuppressWarnings("squid:S3776")
     @Override
-    public Initializable deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
+    public InitializablePayment deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
 
         JsonObject debtorAccountJson = jsonObject.getAsJsonObject("debtorAccount");
@@ -132,7 +132,10 @@ public class PaymentSerializer implements JsonSerializer<Initializable>, JsonDes
         if (paymentService.equals(PaymentService.PAYMENTS)) {
             String remittanceInformationUnstructured = jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()).getAsString();
 
-            String endToEndIdentification = jsonObject.get("endToEndIdentification").getAsString();
+            String endToEndIdentification = jsonObject.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()) != null
+                    && !jsonObject.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()).isJsonNull()
+                    ? jsonObject.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()).getAsString()
+                    : null;
 
             String amount = jsonObject.get(XS2AJsonKeys.INSTRUCTED_AMOUNT.value()).getAsJsonObject().get(XS2AJsonKeys.AMOUNT.value())
                     .getAsString();
@@ -177,7 +180,10 @@ public class PaymentSerializer implements JsonSerializer<Initializable>, JsonDes
                 Currency currency = Currency.valueOf(instructedAmountJson.get("currency").getAsString().toUpperCase());
                 payment.setCurrency(currency);
 
-                String endToEndIdentification = paymentJson.get("endToEndIdentification").getAsString();
+                String endToEndIdentification =  paymentJson.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()) != null
+                        && !paymentJson.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()).isJsonNull()
+                        ? paymentJson.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()).getAsString()
+                        : null;
                 payment.setEndToEndIdentification(endToEndIdentification);
 
                 payment.setAmount(instructedAmountJson.get(XS2AJsonKeys.AMOUNT.value()).getAsString());

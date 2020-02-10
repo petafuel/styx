@@ -37,7 +37,13 @@ public enum XS2AJsonKeys {
     REMITTANCE_INFORMATION_UNSTRUCTURED("remittanceInformationUnstructured"),
     AMOUNT("amount"),
     CREDITOR_ACCOUNT("creditorAccount"),
-    CREDITOR_NAME("creditorName");
+    END_TO_END_IDENTIFICATION("endToEndIdentification"),
+    CREDITOR_NAME("creditorName"),
+    STREET("street"),
+    CITY("city"),
+    BUILDING_NUMBER("buildingNumber"),
+    POSTAL_CODE("postalCode"),
+    COUNTRY("country");
 
     private String jsonValue;
 

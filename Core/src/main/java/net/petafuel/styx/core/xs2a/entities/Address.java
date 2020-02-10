@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Address implements Serializable {
     private String street;
-    private Integer buildingNumber;
+    private String buildingNumber;
     private String city;
     private Integer postalCode;
     private String country;
@@ -17,11 +17,11 @@ public class Address implements Serializable {
         this.street = street;
     }
 
-    public Integer getBuildingNumber() {
+    public String getBuildingNumber() {
         return buildingNumber;
     }
 
-    public void setBuildingNumber(Integer buildingNumber) {
+    public void setBuildingNumber(String buildingNumber) {
         this.buildingNumber = buildingNumber;
     }
 

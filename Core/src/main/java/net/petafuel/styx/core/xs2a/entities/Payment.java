@@ -2,7 +2,7 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import java.util.Date;
 
-public class Payment implements Initializable {
+public class Payment implements InitializablePayment {
     private Account creditor;
     private Account debtor;
     private String amount;

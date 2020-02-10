@@ -18,6 +18,8 @@ public class PaymentXMLSerializer {
     private PAIN00100303Document document;
     private CCTInitiation ccInitation;
     private GroupHeader groupHeader;
+    //Vector is required by JSEPA Dependency
+    @SuppressWarnings("squid:S1149")
     private Vector<PaymentInstructionInformation> pmtInfos;
     private PmtInf pii;
     private CreditTransferTransactionInformation cdtTrfTxInf;

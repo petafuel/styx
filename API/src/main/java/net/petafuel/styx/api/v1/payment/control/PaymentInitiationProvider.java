@@ -23,6 +23,7 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitia
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
+import net.petafuel.styx.core.xs2a.utils.PaymentXMLSerializer;
 
 import javax.ws.rs.core.Response;
 import java.time.ZoneId;

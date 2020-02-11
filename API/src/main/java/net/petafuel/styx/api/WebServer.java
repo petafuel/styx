@@ -12,6 +12,7 @@ import net.petafuel.styx.api.filter.BICFilter;
 import net.petafuel.styx.api.filter.MandatoryHeaderFilter;
 import net.petafuel.styx.api.filter.MasterTokenFilter;
 import net.petafuel.styx.api.filter.PSUFilter;
+import net.petafuel.styx.api.util.ApiProperties;
 import net.petafuel.styx.api.v1.account.boundary.AccountResource;
 import net.petafuel.styx.api.v1.auth.boundary.AuthResource;
 import net.petafuel.styx.api.v1.callback.boundary.CallbackResource;
@@ -40,14 +41,14 @@ import java.net.InetSocketAddress;
 
 public class WebServer {
     private static final Logger LOG = LogManager.getLogger(WebServer.class);
-    private static Boolean isSandbox = Boolean.parseBoolean(System.getProperty("styx.api.sad.enable-sandbox", "true"));
+    private static Boolean isSandbox = Boolean.parseBoolean(System.getProperty(ApiProperties.STYX_API_SAD_SANDBOX_ENABLED, "true"));
     private String ip;
     private String port;
     private Server server = null;
 
     public WebServer() {
-        this.ip = System.getProperty("styx.api.ip");
-        this.port = System.getProperty("styx.api.port");
+        this.ip = System.getProperty(ApiProperties.STYX_API_IP);
+        this.port = System.getProperty(ApiProperties.STYX_API_PORT);
     }
 
     public static Boolean isSandbox() {

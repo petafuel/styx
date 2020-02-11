@@ -15,6 +15,7 @@ import net.petafuel.styx.core.xs2a.entities.Address;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
+import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.XS2AJsonKeys;
@@ -60,10 +61,9 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
             String endToEndIdentification = ctti.getEndToEndID();
 
             Payment payment = new Payment();
-            payment.setAmount(amount);
+            payment.setInstructedAmount(new InstructedAmount(amount, Currency.EUR));
             payment.setCreditor(creditorAccount);
             payment.setDebtor(debtorAccount);
-            payment.setCurrency(Currency.EUR);
             payment.setRemittanceInformationUnstructured(remittanceInformationUnstructured);
             payment.setEndToEndIdentification(endToEndIdentification);
             payment.setRequestedExecutionDate(requestedExecutionDate);
@@ -71,7 +71,8 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
         }
 
         if (paymentService.equals(PaymentService.BULK_PAYMENTS)) {
-            BulkPayment bulkPayment = new BulkPayment(payments);
+            BulkPayment bulkPayment = new BulkPayment();
+            bulkPayment.setPayments(payments);
             bulkPayment.setRequestedExecutionDate(requestedExecutionDate);
             return bulkPayment;
         }
@@ -154,9 +155,8 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
             Payment payment = new Payment();
             payment.setDebtor(debtorAccount);
             payment.setCreditor(creditorAccount);
-            payment.setCurrency(currency);
             payment.setEndToEndIdentification(endToEndIdentification);
-            payment.setAmount(amount);
+            payment.setInstructedAmount(new InstructedAmount(amount, currency));
             payment.setRemittanceInformationUnstructured(remittanceInformationUnstructured);
 
             return payment;
@@ -175,17 +175,19 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
                 creditorAccount.setAddress(creditorAddress);
                 payment.setCreditor(creditorAccount);
 
+                InstructedAmount instructedAmount = new InstructedAmount();
                 JsonObject instructedAmountJson = paymentJson.get(XS2AJsonKeys.INSTRUCTED_AMOUNT.value()).getAsJsonObject();
                 Currency currency = Currency.valueOf(instructedAmountJson.get("currency").getAsString().toUpperCase());
-                payment.setCurrency(currency);
+                instructedAmount.setCurrency(currency);
 
-                String endToEndIdentification =  paymentJson.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()) != null
+                String endToEndIdentification = paymentJson.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()) != null
                         && !paymentJson.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()).isJsonNull()
                         ? paymentJson.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()).getAsString()
                         : null;
                 payment.setEndToEndIdentification(endToEndIdentification);
 
-                payment.setAmount(instructedAmountJson.get(XS2AJsonKeys.AMOUNT.value()).getAsString());
+                instructedAmount.setAmount(instructedAmountJson.get(XS2AJsonKeys.AMOUNT.value()).getAsString());
+                payment.setInstructedAmount(instructedAmount);
                 if (paymentJson.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()) != null) {
                     payment.setRemittanceInformationUnstructured(paymentJson.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()).getAsString());
                 }
@@ -193,7 +195,8 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
                 payments.add(payment);
             }
 
-            BulkPayment bulkPayment = new BulkPayment(payments);
+            BulkPayment bulkPayment = new BulkPayment();
+            bulkPayment.setPayments(payments);
             try {
                 bulkPayment.setRequestedExecutionDate(new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get("requestedExecutionDate").getAsString()));
             } catch (ParseException e) {

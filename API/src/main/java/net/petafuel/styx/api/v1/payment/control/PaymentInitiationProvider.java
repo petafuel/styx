@@ -57,7 +57,7 @@ public class PaymentInitiationProvider {
 
         XS2APaymentInitiationRequest aspspRequest;
         //check IO2 for xml or json - single payment product
-        if (ioParser.getOption("IO2", paymentProductBean.getPaymentProduct().toString()).getAsBoolean()) {
+        if (ioParser.getOption("IO2", paymentProductBean.getPaymentProduct().getValue()).getAsBoolean()) {
             //aspsp accepts json
             aspspRequest = new PaymentInitiationJsonRequest(paymentProductBean.getPaymentProduct(), payment, psu);
         } else {
@@ -87,7 +87,7 @@ public class PaymentInitiationProvider {
         XS2APaymentInitiationRequest aspspRequest;
 
         //check IO3 for xml or json - bulk payment product
-        if (ioParser.getOption("IO3", paymentProductBean.getPaymentProduct().toString()).getAsBoolean()) {
+        if (ioParser.getOption("IO3", paymentProductBean.getPaymentProduct().getValue()).getAsBoolean()) {
             aspspRequest = new BulkPaymentInitiationJsonRequest(paymentProductBean.getPaymentProduct(), bulkPayment, psu);
         } else {
             PAIN00100303Document document = (new PaymentXMLSerializer()).serialize(UUID.randomUUID().toString(), bulkPayment);
@@ -123,7 +123,7 @@ public class PaymentInitiationProvider {
         }
         XS2APaymentInitiationRequest aspspRequest;
         //check IO4 for xml or json - periodic payment product
-        if (ioParser.getOption("IO4", paymentProductBean.getPaymentProduct().toString()).getAsBoolean()) {
+        if (ioParser.getOption("IO4", paymentProductBean.getPaymentProduct().getValue()).getAsBoolean()) {
             aspspRequest = new PeriodicPaymentInitiationJsonRequest(paymentProductBean.getPaymentProduct(), periodicPayment, psu);
         } else {
             PAIN00100303Document document = (new PaymentXMLSerializer()).serialize(UUID.randomUUID().toString(), periodicPayment);

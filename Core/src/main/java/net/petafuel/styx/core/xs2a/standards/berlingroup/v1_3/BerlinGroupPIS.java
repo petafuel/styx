@@ -77,7 +77,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
             this.createBody(RequestType.POST, JSON, xs2ARequest);
         }
 
-        this.setUrl(this.url + String.format(INITIATE_PAYMENT, service.toString(), product.toString()));
+        this.setUrl(this.url + String.format(INITIATE_PAYMENT, service.getValue(), product.getValue()));
         this.createHeaders(xs2ARequest);
 
         try (Response response = this.execute()) {
@@ -103,8 +103,8 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
         ReadPaymentStatusRequest request = (ReadPaymentStatusRequest) xs2AGetRequest;
 
         this.setUrl(this.url + String.format(GET_PAYMENT_STATUS,
-                request.getPaymentService().toString(),
-                request.getPaymentProduct().toString(),
+                request.getPaymentService().getValue(),
+                request.getPaymentProduct().getValue(),
                 request.getPaymentId()));
         this.createBody(RequestType.GET);
         if (request.getPaymentProduct().isXml()) {
@@ -143,8 +143,8 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
         ReadPaymentRequest request = (ReadPaymentRequest) xs2AGetRequest;
 
         this.setUrl(this.url + String.format(GET_PAYMENT,
-                request.getPaymentService().toString(),
-                request.getPaymentProduct().toString(),
+                request.getPaymentService().getValue(),
+                request.getPaymentProduct().getValue(),
                 request.getPaymentId())
         );
         this.createBody(RequestType.GET);

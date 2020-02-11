@@ -19,7 +19,12 @@ public class InstructedAmount {
     }
 
     public InstructedAmount(String amount) {
+        this(amount, Currency.EUR);
+    }
+
+    public InstructedAmount(String amount, Currency currency) {
         this.amount = amount;
+        this.currency = currency;
     }
 
     public Currency getCurrency() {

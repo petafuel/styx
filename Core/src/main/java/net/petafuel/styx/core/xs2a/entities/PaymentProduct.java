@@ -21,16 +21,15 @@ public enum PaymentProduct {
         this.xml = xml;
     }
 
-    @Override
-    public String toString() {
-        return value;
+    public static PaymentProduct byValue(final String paymentProductStr) {
+        return Arrays.asList(PaymentProduct.values()).parallelStream().filter(paymentProduct -> paymentProduct.getValue().equals(paymentProductStr)).findFirst().orElse(null);
     }
 
     public boolean isXml() {
         return xml;
     }
 
-    public static PaymentProduct byValue(final String paymentProductStr) {
-        return Arrays.asList(PaymentProduct.values()).parallelStream().filter(paymentProduct -> paymentProduct.toString().equals(paymentProductStr)).findFirst().orElse(null);
+    public String getValue() {
+        return value;
     }
 }

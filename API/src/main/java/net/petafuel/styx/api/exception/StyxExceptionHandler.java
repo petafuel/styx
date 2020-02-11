@@ -18,12 +18,13 @@ public class StyxExceptionHandler implements ExceptionMapper<StyxException> {
         } else {
             logLevel = Level.ERROR;
         }
-        LOG.log(logLevel, "StyxException happened: category={}, code={}, httpStatus={}, message={}, trace={}",
+        LOG.log(logLevel, "StyxException happened: category={}, code={}, httpStatus={}, message={}, trace={}, throwableMessage={}",
                 e.getErrorEntity().getCategory(),
                 e.getErrorEntity().getCode(),
                 e.getErrorEntity().getCode().getStatusCode(),
                 e.getErrorEntity().getMessage(),
-                e.getStackTrace());
+                e.getStackTrace(),
+                e.getAttachedThrowable() != null ? e.getAttachedThrowable().getMessage() : "");
         return Response.status(e.getErrorEntity().getCode().getStatusCode()).entity(e.getErrorEntity()).build();
     }
 }

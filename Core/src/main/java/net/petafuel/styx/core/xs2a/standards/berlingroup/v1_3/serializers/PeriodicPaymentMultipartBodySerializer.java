@@ -7,6 +7,7 @@ import com.google.gson.JsonSerializer;
 import net.petafuel.jsepa.model.Document;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
+import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.XS2AJsonKeys;
 
@@ -77,10 +78,9 @@ public class PeriodicPaymentMultipartBodySerializer implements JsonSerializer<Pe
                 .getCctInitiation().getPmtInfos().get(0).getRequestedExecutionDate());
 
         PeriodicPayment periodicPayment = new PeriodicPayment();
-        periodicPayment.setAmount(amount);
+        periodicPayment.setInstructedAmount(new InstructedAmount(amount));
         periodicPayment.setCreditor(creditorAccount);
         periodicPayment.setDebtor(debtorAccount);
-        periodicPayment.setCurrency(Currency.EUR);
         periodicPayment.setRemittanceInformationUnstructured(remittanceInformationUnstructured);
         periodicPayment.setEndToEndIdentification(endToEndIdentification);
         periodicPayment.setRequestedExecutionDate(requestExecutionDate);

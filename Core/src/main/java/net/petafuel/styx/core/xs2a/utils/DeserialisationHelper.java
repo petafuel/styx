@@ -20,14 +20,14 @@ public class DeserialisationHelper {
      * @param links a jsonObject which contains the _links object and underlying href -> url key-value pairs
      */
     public static void parseSCALinksData(SCA sca, JsonObject links) {
-        if (links.get(SCA.LinkType.SCA_REDIRECT.getJsonKey()) != null) {
+        if (links.get(SCA.LinkType.SCA_REDIRECT.getValue()) != null) {
             sca.setApproach(SCA.Approach.REDIRECT);
-        } else if (links.get(SCA.LinkType.SCA_OAUTH.getJsonKey()) != null) {
+        } else if (links.get(SCA.LinkType.SCA_OAUTH.getValue()) != null) {
             sca.setApproach(SCA.Approach.OAUTH2);
         }
         for (SCA.LinkType linkType : SCA.LinkType.values()) {
-            if (links.get(linkType.getJsonKey()) != null) {
-                sca.addLink(linkType, links.get(linkType.getJsonKey()).getAsJsonObject().get("href").getAsString());
+            if (links.get(linkType.getValue()) != null) {
+                sca.addLink(linkType, links.get(linkType.getValue()).getAsJsonObject().get("href").getAsString());
             }
         }
     }

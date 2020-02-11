@@ -1,12 +1,17 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import net.petafuel.styx.core.xs2a.entities.serializers.ISODateDeserializer;
+
+import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
-public class Payment {
+public class Payment implements InitializablePayment {
     @JsonbProperty("endToEndIdentification")
     private String endToEndIdentification;
 
@@ -38,8 +43,10 @@ public class Payment {
     private String remittanceInformationUnstructured;
 
     //Only in case of future dated payments, not supported by all aspsps
+    @JsonbDateFormat(value = "yyyy-MM-dd")
     @JsonbProperty("requestedExecutionDate")
-    private String requestedExecutionDate;
+    @JsonbTypeDeserializer(ISODateDeserializer.class)
+    private Date requestedExecutionDate;
 
     public Payment() {
         //empty ctor for json binding
@@ -101,11 +108,11 @@ public class Payment {
         this.creditorAddress = creditorAddress;
     }
 
-    public String getRequestedExecutionDate() {
+    public Date getRequestedExecutionDate() {
         return requestedExecutionDate;
     }
 
-    public void setRequestedExecutionDate(String requestedExecutionDate) {
+    public void setRequestedExecutionDate(Date requestedExecutionDate) {
         this.requestedExecutionDate = requestedExecutionDate;
     }
 }

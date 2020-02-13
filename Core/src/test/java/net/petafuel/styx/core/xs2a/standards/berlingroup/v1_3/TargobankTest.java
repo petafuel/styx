@@ -5,9 +5,11 @@ import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
@@ -38,7 +40,7 @@ public class TargobankTest {
 
     private static final String BIC = "CMCIDEDD";
     private static final String BANK_VERLAG_TOKEN = "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE";
-    private static final String CONSENT = "P6wMwv2MAlyqHLxiQ0W9Jao0rBZp90l7RoRUWHW5YG2tvuV4UiKKo5eMVlEsrA-VCSmy8mjGAmN707bED6NC__SdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q";
+    private static final String CONSENT = "XorXzzKrmqFvKwtIVnnqp0fZ3Fyl0yCuIyQ96OEzojyAc9LfEVKhs-qhumi8p66h97Zw7L0UcJLvR3uke5rcjPSdMWF3876hAweK_n7HJlg=_=_psGLvQpt9Q";
 
     @Test
     @Tag("integration")
@@ -48,10 +50,12 @@ public class TargobankTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE70300209005320320678"));
+        Account account = new Account("DE70300209005320320678");
+        account.setIdentifier("DE70300209005320320678");
+        balances.add(account);
 
         List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE70300209005320320678"));
+        transactions.add(account);
 
         PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");
@@ -134,7 +138,9 @@ public class TargobankTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE40100100103307118608"));
+        Account account = new Account("DE40100100103307118608");
+        account.setIdentifier("DE40100100103307118608");
+        balances.add(account);
 
         PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");
@@ -162,7 +168,9 @@ public class TargobankTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE40100100103307118608"));
+        Account account = new Account("DE40100100103307118608");
+        account.setIdentifier("DE40100100103307118608");
+        transactions.add(account);
 
         PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");
@@ -285,12 +293,11 @@ public class TargobankTest {
 
         Payment paymentBody = new Payment();
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
+        paymentBody.setCreditorName(creditorName);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
+        paymentBody.setInstructedAmount(new InstructedAmount(amount, instructedCurrency));
         paymentBody.setRemittanceInformationUnstructured(reference);
 
         PSU psu = new PSU("PSD2TEST4");
@@ -329,11 +336,10 @@ public class TargobankTest {
 
         p1.setDebtor(debtor);
         p1.setCreditor(creditor1);
-        p1.setAmount(instructedAmount1);
-        p1.setCurrency(instructedCurrency1);
+        p1.setInstructedAmount(new InstructedAmount(instructedAmount1, instructedCurrency1));
         p1.setRemittanceInformationUnstructured(reference1);
         p1.setEndToEndIdentification("RI-234567890");
-
+        p1.setCreditorName(creditorName1);
 
         /** Payment 2 information*/
         String creditorIban2 = "DE75999999990000001004";
@@ -350,8 +356,8 @@ public class TargobankTest {
 
         p2.setDebtor(debtor);
         p2.setCreditor(creditor2);
-        p2.setAmount(instructedAmount2);
-        p2.setCurrency(instructedCurrency2);
+        p2.setCreditorName(creditorName2);
+        p2.setInstructedAmount(new InstructedAmount(instructedAmount2, instructedCurrency2));
         p2.setRemittanceInformationUnstructured(reference2);
         p2.setEndToEndIdentification("WBG-123456789");
 
@@ -359,10 +365,15 @@ public class TargobankTest {
         payments.add(p1);
         payments.add(p2);
 
+        BulkPayment bulkPayment = new BulkPayment();
+        bulkPayment.setPayments(payments);
+        bulkPayment.setDebtorAccount(debtor);
+        bulkPayment.setBatchBookingPreferred(false);
+
         PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");
         BulkPaymentInitiationJsonRequest request = new BulkPaymentInitiationJsonRequest(
-                PaymentProduct.SEPA_CREDIT_TRANSFERS, payments, psu, false);
+                PaymentProduct.SEPA_CREDIT_TRANSFERS, bulkPayment, psu);
         request.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);

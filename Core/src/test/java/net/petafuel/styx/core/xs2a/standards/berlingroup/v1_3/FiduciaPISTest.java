@@ -12,6 +12,7 @@ import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
@@ -131,7 +132,7 @@ public class FiduciaPISTest {
         xmlRequest.setTppRedirectPreferred(true);
 
         //build json request part
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.name());
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.getValue());
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
         paymentBody.setDayOfExecution(dayOfExecution);
@@ -354,8 +355,7 @@ public class FiduciaPISTest {
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
+        paymentBody.setInstructedAmount(new InstructedAmount(amount, instructedCurrency));
         paymentBody.setRemittanceInformationUnstructured(reference);
 
         PSU psu = new PSU("PSU-Successful");

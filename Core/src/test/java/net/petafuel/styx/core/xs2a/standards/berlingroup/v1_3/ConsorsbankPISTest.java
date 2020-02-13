@@ -1,7 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
 import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonPrimitive;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
@@ -23,7 +22,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -59,11 +57,11 @@ public class ConsorsbankPISTest {
         }
         String dayOfExecution = "20";
 
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.getValue());
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
+        paymentBody.setCreditorName(creditorName);
         paymentBody.setDebtor(debtor);
         InstructedAmount instructedAmount = new InstructedAmount("520.00");
         instructedAmount.setCurrency(Currency.EUR);
@@ -101,21 +99,18 @@ public class ConsorsbankPISTest {
         Calendar day = Calendar.getInstance();
         day.set(Calendar.DAY_OF_MONTH, day.getActualMinimum(Calendar.DAY_OF_MONTH));
         day.add(Calendar.MONTH, 1);
-        Date startDate = new SimpleDateFormat("yyyy-M-dd").parse(day.getTime().toString());
         day.add(Calendar.MONTH, 2);
-        Date endDate = new SimpleDateFormat("yyyy-M-dd").parse(day.getTime().toString());
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         String dayOfExecution = "20";
 
         Payment paymentBody = new Payment();
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
+        paymentBody.setInstructedAmount(new InstructedAmount(amount, instructedCurrency));
         paymentBody.setRemittanceInformationUnstructured(reference);
+        paymentBody.setCreditorName(creditorName);
 
         PSU psu = new PSU("PSU-Successful");
         psu.setIp("192.168.8.78");

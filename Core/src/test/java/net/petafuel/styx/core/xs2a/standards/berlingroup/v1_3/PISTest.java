@@ -1,6 +1,5 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
-import com.google.gson.JsonPrimitive;
 import net.petafuel.jsepa.model.CCTInitiation;
 import net.petafuel.jsepa.model.CreditTransferTransactionInformation;
 import net.petafuel.jsepa.model.GroupHeader;
@@ -92,7 +91,7 @@ public class PISTest {
 
         Payment payment = (Payment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getInstructedAmount().getCurrency());
     }
 
     @Test
@@ -108,7 +107,7 @@ public class PISTest {
 
         Payment payment = (Payment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getInstructedAmount().getCurrency());
     }
 
     @Test
@@ -124,7 +123,7 @@ public class PISTest {
 
         BulkPayment payment = (BulkPayment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getPayments().get(0).getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getPayments().get(0).getInstructedAmount().getCurrency());
     }
 
     @Test
@@ -139,7 +138,7 @@ public class PISTest {
 
         Payment payment = (Payment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getInstructedAmount().getCurrency());
     }
 
     @Test
@@ -154,7 +153,7 @@ public class PISTest {
 
         PeriodicPayment payment = (PeriodicPayment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getInstructedAmount().getCurrency());
     }
 
     @Test
@@ -167,9 +166,9 @@ public class PISTest {
                 PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS,
                 initializeXMLBulkPaymentForTest());
 
-        BulkPayment payment =  (BulkPayment) standard.getPis().getPayment(r1);
+        BulkPayment payment = (BulkPayment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getPayments().get(0).getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getPayments().get(0).getInstructedAmount().getCurrency());
     }
 
     public String initiateJsonPaymentForTest() throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
@@ -181,17 +180,17 @@ public class PISTest {
         String creditorName = "Max Creditor";
         String debtorIban = "DE40100100103307118608";
         Currency debtorCurrency = Currency.EUR;
+        String amount = "0.99";
         Currency instructedCurrency = Currency.EUR;
         String reference = "Beispiel Verwendungszweck";
-        InstructedAmount instructedAmount = new InstructedAmount("0.99");
-        instructedAmount.setCurrency(instructedCurrency);
+
         Payment paymentBody = new Payment();
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
+        paymentBody.setCreditorName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setInstructedAmount(instructedAmount);
+        paymentBody.setInstructedAmount(new InstructedAmount(amount, instructedCurrency));
         paymentBody.setRemittanceInformationUnstructured(reference);
 
         PSU psu = new PSU("PSD2TEST4");
@@ -225,91 +224,25 @@ public class PISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         String frequency = PeriodicPayment.Frequency.MNTH.name();
-        if (((JsonPrimitive) standard.getAspsp().getConfig().getImplementerOptions().get("STYX01").getOptions()
-                .get("required")).getAsBoolean()) {
-            frequency = PeriodicPayment.Frequency.MNTH.getName();
+        if (standard.getAspsp().getConfig().getImplementerOptions().get("STYX01").getOptions()
+                .get("required").getAsBoolean()) {
+            frequency = PeriodicPayment.Frequency.MNTH.getValue();
         }
         String dayOfExecution = "20";
 
         PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
+        paymentBody.setCreditorName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        InstructedAmount instructedAmount = new InstructedAmount(amount);
-        instructedAmount.setCurrency(instructedCurrency);
-        paymentBody.setInstructedAmount(instructedAmount);
+        paymentBody.setInstructedAmount(new InstructedAmount(amount, instructedCurrency));
         paymentBody.setRemittanceInformationUnstructured(reference);
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
         paymentBody.setDayOfExecution(dayOfExecution);
-
-        PSU psu = new PSU("PSU-1234");
-        PaymentInitiationJsonRequest request = new PaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
-
-        InitiatedPayment payment = standard.getPis().initiatePayment(request);
-        Assert.assertNotNull(payment);
-
-    }
-
-    @Tag("integration")
-    @Test
-    public void initializeSingleFuturePayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
-
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
-
-        // Necessary instances for creating a PAIN00100303Document
-        PAIN00100303Document document = new PAIN00100303Document();
-        CCTInitiation ccInitation = new CCTInitiation();
-        GroupHeader groupHeader = new GroupHeader();
-        Vector<PaymentInstructionInformation> pmtInfos = new Vector<>();
-        PaymentInstructionInformation p1 = new PaymentInstructionInformation();
-        CreditTransferTransactionInformation cdtTrfTxInf = new CreditTransferTransactionInformation();
-
-        // Necessary variables for creating a PAIN00100303Document
-        String messageId = "messageId";
-        String creationTime = "2019-10-10";
-        int numberOfTransactions = 1;
-        double controlSum = 100.00;
-        double amount = 100.00;
-        String initiatingPartyName = "initiatingPartyName";
-        String paymentInformationId = "NOTPROVIDED";
-        String paymentMethod = "TRF";
-        String requestedExecutionDate = "2019-10-10";
-        String debtorName = "Debtor Name";
-        String debtorIban = "DE86999999990000001000";
-        String debtorBic = "TESTDETT421";
-        String chargeBearer = "SLEV";
-        String endToEndID = "EndToEndId";
-        String creditorName = "Hans Handbuch";
-        String creditorIBAN = "DE98999999990000009999";
-        String purpose = "purpose string";
-
-        // Setting values for each instance
-        groupHeader.setMessageId(messageId);
-        groupHeader.setCreationTime(creationTime);
-        groupHeader.setNoOfTransactions(numberOfTransactions);
-        groupHeader.setControlSum(controlSum);
-        groupHeader.setInitiatingPartyName(initiatingPartyName);
-
-        cdtTrfTxInf.setEndToEndID(endToEndID);
-        cdtTrfTxInf.setAmount(amount);
-        cdtTrfTxInf.setCreditorName(creditorName);
-        cdtTrfTxInf.setCreditorIBAN(creditorIBAN);
-        cdtTrfTxInf.setVwz(purpose);
-
-        p1.setPmtInfId(paymentInformationId);
-        p1.setPaymentMethod(paymentMethod);
-        p1.setNoTxns(numberOfTransactions);
-        p1.setCtrlSum(controlSum);
-        p1.setRequestedExecutionDate(requestedExecutionDate);
-        p1.setDebtorName(debtorName);
-        p1.setDebtorAccountIBAN(debtorIban);
-        p1.setDebitorBic(debtorBic);
-        p1.setChargeBearer(chargeBearer);
 
         PSU psu = new PSU("PSU-Successful");
         psu.setIp("192.168.8.78");
@@ -341,11 +274,10 @@ public class PISTest {
         creditor1.setName(creditorName1);
 
         Payment p1 = new Payment();
-        InstructedAmount instructedAmountObj1 = new InstructedAmount(instructedAmount1);
-        instructedAmountObj1.setCurrency(instructedCurrency1);
+        p1.setCreditorName(creditorName1);
         p1.setDebtor(debtor);
         p1.setCreditor(creditor1);
-        p1.setInstructedAmount(instructedAmountObj1);
+        p1.setInstructedAmount(new InstructedAmount(instructedAmount1, instructedCurrency1));
         p1.setRemittanceInformationUnstructured(reference1);
         p1.setEndToEndIdentification("RI-234567890");
 
@@ -361,13 +293,12 @@ public class PISTest {
         Account creditor2 = new Account(creditorIban2, creditorCurrency2, Account.Type.IBAN);
         creditor2.setName(creditorName2);
 
-        Payment p2 = new Payment();
 
+        Payment p2 = new Payment();
+        p2.setCreditorName(creditorName2);
         p2.setDebtor(debtor);
         p2.setCreditor(creditor2);
-        InstructedAmount instructedAmountObj2 = new InstructedAmount(instructedAmount2);
-        instructedAmountObj2.setCurrency(instructedCurrency2);
-        p2.setInstructedAmount(instructedAmountObj2);
+        p2.setInstructedAmount(new InstructedAmount(instructedAmount2, instructedCurrency2));
         p2.setRemittanceInformationUnstructured(reference2);
         p2.setEndToEndIdentification("WBG-123456789");
 
@@ -375,11 +306,15 @@ public class PISTest {
         payments.add(p1);
         payments.add(p2);
 
-        //TODO Fix empty Bulkpayment
+        BulkPayment bulkPayment = new BulkPayment();
+        bulkPayment.setPayments(payments);
+        bulkPayment.setDebtorAccount(debtor);
+        bulkPayment.setBatchBookingPreferred(false);
+
         PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");
         BulkPaymentInitiationJsonRequest request = new BulkPaymentInitiationJsonRequest(
-                PaymentProduct.SEPA_CREDIT_TRANSFERS, new BulkPayment(), psu);
+                PaymentProduct.SEPA_CREDIT_TRANSFERS, bulkPayment, psu);
         request.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
@@ -464,52 +399,6 @@ public class PISTest {
         PaymentInitiationPain001Request request = new PaymentInitiationPain001Request(
                 PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS, PaymentService.PAYMENTS, document, psu
         );
-
-        InitiatedPayment payment = standard.getPis().initiatePayment(request);
-        Assert.assertNotNull(payment);
-    }
-
-    @Test
-    @Tag("integration")
-    public void initiateJsonPeriodicPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC_SPARKASSE, true);
-
-        //payment information
-        String creditorIban = "DE75999999990000001004"; //Sparkasse
-        Currency creditorCurrency = Currency.EUR;
-        String creditorName = "Max Creditor";
-        String debtorIban = "DE86999999990000001000"; //Sparkasse
-        Currency debtorCurrency = Currency.EUR;
-        String amount = "0.99";
-        Currency instructedCurrency = Currency.EUR;
-        String reference = "Beispiel Verwendungszweck";
-        //additional periodic payment information
-        Calendar day = Calendar.getInstance();
-        day.set(Calendar.DAY_OF_MONTH, day.getActualMinimum(Calendar.DAY_OF_MONTH));
-        day.add(Calendar.MONTH, 1);
-        Date startDate = day.getTime();
-        day.add(Calendar.MONTH, 2);
-        Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
-        PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
-        String dayOfExecution = "20";
-
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.name());
-        Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
-        Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
-        paymentBody.setCreditor(creditor);
-        paymentBody.setDebtor(debtor);
-        InstructedAmount instructedAmount = new InstructedAmount(amount);
-        instructedAmount.setCurrency(instructedCurrency);
-        paymentBody.setInstructedAmount(instructedAmount);
-        paymentBody.setRemittanceInformationUnstructured(reference);
-        paymentBody.setExecutionRule(executionRule);
-        paymentBody.setEndDate(endDate);
-        paymentBody.setDayOfExecution(dayOfExecution);
-
-        PSU psu = new PSU("PSU-1234");
-        PeriodicPaymentInitiationJsonRequest request = new PeriodicPaymentInitiationJsonRequest(PaymentProduct.SEPA_CREDIT_TRANSFERS, paymentBody, psu);
         request.setTppRedirectPreferred(true);
 
         InitiatedPayment payment = standard.getPis().initiatePayment(request);
@@ -609,7 +498,7 @@ public class PISTest {
         xmlRequest.setTppRedirectPreferred(true);
 
         //build json request part
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.name());
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.getValue());
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
         paymentBody.setDayOfExecution(dayOfExecution);

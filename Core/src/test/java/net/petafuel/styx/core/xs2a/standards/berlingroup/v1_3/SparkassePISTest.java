@@ -10,8 +10,10 @@ import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
@@ -62,8 +64,7 @@ public class SparkassePISTest {
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
+        paymentBody.setInstructedAmount(new InstructedAmount(amount, instructedCurrency));
         paymentBody.setRemittanceInformationUnstructured(reference);
 
         PSU psu = new PSU("PSU-1234");
@@ -102,8 +103,7 @@ public class SparkassePISTest {
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
+        paymentBody.setInstructedAmount(new InstructedAmount(amount, instructedCurrency));
         paymentBody.setRemittanceInformationUnstructured(reference);
         paymentBody.setRequestedExecutionDate(executionDate);
 
@@ -139,8 +139,7 @@ public class SparkassePISTest {
 
         p1.setDebtor(debtor);
         p1.setCreditor(creditor1);
-        p1.setAmount(instructedAmount1);
-        p1.setCurrency(instructedCurrency1);
+        p1.setInstructedAmount(new InstructedAmount(instructedAmount1, instructedCurrency1));
         p1.setRemittanceInformationUnstructured(reference1);
         p1.setEndToEndIdentification("RI-234567890");
 
@@ -160,8 +159,7 @@ public class SparkassePISTest {
 
         p2.setDebtor(debtor);
         p2.setCreditor(creditor2);
-        p2.setAmount(instructedAmount2);
-        p2.setCurrency(instructedCurrency2);
+        p2.setInstructedAmount(new InstructedAmount(instructedAmount2, instructedCurrency2));
         p2.setRemittanceInformationUnstructured(reference2);
         p2.setEndToEndIdentification("WBG-123456789");
 
@@ -169,9 +167,14 @@ public class SparkassePISTest {
         payments.add(p1);
         payments.add(p2);
 
+        BulkPayment bulkPayment = new BulkPayment();
+        bulkPayment.setPayments(payments);
+        bulkPayment.setBatchBookingPreferred(false);
+        bulkPayment.setDebtorAccount(debtor);
+
         PSU psu = new PSU("PSU-1234");
         BulkPaymentInitiationJsonRequest request = new BulkPaymentInitiationJsonRequest(
-                PaymentProduct.SEPA_CREDIT_TRANSFERS, payments, psu, false);
+                PaymentProduct.SEPA_CREDIT_TRANSFERS, bulkPayment, psu);
 
         InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
         Assert.assertNotNull(initiatedPayment);
@@ -301,7 +304,7 @@ public class SparkassePISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 
@@ -311,8 +314,7 @@ public class SparkassePISTest {
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
+        paymentBody.setInstructedAmount(new InstructedAmount(amount, instructedCurrency));
         paymentBody.setRemittanceInformationUnstructured(reference);
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
@@ -375,7 +377,7 @@ public class SparkassePISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 

@@ -16,6 +16,7 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
+import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentInitiationJsonRequest;
@@ -35,6 +36,8 @@ public class PaymentInitiationProvider {
     private XS2AStandard xs2AStandard;
     private PaymentProductBean paymentProductBean;
     private PSU psu;
+
+    private static final String XML_PAYMENT_PRODUCT_PREFIX = "pain.001-";
 
     public PaymentInitiationProvider(XS2AStandard xs2AStandard, PaymentProductBean paymentProductBean, PSU psu) {
         this.xs2AStandard = xs2AStandard;
@@ -60,10 +63,12 @@ public class PaymentInitiationProvider {
         if (ioParser.getOption("IO2", paymentProductBean.getPaymentProduct().getValue()).getAsBoolean()) {
             //aspsp accepts json
             aspspRequest = new PaymentInitiationJsonRequest(paymentProductBean.getPaymentProduct(), payment, psu);
-        } else {
+        } else if (ioParser.getOption("IO2", XML_PAYMENT_PRODUCT_PREFIX + paymentProductBean.getPaymentProduct().getValue()).getAsBoolean()) {
             //aspsp does not support json, use pain001.003
             PAIN00100303Document document = (new PaymentXMLSerializer()).serialize(UUID.randomUUID().toString(), payment);
-            aspspRequest = new PaymentInitiationPain001Request(paymentProductBean.getPaymentProduct(), PaymentService.PAYMENTS, document, psu);
+            aspspRequest = new PaymentInitiationPain001Request(PaymentProduct.byValue(XML_PAYMENT_PRODUCT_PREFIX + paymentProductBean.getPaymentProduct().getValue()), PaymentService.PAYMENTS, document, psu);
+        } else {
+            throw new StyxException(new ErrorEntity("The requested ASPSP does not support single-payments with payment-product " + paymentProductBean.getPaymentProduct().getValue(), Response.Status.BAD_REQUEST, ErrorCategory.ASPSP));
         }
 
         return aspspRequest;
@@ -89,9 +94,11 @@ public class PaymentInitiationProvider {
         //check IO3 for xml or json - bulk payment product
         if (ioParser.getOption("IO3", paymentProductBean.getPaymentProduct().getValue()).getAsBoolean()) {
             aspspRequest = new BulkPaymentInitiationJsonRequest(paymentProductBean.getPaymentProduct(), bulkPayment, psu);
-        } else {
+        } else if (ioParser.getOption("IO3", XML_PAYMENT_PRODUCT_PREFIX + paymentProductBean.getPaymentProduct().getValue()).getAsBoolean()) {
             PAIN00100303Document document = (new PaymentXMLSerializer()).serialize(UUID.randomUUID().toString(), bulkPayment);
-            aspspRequest = new PaymentInitiationPain001Request(paymentProductBean.getPaymentProduct(), PaymentService.BULK_PAYMENTS, document, psu);
+            aspspRequest = new PaymentInitiationPain001Request(PaymentProduct.byValue(XML_PAYMENT_PRODUCT_PREFIX + paymentProductBean.getPaymentProduct().getValue()), PaymentService.BULK_PAYMENTS, document, psu);
+        } else {
+            throw new StyxException(new ErrorEntity("The requested ASPSP does not support bulk-payments with payment-product " + paymentProductBean.getPaymentProduct().getValue(), Response.Status.BAD_REQUEST, ErrorCategory.ASPSP));
         }
         return aspspRequest;
     }
@@ -125,15 +132,17 @@ public class PaymentInitiationProvider {
         //check IO4 for xml or json - periodic payment product
         if (ioParser.getOption("IO4", paymentProductBean.getPaymentProduct().getValue()).getAsBoolean()) {
             aspspRequest = new PeriodicPaymentInitiationJsonRequest(paymentProductBean.getPaymentProduct(), periodicPayment, psu);
-        } else {
+        } else if (ioParser.getOption("IO4", XML_PAYMENT_PRODUCT_PREFIX + paymentProductBean.getPaymentProduct().getValue()).getAsBoolean()) {
             PAIN00100303Document document = (new PaymentXMLSerializer()).serialize(UUID.randomUUID().toString(), periodicPayment);
             aspspRequest = new PeriodicPaymentInitiationXMLRequest(
                     new PaymentInitiationPain001Request(
-                            paymentProductBean.getPaymentProduct(),
+                            PaymentProduct.byValue(XML_PAYMENT_PRODUCT_PREFIX + paymentProductBean.getPaymentProduct().getValue()),
                             PaymentService.PERIODIC_PAYMENTS,
                             document,
                             psu),
                     periodicPayment);
+        } else {
+            throw new StyxException(new ErrorEntity("The requested ASPSP does not support periodic-payments with payment-product " + paymentProductBean.getPaymentProduct().getValue(), Response.Status.BAD_REQUEST, ErrorCategory.ASPSP));
         }
         return aspspRequest;
     }

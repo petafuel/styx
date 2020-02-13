@@ -139,6 +139,7 @@ public class PaymentInitiationResource extends PSUResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PERIODIC_PAYMENTS, paymentProductBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         aspspUrlMapper.map(paymentResponse.getLinks());
 
+        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), bic, paymentResponse.getTransactionStatus());
         return Response.status(201).entity(paymentResponse).build();
     }
 }

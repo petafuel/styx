@@ -9,10 +9,14 @@ import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 
 public class PaymentInitiationPain001Request extends XS2APaymentInitiationRequest {
+
+    private static final Logger LOG = LogManager.getLogger(PaymentInitiationPain001Request.class);
 
     /**
      * Body
@@ -38,6 +42,7 @@ public class PaymentInitiationPain001Request extends XS2APaymentInitiationReques
         try {
             return Optional.of(new String(writer.writeSEPA()));
         } catch (SEPAWriteException exception) {
+            LOG.warn("Error creating raw body for PaymentInitiationPain001Request message={} cause={}", exception.getMessage(), exception.getCause().getCause());
             return Optional.empty();
         }
     }

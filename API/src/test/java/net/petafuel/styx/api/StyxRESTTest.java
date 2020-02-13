@@ -1,4 +1,4 @@
-package net.petafuel.styx.api.v1;
+package net.petafuel.styx.api;
 
 import net.petafuel.styx.api.exception.BankRequestFailedExceptionHandler;
 import net.petafuel.styx.api.exception.ClientExceptionHandler;
@@ -13,6 +13,8 @@ import net.petafuel.styx.api.filter.PSUFilter;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 
+//This is just a setup class
+@SuppressWarnings("squid:S2187")
 public class StyxRESTTest extends JerseyTest {
     protected ResourceConfig setupFiltersAndErrorHandlers() {
 

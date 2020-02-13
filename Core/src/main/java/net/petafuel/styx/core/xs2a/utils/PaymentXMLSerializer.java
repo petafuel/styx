@@ -12,6 +12,7 @@ import net.petafuel.styx.core.xs2a.utils.jsepa.PmtInf;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.UUID;
 import java.util.Vector;
 
 public class PaymentXMLSerializer {
@@ -56,7 +57,7 @@ public class PaymentXMLSerializer {
         ArrayList<CreditTransferTransactionInformation> list = new ArrayList<>();
 
         controlSum += Double.parseDouble(payment.getInstructedAmount().getAmount());
-        cdtTrfTxInf.setEndToEndID(payment.getEndToEndIdentification());
+        cdtTrfTxInf.setEndToEndID(payment.getEndToEndIdentification() != null ? payment.getEndToEndIdentification() : UUID.randomUUID().toString());
         cdtTrfTxInf.setAmount(Double.parseDouble(payment.getInstructedAmount().getAmount()));
         cdtTrfTxInf.setCreditorName(payment.getCreditorName());
         cdtTrfTxInf.setCreditorIBAN(payment.getCreditor().getIban());
@@ -103,7 +104,7 @@ public class PaymentXMLSerializer {
         ArrayList<CreditTransferTransactionInformation> list = new ArrayList<>();
         for (Payment payment : bulkPayment.getPayments()) {
             controlSum += Double.parseDouble(payment.getInstructedAmount().getAmount());
-            cdtTrfTxInf.setEndToEndID(payment.getEndToEndIdentification());
+            cdtTrfTxInf.setEndToEndID(payment.getEndToEndIdentification() != null ? payment.getEndToEndIdentification() : UUID.randomUUID().toString());
             cdtTrfTxInf.setAmount(Double.parseDouble(payment.getInstructedAmount().getAmount()));
             cdtTrfTxInf.setCreditorName(payment.getCreditorName());
             cdtTrfTxInf.setCreditorIBAN(payment.getCreditor().getIban());

@@ -8,6 +8,7 @@ import net.petafuel.styx.core.xs2a.entities.PaymentService;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
 import java.util.Optional;
 
 public class PaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
@@ -21,7 +22,9 @@ public class PaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
 
     @Override
     public Optional<String> getRawBody() {
-        try (Jsonb jsonb = JsonbBuilder.create()) {
+        JsonbConfig jsonbConfig = new JsonbConfig();
+        jsonbConfig.withNullValues(false);
+        try (Jsonb jsonb = JsonbBuilder.create(jsonbConfig)) {
             return Optional.ofNullable(jsonb.toJson(payment));
         } catch (Exception e) {
             return Optional.empty();

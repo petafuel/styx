@@ -197,10 +197,13 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
 
             BulkPayment bulkPayment = new BulkPayment();
             bulkPayment.setPayments(payments);
-            try {
-                bulkPayment.setRequestedExecutionDate(new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get("requestedExecutionDate").getAsString()));
-            } catch (ParseException e) {
-                e.printStackTrace();
+
+            if (jsonObject.get("requestedExecutionDate") != null) {
+                try {
+                    bulkPayment.setRequestedExecutionDate(new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get("requestedExecutionDate").getAsString()));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
             bulkPayment.setBatchBookingPreferred(jsonObject.get("batchBookingPreferred").getAsBoolean());
 

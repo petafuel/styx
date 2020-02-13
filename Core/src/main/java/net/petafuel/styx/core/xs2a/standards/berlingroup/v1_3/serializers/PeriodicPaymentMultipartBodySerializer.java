@@ -18,28 +18,6 @@ import java.util.Date;
 
 public class PeriodicPaymentMultipartBodySerializer implements JsonSerializer<PeriodicPayment> {
 
-    @Override
-    public JsonElement serialize(PeriodicPayment payment, Type typeOfSrc, JsonSerializationContext context) {
-
-        JsonObject object = new JsonObject();
-        SimpleDateFormat format = new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value());
-
-        //Periodic Payment Serialization
-        String formattedStartDate = format.format(payment.getStartDate());
-        object.addProperty("startDate", formattedStartDate);
-        if (payment.getExecutionRule() != null) {
-            object.addProperty("executionRule", payment.getExecutionRule().toString());
-        }
-        if (payment.getEndDate() != null) {
-            String formattedEndDate = format.format(payment.getEndDate());
-            object.addProperty("endDate", formattedEndDate);
-        }
-        object.addProperty("frequency", payment.getFrequency());
-        object.addProperty("dayOfExecution", payment.getDayOfExecution());
-
-        return object;
-    }
-
     public static PeriodicPayment xmlDeserialize(Document sepaDocument, JsonObject jsonObject) throws ParseException {
         Account debtorAccount = new Account();
         debtorAccount.setName(sepaDocument.getCctInitiation().getPmtInfos().get(0).getDebitor().getName());
@@ -49,7 +27,7 @@ public class PeriodicPaymentMultipartBodySerializer implements JsonSerializer<Pe
 
         Date startDate = new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get("startDate").getAsString());
         Date endDate = new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get("endDate").getAsString());
-        String executionRule = jsonObject.get("executionRule").getAsString();
+        String executionRule = jsonObject.get("executionRule").getAsString().toUpperCase();
         String frequency = jsonObject.get("frequency").getAsString();
         String dayOfExecution = jsonObject.get("dayOfExecution").getAsString();
 
@@ -91,5 +69,27 @@ public class PeriodicPaymentMultipartBodySerializer implements JsonSerializer<Pe
         periodicPayment.setFrequency(frequency);
 
         return periodicPayment;
+    }
+
+    @Override
+    public JsonElement serialize(PeriodicPayment payment, Type typeOfSrc, JsonSerializationContext context) {
+
+        JsonObject object = new JsonObject();
+        SimpleDateFormat format = new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value());
+
+        //Periodic Payment Serialization
+        String formattedStartDate = format.format(payment.getStartDate());
+        object.addProperty("startDate", formattedStartDate);
+        if (payment.getExecutionRule() != null) {
+            object.addProperty("executionRule", payment.getExecutionRule().getValue());
+        }
+        if (payment.getEndDate() != null) {
+            String formattedEndDate = format.format(payment.getEndDate());
+            object.addProperty("endDate", formattedEndDate);
+        }
+        object.addProperty("frequency", payment.getFrequency());
+        object.addProperty("dayOfExecution", payment.getDayOfExecution());
+
+        return object;
     }
 }

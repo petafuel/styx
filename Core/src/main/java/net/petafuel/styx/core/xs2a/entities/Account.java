@@ -1,6 +1,7 @@
 package net.petafuel.styx.core.xs2a.entities;
 
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -21,29 +22,33 @@ public class Account implements Serializable {
      * This is the `account-id` used by the banks
      */
     private String resourceId;
-    @JsonbProperty("name")
+    @JsonbTransient
     private String name;
     @JsonbProperty("product")
     private String product;
     @JsonbProperty("cashAccountType")
     private String cashAccountType;
+    @JsonbTransient
     private Type type;
     private Currency currency;
     private Address address;
     private String agent;
+    @JsonbTransient
     private ArrayList<Balance> balances;
 
-    public Account() {}
 
-    public Account(String identifier, Currency currency, Type type) {
-        this.identifier = identifier;
+    public Account() {
+    }
+
+    public Account(String iban, Currency currency, Type type) {
+        this.iban = iban;
         this.currency = currency;
         this.type = type;
         this.balances = new ArrayList<>();
     }
 
-    public Account(String identifier) {
-        this(identifier, Currency.EUR, Type.IBAN);
+    public Account(String iban) {
+        this(iban, Currency.EUR, Type.IBAN);
     }
 
     public Type getType() {
@@ -122,6 +127,10 @@ public class Account implements Serializable {
 
     public ArrayList<Balance> getBalances() {
         return balances;
+    }
+
+    public void setBalances(ArrayList<Balance> balances) {
+        this.balances = balances;
     }
 
     public void addBalance(Balance balance) {

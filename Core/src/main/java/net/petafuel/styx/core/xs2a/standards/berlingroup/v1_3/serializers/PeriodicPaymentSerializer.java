@@ -97,7 +97,7 @@ public class PeriodicPaymentSerializer implements JsonSerializer<InitializablePa
             e.printStackTrace();
         }
         periodicPayment.setDayOfExecution(jsonObject.get("dayOfExecution").getAsString());
-        periodicPayment.setExecutionRule(PeriodicPayment.ExecutionRule.valueOf(jsonObject.get("executionRule").getAsString()));
+        periodicPayment.setExecutionRule(PeriodicPayment.ExecutionRule.valueOf(jsonObject.get("executionRule").getAsString().toUpperCase()));
         periodicPayment.setFrequency(jsonObject.get("frequency").getAsString());
 
         return periodicPayment;

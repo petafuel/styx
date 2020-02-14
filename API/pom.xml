@@ -158,6 +158,13 @@
                                         <include>connectionpool.properties</include>
                                     </includes>
                                 </resource>
+                                <resource>
+                                    <directory>${basedir}/src/main/resources/</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>api.properties</include>
+                                    </includes>
+                                </resource>
                             </resources>
                         </configuration>
                     </execution>

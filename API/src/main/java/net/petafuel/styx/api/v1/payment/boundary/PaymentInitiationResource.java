@@ -100,7 +100,6 @@ public class PaymentInitiationResource extends PSUResource {
         XS2APaymentInitiationRequest aspspRequest = new PaymentInitiationProvider(xs2AStandard, paymentProductBean, getPsu()).buildBulkPaymentRequest(bulkPaymentBody);
 
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
-        aspspRequest.getHeaders().put("X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
         PaymentResponse paymentResponse = new PaymentResponse(xs2AStandard.getPis().initiatePayment(aspspRequest));
         LOG.info("Initiate bulk payment bic={} aspsp_name={} aspsp_id={} paymentId={}", bic, xs2AStandard.getAspsp().getName(), xs2AStandard.getAspsp().getId(), paymentResponse.getPaymentId());

@@ -12,6 +12,7 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Address;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
+import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
@@ -78,10 +79,11 @@ public class PeriodicPaymentSerializer implements JsonSerializer<InitializablePa
         creditorAccount.setAddress(creditorAddress);
 
         PeriodicPayment periodicPayment = new PeriodicPayment();
-        periodicPayment.setAmount(amount);
+        InstructedAmount instructedAmount = new InstructedAmount(amount);
+        instructedAmount.setCurrency(currency);
+        periodicPayment.setInstructedAmount(instructedAmount);
         periodicPayment.setCreditor(creditorAccount);
         periodicPayment.setDebtor(debtorAccount);
-        periodicPayment.setCurrency(currency);
         periodicPayment.setRemittanceInformationUnstructured(remittanceInformationUnstructured);
         periodicPayment.setEndToEndIdentification(endToEndIdentification);
         try {
@@ -95,7 +97,7 @@ public class PeriodicPaymentSerializer implements JsonSerializer<InitializablePa
             e.printStackTrace();
         }
         periodicPayment.setDayOfExecution(jsonObject.get("dayOfExecution").getAsString());
-        periodicPayment.setExecutionRule(PeriodicPayment.ExecutionRule.valueOf(jsonObject.get("executionRule").getAsString()));
+        periodicPayment.setExecutionRule(PeriodicPayment.ExecutionRule.valueOf(jsonObject.get("executionRule").getAsString().toUpperCase()));
         periodicPayment.setFrequency(jsonObject.get("frequency").getAsString());
 
         return periodicPayment;

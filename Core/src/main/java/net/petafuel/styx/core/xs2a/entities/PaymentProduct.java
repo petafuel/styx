@@ -1,5 +1,7 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import java.util.Arrays;
+
 public enum PaymentProduct {
 
     SEPA_CREDIT_TRANSFERS("sepa-credit-transfers", false),
@@ -19,12 +21,15 @@ public enum PaymentProduct {
         this.xml = xml;
     }
 
-    @Override
-    public String toString() {
-        return value;
+    public static PaymentProduct byValue(final String paymentProductStr) {
+        return Arrays.asList(PaymentProduct.values()).parallelStream().filter(paymentProduct -> paymentProduct.getValue().equals(paymentProductStr)).findFirst().orElse(null);
     }
 
     public boolean isXml() {
         return xml;
+    }
+
+    public String getValue() {
+        return value;
     }
 }

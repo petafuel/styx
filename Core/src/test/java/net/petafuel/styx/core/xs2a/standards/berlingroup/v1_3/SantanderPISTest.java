@@ -12,6 +12,7 @@ import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
@@ -60,7 +61,7 @@ public class SantanderPISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 
@@ -70,12 +71,12 @@ public class SantanderPISTest {
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
+        InstructedAmount instructedAmount = new InstructedAmount(amount);
+        instructedAmount.setCurrency(Currency.EUR);
+        paymentBody.setInstructedAmount(instructedAmount);
         paymentBody.setRemittanceInformationUnstructured(reference);
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
-        paymentBody.setRequestedExecutionDate(null);
         paymentBody.setDayOfExecution(dayOfExecution);
 
         PSU psu = new PSU("PSU-Successful");
@@ -136,7 +137,7 @@ public class SantanderPISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.MNTH;
         String dayOfExecution = "20";
 

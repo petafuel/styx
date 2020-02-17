@@ -1,6 +1,5 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
-import com.google.gson.JsonPrimitive;
 import net.petafuel.jsepa.model.CCTInitiation;
 import net.petafuel.jsepa.model.CreditTransferTransactionInformation;
 import net.petafuel.jsepa.model.GroupHeader;
@@ -14,6 +13,7 @@ import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
@@ -91,7 +91,7 @@ public class PISTest {
 
         Payment payment = (Payment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getInstructedAmount().getCurrency());
     }
 
     @Test
@@ -107,7 +107,7 @@ public class PISTest {
 
         Payment payment = (Payment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getInstructedAmount().getCurrency());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class PISTest {
 
         BulkPayment payment = (BulkPayment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getPayments().get(0).getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getPayments().get(0).getInstructedAmount().getCurrency());
     }
 
     @Test
@@ -138,7 +138,7 @@ public class PISTest {
 
         Payment payment = (Payment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getInstructedAmount().getCurrency());
     }
 
     @Test
@@ -153,7 +153,7 @@ public class PISTest {
 
         PeriodicPayment payment = (PeriodicPayment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getInstructedAmount().getCurrency());
     }
 
     @Test
@@ -166,9 +166,9 @@ public class PISTest {
                 PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS,
                 initializeXMLBulkPaymentForTest());
 
-        BulkPayment payment =  (BulkPayment) standard.getPis().getPayment(r1);
+        BulkPayment payment = (BulkPayment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
-        Assert.assertEquals(Currency.EUR, payment.getPayments().get(0).getCurrency());
+        Assert.assertEquals(Currency.EUR, payment.getPayments().get(0).getInstructedAmount().getCurrency());
     }
 
     public String initiateJsonPaymentForTest() throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
@@ -186,12 +186,11 @@ public class PISTest {
 
         Payment paymentBody = new Payment();
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
+        paymentBody.setCreditorName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
+        paymentBody.setInstructedAmount(new InstructedAmount(amount, instructedCurrency));
         paymentBody.setRemittanceInformationUnstructured(reference);
 
         PSU psu = new PSU("PSD2TEST4");
@@ -225,22 +224,21 @@ public class PISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         String frequency = PeriodicPayment.Frequency.MNTH.name();
-        if (((JsonPrimitive) standard.getAspsp().getConfig().getImplementerOptions().get("STYX01").getOptions()
-                .get("required")).getAsBoolean()) {
-            frequency = PeriodicPayment.Frequency.MNTH.getName();
+        if (standard.getAspsp().getConfig().getImplementerOptions().get("STYX01").getOptions()
+                .get("required").getAsBoolean()) {
+            frequency = PeriodicPayment.Frequency.MNTH.getValue();
         }
         String dayOfExecution = "20";
 
         PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency);
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
+        paymentBody.setCreditorName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
-        paymentBody.setAmount(amount);
-        paymentBody.setCurrency(instructedCurrency);
+        paymentBody.setInstructedAmount(new InstructedAmount(amount, instructedCurrency));
         paymentBody.setRemittanceInformationUnstructured(reference);
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
@@ -276,11 +274,10 @@ public class PISTest {
         creditor1.setName(creditorName1);
 
         Payment p1 = new Payment();
-
+        p1.setCreditorName(creditorName1);
         p1.setDebtor(debtor);
         p1.setCreditor(creditor1);
-        p1.setAmount(instructedAmount1);
-        p1.setCurrency(instructedCurrency1);
+        p1.setInstructedAmount(new InstructedAmount(instructedAmount1, instructedCurrency1));
         p1.setRemittanceInformationUnstructured(reference1);
         p1.setEndToEndIdentification("RI-234567890");
 
@@ -296,12 +293,12 @@ public class PISTest {
         Account creditor2 = new Account(creditorIban2, creditorCurrency2, Account.Type.IBAN);
         creditor2.setName(creditorName2);
 
-        Payment p2 = new Payment();
 
+        Payment p2 = new Payment();
+        p2.setCreditorName(creditorName2);
         p2.setDebtor(debtor);
         p2.setCreditor(creditor2);
-        p2.setAmount(instructedAmount2);
-        p2.setCurrency(instructedCurrency2);
+        p2.setInstructedAmount(new InstructedAmount(instructedAmount2, instructedCurrency2));
         p2.setRemittanceInformationUnstructured(reference2);
         p2.setEndToEndIdentification("WBG-123456789");
 
@@ -309,10 +306,15 @@ public class PISTest {
         payments.add(p1);
         payments.add(p2);
 
+        BulkPayment bulkPayment = new BulkPayment();
+        bulkPayment.setPayments(payments);
+        bulkPayment.setDebtorAccount(debtor);
+        bulkPayment.setBatchBookingPreferred(false);
+
         PSU psu = new PSU("PSD2TEST4");
         psu.setIp("255.255.255.0");
         BulkPaymentInitiationJsonRequest request = new BulkPaymentInitiationJsonRequest(
-                PaymentProduct.SEPA_CREDIT_TRANSFERS, payments, psu, false);
+                PaymentProduct.SEPA_CREDIT_TRANSFERS, bulkPayment, psu);
         request.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         InitiatedPayment initiatedPayment = standard.getPis().initiatePayment(request);
@@ -450,7 +452,7 @@ public class PISTest {
         Date startDate = day.getTime();
         day.add(Calendar.MONTH, 2);
         Date endDate = day.getTime();
-        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.following;
+        PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         PeriodicPayment.Frequency frequency = PeriodicPayment.Frequency.WEEK;
         String dayOfExecution = "20";
 
@@ -496,7 +498,7 @@ public class PISTest {
         xmlRequest.setTppRedirectPreferred(true);
 
         //build json request part
-        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.getName());
+        PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.getValue());
         paymentBody.setExecutionRule(executionRule);
         paymentBody.setEndDate(endDate);
         paymentBody.setDayOfExecution(dayOfExecution);

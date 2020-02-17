@@ -71,6 +71,9 @@ public abstract class BasicService {
     }
 
     protected void createBody(RequestType requestType, MediaType mediaType, XS2ARequest request) {
+        if (!requestType.equals(RequestType.GET) && !request.getRawBody().isPresent()) {
+            LOG.warn("Sending empty request body for non GET http-method");
+        }
         createBody(requestType, RequestBody.create(request.getRawBody().orElse(""), mediaType));
     }
 

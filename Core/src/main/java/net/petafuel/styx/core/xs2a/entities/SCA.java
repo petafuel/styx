@@ -14,6 +14,8 @@ public class SCA {
     private List<AuthenticationObject> scaMethods;
     private AuthenticationObject chosenSCAMethod;
     private Challenge challengeData;
+    //_links is predefined by the berlingroup spec and used for json binding
+    @SuppressWarnings("squid:S00116")
     private Map<LinkType, String> _links;
     private String psuMessage;
 
@@ -120,7 +122,11 @@ public class SCA {
         AUTHORISATION_WITH_PSU_AUTHENTICATION("startAuthorisationWithPsuAuthentication"),
         AUTHORISATION_WITH_ENCRYPTED_PSU_AUTHENTICATION("startAuthorisationWithEncryptedPsuAuthentication"),
         AUTHORISATION_WITH_METHOD_SELECTION("startAuthorisationWithAuthentciationMethodSelection"),
+        UPDATE_PSU_IDENTIFICATION("updatePsuIdentification"),
         UPDATE_PSU_AUTHENTICATION("updatePsuAuthentication"),
+        UPDATE_ENCRYPTED_PSU_AUTHENTICATION("updateEncryptedPsuAuthentication"),
+        UPDATE_ADDITIONAL_PSU_AUTHENTICATION("updateAdditionalPsuAuthentication"),
+        UPDATE_ENCRYPTED_ADDITIONAL_PSU_AUTHENTICATION("updateAdditionalEncryptedPsuAuthentication"),
         STATUS("status"),
         SELF("self"),
         SCA_STATUS("scaStatus"),
@@ -134,10 +140,10 @@ public class SCA {
         }
 
         public static LinkType getByString(String search) {
-            return Arrays.stream(LinkType.values()).filter(linkType -> linkType.getJsonKey().equals(search)).findFirst().orElse(null);
+            return Arrays.stream(LinkType.values()).filter(linkType -> linkType.getValue().equals(search)).findFirst().orElse(null);
         }
 
-        public String getJsonKey() {
+        public String getValue() {
             return jsonKey;
         }
     }

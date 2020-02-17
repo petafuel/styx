@@ -10,8 +10,7 @@ public enum PaymentService {
         this.name = name;
     }
 
-    @Override
-    public String toString() {
+    public String getValue() {
         return name;
     }
 }

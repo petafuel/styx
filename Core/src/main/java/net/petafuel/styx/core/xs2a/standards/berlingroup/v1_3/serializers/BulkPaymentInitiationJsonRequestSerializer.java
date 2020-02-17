@@ -22,19 +22,19 @@ public class BulkPaymentInitiationJsonRequestSerializer implements JsonSerialize
         JsonObject result = new JsonObject();
         JsonObject debtorAccount = new JsonObject();
         JsonArray payments = new JsonArray();
-        Account debtor = src.getPayments().get(0).getDebtor();
+        Account debtor = src.getBulkPayment().getPayments().get(0).getDebtor();
         debtorAccount.addProperty(XS2AJsonKeys.CURRENCY.value(), debtor.getCurrency().toString());
         debtorAccount.addProperty(debtor.getType().getJsonKey(), debtor.getIdentifier());
 
-        for (Payment payment: src.getPayments()) {
+        for (Payment payment : src.getBulkPayment().getPayments()) {
 
             JsonObject paymentObj = new JsonObject();
             JsonObject instructedAmountObj = new JsonObject();
             JsonObject creditorAccountObj = new JsonObject();
             Account creditor = payment.getCreditor();
             paymentObj.addProperty("endToEndIdentification", payment.getEndToEndIdentification());
-            instructedAmountObj.addProperty("amount", payment.getAmount());
-            instructedAmountObj.addProperty(XS2AJsonKeys.CURRENCY.value(), payment.getCurrency().toString());
+            instructedAmountObj.addProperty("amount", payment.getInstructedAmount().getAmount());
+            instructedAmountObj.addProperty(XS2AJsonKeys.CURRENCY.value(), payment.getInstructedAmount().getCurrency().toString());
             paymentObj.add("instructedAmount", instructedAmountObj);
             creditorAccountObj.addProperty(XS2AJsonKeys.CURRENCY.value(), creditor.getCurrency().toString());
             creditorAccountObj.addProperty(creditor.getType().getJsonKey(), creditor.getIdentifier());
@@ -45,13 +45,13 @@ public class BulkPaymentInitiationJsonRequestSerializer implements JsonSerialize
         }
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         String formattedDate;
-        if (src.getRequestedExecutionDate() != null) {
-           formattedDate = format.format(src.getRequestedExecutionDate());
+        if (src.getBulkPayment().getRequestedExecutionDate() != null) {
+            formattedDate = format.format(src.getBulkPayment().getRequestedExecutionDate());
         } else {
             formattedDate = format.format(new Date());
         }
 
-        result.addProperty("batchBookingPreferred", Boolean.toString(src.isBatchBookingPreferred()));
+        result.addProperty("batchBookingPreferred", Boolean.toString(src.getBulkPayment().getBatchBookingPreferred()));
         result.addProperty("requestedExecutionDate", formattedDate);
         result.add("debtorAccount", debtorAccount);
         result.add("payments", payments);

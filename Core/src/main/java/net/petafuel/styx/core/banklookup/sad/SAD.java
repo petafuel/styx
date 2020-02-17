@@ -27,9 +27,9 @@ import java.util.Map;
 public class SAD implements BankLookUpInterface {
     private static final Logger LOG = LogManager.getLogger(SAD.class);
     private static final String SAD_BANK_NOT_FOUND = "SAD_BANK_NOT_FOUND";
-
-    private Map<XS2AReflection, String> urlMap = new EnumMap<>(XS2AReflection.class);
-    private String xs2aClassAsterix;
+    private static final String SERVICES_PACKAGE_PATH = "net.petafuel.styx.core.xs2a.standards.";
+    private Map<XS2AServices, String> urlMap = new EnumMap<>(XS2AServices.class);
+    private String xs2aClassPrefix;
     private String bic;
 
     /**
@@ -63,19 +63,19 @@ public class SAD implements BankLookUpInterface {
         String interfaceVersion = ".v" + version.getMajor() + "_" + version.getMinor();
 
         //build a full qualified class name without service type suffix
-        xs2aClassAsterix = XS2AReflection.SERVICES_PACKAGE_PATH.getValue() + standardPackage + interfaceVersion + "." + standardClassName;
+        xs2aClassPrefix = SERVICES_PACKAGE_PATH + standardPackage + interfaceVersion + "." + standardClassName;
 
         //Check if requesting sandbox or production urls
         if (isSandbox) {
             LOG.warn("SAD is using sandbox environment bic={}", bic);
-            parseASPSPUrlSetup(aspsp.getSandboxUrl());
+            mapASPSPUrlSetup(aspsp.getSandboxUrl());
         } else {
-            parseASPSPUrlSetup(aspsp.getProductionUrl());
+            mapASPSPUrlSetup(aspsp.getProductionUrl());
         }
 
         //HttpSigner will be used in all following service initialisations and is therefore initialized first
         //Signer might be null if the target standard does not require or did not implement the class in its package
-        Class<?> httpSignerClazz = getServiceClass(xs2aClassAsterix + XS2AReflection.HTTP_SIGNER.getValue());
+        Class<?> httpSignerClazz = getServiceClass(xs2aClassPrefix + XS2AServices.HTTP_SIGNER.getValue());
         try {
             IXS2AHttpSigner httpSignerInstance = null;
             if (httpSignerClazz != null) {
@@ -84,26 +84,26 @@ public class SAD implements BankLookUpInterface {
             //initializing all service classes per service type and setting them into the xs2aStandard
             CSInterface csServiceInstance = (CSInterface) reflectServiceInstance(
                     httpSignerInstance,
-                    XS2AReflection.CS
+                    XS2AServices.CS
             );
             xs2AStandard.setCs(csServiceInstance);
 
             AISInterface aisServiceInstance = (AISInterface) reflectServiceInstance(
                     httpSignerInstance,
-                    XS2AReflection.AIS
+                    XS2AServices.AIS
             );
             xs2AStandard.setAis(aisServiceInstance);
 
             PISInterface pisServiceInstance = (PISInterface) reflectServiceInstance(
                     httpSignerInstance,
-                    XS2AReflection.PIS
+                    XS2AServices.PIS
 
             );
             xs2AStandard.setPis(pisServiceInstance);
 
             PIISInterface piisServiceInstance = (PIISInterface) reflectServiceInstance(
                     httpSignerInstance,
-                    XS2AReflection.PIIS
+                    XS2AServices.PIIS
 
             );
             xs2AStandard.setPiis(piisServiceInstance);
@@ -170,8 +170,8 @@ public class SAD implements BankLookUpInterface {
      * @throws InvocationTargetException
      * @throws InstantiationException
      */
-    private Object reflectServiceInstance(IXS2AHttpSigner httpSignerInstance, XS2AReflection xs2AReflection) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Class<?> serviceClazz = getServiceClass(this.xs2aClassAsterix + xs2AReflection.getValue());
+    private Object reflectServiceInstance(IXS2AHttpSigner httpSignerInstance, XS2AServices xs2AReflection) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?> serviceClazz = getServiceClass(this.xs2aClassPrefix + xs2AReflection.getValue());
         Object serviceInstance = null;
         if (serviceClazz != null) {
             serviceInstance = serviceClazz
@@ -202,7 +202,7 @@ public class SAD implements BankLookUpInterface {
      *
      * @param urls
      */
-    private void parseASPSPUrlSetup(Url urls) {
+    private void mapASPSPUrlSetup(Url urls) {
         String aisUrl;
         String pisUrl;
         String piisUrl;
@@ -214,10 +214,10 @@ public class SAD implements BankLookUpInterface {
         } else {
             aisUrl = pisUrl = piisUrl = urls.getCommonUrl();
         }
-        urlMap.put(XS2AReflection.AIS, aisUrl);
-        urlMap.put(XS2AReflection.CS, aisUrl);
-        urlMap.put(XS2AReflection.PIS, pisUrl);
-        urlMap.put(XS2AReflection.PIIS, piisUrl);
+        urlMap.put(XS2AServices.AIS, aisUrl);
+        urlMap.put(XS2AServices.CS, aisUrl);
+        urlMap.put(XS2AServices.PIS, pisUrl);
+        urlMap.put(XS2AServices.PIIS, piisUrl);
     }
 
     /**
@@ -225,8 +225,7 @@ public class SAD implements BankLookUpInterface {
      * {StandardName}|{Suffix}
      * BerlinGroup|Signer
      */
-    enum XS2AReflection {
-        SERVICES_PACKAGE_PATH("net.petafuel.styx.core.xs2a.standards."),
+    enum XS2AServices {
         AIS("AIS"),
         CS("CS"),
         PIS("PIS"),
@@ -235,7 +234,7 @@ public class SAD implements BankLookUpInterface {
 
         private String value;
 
-        XS2AReflection(String constant) {
+        XS2AServices(String constant) {
             this.value = constant;
         }
 

@@ -1,15 +1,15 @@
 package net.petafuel.styx.api.v1.auth.boundary;
 
 import com.google.gson.JsonElement;
-import net.petafuel.styx.api.filters.CheckMasterToken;
+import net.petafuel.styx.api.filter.CheckMasterToken;
 import net.petafuel.styx.api.v1.auth.control.AuthHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.POST;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;

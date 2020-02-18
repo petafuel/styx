@@ -1,5 +1,6 @@
 package net.petafuel.styx.api;
 
+import net.petafuel.styx.api.event.RequestUUIDAdapter;
 import net.petafuel.styx.api.exception.BankRequestFailedExceptionHandler;
 import net.petafuel.styx.api.exception.ClientExceptionHandler;
 import net.petafuel.styx.api.exception.ConstraintViolationExceptionHandler;
@@ -75,8 +76,8 @@ public class WebServer {
                 .register(AccountResource.class)
                 .register(AuthResource.class)
                 .register(ConsentResource.class)
-                .register(PaymentInitiationResource.class)              //Handle payment initiation calls
-                .register(FetchPaymentResource.class);                  //Handle fetch payment calls
+                .register(PaymentInitiationResource.class)              // handle payment initiation calls
+                .register(FetchPaymentResource.class);                  // handle fetch payment calls
         //Register Middlewares / Filters
         config.register(AuthorizedFilter.class)                         // request Requires valid client token and enabled master token
                 .register(PSUFilter.class)                              // request requires PSU data
@@ -90,10 +91,11 @@ public class WebServer {
                 .register(ClientExceptionHandler.class)                 // handle 4xx client exceptions
                 .register(ConstraintViolationExceptionHandler.class);   // handle validation exceptions
 
-        config.register(new ServiceBinder());
+        config.register(new ServiceBinder());                           // bind service classes for CDI
 
         ServletHolder styxRoutes = new ServletHolder(new ServletContainer(config));
         context.addServlet(styxRoutes, "/*");
+        context.addEventListener(new RequestUUIDAdapter());             // add uuid to every log entry served for one single request
 
         try {
             server.start();

@@ -13,7 +13,12 @@ public class AccountSerializer implements JsonDeserializer<Account> {
     @Override
     public Account deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
         JsonObject accountJsonObject = jsonElement.getAsJsonObject();
-        Currency currency = Currency.valueOf(accountJsonObject.get("currency").getAsString());
+        Currency currency;
+        if (accountJsonObject.get("currency") == null) {
+            currency = Currency.EUR;
+        } else {
+            currency = Currency.valueOf(accountJsonObject.get("currency").getAsString());
+        }
         Account.Type accountType;
         String identifier;
 

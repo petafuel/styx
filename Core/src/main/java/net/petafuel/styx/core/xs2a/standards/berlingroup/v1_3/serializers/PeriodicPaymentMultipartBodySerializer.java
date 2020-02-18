@@ -25,8 +25,14 @@ public class PeriodicPaymentMultipartBodySerializer implements JsonSerializer<Pe
         debtorAccount.setCurrency(Currency.EUR);
         debtorAccount.setType(Account.Type.IBAN);
 
-        Date startDate = new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get("startDate").getAsString());
-        Date endDate = new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get("endDate").getAsString());
+        Date startDate = null;
+        if (jsonObject.get(XS2AJsonKeys.START_DATE.value()) != null && !jsonObject.get(XS2AJsonKeys.START_DATE.value()).isJsonNull()) {
+            startDate = new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get(XS2AJsonKeys.START_DATE.value()).getAsString());
+        }
+        Date endDate = null;
+        if (jsonObject.get(XS2AJsonKeys.END_DATE.value()) != null && !jsonObject.get(XS2AJsonKeys.END_DATE.value()).isJsonNull()) {
+            endDate = new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get(XS2AJsonKeys.END_DATE.value()).getAsString());
+        }
         String executionRule = jsonObject.get("executionRule").getAsString().toUpperCase();
         String frequency = jsonObject.get("frequency").getAsString();
         String dayOfExecution = jsonObject.get("dayOfExecution").getAsString();

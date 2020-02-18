@@ -17,12 +17,14 @@ import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentRequest;
@@ -36,6 +38,8 @@ import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
@@ -135,7 +139,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
         }
     }
 
-    /**not possible to avoid code complexity at this point**/
+    //not possible to avoid code complexity at this point
     @SuppressWarnings("squid:S3776")
     @Override
     public InitializablePayment getPayment(XS2AGetRequest xs2AGetRequest) throws BankRequestFailedException {
@@ -166,6 +170,12 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
                             .registerTypeAdapter(PeriodicPayment.class, new PeriodicPaymentSerializer())
                             .create();
                     return periodicPaymentGson.fromJson(responseBody, PeriodicPayment.class);
+                } else if (request.getPaymentService().equals(PaymentService.PAYMENTS)) {
+                    try (Jsonb jsonb = JsonbBuilder.create()) {
+                        return jsonb.fromJson(responseBody, Payment.class);
+                    } catch (Exception e) {
+                        throw new SerializerException("Cannot parse aspsp response", e);
+                    }
                 }
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(InitializablePayment.class, new PaymentSerializer(request.getPaymentService()))

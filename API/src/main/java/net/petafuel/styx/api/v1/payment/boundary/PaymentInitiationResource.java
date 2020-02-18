@@ -1,32 +1,30 @@
 package net.petafuel.styx.api.v1.payment.boundary;
 
-import net.petafuel.styx.api.WebServer;
+import net.petafuel.styx.api.exception.ResponseConstant;
 import net.petafuel.styx.api.filter.CheckAccessToken;
 import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.filter.RequiresMandatoryHeader;
 import net.petafuel.styx.api.filter.RequiresPSU;
 import net.petafuel.styx.api.rest.PSUResource;
+import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.v1.payment.control.PaymentInitiationProvider;
 import net.petafuel.styx.api.v1.payment.entity.BulkPaymentInitiation;
-import net.petafuel.styx.api.v1.payment.entity.PaymentProductBean;
 import net.petafuel.styx.api.v1.payment.entity.PaymentResponse;
+import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
 import net.petafuel.styx.api.v1.payment.entity.PeriodicPaymentInitiation;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
-import net.petafuel.styx.core.banklookup.XS2AStandard;
-import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
-import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
-import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
-import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -37,108 +35,94 @@ import java.util.UUID;
 
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
+@Consumes({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @CheckAccessToken
 @RequiresPSU
+@RequiresBIC
 public class PaymentInitiationResource extends PSUResource {
     private static final Logger LOG = LogManager.getLogger(PaymentInitiationResource.class);
+
+    @Inject
+    private SADService sadService;
 
     @HeaderParam("token")
     private String token;
 
     /**
-     * Initiates single and future payments on the aspsp interface
+     * Initiate single or future dated payments
      *
-     * @param bic
-     * @param paymentProductBean
-     * @param singlePaymentBody
-     * @return
-     * @throws BankLookupFailedException
-     * @throws BankNotFoundException
-     * @throws BankRequestFailedException
+     * @param paymentTypeBean   contains which payment product is used
+     * @param singlePaymentBody contains the request body as parsed json
+     * @return 201 if successful
+     * @throws BankRequestFailedException in case the communication between styx and aspsp was not successful
      */
     @POST
     @Path("/payments/{paymentProduct}")
-    @RequiresBIC
     @RequiresMandatoryHeader
-    public Response initiateSinglePayment(@HeaderParam(XS2AHeader.PSU_BIC) String bic,
-                                          @BeanParam PaymentProductBean paymentProductBean,
-                                          @Valid SinglePaymentInitiation singlePaymentBody) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
-        XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
-
-        XS2APaymentInitiationRequest aspspRequest = new PaymentInitiationProvider(xs2AStandard, paymentProductBean, getPsu()).buildSinglePaymentRequest(singlePaymentBody);
+    public Response initiateSinglePayment(@BeanParam PaymentTypeBean paymentTypeBean,
+                                          @Valid SinglePaymentInitiation singlePaymentBody) throws BankRequestFailedException {
+        XS2APaymentInitiationRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildSinglePaymentRequest(singlePaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
+        PaymentResponse paymentResponse = new PaymentResponse(sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest));
+        LOG.info("Initiate single payment bic={} aspsp_name={} aspsp_id={} paymentId={}", sadService.getXs2AStandard().getAspsp().getBic(), sadService.getXs2AStandard().getAspsp().getName(), sadService.getXs2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
 
-        PaymentResponse paymentResponse = new PaymentResponse(xs2AStandard.getPis().initiatePayment(aspspRequest));
-        LOG.info("Initiate single payment bic={} aspsp_name={} aspsp_id={} paymentId={}", bic, xs2AStandard.getAspsp().getName(), xs2AStandard.getAspsp().getId(), paymentResponse.getPaymentId());
-
-        AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PAYMENTS, paymentProductBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
+        AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         aspspUrlMapper.map(paymentResponse.getLinks());
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), bic, paymentResponse.getTransactionStatus());
-        return Response.status(201).entity(paymentResponse).build();
+        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 
     /**
-     * Initiate bulk payments
+     * Initiate multiple payments as bulk
      *
-     * @param bic
-     * @param paymentProductBean
-     * @param bulkPaymentBody
-     * @return
-     * @throws BankLookupFailedException
-     * @throws BankNotFoundException
-     * @throws BankRequestFailedException
+     * @param paymentTypeBean contains which payment product is used
+     * @param bulkPaymentBody contains the request body as parsed json
+     * @return 201 if successful
+     * @throws BankRequestFailedException in case the communication between styx and aspsp was not successful
      */
     @POST
     @Path("/bulk-payments/{paymentProduct}")
-    @RequiresBIC
     @RequiresMandatoryHeader
-    public Response initiateBulkPayment(@HeaderParam(XS2AHeader.PSU_BIC) String bic,
-                                        @BeanParam PaymentProductBean paymentProductBean,
-                                        @Valid BulkPaymentInitiation bulkPaymentBody) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
-        XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
-        XS2APaymentInitiationRequest aspspRequest = new PaymentInitiationProvider(xs2AStandard, paymentProductBean, getPsu()).buildBulkPaymentRequest(bulkPaymentBody);
-
+    public Response initiateBulkPayment(
+            @BeanParam PaymentTypeBean paymentTypeBean,
+            @Valid BulkPaymentInitiation bulkPaymentBody) throws BankRequestFailedException {
+        XS2APaymentInitiationRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildBulkPaymentRequest(bulkPaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
 
-        PaymentResponse paymentResponse = new PaymentResponse(xs2AStandard.getPis().initiatePayment(aspspRequest));
-        LOG.info("Initiate bulk payment bic={} aspsp_name={} aspsp_id={} paymentId={}", bic, xs2AStandard.getAspsp().getName(), xs2AStandard.getAspsp().getId(), paymentResponse.getPaymentId());
+        PaymentResponse paymentResponse = new PaymentResponse(sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest));
+        LOG.info("Initiate bulk payment bic={} aspsp_name={} aspsp_id={} paymentId={}", sadService.getXs2AStandard().getAspsp().getBic(), sadService.getXs2AStandard().getAspsp().getName(), sadService.getXs2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
 
-        AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.BULK_PAYMENTS, paymentProductBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
+        AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.BULK_PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         aspspUrlMapper.map(paymentResponse.getLinks());
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), bic, paymentResponse.getTransactionStatus());
-        return Response.status(201).entity(paymentResponse).build();
+        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 
     /**
-     * @param bic
-     * @param paymentProductBean
-     * @param periodicPaymentBody
-     * @return
-     * @throws BankLookupFailedException
-     * @throws BankNotFoundException
-     * @throws BankRequestFailedException
+     * Initiate a reoccurring payment
+     *
+     * @param paymentTypeBean     contains which payment product is used
+     * @param periodicPaymentBody contains the request body as parsed json
+     * @return 201 if successful
+     * @throws BankRequestFailedException in case the communication between styx and aspsp was not successful
      */
     @POST
     @Path("/periodic-payments/{paymentProduct}")
     @RequiresMandatoryHeader
-    @RequiresBIC
-    public Response initiatePeriodicPayment(@HeaderParam(XS2AHeader.PSU_BIC) String bic,
-                                            @BeanParam PaymentProductBean paymentProductBean,
-                                            @Valid PeriodicPaymentInitiation periodicPaymentBody) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
-        XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
-
-        XS2APaymentInitiationRequest aspspRequest = new PaymentInitiationProvider(xs2AStandard, paymentProductBean, getPsu()).buildPeriodicPaymentRequest(periodicPaymentBody);
+    public Response initiatePeriodicPayment(@BeanParam PaymentTypeBean paymentTypeBean,
+                                            @Valid PeriodicPaymentInitiation periodicPaymentBody) throws BankRequestFailedException {
+        XS2APaymentInitiationRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildPeriodicPaymentRequest(periodicPaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
 
-        PaymentResponse paymentResponse = new PaymentResponse(xs2AStandard.getPis().initiatePayment(aspspRequest));
-        LOG.info("Initiate periodic payment bic={} aspsp_name={} aspsp_id={}", bic, xs2AStandard.getAspsp().getName(), xs2AStandard.getAspsp().getId());
+        PaymentResponse paymentResponse = new PaymentResponse(sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest));
+        LOG.info("Initiate periodic payment bic={} aspsp_name={} aspsp_id={}", sadService.getXs2AStandard().getAspsp().getBic(), sadService.getXs2AStandard().getAspsp().getName(), sadService.getXs2AStandard().getAspsp().getId());
 
-        AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PERIODIC_PAYMENTS, paymentProductBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
+        AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PERIODIC_PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         aspspUrlMapper.map(paymentResponse.getLinks());
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), bic, paymentResponse.getTransactionStatus());
-        return Response.status(201).entity(paymentResponse).build();
+        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 }

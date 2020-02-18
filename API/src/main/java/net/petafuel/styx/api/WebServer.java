@@ -3,8 +3,10 @@ package net.petafuel.styx.api;
 import net.petafuel.styx.api.exception.BankRequestFailedExceptionHandler;
 import net.petafuel.styx.api.exception.ClientExceptionHandler;
 import net.petafuel.styx.api.exception.ConstraintViolationExceptionHandler;
-import net.petafuel.styx.api.exception.ErrorCategory;
-import net.petafuel.styx.api.exception.ErrorEntity;
+import net.petafuel.styx.api.exception.ResponseCategory;
+import net.petafuel.styx.api.exception.ResponseConstant;
+import net.petafuel.styx.api.exception.ResponseEntity;
+import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxExceptionHandler;
 import net.petafuel.styx.api.exception.UncaughtExceptionHandler;
 import net.petafuel.styx.api.filter.AuthorizedFilter;
@@ -12,11 +14,13 @@ import net.petafuel.styx.api.filter.BICFilter;
 import net.petafuel.styx.api.filter.MandatoryHeaderFilter;
 import net.petafuel.styx.api.filter.MasterTokenFilter;
 import net.petafuel.styx.api.filter.PSUFilter;
+import net.petafuel.styx.api.injection.ServiceBinder;
 import net.petafuel.styx.api.util.ApiProperties;
 import net.petafuel.styx.api.v1.account.boundary.AccountResource;
 import net.petafuel.styx.api.v1.auth.boundary.AuthResource;
 import net.petafuel.styx.api.v1.callback.boundary.CallbackResource;
 import net.petafuel.styx.api.v1.consent.boundary.ConsentResource;
+import net.petafuel.styx.api.v1.payment.boundary.FetchPaymentResource;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentInitiationResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +37,6 @@ import javax.json.bind.JsonbBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -72,7 +75,8 @@ public class WebServer {
                 .register(AccountResource.class)
                 .register(AuthResource.class)
                 .register(ConsentResource.class)
-                .register(PaymentInitiationResource.class);                       //Handle PIS calls
+                .register(PaymentInitiationResource.class)              //Handle payment initiation calls
+                .register(FetchPaymentResource.class);                  //Handle fetch payment calls
         //Register Middlewares / Filters
         config.register(AuthorizedFilter.class)                         // request Requires valid client token and enabled master token
                 .register(PSUFilter.class)                              // request requires PSU data
@@ -85,6 +89,8 @@ public class WebServer {
                 .register(StyxExceptionHandler.class)                   // handle styx exceptions
                 .register(ClientExceptionHandler.class)                 // handle 4xx client exceptions
                 .register(ConstraintViolationExceptionHandler.class);   // handle validation exceptions
+
+        config.register(new ServiceBinder());
 
         ServletHolder styxRoutes = new ServletHolder(new ServletContainer(config));
         context.addServlet(styxRoutes, "/*");
@@ -113,11 +119,11 @@ public class WebServer {
         @Override
         public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
             LOG.fatal("An out of context error happened baseURI={} status={}", baseRequest.getRequestURI(), response.getStatus());
-            ErrorEntity errorEntity = new ErrorEntity("Internal Server Error", Response.Status.INTERNAL_SERVER_ERROR, ErrorCategory.STYX);
+            ResponseEntity responseEntity = new ResponseEntity("Internal Server Error", ResponseConstant.INTERNAL_SERVER_ERROR, ResponseCategory.ERROR, ResponseOrigin.STYX);
             try (Jsonb jsonb = JsonbBuilder.create()) {
-                response.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+                response.setStatus(ResponseConstant.INTERNAL_SERVER_ERROR.getStatusCode());
                 response.setContentType(MediaType.APPLICATION_JSON);
-                response.getWriter().append(jsonb.toJson(errorEntity));
+                response.getWriter().append(jsonb.toJson(responseEntity));
             } catch (Exception e) {
                 response.setContentType(MediaType.APPLICATION_JSON);
                 response.getWriter().append("{\"message\": \"Internal Server error\"}");

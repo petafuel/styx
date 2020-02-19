@@ -43,6 +43,9 @@ public enum XS2AJsonKeys {
     CITY("city"),
     BUILDING_NUMBER("buildingNumber"),
     POSTAL_CODE("postalCode"),
+    START_DATE("startDate"),
+    END_DATE("endDate"),
+    REQUESTED_EXECUTION_DATE("requestedExecutionDate"),
     COUNTRY("country");
 
     private String jsonValue;

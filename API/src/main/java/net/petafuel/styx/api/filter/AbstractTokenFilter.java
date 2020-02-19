@@ -1,12 +1,13 @@
 package net.petafuel.styx.api.filter;
 
-import net.petafuel.styx.api.exception.ErrorCategory;
-import net.petafuel.styx.api.exception.ErrorEntity;
+import net.petafuel.styx.api.exception.ResponseCategory;
+import net.petafuel.styx.api.exception.ResponseConstant;
+import net.petafuel.styx.api.exception.ResponseEntity;
+import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxException;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 public abstract class AbstractTokenFilter implements ContainerRequestFilter {
@@ -17,20 +18,20 @@ public abstract class AbstractTokenFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext context) {
         String token = context.getHeaderString("token");
         if (token == null || "".equals(token)) {
-            ErrorEntity errorEntity = new ErrorEntity("Token was not contained or empty in request", Response.Status.BAD_REQUEST, ErrorCategory.CLIENT);
-            throw new StyxException(errorEntity);
+            ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_MISSING_CLIENT_TOKEN, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
+            throw new StyxException(responseEntity);
         }
         UUID uuid;
         try {
             uuid = UUID.fromString(token);
         } catch (IllegalArgumentException invalidTokenFormat) {
-            ErrorEntity errorEntity = new ErrorEntity("Token value has an invalid format", Response.Status.BAD_REQUEST, ErrorCategory.CLIENT);
-            throw new StyxException(errorEntity);
+            ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_INVALID_TOKEN_FORMAT, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
+            throw new StyxException(responseEntity);
         }
         boolean tokenValid = checkToken(uuid);
         if (!tokenValid) {
-            ErrorEntity errorEntity = new ErrorEntity("Token is invalid", Response.Status.UNAUTHORIZED, ErrorCategory.CLIENT);
-            throw new StyxException(errorEntity);
+            ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_TOKEN_EXPIRED_OR_REVOKED, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
+            throw new StyxException(responseEntity);
         }
     }
 }

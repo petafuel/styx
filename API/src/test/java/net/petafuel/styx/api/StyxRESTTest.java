@@ -10,6 +10,7 @@ import net.petafuel.styx.api.filter.BICFilter;
 import net.petafuel.styx.api.filter.MandatoryHeaderFilter;
 import net.petafuel.styx.api.filter.MasterTokenFilter;
 import net.petafuel.styx.api.filter.PSUFilter;
+import net.petafuel.styx.api.injection.ServiceBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 
@@ -31,6 +32,8 @@ public class StyxRESTTest extends JerseyTest {
                 .register(StyxExceptionHandler.class)                   // handle styx exceptions
                 .register(ClientExceptionHandler.class)                 // handle 4xx client exceptions
                 .register(ConstraintViolationExceptionHandler.class);   // handle validation exceptions
+
+        config.register(new ServiceBinder());
         return config;
     }
 }

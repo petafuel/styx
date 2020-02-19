@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Map aspsp links for authorisation etc. to styx proxy urls
@@ -29,6 +30,9 @@ public class AspspUrlMapper {
     private String authorisationId;
     private String consentId;
     private Boolean isPIS;
+    private String proxySchema = System.getProperty(ApiProperties.STYX_PROXY_SCHEMA);
+    private String proxyHostname = System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME);
+    private int proxyPort = System.getProperty(ApiProperties.STYX_PROXY_PORT, null) != null ? Integer.parseInt(System.getProperty(ApiProperties.STYX_PROXY_PORT)) : -1;
 
     public AspspUrlMapper(PaymentService paymentService, PaymentProduct paymentProduct, String paymentId, String authorisationId) {
         this.paymentService = paymentService;
@@ -50,50 +54,57 @@ public class AspspUrlMapper {
         }
 
         links.entrySet().parallelStream().forEach(entry -> {
-            try {
-                URL styxWrapperUrl = null;
-                String route;
-                switch (entry.getKey()) {
-                    case AUTHORISATION_WITH_PSU_IDENTIFICATION:
-                    case AUTHORISATION_WITH_PSU_AUTHENTICATION:
-                    case AUTHORISATION_WITH_ENCRYPTED_PSU_AUTHENTICATION:
-                    case AUTHORISATION_WITH_METHOD_SELECTION:
-                        if (isPIS) {
-                            route = String.format(PIS_CREATE_OR_GET_AUTHORISATION, paymentService.getValue(), paymentProduct.getValue(), paymentId);
-                        } else {
-                            route = String.format(CS_CREATE_OR_GET_AUTHORISATION, consentId);
-                        }
-                        styxWrapperUrl = new URL(System.getProperty(ApiProperties.STYX_PROXY_SCHEMA), System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME), Integer.parseInt(System.getProperty(ApiProperties.STYX_PROXY_PORT)), route);
-                        break;
-                    case UPDATE_PSU_IDENTIFICATION:
-                    case UPDATE_PSU_AUTHENTICATION:
-                    case UPDATE_ENCRYPTED_PSU_AUTHENTICATION:
-                    case UPDATE_ADDITIONAL_PSU_AUTHENTICATION:
-                    case UPDATE_ENCRYPTED_ADDITIONAL_PSU_AUTHENTICATION:
-                    case SCA_STATUS:
-                        if (isPIS) {
-                            route = String.format(PIS_UPDATE_AUTHORISATION, paymentService.getValue(), paymentProduct.getValue(), paymentId, authorisationId);
-                        } else {
-                            route = String.format(CS_UPDATE_AUTHORISATION, consentId, authorisationId);
-                        }
-                        styxWrapperUrl = new URL(System.getProperty(ApiProperties.STYX_PROXY_SCHEMA), System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME), Integer.parseInt(System.getProperty(ApiProperties.STYX_PROXY_PORT)), route);
-                        break;
-                    case STATUS:
-                        if (isPIS) {
-                            route = String.format(PIS_GET_STATUS, paymentService.getValue(), paymentProduct.getValue(), paymentId);
-                        } else {
-                            route = String.format(CS_GET_STATUS, consentId);
-                        }
-                        styxWrapperUrl = new URL(System.getProperty(ApiProperties.STYX_PROXY_SCHEMA), System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME), Integer.parseInt(System.getProperty(ApiProperties.STYX_PROXY_PORT)), route);
-                        break;
-                    default:
-                        styxWrapperUrl = new URL(entry.getValue());
-                }
-                entry.setValue(styxWrapperUrl.toString());
-            } catch (MalformedURLException e) {
-                LOG.error("Unable to wrap aspsp rest response links object to styx urls", e);
+            String route = null;
+            switch (entry.getKey()) {
+                case AUTHORISATION_WITH_PSU_IDENTIFICATION:
+                case AUTHORISATION_WITH_PSU_AUTHENTICATION:
+                case AUTHORISATION_WITH_ENCRYPTED_PSU_AUTHENTICATION:
+                case AUTHORISATION_WITH_METHOD_SELECTION:
+                    if (isPIS) {
+                        route = String.format(PIS_CREATE_OR_GET_AUTHORISATION, paymentService.getValue(), paymentProduct.getValue(), paymentId);
+                    } else {
+                        route = String.format(CS_CREATE_OR_GET_AUTHORISATION, consentId);
+                    }
+                    break;
+                case UPDATE_PSU_IDENTIFICATION:
+                case UPDATE_PSU_AUTHENTICATION:
+                case UPDATE_ENCRYPTED_PSU_AUTHENTICATION:
+                case UPDATE_ADDITIONAL_PSU_AUTHENTICATION:
+                case UPDATE_ENCRYPTED_ADDITIONAL_PSU_AUTHENTICATION:
+                case SCA_STATUS:
+                    if (isPIS) {
+                        route = String.format(PIS_UPDATE_AUTHORISATION, paymentService.getValue(), paymentProduct.getValue(), paymentId, authorisationId);
+                    } else {
+                        route = String.format(CS_UPDATE_AUTHORISATION, consentId, authorisationId);
+                    }
+                    break;
+                case STATUS:
+                    if (isPIS) {
+                        route = String.format(PIS_GET_STATUS, paymentService.getValue(), paymentProduct.getValue(), paymentId);
+                    } else {
+                        route = String.format(CS_GET_STATUS, consentId);
+                    }
+                    break;
+                default:
+                    //Keep url as is
+                    break;
             }
-        });
 
+            Optional<URL> styxWrapperUrl = getMappedURL(route);
+            styxWrapperUrl.ifPresent(presentValue -> entry.setValue(presentValue.toString()));
+        });
+    }
+
+    //Only map the url if its mappable(route!=null) or if there was no error
+    private Optional<URL> getMappedURL(String route) {
+        if (route == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(new URL(proxySchema, proxyHostname, proxyPort, route));
+        } catch (MalformedURLException e) {
+            LOG.error("Unable to wrap aspsp rest response links object to styx urls", e);
+            return Optional.empty();
+        }
     }
 }

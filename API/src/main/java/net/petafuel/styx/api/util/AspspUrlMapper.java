@@ -23,7 +23,10 @@ public class AspspUrlMapper {
     private static final String CS_UPDATE_AUTHORISATION = "/v1/consents/%s/authorisations/%s";
 
     private static final String PIS_GET_STATUS = "/v1/%s/%s/%s/status";
+    private static final String PIS_GET_SELF = "/v1/%s/%s/%s";
     private static final String CS_GET_STATUS = "/v1/consents/%s/status";
+    private static final String CS_GET_SELF = "/v1/consents/%s";
+
     private PaymentService paymentService;
     private PaymentProduct paymentProduct;
     private String paymentId;
@@ -78,13 +81,6 @@ public class AspspUrlMapper {
                         route = String.format(CS_UPDATE_AUTHORISATION, consentId, authorisationId);
                     }
                     break;
-                case STATUS:
-                    if (isPIS) {
-                        route = String.format(PIS_GET_STATUS, paymentService.getValue(), paymentProduct.getValue(), paymentId);
-                    } else {
-                        route = String.format(CS_GET_STATUS, consentId);
-                    }
-                    break;
                 default:
                     //Keep url as is
                     break;
@@ -93,6 +89,21 @@ public class AspspUrlMapper {
             Optional<URL> styxWrapperUrl = getMappedURL(route);
             styxWrapperUrl.ifPresent(presentValue -> entry.setValue(presentValue.toString()));
         });
+
+        //Always add Status and Self links
+        String getStatus;
+        String getSelf;
+        if (isPIS) {
+            getStatus = String.format(PIS_GET_STATUS, paymentService.getValue(), paymentProduct.getValue(), paymentId);
+            getSelf = String.format(PIS_GET_SELF, paymentService.getValue(), paymentProduct.getValue(), paymentId);
+        } else {
+            getStatus = String.format(CS_GET_STATUS, consentId);
+            getSelf = String.format(CS_GET_SELF, consentId);
+        }
+        Optional<URL> styxWrapperUrlStatus = getMappedURL(getStatus);
+        Optional<URL> styxWrapperUrlSelf = getMappedURL(getSelf);
+        styxWrapperUrlStatus.ifPresent(presentValue -> links.put(SCA.LinkType.STATUS, presentValue.toString()));
+        styxWrapperUrlSelf.ifPresent(presentValue -> links.put(SCA.LinkType.SELF, presentValue.toString()));
     }
 
     //Only map the url if its mappable(route!=null) or if there was no error

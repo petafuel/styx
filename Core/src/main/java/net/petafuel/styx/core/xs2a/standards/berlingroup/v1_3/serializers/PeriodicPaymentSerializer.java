@@ -41,6 +41,8 @@ public class PeriodicPaymentSerializer implements JsonSerializer<InitializablePa
         return paymentJsonObject;
     }
 
+    //Serializer will be removed in the future due to json bindings
+    @SuppressWarnings("squid:S1148")
     @Override
     public InitializablePayment deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
@@ -56,7 +58,10 @@ public class PeriodicPaymentSerializer implements JsonSerializer<InitializablePa
                 .registerTypeAdapter(Address.class, new AddressSerializer())
                 .create();
 
-        String remittanceInformationUnstructured = jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()).getAsString();
+        String remittanceInformationUnstructured = null;
+        if (jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()) != null && !jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()).isJsonNull()) {
+            remittanceInformationUnstructured = jsonObject.get(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value()).getAsString();
+        }
 
         String endToEndIdentification = jsonObject.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()) != null
                 && !jsonObject.get(XS2AJsonKeys.END_TO_END_IDENTIFICATION.value()).isJsonNull()
@@ -87,12 +92,16 @@ public class PeriodicPaymentSerializer implements JsonSerializer<InitializablePa
         periodicPayment.setRemittanceInformationUnstructured(remittanceInformationUnstructured);
         periodicPayment.setEndToEndIdentification(endToEndIdentification);
         try {
-            periodicPayment.setStartDate(simpleDateFormat.parse(jsonObject.get("startDate").getAsString()));
+            if (jsonObject.get(XS2AJsonKeys.START_DATE.value()) != null && !jsonObject.get(XS2AJsonKeys.START_DATE.value()).isJsonNull()) {
+                periodicPayment.setStartDate(simpleDateFormat.parse(jsonObject.get(XS2AJsonKeys.START_DATE.value()).getAsString()));
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
         try {
-            periodicPayment.setEndDate(simpleDateFormat.parse(jsonObject.get("endDate").getAsString()));
+            if (jsonObject.get(XS2AJsonKeys.END_DATE.value()) != null && !jsonObject.get(XS2AJsonKeys.END_DATE.value()).isJsonNull()) {
+                periodicPayment.setEndDate(simpleDateFormat.parse(jsonObject.get(XS2AJsonKeys.END_DATE.value()).getAsString()));
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }

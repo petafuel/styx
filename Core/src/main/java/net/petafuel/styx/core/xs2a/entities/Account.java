@@ -2,8 +2,10 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Model to describe an Account in XS2A context
@@ -16,6 +18,7 @@ public class Account implements Serializable {
     @JsonbProperty("identifier")
     private String identifier;
 
+    @NotNull
     @JsonbProperty("iban")
     private String iban;
     /**
@@ -34,10 +37,10 @@ public class Account implements Serializable {
     private Address address;
     private String agent;
     @JsonbTransient
-    private ArrayList<Balance> balances;
-
+    private List<Balance> balances;
 
     public Account() {
+        //ctor for json binding
     }
 
     public Account(String iban, Currency currency, Type type) {
@@ -125,11 +128,11 @@ public class Account implements Serializable {
         this.type = type;
     }
 
-    public ArrayList<Balance> getBalances() {
+    public List<Balance> getBalances() {
         return balances;
     }
 
-    public void setBalances(ArrayList<Balance> balances) {
+    public void setBalances(List<Balance> balances) {
         this.balances = balances;
     }
 

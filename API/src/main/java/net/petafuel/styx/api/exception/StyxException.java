@@ -3,23 +3,23 @@ package net.petafuel.styx.api.exception;
 import javax.ws.rs.WebApplicationException;
 
 public class StyxException extends WebApplicationException {
-    private final ErrorEntity errorEntity;
+    private final ResponseEntity responseEntity;
     private final Throwable attachedThrowable;
 
-    public StyxException(ErrorEntity errorEntity) {
-        super(errorEntity.getMessage(), errorEntity.getCode().getStatusCode());
-        this.errorEntity = errorEntity;
+    public StyxException(ResponseEntity responseEntity) {
+        super(responseEntity.getMessage(), responseEntity.getCode().getStatusCode());
+        this.responseEntity = responseEntity;
         attachedThrowable = null;
     }
 
-    public StyxException(ErrorEntity errorEntity, Throwable attachedThrowable) {
-        super(errorEntity.getMessage(), errorEntity.getCode().getStatusCode());
-        this.errorEntity = errorEntity;
+    public StyxException(ResponseEntity responseEntity, Throwable attachedThrowable) {
+        super(responseEntity.getMessage(), responseEntity.getCode().getStatusCode());
+        this.responseEntity = responseEntity;
         this.attachedThrowable = attachedThrowable;
     }
 
-    public ErrorEntity getErrorEntity() {
-        return errorEntity;
+    public ResponseEntity getResponseEntity() {
+        return responseEntity;
     }
 
     public Throwable getAttachedThrowable() {

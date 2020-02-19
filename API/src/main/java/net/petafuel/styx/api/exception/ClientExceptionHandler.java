@@ -16,13 +16,13 @@ public class ClientExceptionHandler implements ExceptionMapper<ClientErrorExcept
 
     @Override
     public Response toResponse(ClientErrorException throwable) {
-        ErrorEntity errorEntity = new ErrorEntity(throwable.getMessage(), Response.Status.fromStatusCode(throwable.getResponse().getStatus()), ErrorCategory.STYX);
+        ResponseEntity responseEntity = new ResponseEntity(throwable.getMessage(), ResponseConstant.fromStatusCode(throwable.getResponse().getStatus()), ResponseCategory.ERROR, ResponseOrigin.CLIENT);
         LOG.warn("ClientErrorException happened: category={}, code={}, httpStatus={}, message={}, trace={}",
-                errorEntity.getCategory(),
-                errorEntity.getCode(),
-                errorEntity.getCode().getStatusCode(),
+                responseEntity.getCategory(),
+                responseEntity.getCode(),
+                responseEntity.getCode().getStatusCode(),
                 throwable.getMessage(),
                 throwable.getStackTrace());
-        return Response.status(errorEntity.getCode().getStatusCode()).type(MediaType.APPLICATION_JSON).entity(errorEntity).build();
+        return Response.status(responseEntity.getCode().getStatusCode()).type(MediaType.APPLICATION_JSON).entity(responseEntity).build();
     }
 }

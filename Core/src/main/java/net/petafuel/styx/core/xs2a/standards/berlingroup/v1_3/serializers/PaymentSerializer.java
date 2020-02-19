@@ -73,6 +73,7 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
         if (paymentService.equals(PaymentService.BULK_PAYMENTS)) {
             BulkPayment bulkPayment = new BulkPayment();
             bulkPayment.setPayments(payments);
+            bulkPayment.setDebtorAccount(debtorAccount);
             bulkPayment.setRequestedExecutionDate(requestedExecutionDate);
             return bulkPayment;
         }
@@ -103,7 +104,7 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
 
         if (payment.getRequestedExecutionDate() != null) {
             String formattedDate = format.format(payment.getRequestedExecutionDate());
-            object.addProperty("requestedExecutionDate", formattedDate);
+            object.addProperty(XS2AJsonKeys.REQUESTED_EXECUTION_DATE.value(), formattedDate);
         }
 
         object.addProperty(XS2AJsonKeys.REMITTANCE_INFORMATION_UNSTRUCTURED.value(), payment.getRemittanceInformationUnstructured());
@@ -111,10 +112,10 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
         return object;
     }
 
-    /**
-     * code complexity not possible to avoid at this point
-     **/
-    @SuppressWarnings("squid:S3776")
+
+    //code complexity not possible to avoid at this point
+    //Serializer will be removed in the future due to json bindings, ignore logging for now
+    @SuppressWarnings({"squid:S3776", "squid:S1148"})
     @Override
     public InitializablePayment deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
@@ -159,6 +160,14 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
             payment.setInstructedAmount(new InstructedAmount(amount, currency));
             payment.setRemittanceInformationUnstructured(remittanceInformationUnstructured);
 
+            if (jsonObject.get(XS2AJsonKeys.REQUESTED_EXECUTION_DATE.value()) != null) {
+                try {
+                    payment.setRequestedExecutionDate(new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get(XS2AJsonKeys.REQUESTED_EXECUTION_DATE.value()).getAsString()));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
             return payment;
         } else {
             ArrayList<Payment> payments = new ArrayList<>();
@@ -197,10 +206,11 @@ public class PaymentSerializer implements JsonSerializer<InitializablePayment>, 
 
             BulkPayment bulkPayment = new BulkPayment();
             bulkPayment.setPayments(payments);
+            bulkPayment.setDebtorAccount(debtorAccount);
 
-            if (jsonObject.get("requestedExecutionDate") != null) {
+            if (jsonObject.get(XS2AJsonKeys.REQUESTED_EXECUTION_DATE.value()) != null) {
                 try {
-                    bulkPayment.setRequestedExecutionDate(new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get("requestedExecutionDate").getAsString()));
+                    bulkPayment.setRequestedExecutionDate(new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(jsonObject.get(XS2AJsonKeys.REQUESTED_EXECUTION_DATE.value()).getAsString()));
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }

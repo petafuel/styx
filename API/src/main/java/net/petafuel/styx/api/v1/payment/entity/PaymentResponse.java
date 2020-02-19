@@ -20,6 +20,10 @@ public class PaymentResponse {
     @JsonbProperty("psuMessage")
     private String psuMessage;
 
+    public PaymentResponse() {
+        //default ctor for json binding
+    }
+
     public PaymentResponse(InitiatedPayment initiatedPayment) {
         transactionStatus = initiatedPayment.getStatus();
         paymentId = initiatedPayment.getPaymentId();

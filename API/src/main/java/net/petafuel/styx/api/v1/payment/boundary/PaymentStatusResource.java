@@ -18,6 +18,8 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentSt
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -43,7 +45,10 @@ public class PaymentStatusResource extends PSUResource {
     @GET
     @Path("/payments/{paymentProduct}/{paymentId}/status")
     @RequiresBIC
-    public Response getSinglePaymentStatus(@HeaderParam(XS2AHeader.PSU_BIC) String bic, @PathParam("paymentProduct") String paymentProduct, @PathParam("paymentId") String paymentId) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+    public Response getSinglePaymentStatus(@HeaderParam(XS2AHeader.PSU_BIC) String bic,
+                                           @PathParam("paymentProduct") String paymentProduct,
+                                           @PathParam("paymentId") @NotEmpty @NotBlank String paymentId
+    ) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
 
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
         ReadPaymentStatusRequest request = provider.buildRequest(xs2AStandard.getAspsp(), PaymentService.PAYMENTS, "IO2", paymentProduct, paymentId);
@@ -56,7 +61,10 @@ public class PaymentStatusResource extends PSUResource {
     @GET
     @Path("/bulk-payments/{paymentProduct}/{paymentId}/status")
     @RequiresBIC
-    public Response getBulkPaymentStatus(@HeaderParam(XS2AHeader.PSU_BIC) String bic,@PathParam("paymentProduct") String paymentProduct, @PathParam("paymentId") String paymentId) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+    public Response getBulkPaymentStatus(@HeaderParam(XS2AHeader.PSU_BIC) String bic,
+                                         @PathParam("paymentProduct") String paymentProduct,
+                                         @PathParam("paymentId") @NotEmpty @NotBlank String paymentId
+    ) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
 
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
         ReadPaymentStatusRequest request = provider.buildRequest(xs2AStandard.getAspsp(), PaymentService.BULK_PAYMENTS, "IO3", paymentProduct, paymentId);
@@ -69,7 +77,10 @@ public class PaymentStatusResource extends PSUResource {
     @GET
     @Path("/periodic-payments/{paymentProduct}/{paymentId}/status")
     @RequiresBIC
-    public Response getPeriodicPaymentStatus(@HeaderParam(XS2AHeader.PSU_BIC) String bic, @PathParam("paymentProduct") String paymentProduct, @PathParam("paymentId") String paymentId) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
+    public Response getPeriodicPaymentStatus(@HeaderParam(XS2AHeader.PSU_BIC) String bic,
+                                             @PathParam("paymentProduct") String paymentProduct,
+                                             @PathParam("paymentId") @NotEmpty @NotBlank String paymentId
+    ) throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
 
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
         ReadPaymentStatusRequest request = provider.buildRequest(xs2AStandard.getAspsp(), PaymentService.PERIODIC_PAYMENTS, "IO4", paymentProduct, paymentId);

@@ -53,6 +53,8 @@ public class PaymentStatusResource extends PSUResource {
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
         ReadPaymentStatusRequest request = provider.buildRequest(xs2AStandard.getAspsp(), PaymentService.PAYMENTS, "IO2", paymentProduct, paymentId);
         PaymentStatus status = xs2AStandard.getPis().getPaymentStatus(request);
+
+        LOG.info("Successfully read the payment status entity for bic={}, paymentId={}", bic, paymentId);
         return Response.status(200).entity(status).build();
     }
 
@@ -69,6 +71,8 @@ public class PaymentStatusResource extends PSUResource {
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
         ReadPaymentStatusRequest request = provider.buildRequest(xs2AStandard.getAspsp(), PaymentService.BULK_PAYMENTS, "IO3", paymentProduct, paymentId);
         PaymentStatus status = xs2AStandard.getPis().getPaymentStatus(request);
+
+        LOG.info("Successfully read the bulk-payment status entity for bic={}, paymentId={}", bic, paymentId);
         return Response.status(200).entity(status).build();
     }
 
@@ -85,6 +89,8 @@ public class PaymentStatusResource extends PSUResource {
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
         ReadPaymentStatusRequest request = provider.buildRequest(xs2AStandard.getAspsp(), PaymentService.PERIODIC_PAYMENTS, "IO4", paymentProduct, paymentId);
         PaymentStatus status = xs2AStandard.getPis().getPaymentStatus(request);
+
+        LOG.info("Successfully read the periodic-payment status entity for bic={}, paymentId={}", bic, paymentId);
         return Response.status(200).entity(status).build();
     }
 

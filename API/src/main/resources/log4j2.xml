@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="60">
+    <Properties>
+        <Property name="log-pattern-api">%d %-5p [%t] [] %c - %m, requestUUID=%X{requestUUID}%n</Property>
+        <Property name="log-pattern">%d %-5p [%t] [] %c - %m%n</Property>
+        <Property name="log-directory">log/</Property>
+        <Property name="log-filename">styxapi.log</Property>
+        <Property name="date-suffix">.%d{yyyy-MM-dd}</Property>
+        <Property name="log-filename-keep-alive">keepalive.log</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${sys:log-pattern-api}"/>
+        </Console>
+        <RollingRandomAccessFile name="File" fileName="${sys:log-directory}${sys:log-filename}"
+                                 filePattern="${sys:log-directory}${sys:log-filename}${sys:date-suffix}" append="true">
+            <PatternLayout pattern="${sys:log-pattern-api}"/>
+            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="keepalive" fileName="${sys:log-directory}${sys:log-filename-keep-alive}"
+                                 filePattern="${sys:log-directory}${sys:log-filename-keep-alive}${sys:date-suffix}"
+                                 append="true">
+            <PatternLayout pattern="${sys:log-pattern}"/>
+            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        </RollingRandomAccessFile>
+    </Appenders>
+    <Loggers>
+        <Root level="ALL">
+            <AppenderRef ref="File"/>
+            <AppenderRef ref="Console"/>
+        </Root>
+        <Logger level="ALL" name="net.petafuel.styx.core.keepalive" additivity="false">
+            <AppenderRef ref="keepalive"/>
+        </Logger>
+    </Loggers>
+</Configuration>

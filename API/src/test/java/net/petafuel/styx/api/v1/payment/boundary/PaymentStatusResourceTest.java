@@ -34,8 +34,6 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
     public static final String CONSORS_BIC = "CSDBDE71";
     public static final String SPARKASSE_BIC = "BYLADEM1FSI";
 
-
-
     public static final String ACCESS_TOKEN = "d0b10916-7926-4b6c-a90c-3643c62e4b08";
 
     private String consorsSinglePaymentId;

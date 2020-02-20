@@ -19,16 +19,30 @@ public class FetchPaymentProvider extends PaymentProvider {
 
     public ReadPaymentRequest buildFetchPaymentRequest(String paymentId) {
         IOParser ioParser = new IOParser(xs2AStandard.getAspsp());
+
         ReadPaymentRequest aspspRequest;
-        //check IO2 for xml or json - single payment product
-        if (ioParser.getOption("IO2", paymentTypeBean.getPaymentProduct().getValue()).getAsBoolean()) {
+        String implementerOptionID;
+        switch (paymentTypeBean.getPaymentService()) {
+            case BULK_PAYMENTS:
+                implementerOptionID = "IO3";
+                break;
+            case PERIODIC_PAYMENTS:
+                implementerOptionID = "IO4";
+                break;
+            default:
+                implementerOptionID = "IO2";
+                break;
+        }
+
+        //check io for payment product by payment service
+        if (ioParser.getOption(implementerOptionID, paymentTypeBean.getPaymentProduct().getValue()).getAsBoolean()) {
             //aspsp accepts json
             aspspRequest = new ReadPaymentRequest(paymentTypeBean.getPaymentService(), paymentTypeBean.getPaymentProduct(), paymentId);
-        } else if (ioParser.getOption("IO2", XML_PAYMENT_PRODUCT_PREFIX + paymentTypeBean.getPaymentProduct().getValue()).getAsBoolean()) {
+        } else if (ioParser.getOption(implementerOptionID, XML_PAYMENT_PRODUCT_PREFIX + paymentTypeBean.getPaymentProduct().getValue()).getAsBoolean()) {
             //aspsp does not support json, use pain001.003
             aspspRequest = new ReadPaymentRequest(paymentTypeBean.getPaymentService(), PaymentProduct.byValue(XML_PAYMENT_PRODUCT_PREFIX + paymentTypeBean.getPaymentProduct().getValue()), paymentId);
         } else {
-            throw new StyxException(new ResponseEntity("The requested ASPSP does not support fetching single-payments with payment-product " + paymentTypeBean.getPaymentProduct().getValue(), ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.ASPSP));
+            throw new StyxException(new ResponseEntity("The requested ASPSP does not support fetching " + paymentTypeBean.getPaymentService().getValue() + " with payment-product " + paymentTypeBean.getPaymentProduct().getValue(), ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.ASPSP));
         }
 
         return aspspRequest;

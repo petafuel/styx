@@ -8,9 +8,13 @@ import net.petafuel.styx.api.exception.StyxException;
 import net.petafuel.styx.api.util.IOParser;
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 
+import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
+import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
+
+import java.util.UUID;
 
 public class PaymentStatusProvider {
 
@@ -28,6 +32,14 @@ public class PaymentStatusProvider {
             return new ReadPaymentStatusRequest(paymentService, PaymentProduct.byValue(XML_PAYMENT_PRODUCT_PREFIX + paymentProduct), paymentId);
         } else {
             throw new StyxException(new ResponseEntity("The requested ASPSP does not support " + paymentService.getValue() + " with payment-product " + paymentProduct, ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.ASPSP));
+        }
+    }
+
+    public void updateStatus(String paymentId, UUID clientToken, String bic, TransactionStatus status) {
+        if (PersistentPayment.get(paymentId) == null) {
+            PersistentPayment.create(paymentId, clientToken, bic, status);
+        } else {
+            PersistentPayment.updateStatus(paymentId, status);
         }
     }
 }

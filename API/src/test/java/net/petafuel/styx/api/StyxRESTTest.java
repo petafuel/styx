@@ -14,11 +14,14 @@ import net.petafuel.styx.api.injection.ServiceBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 
+import java.util.TimeZone;
+
 //This is just a setup class
 @SuppressWarnings("squid:S2187")
 public class StyxRESTTest extends JerseyTest {
     protected ResourceConfig setupFiltersAndErrorHandlers() {
 
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         ResourceConfig config = new ResourceConfig();
         //Register Middlewares / Filters
         config.register(AuthorizedFilter.class)                         // request Requires valid client token and enabled master token

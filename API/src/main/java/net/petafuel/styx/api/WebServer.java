@@ -23,6 +23,7 @@ import net.petafuel.styx.api.v1.callback.boundary.CallbackResource;
 import net.petafuel.styx.api.v1.consent.boundary.ConsentResource;
 import net.petafuel.styx.api.v1.payment.boundary.FetchPaymentResource;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentInitiationResource;
+import net.petafuel.styx.api.v1.payment.boundary.PaymentStatusResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Request;
@@ -76,6 +77,7 @@ public class WebServer {
                 .register(AccountResource.class)
                 .register(AuthResource.class)
                 .register(ConsentResource.class)
+                .register(PaymentStatusResource.class)
                 .register(PaymentInitiationResource.class)              // handle payment initiation calls
                 .register(FetchPaymentResource.class);                  // handle fetch payment calls
         //Register Middlewares / Filters

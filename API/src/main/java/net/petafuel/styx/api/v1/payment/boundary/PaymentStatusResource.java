@@ -27,6 +27,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.UUID;
 
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
@@ -53,6 +54,7 @@ public class PaymentStatusResource extends PSUResource {
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
         ReadPaymentStatusRequest request = provider.buildRequest(xs2AStandard.getAspsp(), PaymentService.PAYMENTS, "IO2", paymentProduct, paymentId);
         PaymentStatus status = xs2AStandard.getPis().getPaymentStatus(request);
+        provider.updateStatus(paymentId, UUID.fromString(token), bic, status.getTransactionStatus());
 
         LOG.info("Successfully read the payment status entity for bic={}, paymentId={}", bic, paymentId);
         return Response.status(200).entity(status).build();
@@ -71,6 +73,7 @@ public class PaymentStatusResource extends PSUResource {
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
         ReadPaymentStatusRequest request = provider.buildRequest(xs2AStandard.getAspsp(), PaymentService.BULK_PAYMENTS, "IO3", paymentProduct, paymentId);
         PaymentStatus status = xs2AStandard.getPis().getPaymentStatus(request);
+        provider.updateStatus(paymentId, UUID.fromString(token), bic, status.getTransactionStatus());
 
         LOG.info("Successfully read the bulk-payment status entity for bic={}, paymentId={}", bic, paymentId);
         return Response.status(200).entity(status).build();
@@ -89,6 +92,7 @@ public class PaymentStatusResource extends PSUResource {
         XS2AStandard xs2AStandard = (new SAD()).getBankByBIC(bic, WebServer.isSandbox());
         ReadPaymentStatusRequest request = provider.buildRequest(xs2AStandard.getAspsp(), PaymentService.PERIODIC_PAYMENTS, "IO4", paymentProduct, paymentId);
         PaymentStatus status = xs2AStandard.getPis().getPaymentStatus(request);
+        provider.updateStatus(paymentId, UUID.fromString(token), bic, status.getTransactionStatus());
 
         LOG.info("Successfully read the periodic-payment status entity for bic={}, paymentId={}", bic, paymentId);
         return Response.status(200).entity(status).build();

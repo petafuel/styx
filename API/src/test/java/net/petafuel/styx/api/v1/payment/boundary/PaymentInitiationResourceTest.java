@@ -98,7 +98,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void initiatePeriodicPayment_Consors() {
         Jsonb jsonb = JsonbBuilder.create();
-        PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"startDate\":\"2020-02-20\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", PeriodicPaymentInitiation.class);
+        PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"startDate\":\"" + currentDate + "\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", PeriodicPaymentInitiation.class);
 
         Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
         invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
@@ -115,7 +115,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void initiatePeriodicPayment_Targo() {
         Jsonb jsonb = JsonbBuilder.create();
-        PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"startDate\":\"2020-02-20\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", PeriodicPaymentInitiation.class);
+        PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"startDate\":\"" + currentDate + "\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", PeriodicPaymentInitiation.class);
 
         Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
         invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
@@ -169,7 +169,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void initiatePeriodicPayment_Fiducia() {
         Jsonb jsonb = JsonbBuilder.create();
-        PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"startDate\":\"2020-02-20\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE87200500001234567890\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE23100120020123456789\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\"}]}", PeriodicPaymentInitiation.class);
+        PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"startDate\":\"" + currentDate + "\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE87200500001234567890\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE23100120020123456789\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\"}]}", PeriodicPaymentInitiation.class);
 
         Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
         invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");

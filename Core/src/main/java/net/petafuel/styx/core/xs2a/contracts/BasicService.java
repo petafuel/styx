@@ -28,8 +28,8 @@ import java.util.StringJoiner;
 
 
 public abstract class BasicService {
-    protected static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-    protected static final MediaType XML = MediaType.get("application/xml; charset=utf-8");
+    protected static final MediaType JSON = MediaType.get("application/json;charset=utf-8");
+    protected static final MediaType XML = MediaType.get("application/xml;charset=utf-8");
     private final Logger LOG;
     protected String url;
     private Request.Builder builder;

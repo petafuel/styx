@@ -56,6 +56,7 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
 
     private static final Logger LOG = LogManager.getLogger(BerlinGroupPIS.class);
 
+    // PIS Endpoints
     private static final String INITIATE_PAYMENT = "/v1/%s/%s";
     private static final String GET_PAYMENT_STATUS = "/v1/%s/%s/%s/status";
     private static final String GET_PAYMENT = "/v1/%s/%s/%s";

@@ -1,8 +1,13 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 public class PaymentStatus {
 
+    @JsonbProperty(value = "transactionStatus", nillable = true)
     private TransactionStatus transactionStatus;
+
+    @JsonbProperty(value = "fundsAvailable", nillable = true)
     private Boolean fundsAvailable;
 
     public PaymentStatus(TransactionStatus transactionStatus, Boolean fundsAvailable) {

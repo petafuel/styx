@@ -31,7 +31,7 @@ public class AuthResource extends Application {
     public Response processAuth(@Context HttpHeaders httpHeaders) {
 
         String masterToken = httpHeaders.getHeaderString("token");
-        JsonElement response = this.handler.createAccessToken(UUID.fromString(masterToken));
+        JsonElement response = handler.createAccessToken(UUID.fromString(masterToken));
         LOG.info("An access_token was created");
         return Response.status(200).entity(response.toString()).build();
     }

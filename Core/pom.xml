@@ -50,7 +50,7 @@
                 <executions>
                     <execution>
                         <id>Install JSEPA jar into local m2</id>
-                        <phase>clean</phase>
+                        <phase>install</phase>
                         <configuration>
                             <groupId>net.petafuel.library</groupId>
                             <artifactId>JSEPA</artifactId>
@@ -66,7 +66,7 @@
                     </execution>
                     <execution>
                         <id>Install DBUtils jar into local m2</id>
-                        <phase>clean</phase>
+                        <phase>install</phase>
                         <configuration>
                             <groupId>net.petafuel.prepaid.library</groupId>
                             <artifactId>DBUtils</artifactId>
@@ -82,7 +82,7 @@
                     </execution>
                     <execution>
                         <id>Install ConnectionPool jar into local m2</id>
-                        <phase>clean</phase>
+                        <phase>install</phase>
                         <configuration>
                             <groupId>net.petafuel.prepaid.library</groupId>
                             <artifactId>ConnectionPool</artifactId>

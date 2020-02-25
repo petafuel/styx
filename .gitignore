@@ -2,8 +2,8 @@ styx*.iml
 .idea/*
 API/target/*
 API/log/*
-API/src/main/resources/config.properties
 Core/target/*
-Core/src/main/resources/config.properties
 log/*
 connectionpool.properties
+API/src/main/resources/api.properties
+Core/src/main/resources/core.properties

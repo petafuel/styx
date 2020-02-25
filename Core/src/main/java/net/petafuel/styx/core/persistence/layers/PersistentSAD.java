@@ -7,6 +7,7 @@ import net.petafuel.styx.core.persistence.StyxifySQL;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,7 +37,7 @@ public class PersistentSAD {
                     aspsp = StyxifySQL.fetchModel(Aspsp.class, resultSet);
                 }
             }
-        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | IntrospectionException | InvocationTargetException e) {
             LOG.error("Error mapping resultset to Aspsp.class message={}", e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {

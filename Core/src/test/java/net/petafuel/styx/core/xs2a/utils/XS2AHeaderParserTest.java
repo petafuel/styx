@@ -76,13 +76,37 @@ public class XS2AHeaderParserTest {
             protected int primitiveNumber;
 
             @XS2AHeader("isActive")
-            public boolean isActive;
+            public boolean active;
 
             public ClassDataMember()
             {
                 this.id = null;
                 this.primitiveNumber = 1;
-                this.isActive = false;
+                this.active = false;
+            }
+
+            public String getId() {
+                return id;
+            }
+
+            public void setId(String id) {
+                this.id = id;
+            }
+
+            public int getPrimitiveNumber() {
+                return primitiveNumber;
+            }
+
+            public void setPrimitiveNumber(int primitiveNumber) {
+                this.primitiveNumber = primitiveNumber;
+            }
+
+            public boolean isActive() {
+                return active;
+            }
+
+            public void setActive(boolean active) {
+                this.active = active;
             }
         }
 
@@ -109,6 +133,29 @@ public class XS2AHeaderParserTest {
                 return Optional.empty();
             }
 
+            public ClassDataMember getClassDataMember() {
+                return classDataMember;
+            }
+
+            public void setClassDataMember(ClassDataMember classDataMember) {
+                this.classDataMember = classDataMember;
+            }
+
+            public String getNotNested() {
+                return notNested;
+            }
+
+            public void setNotNested(String notNested) {
+                this.notNested = notNested;
+            }
+
+            public String getEmpty() {
+                return empty;
+            }
+
+            public void setEmpty(String empty) {
+                this.empty = empty;
+            }
         }
         Request request = new Request();
         XS2AHeaderParser.parse(request);

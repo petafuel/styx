@@ -8,4 +8,6 @@ public abstract class ApiProperties {
     public static final String STYX_PROXY_HOSTNAME = "styx.proxy.hostname";
     public static final String STYX_PROXY_PORT = "styx.proxy.port";
     public static final String STYX_PROXY_SCHEMA = "styx.proxy.schema";
+
+    private ApiProperties(){}
 }

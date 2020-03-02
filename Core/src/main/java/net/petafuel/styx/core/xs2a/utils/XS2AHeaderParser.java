@@ -4,7 +4,11 @@ import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.XS2AHeaderParserException;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,18 +28,22 @@ public class XS2AHeaderParser {
         fields.addAll(parentFields);
         try {
             for (Field field : fields) {
-                field.setAccessible(true);
-                if (field.isAnnotationPresent(XS2AHeader.class) && field.get(o) != null) {
+                if (!field.isAnnotationPresent(XS2AHeader.class)) {
+                    continue;
+                }
+                Method getter = new PropertyDescriptor(field.getName(), o.getClass()).getReadMethod();
+                if (getter.invoke(o) != null) {
                     if (field.getAnnotation(XS2AHeader.class).nested()) {
-                        mapFields(field.get(o), xs2aRequest);
+                        mapFields(getter.invoke(o), xs2aRequest);
                     } else {
-                        if (!String.valueOf(field.get(o)).isEmpty()) {
-                            xs2aRequest.addHeader(field.getAnnotation(XS2AHeader.class).value(), String.valueOf(field.get(o)));
+                        if (!String.valueOf(getter.invoke(o)).isEmpty()) {
+                            xs2aRequest.addHeader(field.getAnnotation(XS2AHeader.class).value(), String.valueOf(getter.invoke(o)));
                         }
                     }
                 }
             }
-        } catch (IllegalAccessException e) {
+
+        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
             throw new XS2AHeaderParserException(e.getMessage(), e);
         }
     }

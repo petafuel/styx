@@ -44,6 +44,8 @@ public class CertificateManager {
     private String keyStoreStyxAlias;
     private char[] password;
 
+    //Reading an invalid keystore results in an exception. The path needs to be configured correctly
+    @SuppressWarnings("squid:S4797")
     private CertificateManager() {
 
         String keyStorePath = Config.getInstance().getProperties().getProperty(KEYSTORE_PATH);

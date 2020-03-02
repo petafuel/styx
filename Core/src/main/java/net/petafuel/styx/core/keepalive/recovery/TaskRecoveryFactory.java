@@ -26,6 +26,8 @@ final class TaskRecoveryFactory {
     private TaskRecoveryFactory() {
     }
 
+    //the full qualified classname is build by the Factory itself and only takes "input" from the database as trusted source
+    @SuppressWarnings("squid:S1523")
     private static WorkableTask factory(JsonObject jsonGoal) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Gson gson = new GsonBuilder()
                 .serializeNulls()

@@ -41,9 +41,10 @@ public class PersistentOAuthSession {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call get_oauth_session(?)}")) {
             query.setString(1, state);
-            ResultSet resultSet = query.executeQuery();
-            if (resultSet.next()) {
-                return this.dbToModel(resultSet);
+            try (ResultSet resultSet = query.executeQuery()) {
+                if (resultSet.next()) {
+                    return this.dbToModel(resultSet);
+                }
             }
             throw new PersistenceException("No OAuth session found for the given state");
         } catch (SQLException e) {
@@ -60,9 +61,10 @@ public class PersistentOAuthSession {
             query.setString(3, model.getRefreshToken());
             query.setTimestamp(4, new Timestamp(model.getExpiresAt().getTime()));
             query.setString(5, model.getState());
-            ResultSet resultSet = query.executeQuery();
-            if (resultSet.next()) {
-                return this.dbToModel(resultSet);
+            try (ResultSet resultSet = query.executeQuery()) {
+                if (resultSet.next()) {
+                    return this.dbToModel(resultSet);
+                }
             }
             throw new PersistenceException("No OAuthSession found for the given state");
         } catch (SQLException e) {

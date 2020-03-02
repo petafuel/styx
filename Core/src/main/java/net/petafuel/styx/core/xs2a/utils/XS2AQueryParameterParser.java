@@ -4,7 +4,11 @@ import net.petafuel.styx.core.xs2a.contracts.XS2AQueryParameter;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.exceptions.XS2AHeaderParserException;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,21 +33,24 @@ public class XS2AQueryParameterParser {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
             for (Field field : fields) {
-                field.setAccessible(true);
-                if (field.isAnnotationPresent(XS2AQueryParameter.class) && field.get(o) != null) {
+                if (!field.isAnnotationPresent(XS2AQueryParameter.class)) {
+                    continue;
+                }
+                Method getter = new PropertyDescriptor(field.getName(), o.getClass()).getReadMethod();
+                if (getter.invoke(o) != null) {
                     if (field.getAnnotation(XS2AQueryParameter.class).nested()) {
-                        mapFields(field.get(o), request);
-                    } else if (!String.valueOf(field.get(o)).isEmpty()) {
-                        if (field.get(o) instanceof Date) {
-                            String isoDate = sdf.format(field.get(o));
+                        mapFields(getter.invoke(o), request);
+                    } else if (!String.valueOf(getter.invoke(o)).isEmpty()) {
+                        if (getter.invoke(o) instanceof Date) {
+                            String isoDate = sdf.format(getter.invoke(o));
                             request.addQueryParameter(field.getAnnotation(XS2AQueryParameter.class).value(), isoDate);
                         } else {
-                            request.addQueryParameter(field.getAnnotation(XS2AQueryParameter.class).value(), String.valueOf(field.get(o)));
+                            request.addQueryParameter(field.getAnnotation(XS2AQueryParameter.class).value(), String.valueOf(getter.invoke(o)));
                         }
                     }
                 }
             }
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
             throw new XS2AHeaderParserException(e.getMessage(), e);
         }
     }

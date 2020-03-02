@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class Config {
     @DatabaseColumn("configs_id")
-    private int id;
+    private Integer id;
     @DatabaseColumn(value = "", nested = true)
     private Standard standard;
     @DatabaseColumn("config")
@@ -27,24 +27,44 @@ public class Config {
         implementerOptions = new HashMap<>();
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Standard getStandard() {
         return standard;
     }
 
+    public void setStandard(Standard standard) {
+        this.standard = standard;
+    }
+
     public String getConfiguration() {
         return configuration;
+    }
+
+    public void setConfiguration(String configuration) {
+        this.configuration = configuration;
     }
 
     public Date getUpdatedAt() {
         return updatedAt;
     }
 
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public Map<String, ImplementerOption> getImplementerOptions() {

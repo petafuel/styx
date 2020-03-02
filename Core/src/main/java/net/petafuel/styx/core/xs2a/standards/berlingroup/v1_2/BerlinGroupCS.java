@@ -3,12 +3,16 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
+import net.petafuel.styx.core.xs2a.contracts.BasicAuthorisationService;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
+import net.petafuel.styx.core.xs2a.entities.PSUData;
+import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
+import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
@@ -17,6 +21,7 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.Accoun
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentStatusSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.SCASerializer;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.UUID;
 
-public class BerlinGroupCS extends BasicService implements CSInterface {
+public class BerlinGroupCS extends BasicAuthorisationService implements CSInterface {
 
     private static final Logger LOG = LogManager.getLogger(BerlinGroupCS.class);
 
@@ -122,7 +127,9 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
         }
     }
 
+    //TODO DELETE THE METHOD BELOW
     /**
+     *
      * If the bank requires us to create a new authroisation resource, use this method
      *
      * @param consentCreateAuthResourceRequest Requires a request that contains at least the consent id
@@ -158,5 +165,10 @@ public class BerlinGroupCS extends BasicService implements CSInterface {
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public SCA startAuthorisation(StartAuthorisationRequest request) throws BankRequestFailedException {
+        return super.startAuthorisation(request);
     }
 }

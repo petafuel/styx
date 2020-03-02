@@ -241,17 +241,18 @@ public class TargobankTest {
         Assertions.assertThrows(BankRequestFailedException.class, () -> standard.getCs().createConsent(createConsentRequest));
     }
 
+    // TODO DELETE
     @Test
     @Tag("integration")
     public void authoriseConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
+        XS2AStandard standard = (new SAD()).getBankByBIC("BYLADEM1FSI", true);
 
-        PSU psu = new PSU("PSD2TEST4");
+        PSU psu = new PSU("chipTAN");
         psu.setIp("255.255.255.0");
         ConsentCreateAuthResourceRequest consentCreateAuthResourceRequest =
-                new ConsentCreateAuthResourceRequest(CONSENT);
+                new ConsentCreateAuthResourceRequest("5495b52b-2f35-4b17-a813-6f21880d71c2");
         consentCreateAuthResourceRequest.setPsu(psu);
-        consentCreateAuthResourceRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
+//        consentCreateAuthResourceRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
         SCA sca = standard.getCs().startAuthorisationProcess(consentCreateAuthResourceRequest);
         Assert.assertNotNull(sca);
         Assert.assertNotNull(sca.getAuthorisationId());

@@ -15,7 +15,6 @@ public class Account implements Serializable {
     /**
      * This is the universal account identifier as iban or bban
      */
-    @JsonbProperty("identifier")
     private String identifier;
 
     @NotNull
@@ -45,6 +44,7 @@ public class Account implements Serializable {
 
     public Account(String iban, Currency currency, Type type) {
         this.iban = iban;
+        this.identifier = iban;
         this.currency = currency;
         this.type = type;
         this.balances = new ArrayList<>();
@@ -62,6 +62,7 @@ public class Account implements Serializable {
         return currency;
     }
 
+    @JsonbTransient
     public String getIdentifier() {
         return identifier;
     }

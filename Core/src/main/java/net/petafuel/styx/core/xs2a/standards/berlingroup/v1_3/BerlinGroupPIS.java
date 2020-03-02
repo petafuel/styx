@@ -9,7 +9,7 @@ import net.petafuel.jsepa.exception.SEPAParsingException;
 import net.petafuel.jsepa.facades.ReportConverter;
 import net.petafuel.jsepa.model.pain002.TransactionReport;
 import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
-import net.petafuel.styx.core.xs2a.contracts.BasicService;
+import net.petafuel.styx.core.xs2a.contracts.BasicAuthorisationService;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
@@ -22,6 +22,7 @@ import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
+import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
@@ -29,6 +30,7 @@ import net.petafuel.styx.core.xs2a.sca.SCAUtils;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.InitiatedPaymentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentStatusSerializer;
@@ -52,7 +54,7 @@ import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.util.UUID;
 
-public class BerlinGroupPIS extends BasicService implements PISInterface {
+public class BerlinGroupPIS extends BasicAuthorisationService implements PISInterface {
 
     private static final Logger LOG = LogManager.getLogger(BerlinGroupPIS.class);
 
@@ -219,5 +221,9 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
         } catch (IOException | SEPAParsingException | ParseException | MessagingException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
+    }
+
+    public SCA startAuthorisation(StartAuthorisationRequest request) throws BankRequestFailedException {
+        return super.startAuthorisation(request);
     }
 }

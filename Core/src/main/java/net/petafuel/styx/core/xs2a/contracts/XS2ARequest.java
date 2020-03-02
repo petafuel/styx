@@ -20,7 +20,7 @@ public abstract class XS2ARequest {
     private PSU psu;
 
     @XS2AHeader(XS2AHeader.X_REQUEST_ID)
-    private String xRequestId;
+    private String xrequestId;
 
     @XS2AHeader(XS2AHeader.DATE)
     private String date;
@@ -52,7 +52,7 @@ public abstract class XS2ARequest {
 
     protected XS2ARequest() {
         psu = new PSU();
-        this.xRequestId = String.valueOf(UUID.randomUUID());
+        this.xrequestId = String.valueOf(UUID.randomUUID());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss zz", Locale.ENGLISH);
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         this.date = simpleDateFormat.format(new Date());
@@ -116,12 +116,12 @@ public abstract class XS2ARequest {
         this.psu = psu;
     }
 
-    public String getxRequestId() {
-        return xRequestId;
+    public String getXrequestId() {
+        return xrequestId;
     }
 
-    public void setxRequestId(String xRequestId) {
-        this.xRequestId = xRequestId;
+    public void setXrequestId(String xrequestId) {
+        this.xrequestId = xrequestId;
     }
 
     public String getTppRedirectUri() {

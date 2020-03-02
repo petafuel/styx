@@ -9,6 +9,7 @@ import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -43,7 +44,7 @@ public class PersistentPayment {
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
             }
-        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
             LOG.error(ERROR_MODEL_MAPPING, e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {
@@ -72,7 +73,7 @@ public class PersistentPayment {
                     }
                 }
             }
-        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
             LOG.error(ERROR_MODEL_MAPPING, e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {
@@ -100,7 +101,7 @@ public class PersistentPayment {
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
             }
-        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
             LOG.error(ERROR_MODEL_MAPPING, e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {
@@ -126,7 +127,7 @@ public class PersistentPayment {
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
             }
-        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
             LOG.error(ERROR_MODEL_MAPPING, e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {
@@ -151,7 +152,7 @@ public class PersistentPayment {
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
             }
-        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
             LOG.error(ERROR_MODEL_MAPPING, e.getMessage());
             throw new PersistenceException(e.getMessage(), e);
         } catch (SQLException e) {

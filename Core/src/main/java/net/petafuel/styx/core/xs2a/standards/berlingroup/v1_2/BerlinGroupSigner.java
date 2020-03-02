@@ -121,8 +121,10 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
      * Digest the message body and add to request
      *
      * @param request XS2ARequest
-     * @throws NoSuchAlgorithmException Throws the exception in case the SHA-256 Algorithm is not supported
+     * @throws NoSuchAlgorithmException Throws the exception in case the SHA-512 Algorithm is not supported
      */
+    //SHA-512 is predefined by the berlingroup spec for generating the http body digest RFC5843
+    @SuppressWarnings("squid:S4790")
     private void digest(XS2ARequest request) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-512");
         byte[] requestBodyBytes = request.getRawBody().orElse("").getBytes(StandardCharsets.UTF_8);

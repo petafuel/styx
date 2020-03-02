@@ -9,7 +9,7 @@ import java.util.Date;
  */
 public class Standard {
     @DatabaseColumn("standards_id")
-    private int id;
+    private Integer id;
     @DatabaseColumn("standards_name")
     private String name;
     @DatabaseColumn("standards_version")
@@ -21,27 +21,51 @@ public class Standard {
     @DatabaseColumn("standards_created_at")
     private Date createdAt;
 
-    public int getId() {
+    public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getVersion() {
         return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public String getConfigTemplate() {
         return configTemplate;
     }
 
+    public void setConfigTemplate(String configTemplate) {
+        this.configTemplate = configTemplate;
+    }
+
     public Date getUpdatedAt() {
         return updatedAt;
     }
 
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 }

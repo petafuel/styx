@@ -12,5 +12,5 @@ public interface PISInterface {
 
     PaymentStatus getPaymentStatus(XS2ARequest request) throws BankRequestFailedException;
 
-    InitializablePayment getPayment(XS2AGetRequest request) throws BankRequestFailedException;
+    InitializablePayment getPayment(XS2ARequest request) throws BankRequestFailedException;
 }

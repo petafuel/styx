@@ -10,13 +10,13 @@ import java.util.Date;
  */
 public class Aspsp {
     @DatabaseColumn("id")
-    private int id;
+    private Integer id;
     @DatabaseColumn("name")
     private String name;
     @DatabaseColumn("bic")
     private String bic;
     @DatabaseColumn("active")
-    private boolean active;
+    private Boolean active;
     @DatabaseColumn("updated_at")
     private Date updatedAt;
     @DatabaseColumn("created_at")
@@ -52,47 +52,91 @@ public class Aspsp {
     @DatabaseColumn(value = "", nested = true)
     private Config config;
 
-    public int getId() {
+    public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getBic() {
         return bic;
     }
 
-    public boolean isActive() {
+    public void setBic(String bic) {
+        this.bic = bic;
+    }
+
+    public Boolean isActive() {
         return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Date getUpdatedAt() {
         return updatedAt;
     }
 
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getDocumentationUrl() {
         return documentationUrl;
     }
 
+    public void setDocumentationUrl(String documentationUrl) {
+        this.documentationUrl = documentationUrl;
+    }
+
     public AspspGroup getAspspGroup() {
         return aspspGroup;
+    }
+
+    public void setAspspGroup(AspspGroup aspspGroup) {
+        this.aspspGroup = aspspGroup;
     }
 
     public Url getProductionUrl() {
         return productionUrl;
     }
 
+    public void setProductionUrl(Url productionUrl) {
+        this.productionUrl = productionUrl;
+    }
+
     public Url getSandboxUrl() {
         return sandboxUrl;
     }
 
+    public void setSandboxUrl(Url sandboxUrl) {
+        this.sandboxUrl = sandboxUrl;
+    }
+
     public Config getConfig() {
         return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
     }
 }

@@ -9,7 +9,7 @@ import java.util.Date;
  */
 public class Url {
     @DatabaseColumn("id")
-    private int id;
+    private Integer id;
     @DatabaseColumn("url")
     private String commonUrl;
     @DatabaseColumn("ais_url")
@@ -23,11 +23,11 @@ public class Url {
     @DatabaseColumn("created_at")
     private Date createdAt;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

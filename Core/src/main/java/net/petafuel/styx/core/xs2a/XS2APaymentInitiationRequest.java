@@ -16,7 +16,7 @@ public abstract class XS2APaymentInitiationRequest extends XS2ARequest {
         this.paymentProduct = product;
         this.paymentService = paymentService;
         this.setPsu(psu);
-        this.setTppRedirectUri(Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.getxRequestId());
+        this.setTppRedirectUri(Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.getXrequestId());
     }
 
     public PaymentProduct getPaymentProduct() {

@@ -10,8 +10,8 @@ public class PmtInf extends PaymentInstructionInformation {
     @Element(name = "BtchBookg", required = false)
     Boolean batchBooking;
 
-    public PmtInf(){
-
+    public PmtInf() {
+        //Default constructor
     }
 
     public boolean isBatchBooking() {

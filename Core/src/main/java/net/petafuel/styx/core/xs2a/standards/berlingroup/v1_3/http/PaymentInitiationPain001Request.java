@@ -5,7 +5,7 @@ import net.petafuel.jsepa.exception.SEPAWriteException;
 import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.jsepa.model.PaymentInstructionInformation;
-import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
+import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 
-public class PaymentInitiationPain001Request extends XS2APaymentInitiationRequest {
+public class PaymentInitiationPain001Request extends XS2APaymentRequest {
 
     private static final Logger LOG = LogManager.getLogger(PaymentInitiationPain001Request.class);
 

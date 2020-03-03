@@ -1,27 +1,18 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
-import net.petafuel.styx.core.xs2a.contracts.XS2AGetRequest;
+import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
+import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 
-public class ReadPaymentRequest extends XS2AGetRequest {
+import java.util.Optional;
 
-    private PaymentService paymentService;
-    private PaymentProduct paymentProduct;
+public class ReadPaymentRequest extends XS2APaymentRequest {
     private String paymentId;
 
-    public ReadPaymentRequest(PaymentService paymentService, PaymentProduct paymentProduct, String paymentId) {
-        this.paymentService = paymentService;
-        this.paymentProduct = paymentProduct;
+    public ReadPaymentRequest(PaymentService paymentService, PaymentProduct paymentProduct, String paymentId, PSU psu) {
+        super(paymentProduct, paymentService, psu);
         this.paymentId = paymentId;
-    }
-
-    public PaymentProduct getPaymentProduct() {
-        return paymentProduct;
-    }
-
-    public void setPaymentProduct(PaymentProduct paymentProduct) {
-        this.paymentProduct = paymentProduct;
     }
 
     public String getPaymentId() {
@@ -32,13 +23,8 @@ public class ReadPaymentRequest extends XS2AGetRequest {
         this.paymentId = paymentId;
     }
 
-    public PaymentService getPaymentService() {
-        return paymentService;
+    @Override
+    public Optional<String> getRawBody() {
+        return Optional.empty();
     }
-
-    public void setPaymentService(PaymentService paymentService) {
-        this.paymentService = paymentService;
-    }
-
-
 }

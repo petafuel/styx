@@ -16,6 +16,8 @@ public class Config {
     private Standard standard;
     @DatabaseColumn("config")
     private String configuration;
+    @DatabaseColumn("styx_config")
+    private String styxConfiguration;
     @DatabaseColumn("configs_updated_at")
     private Date updatedAt;
     @DatabaseColumn("configs_created_at")
@@ -73,5 +75,13 @@ public class Config {
 
     public void setImplementerOptions(Map<String, ImplementerOption> implementerOptions) {
         this.implementerOptions = implementerOptions;
+    }
+
+    public String getStyxConfiguration() {
+        return styxConfiguration;
+    }
+
+    public void setStyxConfiguration(String styxConfiguration) {
+        this.styxConfiguration = styxConfiguration;
     }
 }

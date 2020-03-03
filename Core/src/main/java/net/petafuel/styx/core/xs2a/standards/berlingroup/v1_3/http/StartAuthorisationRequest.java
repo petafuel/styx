@@ -1,11 +1,10 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.PSUData;
 
 import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
@@ -49,9 +48,9 @@ public class StartAuthorisationRequest extends XS2ARequest {
         JsonbConfig jsonbConfig = new JsonbConfig();
         jsonbConfig.withNullValues(false);
         try (Jsonb jsonb = JsonbBuilder.create(jsonbConfig)) {
-            String psuDataJson = jsonb.toJson(psuData);
+            JsonObjectBuilder builder = Json.createObjectBuilder().add("password", psuData.getPassword());
             String responseBody = Json.createObjectBuilder()
-                    .add("psuData", psuDataJson).build().toString();
+                    .add("psuData", builder).build().toString();
             return Optional.ofNullable(responseBody);
         } catch (Exception e) {
             return Optional.empty();

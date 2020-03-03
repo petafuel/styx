@@ -3,7 +3,11 @@ package net.petafuel.styx.core.xs2a.contracts;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
+
+import java.util.List;
 
 /**
  * Consent Service Interface
@@ -49,4 +53,8 @@ public interface CSInterface {
     void updatePSUData(XS2ARequest consentUpdatePSUDataRequest) throws BankRequestFailedException;
 
     SCA startAuthorisation(StartAuthorisationRequest request) throws BankRequestFailedException;
+
+    List<String> getAuthorisationRequest(GetAuthorisationRequest request) throws BankRequestFailedException;
+
+    String getSCAStatus(GetSCAStatusRequest request) throws BankRequestFailedException;
 }

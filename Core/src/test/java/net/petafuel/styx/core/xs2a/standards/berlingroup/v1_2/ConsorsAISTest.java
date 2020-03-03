@@ -8,6 +8,7 @@ import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.Balance;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -18,6 +19,7 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransacti
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.TransactionsSerializer;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -55,6 +57,7 @@ public class ConsorsAISTest {
         ReadAccountListRequest r1 = new ReadAccountListRequest(CONSENT);
         r1.setWithBalance(true);
         List<Account> list = standard.getAis().getAccountList(r1);
+        Assertions.assertTrue(list.size() >= 1);
     }
 
     @Test
@@ -65,6 +68,8 @@ public class ConsorsAISTest {
         r1.setWithBalance(true);
 
         Account result = standard.getAis().getAccount(r1);
+        Assertions.assertNotNull(result);
+        Assertions.assertNotNull(result.getIban());
     }
 
     @Test
@@ -74,7 +79,9 @@ public class ConsorsAISTest {
 
         ReadBalancesRequest r1 = new ReadBalancesRequest(ACCOUNT_ID, CONSENT);
 
-        Object result = standard.getAis().getBalancesByAccount(r1);
+        List<Balance> result = standard.getAis().getBalancesByAccount(r1);
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.size() >= 1);
     }
 
     @Test
@@ -87,8 +94,9 @@ public class ConsorsAISTest {
         Date from = format.parse("2019-03-03");
         Date to = new Date();
         ReadTransactionsRequest r1 = new ReadTransactionsRequest(ACCOUNT_ID, CONSENT, "booked", from, to);
-        Object result = standard.getAis().getTransactionsByAccount(r1);
-
+        List<Transaction> result = standard.getAis().getTransactionsByAccount(r1);
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.size() >= 1);
     }
 
     @Test
@@ -96,7 +104,9 @@ public class ConsorsAISTest {
     public void testTransactionDetails() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
         ReadTransactionDetailsRequest r1 = new ReadTransactionDetailsRequest(ACCOUNT_ID, TRANSACTION_ID, CONSENT);
-        Object result = standard.getAis().getTransaction(r1);
+        Transaction result = standard.getAis().getTransaction(r1);
+        Assertions.assertNotNull(result);
+        Assertions.assertNotNull(result.getAccount());
     }
 
     @Test

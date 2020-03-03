@@ -11,7 +11,7 @@ import java.util.List;
  * Account Information Service Interface
  *
  * @see Account
- * @see XS2AGetRequest
+ * @see XS2ARequest
  * @see Balance
  * @see Transaction
  */

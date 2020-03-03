@@ -2,8 +2,11 @@ package net.petafuel.styx.core.persistence;
 
 import org.postgresql.util.PGobject;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -28,16 +31,20 @@ public class StyxifySQL {
      * @throws InstantiationException
      * @throws SQLException
      */
-    public static <T> T fetchModel(Class<T> clazz, ResultSet resultSet, DatabaseColumnOverride[] overrides) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, SQLException {
+    //
+    //Data for reflected class is loaded from the database as trusted source
+    @SuppressWarnings("squid:S1523")
+    public static <T> T fetchModel(Class<T> clazz, ResultSet resultSet, DatabaseColumnOverride[] overrides) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, SQLException, IntrospectionException {
         T templateInstance = clazz.getConstructor().newInstance();
         for (Field field : clazz.getDeclaredFields()) {
-            field.setAccessible(true);
+            Method setter = new PropertyDescriptor(field.getName(), templateInstance.getClass()).getWriteMethod();
+
             DatabaseColumn databaseColumnName = field.getAnnotation(DatabaseColumn.class);
             //Check if field should be mapped
             if (databaseColumnName != null) {
                 if (databaseColumnName.nested()) {
                     //if nested type, use recursion to fill sub level class attributes
-                    field.set(templateInstance, fetchModel(field.getType(), resultSet, databaseColumnName.overrides()));
+                    setter.invoke(templateInstance, fetchModel(field.getType(), resultSet, databaseColumnName.overrides()));
                 } else {
                     //Check if there are overridden column names
                     Optional<DatabaseColumnOverride> optionalReplacement = Arrays.stream(overrides)
@@ -50,7 +57,7 @@ public class StyxifySQL {
 
                     //Special case if postgres data type is represented as PGobject and its type is json
                     rowValue = checkComplexPostgresTypes(rowValue);
-                    field.set(templateInstance, rowValue);
+                    setter.invoke(templateInstance, rowValue);
                 }
             }
         }
@@ -58,7 +65,7 @@ public class StyxifySQL {
     }
 
     public static <T> T fetchModel(Class<T> clazz, ResultSet resultSet) throws
-            InvocationTargetException, NoSuchMethodException, InstantiationException, SQLException, IllegalAccessException {
+            InvocationTargetException, NoSuchMethodException, InstantiationException, SQLException, IllegalAccessException, IntrospectionException {
         return fetchModel(clazz, resultSet, new DatabaseColumnOverride[0]);
     }
 

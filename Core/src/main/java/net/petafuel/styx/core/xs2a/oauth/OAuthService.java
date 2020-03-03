@@ -10,7 +10,6 @@ import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
 import net.petafuel.styx.core.xs2a.oauth.serializers.EndpointsSerializer;
 import net.petafuel.styx.core.xs2a.oauth.serializers.TokenSerializer;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupAIS;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.Config;
 import okhttp3.Response;
@@ -28,7 +27,7 @@ import java.util.UUID;
 
 public class OAuthService extends BasicService {
 
-    private static final Logger LOG = LogManager.getLogger(BerlinGroupAIS.class);
+    private static final Logger LOG = LogManager.getLogger(OAuthService.class);
 
     public OAuthService() {
         super(LOG, null, new BerlinGroupSigner());
@@ -79,8 +78,9 @@ public class OAuthService extends BasicService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(code);
     }
 
+    //SHA-256 is predefined for key exchange on oAuth 2.0 @see https://tools.ietf.org/html/rfc7636#section-4.2
+    @SuppressWarnings("squid:S4790")
     private static String generateCodeChallenge(String codeVerifier) {
-
         try {
             byte[] bytes = codeVerifier.getBytes(StandardCharsets.US_ASCII);
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -107,7 +107,7 @@ public class OAuthService extends BasicService {
         queryParams.put("code_challenge", OAuthService.generateCodeChallenge(stored.getCodeVerifier()));
         queryParams.put("code_challenge_method", "S256");
 
-        return stored.getAuthorizationEndpoint() + OAuthService.httpBuildQuery(queryParams);
+        return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 
     public static OAuthSession startSession(SCA sca, String scope) {

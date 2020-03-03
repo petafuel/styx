@@ -133,11 +133,13 @@ public final class ConsentPoll extends WorkableTask {
     }
 
     @Override
+    //class names are generated and read from the styx database as trustet source
+    @SuppressWarnings("squid:S1523")
     public WorkableTask buildFromRecovery(JsonObject goal) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         String standardPackage = "net.petafuel.styx.core.xs2a.standards"
                 + ("." + goal.get("standard").getAsString())
                 + ("." + goal.get("version").getAsString());
-
+        //TODO use SAD to initialize services based on the bic
         String csServiceClass = standardPackage + ("." + goal.get("class").getAsString());
         String signerClass = standardPackage + ("." + goal.get("signer").getAsString());
 

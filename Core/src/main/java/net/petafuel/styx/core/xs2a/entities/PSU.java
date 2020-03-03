@@ -2,13 +2,15 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 
+import java.io.Serializable;
+
 /**
  * PSU model for xs2a users
  * <p>
  * <b>P</b>ayment <b>S</b>ervice <b>U</b>ser
  * </p>
  */
-public class PSU {
+public class PSU implements Serializable {
 
     @XS2AHeader(XS2AHeader.PSU_ID)
     private String id;

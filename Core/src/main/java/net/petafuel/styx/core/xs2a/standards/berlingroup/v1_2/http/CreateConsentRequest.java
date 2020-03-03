@@ -17,14 +17,14 @@ public class CreateConsentRequest extends XS2ARequest {
         this.consent = consent;
         if (consent.getxRequestId() == null) {
             UUID uuid = UUID.randomUUID();
-            this.setxRequestId(uuid.toString());
+            this.setXrequestId(uuid.toString());
             consent.setxRequestId(uuid);
         } else {
-            this.setxRequestId(consent.getxRequestId().toString());
+            this.setXrequestId(consent.getxRequestId().toString());
         }
         this.setPsu(consent.getPsu());
-        this.setTppRedirectUri(Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.getxRequestId());
-        this.setTppNokRedirectUri(Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.getxRequestId());
+        this.setTppRedirectUri(Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.getXrequestId());
+        this.setTppNokRedirectUri(Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.getXrequestId());
     }
 
     @Override

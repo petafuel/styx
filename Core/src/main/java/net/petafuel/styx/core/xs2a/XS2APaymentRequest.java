@@ -6,12 +6,12 @@ import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.utils.Config;
 
-public abstract class XS2APaymentInitiationRequest extends XS2ARequest {
+public abstract class XS2APaymentRequest extends XS2ARequest {
 
     private PaymentProduct paymentProduct;
     private PaymentService paymentService;
 
-    public XS2APaymentInitiationRequest(PaymentProduct product, PaymentService paymentService, PSU psu) {
+    public XS2APaymentRequest(PaymentProduct product, PaymentService paymentService, PSU psu) {
         super();
         this.paymentProduct = product;
         this.paymentService = paymentService;

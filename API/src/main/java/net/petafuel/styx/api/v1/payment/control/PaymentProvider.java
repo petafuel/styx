@@ -5,10 +5,9 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 
 public class PaymentProvider {
-    protected static final String XML_PAYMENT_PRODUCT_PREFIX = "pain.001-";
-    protected XS2AStandard xs2AStandard;
-    protected PaymentTypeBean paymentTypeBean;
-    protected PSU psu;
+    protected final XS2AStandard xs2AStandard;
+    protected final PaymentTypeBean paymentTypeBean;
+    protected final PSU psu;
 
     public PaymentProvider(XS2AStandard xs2AStandard, PaymentTypeBean paymentTypeBean, PSU psu) {
         this.xs2AStandard = xs2AStandard;

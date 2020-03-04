@@ -8,8 +8,8 @@ import net.petafuel.jsepa.SEPAParser;
 import net.petafuel.jsepa.exception.SEPAParsingException;
 import net.petafuel.jsepa.facades.ReportConverter;
 import net.petafuel.jsepa.model.pain002.TransactionReport;
+import net.petafuel.styx.core.xs2a.contracts.BasicAuthorisationService;
 import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
-import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
@@ -21,6 +21,7 @@ import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
+import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
@@ -49,9 +50,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
+import java.util.List;
 import java.util.UUID;
 
-public class BerlinGroupPIS extends BasicService implements PISInterface {
+public class BerlinGroupPIS extends BasicAuthorisationService implements PISInterface {
 
     private static final Logger LOG = LogManager.getLogger(BerlinGroupPIS.class);
 
@@ -218,5 +220,20 @@ public class BerlinGroupPIS extends BasicService implements PISInterface {
         } catch (IOException | SEPAParsingException | ParseException | MessagingException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public SCA startAuthorisation(XS2ARequest request) throws BankRequestFailedException {
+        return super.startAuthorisation(request);
+    }
+
+    @Override
+    public List<String> getAuthorisationRequest(XS2ARequest request) throws BankRequestFailedException {
+        return super.getAuthorisationRequest(request);
+    }
+
+    @Override
+    public String getSCAStatus(XS2ARequest request) throws BankRequestFailedException {
+        return super.getSCAStatus(request);
     }
 }

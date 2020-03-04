@@ -1,5 +1,7 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 /**
  * Contains sensitive PSU data that is used whenever a Response is steering in the direction of authenticating
  * an Authorisation Resource like a consent or a payment
@@ -17,24 +19,32 @@ public class PSUData {
      * password in plaintext
      * conditional
      */
+    @JsonbProperty("password")
     private String password;
 
     /**
      * encrypted password
      * conditional
      */
+    @JsonbProperty("encryptedPassword")
     private String encryptedPassword;
 
     /**
      * Additional password in plaintext
      * conditional
      */
+    @JsonbProperty("additionalPassword")
     private String additionalPassword;
 
     /**
      * If an additional encrypted password is required
      */
+    @JsonbProperty("additionalEncryptedPassword")
     private String additionalEncryptedPassword;
+
+    public PSUData(){
+
+    }
 
     public String getPassword() {
         return password;

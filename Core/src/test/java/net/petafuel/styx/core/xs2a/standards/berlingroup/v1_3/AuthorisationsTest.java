@@ -15,9 +15,11 @@ import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PSUData;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
+import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import org.junit.Assert;
@@ -28,6 +30,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class AuthorisationsTest {
 
@@ -69,6 +72,34 @@ public class AuthorisationsTest {
 
     @Test
     @Tag("integration")
+    public void getCSAuthorisationAndSCAStatusSparkasse() throws BankRequestFailedException, BankNotFoundException, BankLookupFailedException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(SPARKASSE_BIC, true);
+
+        Assert.assertTrue(standard.isCSImplemented());
+
+        PSUData psuData = new PSUData();
+        psuData.setPassword(SPARKASSE_PIN_VALID);
+
+        Consent consent = this.getSparkasseConsent(standard.getCs());
+        StartAuthorisationRequest request = new StartAuthorisationRequest(psuData,"consents/" + consent.getId());
+        request.getPsu().setId("smsTAN_singleMed");
+
+        SCA sca = standard.getCs().startAuthorisation(request);
+
+        GetAuthorisationRequest getAuthorisationRequest = new GetAuthorisationRequest(consent.getId());
+
+        GetSCAStatusRequest getSCAStatusRequest = new GetSCAStatusRequest(consent.getId(), sca.getAuthorisationId());
+
+        List<String> authIdList = standard.getCs().getAuthorisationRequest(getAuthorisationRequest);
+
+        String scaStatus = standard.getCs().getSCAStatus(getSCAStatusRequest);
+
+        Assert.assertEquals(scaStatus, sca.getStatus().getValue());
+        Assert.assertTrue(authIdList.contains(sca.getAuthorisationId()));
+    }
+
+    @Test
+    @Tag("integration")
     public void startAuthorisationTargoPayment() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(TARGO_BIC, true);
 
@@ -81,6 +112,34 @@ public class AuthorisationsTest {
 
         SCA sca = standard.getPis().startAuthorisation(request);
         Assert.assertNotNull(sca.getAuthorisationId());
+    }
+
+    @Test
+    @Tag("integration")
+    public void getPISAuthorisationAndSCAStatusTargo() throws BankRequestFailedException, BankNotFoundException, BankLookupFailedException {
+        XS2AStandard standard = (new SAD()).getBankByBIC(TARGO_BIC, true);
+
+        Assert.assertTrue(standard.isPISImplemented());
+
+        InitiatedPayment payment = this.getTargoPayment(standard.getPis());
+        StartAuthorisationRequest request = new StartAuthorisationRequest(new PSUData(), PaymentService.PAYMENTS.getValue() + "/" +
+                PaymentProduct.SEPA_CREDIT_TRANSFERS.getValue() + "/" + payment.getPaymentId());
+        request.getPsu().setId(TARGO_PSU_ID);
+
+        SCA sca = standard.getPis().startAuthorisation(request);
+
+        GetAuthorisationRequest getAuthorisationRequest = new GetAuthorisationRequest(PaymentService.PAYMENTS.getValue(),
+                PaymentProduct.SEPA_CREDIT_TRANSFERS.getValue(), payment.getPaymentId());
+
+        GetSCAStatusRequest getSCAStatusRequest = new GetSCAStatusRequest(PaymentService.PAYMENTS.getValue(),
+                PaymentProduct.SEPA_CREDIT_TRANSFERS.getValue(), payment.getPaymentId(), sca.getAuthorisationId());
+
+        List<String> authIdList = standard.getPis().getAuthorisationRequest(getAuthorisationRequest);
+
+        String scaStatus = standard.getPis().getSCAStatus(getSCAStatusRequest);
+
+        Assert.assertEquals(scaStatus, sca.getStatus().getValue());
+        Assert.assertTrue(authIdList.contains(sca.getAuthorisationId()));
     }
 
     @Test
@@ -134,6 +193,7 @@ public class AuthorisationsTest {
 
         return csInterface.createConsent(createConsentRequest);
     }
+
 
     private InitiatedPayment getTargoPayment(PISInterface pisInterface) throws BankRequestFailedException {
         //payment information

@@ -105,14 +105,24 @@ public class SCA {
     }
 
     public enum Status {
-        RECEIVED,
-        PSUIDENTIFIED,
-        PSUAUTHENTICATED,
-        SCAMETHODSELECTED,
-        STARTED,
-        FINALISED,
-        FAILED,
-        EXEMPTED
+        RECEIVED("received"),
+        PSUIDENTIFIED("psuIdentified"),
+        PSUAUTHENTICATED("psuAuthenticated"),
+        SCAMETHODSELECTED("scaMethodSelected"),
+        STARTED("started"),
+        FINALISED("finalised"),
+        FAILED("failed"),
+        EXEMPTED("exempted");
+
+        private String jsonKey;
+
+        Status(String jsonKey) {
+            this.jsonKey = jsonKey;
+        }
+
+        public String getValue() {
+            return jsonKey;
+        }
     }
 
     public enum LinkType {

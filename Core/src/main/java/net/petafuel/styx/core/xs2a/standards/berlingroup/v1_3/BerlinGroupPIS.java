@@ -222,7 +222,8 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
         }
     }
 
-    public SCA startAuthorisation(StartAuthorisationRequest request) throws BankRequestFailedException {
+    @Override
+    public SCA startAuthorisation(XS2ARequest request) throws BankRequestFailedException {
         return super.startAuthorisation(request);
     }
 }

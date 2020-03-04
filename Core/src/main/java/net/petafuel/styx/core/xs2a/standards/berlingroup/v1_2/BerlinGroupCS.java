@@ -127,33 +127,6 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
         }
     }
 
-    //TODO DELETE THE METHOD BELOW
-    /**
-     *
-     * If the bank requires us to create a new authroisation resource, use this method
-     *
-     * @param consentCreateAuthResourceRequest Requires a request that contains at least the consent id
-     * @return Returns all relevant SCA informations
-     * @throws BankRequestFailedException
-     */
-    @Override
-    public SCA startAuthorisationProcess(XS2ARequest consentCreateAuthResourceRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(CREATE_AUTHORISATION_RESOURCE, consentCreateAuthResourceRequest.getConsentId()));
-        this.createBody(RequestType.POST, JSON, consentCreateAuthResourceRequest);
-        this.createHeaders(consentCreateAuthResourceRequest);
-
-        try (Response response = this.execute()) {
-            String responseBody = extractResponseBody(response, 201);
-
-            Gson gson = new GsonBuilder().registerTypeAdapter(SCA.class, new SCASerializer()).create();
-            SCA sca = gson.fromJson(responseBody, SCA.class);
-            SCAUtils.parseSCAApproach(sca, response);
-            return sca;
-        } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage(), e);
-        }
-    }
-
     @Override
     public void updatePSUData(XS2ARequest consentUpdatePSUDataRequest) throws BankRequestFailedException {
         this.setUrl(this.url + String.format(UPDATE_PSU_DATA, consentUpdatePSUDataRequest.getConsentId(), ((ConsentUpdatePSUDataRequest) consentUpdatePSUDataRequest).getAuthorisationId()));
@@ -168,7 +141,7 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
     }
 
     @Override
-    public SCA startAuthorisation(StartAuthorisationRequest request) throws BankRequestFailedException {
+    public SCA startAuthorisation(XS2ARequest request) throws BankRequestFailedException {
         return super.startAuthorisation(request);
     }
 }

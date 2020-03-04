@@ -127,6 +127,7 @@ public class SCA {
         UPDATE_ENCRYPTED_PSU_AUTHENTICATION("updateEncryptedPsuAuthentication"),
         UPDATE_ADDITIONAL_PSU_AUTHENTICATION("updateAdditionalPsuAuthentication"),
         UPDATE_ENCRYPTED_ADDITIONAL_PSU_AUTHENTICATION("updateAdditionalEncryptedPsuAuthentication"),
+        AUTHORISE_TRANSACTION("authoriseTransaction"),
         STATUS("status"),
         SELF("self"),
         SCA_STATUS("scaStatus"),

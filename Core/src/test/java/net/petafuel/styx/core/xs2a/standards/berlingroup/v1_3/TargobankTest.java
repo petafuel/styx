@@ -13,7 +13,6 @@ import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
-import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
 import net.petafuel.styx.core.xs2a.sca.SCAHandler;
@@ -22,7 +21,6 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsent
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentInitiationJsonRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentCreateAuthResourceRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import org.junit.Assert;
@@ -239,25 +237,6 @@ public class TargobankTest {
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
         createConsentRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
         Assertions.assertThrows(BankRequestFailedException.class, () -> standard.getCs().createConsent(createConsentRequest));
-    }
-
-    // TODO DELETE
-    @Test
-    @Tag("integration")
-    public void authoriseConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC("BYLADEM1FSI", true);
-
-        PSU psu = new PSU("chipTAN");
-        psu.setIp("255.255.255.0");
-        ConsentCreateAuthResourceRequest consentCreateAuthResourceRequest =
-                new ConsentCreateAuthResourceRequest("5495b52b-2f35-4b17-a813-6f21880d71c2");
-        consentCreateAuthResourceRequest.setPsu(psu);
-//        consentCreateAuthResourceRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
-        SCA sca = standard.getCs().startAuthorisationProcess(consentCreateAuthResourceRequest);
-        Assert.assertNotNull(sca);
-        Assert.assertNotNull(sca.getAuthorisationId());
-        Assert.assertNotNull(sca.getApproach());
-        Assert.assertEquals(SCA.Status.PSUIDENTIFIED, sca.getStatus());
     }
 
     @Test

@@ -6,7 +6,6 @@ import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 
 public interface PISInterface {
 
@@ -16,5 +15,5 @@ public interface PISInterface {
 
     InitializablePayment getPayment(XS2ARequest request) throws BankRequestFailedException;
 
-    SCA startAuthorisation(StartAuthorisationRequest request) throws BankRequestFailedException;
+    SCA startAuthorisation(XS2ARequest request) throws BankRequestFailedException;
 }

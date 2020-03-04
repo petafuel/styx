@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 public class BasicAuthorisationService extends BasicService {
 
-    public static final String AUTHORISATIONS = "/v1/%s/authorisations";
+    private static final String AUTHORISATIONS = "/v1/%s/authorisations";
 
     public BasicAuthorisationService(String url, IXS2AHttpSigner signer) {
         this(LogManager.getLogger(BasicAuthorisationService.class), url, signer);
@@ -23,14 +23,17 @@ public class BasicAuthorisationService extends BasicService {
         super(log, url, signer);
     }
 
-    protected SCA startAuthorisation(StartAuthorisationRequest request) throws BankRequestFailedException {
+    protected SCA startAuthorisation(XS2ARequest xs2ARequest) throws BankRequestFailedException {
+
+        StartAuthorisationRequest request = (StartAuthorisationRequest) xs2ARequest;
+
         this.setUrl(this.url + String.format(AUTHORISATIONS, request.getService()));
 
         this.createBody(RequestType.POST, JSON, request);
         this.createHeaders(request);
 
         try (Response response = this.execute()) {
-            String responseBody = extractResponseBody(response, 201);
+            String responseBody = extractResponseBody(response, request.getExpectedResponseCode());
             Gson gson = new GsonBuilder().registerTypeAdapter(SCA.class, new SCASerializer()).create();
             SCA sca = gson.fromJson(responseBody, SCA.class);
             SCAUtils.parseSCAApproach(sca, response);

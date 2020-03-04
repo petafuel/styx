@@ -27,7 +27,7 @@ public enum XS2AJsonKeys {
     CHALLENGE_IMAGE("image"),
     CHALLENGE_DATA("data"),
     CHALLENGE_IMAGE_LINK("imageLink"),
-    CHALLENGE_OTP_MAX_LENGTH("optMaxLength"),
+    CHALLENGE_OTP_MAX_LENGTH("otpMaxLength"),
     CHALLENGE_OTP_FORMAT("otpFormat"),
     CHALLENGE_ADDITIONAL_INFORMATION("additionalInformation"),
     CURRENCY("currency"),

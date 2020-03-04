@@ -29,7 +29,6 @@ import net.petafuel.styx.core.xs2a.sca.SCAUtils;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.InitiatedPaymentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentStatusSerializer;
@@ -51,6 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
+import java.util.List;
 import java.util.UUID;
 
 public class BerlinGroupPIS extends BasicAuthorisationService implements PISInterface {
@@ -222,7 +222,18 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
         }
     }
 
-    public SCA startAuthorisation(StartAuthorisationRequest request) throws BankRequestFailedException {
+    @Override
+    public SCA startAuthorisation(XS2ARequest request) throws BankRequestFailedException {
         return super.startAuthorisation(request);
+    }
+
+    @Override
+    public List<String> getAuthorisationRequest(XS2ARequest request) throws BankRequestFailedException {
+        return super.getAuthorisationRequest(request);
+    }
+
+    @Override
+    public String getSCAStatus(XS2ARequest request) throws BankRequestFailedException {
+        return super.getSCAStatus(request);
     }
 }

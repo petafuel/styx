@@ -4,15 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
 import net.petafuel.styx.core.xs2a.contracts.BasicAuthorisationService;
-import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
-import net.petafuel.styx.core.xs2a.entities.PSUData;
-import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
-import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
@@ -21,13 +17,14 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.Accoun
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentStatusSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.SCASerializer;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 public class BerlinGroupCS extends BasicAuthorisationService implements CSInterface {
@@ -38,7 +35,6 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
     private static final String GET_CONSENT = "/v1/consents/%s";
     private static final String GET_CONSENT_STATUS = "/v1/consents/%s/status";
     private static final String DELETE_CONSENT = "/v1/consents/%s";
-    private static final String CREATE_AUTHORISATION_RESOURCE = "/v1/consents/%s/authorisations";
     private static final String UPDATE_PSU_DATA = "/v1/consents/%s/authorisations/%s";
 
     public BerlinGroupCS(String url, IXS2AHttpSigner signer) {
@@ -127,33 +123,6 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
         }
     }
 
-    //TODO DELETE THE METHOD BELOW
-    /**
-     *
-     * If the bank requires us to create a new authroisation resource, use this method
-     *
-     * @param consentCreateAuthResourceRequest Requires a request that contains at least the consent id
-     * @return Returns all relevant SCA informations
-     * @throws BankRequestFailedException
-     */
-    @Override
-    public SCA startAuthorisationProcess(XS2ARequest consentCreateAuthResourceRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(CREATE_AUTHORISATION_RESOURCE, consentCreateAuthResourceRequest.getConsentId()));
-        this.createBody(RequestType.POST, JSON, consentCreateAuthResourceRequest);
-        this.createHeaders(consentCreateAuthResourceRequest);
-
-        try (Response response = this.execute()) {
-            String responseBody = extractResponseBody(response, 201);
-
-            Gson gson = new GsonBuilder().registerTypeAdapter(SCA.class, new SCASerializer()).create();
-            SCA sca = gson.fromJson(responseBody, SCA.class);
-            SCAUtils.parseSCAApproach(sca, response);
-            return sca;
-        } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage(), e);
-        }
-    }
-
     @Override
     public void updatePSUData(XS2ARequest consentUpdatePSUDataRequest) throws BankRequestFailedException {
         this.setUrl(this.url + String.format(UPDATE_PSU_DATA, consentUpdatePSUDataRequest.getConsentId(), ((ConsentUpdatePSUDataRequest) consentUpdatePSUDataRequest).getAuthorisationId()));
@@ -168,7 +137,17 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
     }
 
     @Override
-    public SCA startAuthorisation(StartAuthorisationRequest request) throws BankRequestFailedException {
+    public SCA startAuthorisation(XS2ARequest request) throws BankRequestFailedException {
         return super.startAuthorisation(request);
+    }
+
+    @Override
+    public List<String> getAuthorisationRequest(GetAuthorisationRequest request) throws BankRequestFailedException {
+        return super.getAuthorisationRequest(request);
+    }
+
+    @Override
+    public String getSCAStatus(GetSCAStatusRequest request) throws BankRequestFailedException {
+        return super.getSCAStatus(request);
     }
 }

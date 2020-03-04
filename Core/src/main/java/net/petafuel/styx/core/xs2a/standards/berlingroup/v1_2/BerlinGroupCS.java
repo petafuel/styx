@@ -19,8 +19,6 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.Consen
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.SCASerializer;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +35,6 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
     private static final String GET_CONSENT = "/v1/consents/%s";
     private static final String GET_CONSENT_STATUS = "/v1/consents/%s/status";
     private static final String DELETE_CONSENT = "/v1/consents/%s";
-    private static final String CREATE_AUTHORISATION_RESOURCE = "/v1/consents/%s/authorisations";
     private static final String UPDATE_PSU_DATA = "/v1/consents/%s/authorisations/%s";
 
     public BerlinGroupCS(String url, IXS2AHttpSigner signer) {

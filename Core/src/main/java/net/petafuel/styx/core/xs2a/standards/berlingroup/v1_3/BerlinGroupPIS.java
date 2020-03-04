@@ -26,12 +26,9 @@ import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.InitiatedPaymentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentStatusSerializer;
@@ -231,12 +228,12 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
     }
 
     @Override
-    public List<String> getAuthorisationRequest(GetAuthorisationRequest request) throws BankRequestFailedException {
+    public List<String> getAuthorisationRequest(XS2ARequest request) throws BankRequestFailedException {
         return super.getAuthorisationRequest(request);
     }
 
     @Override
-    public String getSCAStatus(GetSCAStatusRequest request) throws BankRequestFailedException {
+    public String getSCAStatus(XS2ARequest request) throws BankRequestFailedException {
         return super.getSCAStatus(request);
     }
 }

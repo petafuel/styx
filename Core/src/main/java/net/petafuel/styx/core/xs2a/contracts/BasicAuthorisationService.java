@@ -21,11 +21,11 @@ import java.util.List;
 
 public class BasicAuthorisationService extends BasicService {
 
-    public static final String AUTHORISATIONS = "/v1/%s/authorisations";
-    public static final String PIS_AUTHORISATION_REQUEST = "/v1/%s/%s/%s/authorisations";
-    public static final String AIS_AUTHORISATION_REQUEST = "/v1/consents/%s/authorisations";
-    public static final String PIS_SCA_STATUS = "/v1/%s/%s/%s/authorisations/%s";
-    public static final String AIS_SCA_STATUS = "/v1/consents/%s/authorisations/%s";
+    private static final String AUTHORISATIONS = "/v1/%s/authorisations";
+    private static final String PIS_AUTHORISATION_REQUEST = "/v1/%s/%s/%s/authorisations";
+    private static final String AIS_AUTHORISATION_REQUEST = "/v1/consents/%s/authorisations";
+    private static final String PIS_SCA_STATUS = "/v1/%s/%s/%s/authorisations/%s";
+    private static final String AIS_SCA_STATUS = "/v1/consents/%s/authorisations/%s";
 
     public BasicAuthorisationService(String url, IXS2AHttpSigner signer) {
         this(LogManager.getLogger(BasicAuthorisationService.class), url, signer);
@@ -55,7 +55,8 @@ public class BasicAuthorisationService extends BasicService {
         }
     }
 
-    protected List<String> getAuthorisationRequest(GetAuthorisationRequest request) throws BankRequestFailedException {
+    protected List<String> getAuthorisationRequest(XS2ARequest xs2ARequest) throws BankRequestFailedException {
+        GetAuthorisationRequest request = (GetAuthorisationRequest) xs2ARequest;
         if (request.getType().equals("AIS")) {
             this.setUrl(this.url + String.format(AIS_AUTHORISATION_REQUEST, request.getConsentId()));
         } else {
@@ -76,7 +77,8 @@ public class BasicAuthorisationService extends BasicService {
         }
     }
 
-    protected String getSCAStatus(GetSCAStatusRequest request) throws BankRequestFailedException {
+    protected String getSCAStatus(XS2ARequest xs2ARequest) throws BankRequestFailedException {
+        GetSCAStatusRequest request = (GetSCAStatusRequest) xs2ARequest;
         if (request.getType().equals("AIS")) {
             this.setUrl(this.url + String.format(AIS_SCA_STATUS, request.getConsentId(), request.getAuthorisationId()));
         } else {

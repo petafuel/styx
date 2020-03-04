@@ -19,7 +19,8 @@ import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import org.junit.Assert;
@@ -30,7 +31,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 public class AuthorisationsTest {
 
@@ -78,11 +78,12 @@ public class AuthorisationsTest {
         Assert.assertTrue(standard.isCSImplemented());
 
         PSUData psuData = new PSUData();
-        psuData.setPassword(SPARKASSE_PIN_VALID);
+        psuData.setPassword(SPARKASSE_PIN);
 
         Consent consent = this.getSparkasseConsent(standard.getCs());
-        StartAuthorisationRequest request = new StartAuthorisationRequest(psuData,"consents/" + consent.getId());
-        request.getPsu().setId("smsTAN_singleMed");
+        StartAuthorisationRequest request = new StartAuthorisationRequest("consents/" + consent.getId());
+        request.setPsuData(psuData);
+        request.getPsu().setId(SPARKASSE_PSU_ID);
 
         SCA sca = standard.getCs().startAuthorisation(request);
 
@@ -122,9 +123,10 @@ public class AuthorisationsTest {
         Assert.assertTrue(standard.isPISImplemented());
 
         InitiatedPayment payment = this.getTargoPayment(standard.getPis());
-        StartAuthorisationRequest request = new StartAuthorisationRequest(new PSUData(), PaymentService.PAYMENTS.getValue() + "/" +
+        StartAuthorisationRequest request = new StartAuthorisationRequest(PaymentService.PAYMENTS.getValue() + "/" +
                 PaymentProduct.SEPA_CREDIT_TRANSFERS.getValue() + "/" + payment.getPaymentId());
         request.getPsu().setId(TARGO_PSU_ID);
+        request.setPsuData(new PSUData());
 
         SCA sca = standard.getPis().startAuthorisation(request);
 
@@ -224,7 +226,7 @@ public class AuthorisationsTest {
         return pisInterface.initiatePayment(request);
     }
 
-    public Consent getConsentFiducia(CSInterface csInterface) throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+    public Consent getConsentFiducia(CSInterface csInterface) throws BankRequestFailedException {
 
         List<Account> balances = new LinkedList<>();
         balances.add(new Account("DE40100100103307118608"));
@@ -236,7 +238,10 @@ public class AuthorisationsTest {
         consent.setCombinedServiceIndicator(false);
         consent.setRecurringIndicator(false);
         consent.setFrequencyPerDay(4);
-        consent.setValidUntil(new Date());
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.MONTH, 2);
+        consent.setValidUntil(calendar.getTime());
 
         CreateConsentRequest createConsentRequest = new CreateConsentRequest(consent);
 

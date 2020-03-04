@@ -15,7 +15,7 @@ import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
 import net.petafuel.styx.api.v1.payment.entity.PeriodicPaymentInitiation;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
-import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
+import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import org.apache.logging.log4j.LogManager;
@@ -61,7 +61,7 @@ public class PaymentInitiationResource extends PSUResource {
     @RequiresMandatoryHeader
     public Response initiateSinglePayment(@BeanParam PaymentTypeBean paymentTypeBean,
                                           @Valid SinglePaymentInitiation singlePaymentBody) throws BankRequestFailedException {
-        XS2APaymentInitiationRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildSinglePaymentRequest(singlePaymentBody);
+        XS2APaymentRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildSinglePaymentRequest(singlePaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
         PaymentResponse paymentResponse = new PaymentResponse(sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest));
         LOG.info("Initiate single payment bic={} aspsp_name={} aspsp_id={} paymentId={}", sadService.getXs2AStandard().getAspsp().getBic(), sadService.getXs2AStandard().getAspsp().getName(), sadService.getXs2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
@@ -87,7 +87,7 @@ public class PaymentInitiationResource extends PSUResource {
     public Response initiateBulkPayment(
             @BeanParam PaymentTypeBean paymentTypeBean,
             @Valid BulkPaymentInitiation bulkPaymentBody) throws BankRequestFailedException {
-        XS2APaymentInitiationRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildBulkPaymentRequest(bulkPaymentBody);
+        XS2APaymentRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildBulkPaymentRequest(bulkPaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
 
         PaymentResponse paymentResponse = new PaymentResponse(sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest));
@@ -113,7 +113,7 @@ public class PaymentInitiationResource extends PSUResource {
     @RequiresMandatoryHeader
     public Response initiatePeriodicPayment(@BeanParam PaymentTypeBean paymentTypeBean,
                                             @Valid PeriodicPaymentInitiation periodicPaymentBody) throws BankRequestFailedException {
-        XS2APaymentInitiationRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildPeriodicPaymentRequest(periodicPaymentBody);
+        XS2APaymentRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildPeriodicPaymentRequest(periodicPaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
 
         PaymentResponse paymentResponse = new PaymentResponse(sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest));

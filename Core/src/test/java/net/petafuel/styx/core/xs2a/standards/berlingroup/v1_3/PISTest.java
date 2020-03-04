@@ -86,7 +86,7 @@ public class PISTest {
         ReadPaymentRequest r1 = new ReadPaymentRequest(
                 PaymentService.PAYMENTS,
                 PaymentProduct.SEPA_CREDIT_TRANSFERS,
-                initiateJsonPaymentForTest());
+                initiateJsonPaymentForTest(), new PSU());
         r1.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         Payment payment = (Payment) standard.getPis().getPayment(r1);
@@ -102,7 +102,7 @@ public class PISTest {
         ReadPaymentRequest r1 = new ReadPaymentRequest(
                 PaymentService.PERIODIC_PAYMENTS,
                 PaymentProduct.SEPA_CREDIT_TRANSFERS,
-                initiateJsonPeriodicPaymentForTest());
+                initiateJsonPeriodicPaymentForTest(), new PSU());
         r1.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         Payment payment = (Payment) standard.getPis().getPayment(r1);
@@ -118,7 +118,7 @@ public class PISTest {
         ReadPaymentRequest r1 = new ReadPaymentRequest(
                 PaymentService.BULK_PAYMENTS,
                 PaymentProduct.SEPA_CREDIT_TRANSFERS,
-                initiateJsonBulkPaymentForTest());
+                initiateJsonBulkPaymentForTest(), new PSU());
         r1.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
         BulkPayment payment = (BulkPayment) standard.getPis().getPayment(r1);
@@ -134,7 +134,7 @@ public class PISTest {
         ReadPaymentRequest r1 = new ReadPaymentRequest(
                 PaymentService.PAYMENTS,
                 PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS,
-                initiateXMLPaymentForTest());
+                initiateXMLPaymentForTest(), new PSU());
 
         Payment payment = (Payment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
@@ -149,7 +149,7 @@ public class PISTest {
         ReadPaymentRequest r1 = new ReadPaymentRequest(
                 PaymentService.PERIODIC_PAYMENTS,
                 PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS,
-                initiateXMLPeriodicPaymentForTest());
+                initiateXMLPeriodicPaymentForTest(), new PSU());
 
         PeriodicPayment payment = (PeriodicPayment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);
@@ -164,7 +164,7 @@ public class PISTest {
         ReadPaymentRequest r1 = new ReadPaymentRequest(
                 PaymentService.BULK_PAYMENTS,
                 PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS,
-                initializeXMLBulkPaymentForTest());
+                initializeXMLBulkPaymentForTest(), new PSU());
 
         BulkPayment payment = (BulkPayment) standard.getPis().getPayment(r1);
         Assert.assertNotNull(payment);

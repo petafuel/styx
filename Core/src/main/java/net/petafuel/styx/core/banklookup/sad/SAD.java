@@ -148,6 +148,15 @@ public class SAD implements BankLookUpInterface {
         }
         JsonObject jsonConfig = gson.fromJson(rawJsonConfig, JsonObject.class);
 
+        //Merge styx configs into the normal implementer options
+        if(aspsp.getConfig().getStyxConfiguration() != null){
+            JsonObject styxConfigs = gson.fromJson(aspsp.getConfig().getStyxConfiguration(), JsonObject.class);
+            styxConfigs.entrySet().forEach(entry -> jsonConfig.add(entry.getKey(), entry.getValue()));
+        } else {
+            JsonObject styxConfigs = gson.fromJson(aspsp.getConfig().getStandard().getStyxConfigTemplate(), JsonObject.class);
+            styxConfigs.entrySet().forEach(entry -> jsonConfig.add(entry.getKey(), entry.getValue()));
+        }
+
         jsonConfig.entrySet().parallelStream().forEach(entry -> {
             JsonObject content = entry.getValue().getAsJsonObject();
             ImplementerOption implementerOption = new ImplementerOption();

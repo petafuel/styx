@@ -253,7 +253,9 @@ public class TargobankTest {
         consentUpdatePSUDataRequest.setPsu(psu);
         consentUpdatePSUDataRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
 
-        standard.getCs().updatePSUData(consentUpdatePSUDataRequest);
+        Assertions.assertAll(() -> {
+            standard.getCs().updatePSUData(consentUpdatePSUDataRequest);
+        });
     }
 
     @Test

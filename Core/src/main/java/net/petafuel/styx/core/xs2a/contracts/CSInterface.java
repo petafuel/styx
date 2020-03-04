@@ -3,8 +3,6 @@ package net.petafuel.styx.core.xs2a.contracts;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
 
 import java.util.List;
 
@@ -51,7 +49,7 @@ public interface CSInterface {
 
     SCA startAuthorisation(XS2ARequest request) throws BankRequestFailedException;
 
-    List<String> getAuthorisationRequest(GetAuthorisationRequest request) throws BankRequestFailedException;
+    List<String> getAuthorisationRequest(XS2ARequest request) throws BankRequestFailedException;
 
-    String getSCAStatus(GetSCAStatusRequest request) throws BankRequestFailedException;
+    String getSCAStatus(XS2ARequest request) throws BankRequestFailedException;
 }

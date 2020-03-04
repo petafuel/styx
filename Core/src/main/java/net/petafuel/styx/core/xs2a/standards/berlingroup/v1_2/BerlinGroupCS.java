@@ -3,9 +3,9 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
-import net.petafuel.styx.core.xs2a.contracts.BasicAuthorisationService;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
+import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
@@ -16,9 +16,14 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsent
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.AccountSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentStatusSerializer;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BasicAuthorisationService;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.SelectAuthenticationMethodRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUAuthenticationRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUIdentificationRequest;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +40,6 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
     private static final String GET_CONSENT = "/v1/consents/%s";
     private static final String GET_CONSENT_STATUS = "/v1/consents/%s/status";
     private static final String DELETE_CONSENT = "/v1/consents/%s";
-    private static final String UPDATE_PSU_DATA = "/v1/consents/%s/authorisations/%s";
 
     public BerlinGroupCS(String url, IXS2AHttpSigner signer) {
         super(LOG, url, signer);
@@ -123,31 +127,39 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
         }
     }
 
-    @Override
-    public void updatePSUData(XS2ARequest consentUpdatePSUDataRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(UPDATE_PSU_DATA, consentUpdatePSUDataRequest.getConsentId(), ((ConsentUpdatePSUDataRequest) consentUpdatePSUDataRequest).getAuthorisationId()));
-        this.createBody(RequestType.PUT, JSON, consentUpdatePSUDataRequest);
-        this.createHeaders(consentUpdatePSUDataRequest);
 
-        try (Response response = this.execute()) {
-            //TODO Für den EMBEDDED Approach muss hier vervollständigt werden
-        } catch (IOException e) {
-            throw new BankRequestFailedException(e.getMessage(), e);
-        }
+    @Override
+    public SCA startAuthorisation(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+        return super.startAuthorisation((StartAuthorisationRequest) xs2ARequest);
     }
 
     @Override
-    public SCA startAuthorisation(XS2ARequest request) throws BankRequestFailedException {
-        return super.startAuthorisation(request);
+    public List<String> getAuthorisations(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+        return super.getAuthorisations((GetAuthorisationsRequest) xs2AAuthorisationRequest);
     }
 
     @Override
-    public List<String> getAuthorisationRequest(GetAuthorisationRequest request) throws BankRequestFailedException {
-        return super.getAuthorisationRequest(request);
+    public SCA.Status getSCAStatus(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+        return super.getSCAStatus((GetSCAStatusRequest) xs2AAuthorisationRequest);
     }
 
     @Override
-    public String getSCAStatus(GetSCAStatusRequest request) throws BankRequestFailedException {
-        return super.getSCAStatus(request);
+    public SCA updatePSUIdentification(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+        return super.updatePSUIdentification((UpdatePSUIdentificationRequest) xs2ARequest);
+    }
+
+    @Override
+    public SCA updatePSUAuthentication(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+        return super.updatePSUAuthentication((UpdatePSUAuthenticationRequest) xs2ARequest);
+    }
+
+    @Override
+    public SCA selectAuthenticationMethod(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+        return super.selectAuthenticationMethod((SelectAuthenticationMethodRequest) xs2ARequest);
+    }
+
+    @Override
+    public SCA authoriseTransaction(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+        return super.authoriseTransaction((AuthoriseTransactionRequest) xs2AAuthorisationRequest);
     }
 }

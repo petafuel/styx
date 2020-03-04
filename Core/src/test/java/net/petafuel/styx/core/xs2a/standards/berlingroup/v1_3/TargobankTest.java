@@ -241,25 +241,6 @@ public class TargobankTest {
 
     @Test
     @Tag("integration")
-    public void updatePSUDataConsent() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
-        XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
-
-        PSU psu = new PSU("PSD2TEST4");
-        psu.setIp("255.255.255.0");
-        ConsentUpdatePSUDataRequest consentUpdatePSUDataRequest =
-                new ConsentUpdatePSUDataRequest(
-                        CONSENT,
-                        "03f88668-06a3-406b-af1c-436979ad04cf");
-        consentUpdatePSUDataRequest.setPsu(psu);
-        consentUpdatePSUDataRequest.getHeaders().put("X-bvpsd2-test-apikey", BANK_VERLAG_TOKEN);
-
-        Assertions.assertAll(() -> {
-            standard.getCs().updatePSUData(consentUpdatePSUDataRequest);
-        });
-    }
-
-    @Test
-    @Tag("integration")
     public void initiateJsonPayment() throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 

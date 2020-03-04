@@ -21,14 +21,14 @@ public class AuthenticationObject {
 
     /**
      * This is a general name of the Authentication method
-     * This could be configurated by the PSU through an ASPSP frontend or
+     * This could be configured by the PSU through an ASPSP frontend or
      * this could also be a description by the ASPSP
      * mandatory
      */
     private String name;
 
     /**
-     * Detailed infomration about the SCA Method for the PSU
+     * Detailed information about the SCA Method for the PSU
      * optional
      */
     private String explanation;

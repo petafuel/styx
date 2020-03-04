@@ -117,8 +117,8 @@
             <version>42.2.10</version>
         </dependency>
         <dependency>
-            <groupId>org.simpleframework</groupId>
-            <artifactId>simple-xml</artifactId>
+            <groupId>com.carrotsearch.thirdparty</groupId>
+            <artifactId>simple-xml-safe</artifactId>
             <version>2.7.1</version>
         </dependency>
         <dependency>
@@ -141,5 +141,28 @@
             <artifactId>commons-dbcp</artifactId>
             <version>1.4</version>
         </dependency>
+        <!-- JSON-P -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.json</artifactId>
+            <version>1.1.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- JSON-B API -->
+        <dependency>
+            <groupId>jakarta.json.bind</groupId>
+            <artifactId>jakarta.json.bind-api</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+
+        <!-- Yasson (JSON-B implementation) -->
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>yasson</artifactId>
+            <version>1.0.3</version>
+            <scope>runtime</scope>
+        </dependency>
+
     </dependencies>
 </project>

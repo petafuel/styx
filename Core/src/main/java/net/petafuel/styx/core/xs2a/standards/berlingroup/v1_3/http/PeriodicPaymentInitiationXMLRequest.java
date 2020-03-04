@@ -2,7 +2,7 @@ package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
+import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PeriodicPaymentMultipartBodySerializer;
 import okhttp3.Headers;
@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
-public class PeriodicPaymentInitiationXMLRequest extends XS2APaymentInitiationRequest {
+public class PeriodicPaymentInitiationXMLRequest extends XS2APaymentRequest {
 
     private RequestBody body;
 

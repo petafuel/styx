@@ -1,6 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
-import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
+import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
@@ -10,7 +10,7 @@ import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import java.util.Optional;
 
-public class PeriodicPaymentInitiationJsonRequest extends XS2APaymentInitiationRequest {
+public class PeriodicPaymentInitiationJsonRequest extends XS2APaymentRequest {
 
     private PeriodicPayment payment;
 

@@ -17,8 +17,6 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.Accoun
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentStatusSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -142,12 +140,12 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
     }
 
     @Override
-    public List<String> getAuthorisationRequest(GetAuthorisationRequest request) throws BankRequestFailedException {
+    public List<String> getAuthorisationRequest(XS2ARequest request) throws BankRequestFailedException {
         return super.getAuthorisationRequest(request);
     }
 
     @Override
-    public String getSCAStatus(GetSCAStatusRequest request) throws BankRequestFailedException {
+    public String getSCAStatus(XS2ARequest request) throws BankRequestFailedException {
         return super.getSCAStatus(request);
     }
 }

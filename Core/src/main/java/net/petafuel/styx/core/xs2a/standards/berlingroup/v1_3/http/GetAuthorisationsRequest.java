@@ -8,20 +8,17 @@ import javax.json.Json;
 import javax.json.bind.JsonbConfig;
 import java.util.Optional;
 
-public class GetSCAStatusRequest extends XS2AAuthorisationRequest {
-    public static final String PIS_GET_SCA_STATUS = "/v1/%s/%s/%s/authorisations/%s";
-    public static final String CS_GET_SCA_STATUS = "/v1/consents/%s/authorisations/%s";
-    private String authorisationId;
+public class GetAuthorisationsRequest extends XS2AAuthorisationRequest {
+    public static final String CS_GET_AUTHORISATIONS = "/v1/consents/%s/authorisations";
+    public static final String PIS_GET_AUTHORISATIONS = "/v1/%s/%s/%s/authorisations";
 
-    public GetSCAStatusRequest(PaymentService paymentService, PaymentProduct paymentProduct, String paymentId, String authorisationId) {
+
+    public GetAuthorisationsRequest(PaymentService paymentService, PaymentProduct paymentProduct, String paymentId) {
         super(paymentService, paymentProduct, paymentId);
-        this.authorisationId = authorisationId;
     }
 
-    public GetSCAStatusRequest(String consentId, String authorisationId) {
+    public GetAuthorisationsRequest(String consentId) {
         super(consentId);
-        this.authorisationId = authorisationId;
-
     }
 
     @Override
@@ -39,13 +36,12 @@ public class GetSCAStatusRequest extends XS2AAuthorisationRequest {
     @Override
     public String getServiceURL() {
         if (isPIS()) {
-            return String.format(PIS_GET_SCA_STATUS,
+            return String.format(PIS_GET_AUTHORISATIONS,
                     getPaymentService().getValue(),
                     getPaymentProduct().getValue(),
-                    getPaymentId(),
-                    authorisationId);
+                    getPaymentId());
         } else {
-            return String.format(CS_GET_SCA_STATUS, getConsentId(), authorisationId);
+            return String.format(CS_GET_AUTHORISATIONS, getConsentId());
         }
     }
 }

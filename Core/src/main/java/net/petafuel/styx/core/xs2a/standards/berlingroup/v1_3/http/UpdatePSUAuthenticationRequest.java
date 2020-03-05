@@ -14,28 +14,26 @@ import javax.json.bind.JsonbBuilder;
 import java.io.StringReader;
 import java.util.Optional;
 
-public class StartAuthorisationRequest extends XS2AAuthorisationRequest {
-    public static final String CS_START_AUTHORISATIONS = "/v1/consents/%s/authorisations";
-    public static final String PIS_START_AUTHORISATIONS = "/v1/%s/%s/%s/authorisations";
+public class UpdatePSUAuthenticationRequest extends XS2AAuthorisationRequest {
+    // "/v1/{payment-service}/{payment.product}/{paymentId}/authorisations/{authorisationId}"
+    public static final String PIS_UPDATE_PSU_DATA = "/v1/%s/%s/%s/authorisations/%s";
+    // "/v1/consents/{consentId}/authorisations/{authorsationId}"
+    public static final String CS_UPDATE_PSU_DATA = "/v1/consents/%s/authorisations/%s";
+    private String authorisationId;
     private PSUData psuData;
 
-    public StartAuthorisationRequest(PSU psu, PSUData psuData, PaymentService paymentService, PaymentProduct paymentProduct, String paymentId) {
+    public UpdatePSUAuthenticationRequest(PSU psu, PSUData psuData, PaymentService paymentService, PaymentProduct paymentProduct, String paymentId, String authorisationId) {
         super(paymentService, paymentProduct, paymentId);
-        setPsu(psu);
         this.psuData = psuData;
+        this.authorisationId = authorisationId;
+        setPsu(psu);
     }
 
-    public StartAuthorisationRequest(PSUData psuData, String consentId) {
+    public UpdatePSUAuthenticationRequest(PSU psu,PSUData psuData, String consentId, String authorisationId) {
         super(consentId);
         this.psuData = psuData;
-    }
-
-    public PSUData getPsuData() {
-        return psuData;
-    }
-
-    public void setPsuData(PSUData psuData) {
-        this.psuData = psuData;
+        this.authorisationId = authorisationId;
+        setPsu(psu);
     }
 
     @Override
@@ -55,13 +53,13 @@ public class StartAuthorisationRequest extends XS2AAuthorisationRequest {
     @Override
     public String getServiceURL() {
         if (isPIS()) {
-            return String.format(PIS_START_AUTHORISATIONS,
+            return String.format(PIS_UPDATE_PSU_DATA,
                     getPaymentService().getValue(),
                     getPaymentProduct().getValue(),
-                    getPaymentId());
-
+                    getPaymentId(),
+                    authorisationId);
         } else {
-            return String.format(CS_START_AUTHORISATIONS, getConsentId());
+            return String.format(CS_UPDATE_PSU_DATA, getConsentId(), authorisationId);
         }
     }
 }

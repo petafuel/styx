@@ -8,12 +8,11 @@ import net.petafuel.jsepa.SEPAParser;
 import net.petafuel.jsepa.exception.SEPAParsingException;
 import net.petafuel.jsepa.facades.ReportConverter;
 import net.petafuel.jsepa.model.pain002.TransactionReport;
-import net.petafuel.styx.core.xs2a.contracts.BasicAuthorisationService;
 import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
+import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
-import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.Payment;
@@ -26,9 +25,16 @@ import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationsRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.SelectAuthenticationMethodRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUAuthenticationRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUIdentificationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.InitiatedPaymentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentStatusSerializer;
@@ -104,7 +110,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
     }
 
     @Override
-    public PaymentStatus getPaymentStatus(XS2ARequest xs2AGetRequest) throws BankRequestFailedException {
+    public PaymentStatus getPaymentStatus(XS2APaymentRequest xs2AGetRequest) throws BankRequestFailedException {
 
         ReadPaymentStatusRequest request = (ReadPaymentStatusRequest) xs2AGetRequest;
 
@@ -222,18 +228,39 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
         }
     }
 
+
     @Override
-    public SCA startAuthorisation(XS2ARequest request) throws BankRequestFailedException {
-        return super.startAuthorisation(request);
+    public SCA startAuthorisation(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+        return super.startAuthorisation((StartAuthorisationRequest) xs2ARequest);
     }
 
     @Override
-    public List<String> getAuthorisationRequest(XS2ARequest request) throws BankRequestFailedException {
-        return super.getAuthorisationRequest(request);
+    public List<String> getAuthorisations(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+        return super.getAuthorisations((GetAuthorisationsRequest) xs2AAuthorisationRequest);
     }
 
     @Override
-    public String getSCAStatus(XS2ARequest request) throws BankRequestFailedException {
-        return super.getSCAStatus(request);
+    public SCA.Status getSCAStatus(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+        return super.getSCAStatus((GetSCAStatusRequest) xs2AAuthorisationRequest);
+    }
+
+    @Override
+    public SCA updatePSUIdentification(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+        return super.updatePSUIdentification((UpdatePSUIdentificationRequest) xs2ARequest);
+    }
+
+    @Override
+    public SCA updatePSUAuthentication(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+        return super.updatePSUAuthentication((UpdatePSUAuthenticationRequest) xs2ARequest);
+    }
+
+    @Override
+    public SCA selectAuthenticationMethod(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+        return super.selectAuthenticationMethod((SelectAuthenticationMethodRequest) xs2ARequest);
+    }
+
+    @Override
+    public SCA authoriseTransaction(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+        return super.authoriseTransaction((AuthoriseTransactionRequest) xs2AAuthorisationRequest);
     }
 }

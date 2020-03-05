@@ -8,12 +8,11 @@ import net.petafuel.jsepa.SEPAParser;
 import net.petafuel.jsepa.exception.SEPAParsingException;
 import net.petafuel.jsepa.facades.ReportConverter;
 import net.petafuel.jsepa.model.pain002.TransactionReport;
-import net.petafuel.styx.core.xs2a.XS2APaymentInitiationRequest;
+import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
-import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.Payment;
@@ -74,7 +73,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
     }
 
     @Override
-    public InitiatedPayment initiatePayment(XS2APaymentInitiationRequest xs2ARequest) throws BankRequestFailedException {
+    public InitiatedPayment initiatePayment(XS2APaymentRequest xs2ARequest) throws BankRequestFailedException {
 
         PaymentProduct product = xs2ARequest.getPaymentProduct();
         PaymentService service = xs2ARequest.getPaymentService();
@@ -111,7 +110,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
     }
 
     @Override
-    public PaymentStatus getPaymentStatus(XS2ARequest xs2AGetRequest) throws BankRequestFailedException {
+    public PaymentStatus getPaymentStatus(XS2APaymentRequest xs2AGetRequest) throws BankRequestFailedException {
 
         ReadPaymentStatusRequest request = (ReadPaymentStatusRequest) xs2AGetRequest;
 

@@ -249,13 +249,9 @@ public class AuthorisationsTest {
 
     }
 
-    @Test
-    @Tag("integration")
-    public void updatePSUIdentification() {
-    }
 
     @Test
-    @DisplayName("[Targobank] start Authorisation, update PSU Identification, update PSU Authentication, select SCA Method, authroise Transaction")
+    @DisplayName("[Targobank] start Authorisation, update PSU Authentication, select SCA Method, authroise Transaction")
     @Tag("integration")
     public void finalizePaymentTargo() throws BankLookupFailedException, BankNotFoundException, BankRequestFailedException {
         XS2AStandard standard = (new SAD()).getBankByBIC(TARGO_BIC, true);

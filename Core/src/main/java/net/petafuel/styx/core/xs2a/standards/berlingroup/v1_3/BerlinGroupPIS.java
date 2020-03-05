@@ -151,7 +151,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
     //not possible to avoid code complexity at this point
     @SuppressWarnings("squid:S3776")
     @Override
-    public InitializablePayment getPayment(XS2ARequest xs2AGetRequest) throws BankRequestFailedException {
+    public InitializablePayment getPayment(XS2APaymentRequest xs2AGetRequest) throws BankRequestFailedException {
 
         ReadPaymentRequest request = (ReadPaymentRequest) xs2AGetRequest;
 

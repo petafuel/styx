@@ -16,6 +16,8 @@ public class Standard {
     private String version;
     @DatabaseColumn("standards_config_template")
     private String configTemplate;
+    @DatabaseColumn("standards_styx_config_template")
+    private String styxConfigTemplate;
     @DatabaseColumn("standards_updated_at")
     private Date updatedAt;
     @DatabaseColumn("standards_created_at")
@@ -67,5 +69,13 @@ public class Standard {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getStyxConfigTemplate() {
+        return styxConfigTemplate;
+    }
+
+    public void setStyxConfigTemplate(String styxConfigTemplate) {
+        this.styxConfigTemplate = styxConfigTemplate;
     }
 }

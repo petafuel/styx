@@ -8,7 +8,7 @@ import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 
 public interface PISInterface extends SCAInterface {
 
-    InitiatedPayment initiatePayment(XS2APaymentInitiationRequest xs2ARequest) throws BankRequestFailedException;
+    InitiatedPayment initiatePayment(XS2APaymentRequest xs2ARequest) throws BankRequestFailedException;
 
     PaymentStatus getPaymentStatus(XS2ARequest request) throws BankRequestFailedException;
 

@@ -68,6 +68,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
         invocationBuilder.header("PSU-BIC", "CMCIDEDD");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
         invocationBuilder.header("redirectPreferred", true);
+        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
         Jsonb jsonb = JsonbBuilder.create();
         SinglePaymentInitiation singlePaymentInitiation = jsonb.fromJson("{\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", SinglePaymentInitiation.class);
@@ -89,6 +90,8 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
         invocationBuilder.header("PSU-BIC", "CMCIDEDD");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
         invocationBuilder.header("redirectPreferred", true);
+        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+
         Invocation invocation = invocationBuilder.buildPost(Entity.entity(bulkPaymentInitiation, MediaType.APPLICATION_JSON));
         Response response = invocation.invoke(Response.class);
         Assert.assertEquals(201, response.getStatus());
@@ -106,6 +109,8 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
         invocationBuilder.header("PSU-BIC", "CSDBDE71");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
         invocationBuilder.header("redirectPreferred", true);
+        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+
         Invocation invocation = invocationBuilder.buildPost(Entity.entity(periodicPaymentInitiation, MediaType.APPLICATION_JSON));
         Response response = invocation.invoke(Response.class);
         Assert.assertEquals(201, response.getStatus());
@@ -123,6 +128,8 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
         invocationBuilder.header("PSU-BIC", "CMCIDEDD");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
         invocationBuilder.header("redirectPreferred", true);
+        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+
         Invocation invocation = invocationBuilder.buildPost(Entity.entity(periodicPaymentInitiation, MediaType.APPLICATION_JSON));
         Response response = invocation.invoke(Response.class);
         Assert.assertEquals(201, response.getStatus());

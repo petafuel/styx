@@ -74,6 +74,7 @@ public class AspspUrlMapper {
                 case UPDATE_ENCRYPTED_PSU_AUTHENTICATION:
                 case UPDATE_ADDITIONAL_PSU_AUTHENTICATION:
                 case UPDATE_ENCRYPTED_ADDITIONAL_PSU_AUTHENTICATION:
+                case AUTHORISE_TRANSACTION:
                 case SCA_STATUS:
                     if (isPIS) {
                         route = String.format(PIS_UPDATE_AUTHORISATION, paymentService.getValue(), paymentProduct.getValue(), paymentId, authorisationId);

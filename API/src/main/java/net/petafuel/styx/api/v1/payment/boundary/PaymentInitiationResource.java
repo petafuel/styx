@@ -63,6 +63,7 @@ public class PaymentInitiationResource extends PSUResource {
                                           @Valid SinglePaymentInitiation singlePaymentBody) throws BankRequestFailedException {
         XS2APaymentRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildSinglePaymentRequest(singlePaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
+        aspspRequest.getHeaders().putAll(getSandboxHeaders());
         PaymentResponse paymentResponse = new PaymentResponse(sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest));
         LOG.info("Initiate single payment bic={} aspsp_name={} aspsp_id={} paymentId={}", sadService.getXs2AStandard().getAspsp().getBic(), sadService.getXs2AStandard().getAspsp().getName(), sadService.getXs2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
 
@@ -89,7 +90,7 @@ public class PaymentInitiationResource extends PSUResource {
             @Valid BulkPaymentInitiation bulkPaymentBody) throws BankRequestFailedException {
         XS2APaymentRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildBulkPaymentRequest(bulkPaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
-
+        aspspRequest.getHeaders().putAll(getSandboxHeaders());
         PaymentResponse paymentResponse = new PaymentResponse(sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest));
         LOG.info("Initiate bulk payment bic={} aspsp_name={} aspsp_id={} paymentId={}", sadService.getXs2AStandard().getAspsp().getBic(), sadService.getXs2AStandard().getAspsp().getName(), sadService.getXs2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
 
@@ -115,7 +116,7 @@ public class PaymentInitiationResource extends PSUResource {
                                             @Valid PeriodicPaymentInitiation periodicPaymentBody) throws BankRequestFailedException {
         XS2APaymentRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildPeriodicPaymentRequest(periodicPaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
-
+        aspspRequest.getHeaders().putAll(getSandboxHeaders());
         PaymentResponse paymentResponse = new PaymentResponse(sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest));
         LOG.info("Initiate periodic payment bic={} aspsp_name={} aspsp_id={}", sadService.getXs2AStandard().getAspsp().getBic(), sadService.getXs2AStandard().getAspsp().getName(), sadService.getXs2AStandard().getAspsp().getId());
 

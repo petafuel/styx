@@ -27,7 +27,7 @@ public class SCASerializer implements JsonSerializer<SCA>, JsonDeserializer<SCA>
         JsonElement currentJsonElement;
 
         if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.SCA_STATUS.value())) != null) {
-            sca.setStatus(SCA.Status.valueOf(currentJsonElement.getAsString().toUpperCase()));
+            sca.setScaStatus(SCA.Status.valueOf(currentJsonElement.getAsString().toUpperCase()));
         }
 
         if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.AUTHORISATION_ID.value())) != null) {
@@ -35,18 +35,18 @@ public class SCASerializer implements JsonSerializer<SCA>, JsonDeserializer<SCA>
         }
 
         //array of authentication objects
-        if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.SCA_METHODS.value())) != null) {
+        if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.SCA_METHODS.value())) != null && !currentJsonElement.isJsonNull()) {
             JsonArray methods = currentJsonElement.getAsJsonArray();
             methods.forEach(scaMethodJsonElement -> sca.addScaMethod(parseAuthenticationObject(scaMethodJsonElement)));
         }
 
         //single authentication object
-        if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.CHOSEN_SCA_METHOD.value())) != null) {
+        if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.CHOSEN_SCA_METHOD.value())) != null && !currentJsonElement.isJsonNull()) {
             sca.setChosenSCAMethod(parseAuthenticationObject(currentJsonElement));
         }
 
         //Challenge object
-        if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.CHALLENGE.value())) != null) {
+        if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.CHALLENGE.value())) != null && !currentJsonElement.isJsonNull()) {
             sca.setChallengeData(parseChallenge(currentJsonElement));
         }
 
@@ -54,7 +54,7 @@ public class SCASerializer implements JsonSerializer<SCA>, JsonDeserializer<SCA>
             DeserialisationHelper.parseSCALinksData(sca, currentJsonElement.getAsJsonObject());
         }
 
-        if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.PSU_MESSAGE.value())) != null) {
+        if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.PSU_MESSAGE.value())) != null && !currentJsonElement.isJsonNull()) {
             sca.setPsuMessage(currentJsonElement.getAsString());
         }
 

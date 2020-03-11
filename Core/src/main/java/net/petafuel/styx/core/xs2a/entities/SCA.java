@@ -126,23 +126,23 @@ public class SCA {
     }
 
     public enum LinkType {
-        // ASPSP requires to create a authorisation resource
-        START_AUTHORISATION("startAuthorisation"),
-        AUTHORISATION_WITH_PSU_IDENTIFICATION("startAuthorisationWithPsuIdentfication"),
-        AUTHORISATION_WITH_PSU_AUTHENTICATION("startAuthorisationWithPsuAuthentication"),
         AUTHORISATION_WITH_ENCRYPTED_PSU_AUTHENTICATION("startAuthorisationWithEncryptedPsuAuthentication"),
         AUTHORISATION_WITH_METHOD_SELECTION("startAuthorisationWithAuthentciationMethodSelection"),
-        UPDATE_PSU_IDENTIFICATION("updatePsuIdentification"),
-        UPDATE_PSU_AUTHENTICATION("updatePsuAuthentication"),
-        UPDATE_ENCRYPTED_PSU_AUTHENTICATION("updateEncryptedPsuAuthentication"),
+        AUTHORISATION_WITH_PSU_AUTHENTICATION("startAuthorisationWithPsuAuthentication"),
+        AUTHORISATION_WITH_PSU_IDENTIFICATION("startAuthorisationWithPsuIdentfication"),
+        AUTHORISE_TRANSACTION("authoriseTransaction"),
+        SCA_OAUTH("scaOAuth"),
+        SCA_REDIRECT("scaRedirect"),
+        SCA_STATUS("scaStatus"),
+        SELECT_AUTHENTICATION_METHOD("selectAuthenticationMethod"),
+        SELF("self"),
+        START_AUTHORISATION("startAuthorisation"), // ASPSP requires to create a authorisation resource
+        STATUS("status"),
         UPDATE_ADDITIONAL_PSU_AUTHENTICATION("updateAdditionalPsuAuthentication"),
         UPDATE_ENCRYPTED_ADDITIONAL_PSU_AUTHENTICATION("updateAdditionalEncryptedPsuAuthentication"),
-        AUTHORISE_TRANSACTION("authoriseTransaction"),
-        STATUS("status"),
-        SELF("self"),
-        SCA_STATUS("scaStatus"),
-        SCA_REDIRECT("scaRedirect"),
-        SCA_OAUTH("scaOAuth");
+        UPDATE_ENCRYPTED_PSU_AUTHENTICATION("updateEncryptedPsuAuthentication"),
+        UPDATE_PSU_AUTHENTICATION("updatePsuAuthentication"),
+        UPDATE_PSU_IDENTIFICATION("updatePsuIdentification");
 
         private String jsonKey;
 

@@ -50,6 +50,7 @@ public class PaymentStatusResource extends PSUResource {
     ) throws BankRequestFailedException {
         PaymentStatusProvider provider = new PaymentStatusProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu());
         ReadPaymentStatusRequest request = provider.buildRequest(paymentId);
+        request.getHeaders().putAll(getSandboxHeaders());
         PaymentStatus status = sadService.getXs2AStandard().getPis().getPaymentStatus(request);
         provider.updateStatus(paymentId, UUID.fromString(token), sadService.getXs2AStandard().getAspsp().getBic(), status.getTransactionStatus());
 

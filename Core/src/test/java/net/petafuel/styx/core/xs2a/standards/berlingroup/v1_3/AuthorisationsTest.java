@@ -101,7 +101,7 @@ public class AuthorisationsTest {
 
         SCA.Status scaStatus = standard.getCs().getSCAStatus(getSCAStatusRequest);
 
-        Assert.assertEquals(scaStatus, sca.getStatus());
+        Assert.assertEquals(scaStatus, sca.getScaStatus());
         Assert.assertTrue(authIdList.contains(sca.getAuthorisationId()));
     }
 
@@ -143,7 +143,7 @@ public class AuthorisationsTest {
 
         SCA.Status scaStatus = standard.getPis().getSCAStatus(getSCAStatusRequest);
 
-        Assert.assertEquals(scaStatus, sca.getStatus());
+        Assert.assertEquals(scaStatus, sca.getScaStatus());
         Assert.assertTrue(authIdList.contains(sca.getAuthorisationId()));
     }
 
@@ -262,7 +262,7 @@ public class AuthorisationsTest {
                 PaymentProduct.SEPA_CREDIT_TRANSFERS, payment.getPaymentId());
 
         SCA scaStarted = standard.getPis().startAuthorisation(request);
-        Assertions.assertEquals(SCA.Status.PSUIDENTIFIED, scaStarted.getStatus());
+        Assertions.assertEquals(SCA.Status.PSUIDENTIFIED, scaStarted.getScaStatus());
         System.out.println("Authorisation started -> PSU Identified");
 
         PSUData psuData = new PSUData();
@@ -273,7 +273,7 @@ public class AuthorisationsTest {
                 PaymentProduct.SEPA_CREDIT_TRANSFERS,
                 payment.getPaymentId(),
                 scaStarted.getAuthorisationId()));
-        Assertions.assertEquals(SCA.Status.PSUAUTHENTICATED, updatedPSUAuthentication.getStatus());
+        Assertions.assertEquals(SCA.Status.PSUAUTHENTICATED, updatedPSUAuthentication.getScaStatus());
         System.out.println("PSUData pushed to ASPSP -> PSU Authenticated");
 
         String scaMethodId = null;
@@ -288,7 +288,7 @@ public class AuthorisationsTest {
                 PaymentProduct.SEPA_CREDIT_TRANSFERS,
                 payment.getPaymentId(),
                 scaStarted.getAuthorisationId()));
-        Assertions.assertEquals(SCA.Status.SCAMETHODSELECTED, selectedSCAMethod.getStatus());
+        Assertions.assertEquals(SCA.Status.SCAMETHODSELECTED, selectedSCAMethod.getScaStatus());
         System.out.println("Acquired list of viable scaMethods -> SCA Method Selected");
 
         AuthoriseTransactionRequest authorisePayment = new AuthoriseTransactionRequest("123456",
@@ -298,7 +298,7 @@ public class AuthorisationsTest {
                 scaStarted.getAuthorisationId());
         authorisePayment.addHeader("X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
         SCA scaFinalized = standard.getCs().authoriseTransaction(authorisePayment);
-        Assert.assertEquals(SCA.Status.FINALISED, scaFinalized.getStatus());
+        Assert.assertEquals(SCA.Status.FINALISED, scaFinalized.getScaStatus());
         System.out.println("Solved OTP Challenge -> Payment is finalized");
     }
 
@@ -322,6 +322,6 @@ public class AuthorisationsTest {
 
         SCA sca = standard.getCs().startAuthorisation(request);
         SCA scaFinalized = standard.getCs().authoriseTransaction(new AuthoriseTransactionRequest("111111", consent.getId(), sca.getAuthorisationId()));
-        Assert.assertEquals(SCA.Status.FINALISED, scaFinalized.getStatus());
+        Assert.assertEquals(SCA.Status.FINALISED, scaFinalized.getScaStatus());
     }
 }

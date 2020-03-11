@@ -23,9 +23,9 @@ public class IOInputContainerPIS extends IOInputContainer {
     /**
      * initiate Payment
      *
-     * @param xs2AStandard current xs2aStandard
-     * @param psu PSU data for request headers
-     * @param payment a payment object to be set within the request object
+     * @param xs2AStandard   current xs2aStandard
+     * @param psu            PSU data for request headers
+     * @param payment        a payment object to be set within the request object
      * @param paymentService current paymentService
      * @param paymentProduct current PaymentProduct
      */
@@ -49,6 +49,10 @@ public class IOInputContainerPIS extends IOInputContainer {
         return payment;
     }
 
+    public void setPayment(InitializablePayment payment) {
+        this.payment = payment;
+    }
+
     public XS2APaymentRequest getPaymentRequest() {
         return paymentRequest;
     }
@@ -65,16 +69,32 @@ public class IOInputContainerPIS extends IOInputContainer {
         return paymentService;
     }
 
+    public void setPaymentService(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+
     public PaymentProduct getPaymentProduct() {
         return paymentProduct;
+    }
+
+    public void setPaymentProduct(PaymentProduct paymentProduct) {
+        this.paymentProduct = paymentProduct;
     }
 
     public RequestType getRequestType() {
         return requestType;
     }
 
+    public void setRequestType(RequestType requestType) {
+        this.requestType = requestType;
+    }
+
     public String getPaymentId() {
         return paymentId;
+    }
+
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
     }
 
     public enum RequestType {

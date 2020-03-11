@@ -102,4 +102,12 @@ public class IOProcessor {
     private void addCommonOption(ApplicableImplementerOption<IOInputContainer> applicableImplementerOption) {
         applicableImplementerOptionsCommon.get(applicableImplementerOption.order()).add(applicableImplementerOption);
     }
+
+    public IOInputContainerPIS getIoInputContainerpis() {
+        return ioInputContainerpis;
+    }
+
+    public IOInputContainerAIS getIoInputContainerais() {
+        return ioInputContainerais;
+    }
 }

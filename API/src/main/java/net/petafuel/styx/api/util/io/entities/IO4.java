@@ -1,16 +1,11 @@
 package net.petafuel.styx.api.util.io.entities;
 
 import net.petafuel.jsepa.model.PAIN00100303Document;
-import net.petafuel.styx.api.exception.ResponseCategory;
-import net.petafuel.styx.api.exception.ResponseConstant;
-import net.petafuel.styx.api.exception.ResponseEntity;
-import net.petafuel.styx.api.exception.ResponseOrigin;
-import net.petafuel.styx.api.exception.StyxException;
+import net.petafuel.styx.api.util.io.IOHelper;
 import net.petafuel.styx.api.util.io.PaymentRequestHelper;
 import net.petafuel.styx.api.util.io.contracts.ApplicableImplementerOption;
 import net.petafuel.styx.api.util.io.contracts.IOInputContainerPIS;
 import net.petafuel.styx.api.util.io.contracts.IOOrder;
-import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationPain001Request;
@@ -31,25 +26,25 @@ public class IO4 implements ApplicableImplementerOption<IOInputContainerPIS> {
         if (ioInputContainer.getPaymentService() != PaymentService.PERIODIC_PAYMENTS) {
             return;
         }
+        IOHelper.processPaymentProduct(IO, ioInputContainer);
+
         if (ioInputContainer.getRequestType() == IOInputContainerPIS.RequestType.INITIATE) {
-            if (ioInputContainer.getIoParser().getOption(IO, ioInputContainer.getPaymentProduct().getValue()).getAsBoolean()) {
+            if (!ioInputContainer.getPaymentProduct().isXml()) {
                 ioInputContainer.setPaymentRequest(new PeriodicPaymentInitiationJsonRequest(ioInputContainer.getPaymentProduct(), (PeriodicPayment) ioInputContainer.getPayment(), ioInputContainer.getPsu()));
-            } else if (ioInputContainer.getIoParser().getOption(IO, IOInputContainerPIS.XML_PAYMENT_PRODUCT_PREFIX + ioInputContainer.getPaymentProduct().getValue()).getAsBoolean()) {
+            } else {
                 PAIN00100303Document document = (new PaymentXMLSerializer()).serialize(UUID.randomUUID().toString(), (PeriodicPayment) ioInputContainer.getPayment());
                 ioInputContainer.setPaymentRequest(new PeriodicPaymentInitiationXMLRequest(
                         new PaymentInitiationPain001Request(
-                                PaymentProduct.byValue(IOInputContainerPIS.XML_PAYMENT_PRODUCT_PREFIX + ioInputContainer.getPaymentProduct().getValue()),
+                                ioInputContainer.getPaymentProduct(),
                                 PaymentService.PERIODIC_PAYMENTS,
                                 document,
                                 ioInputContainer.getPsu()),
                         (PeriodicPayment) ioInputContainer.getPayment()));
-            } else {
-                throw new StyxException(new ResponseEntity("The requested ASPSP does not support periodic-payments with payment-product " + ioInputContainer.getPaymentProduct().getValue(), ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.ASPSP));
             }
         } else if (ioInputContainer.getRequestType() == IOInputContainerPIS.RequestType.FETCH) {
-            PaymentRequestHelper.buildFetchRequest(IO, ioInputContainer);
+            PaymentRequestHelper.buildFetchRequest(ioInputContainer);
         } else if (ioInputContainer.getRequestType() == IOInputContainerPIS.RequestType.STATUS) {
-            PaymentRequestHelper.buildStatusRequest(IO, ioInputContainer);
+            PaymentRequestHelper.buildStatusRequest(ioInputContainer);
         } else {
             throw new IllegalArgumentException("RequestType cannot be null on request creation");
         }

@@ -9,7 +9,7 @@ import java.util.Map;
 public class SCA {
 
     private Approach approach;
-    private Status status;
+    private Status scaStatus;
     private String authorisationId;
     private List<AuthenticationObject> scaMethods;
     private AuthenticationObject chosenSCAMethod;
@@ -80,12 +80,12 @@ public class SCA {
         this._links.put(linkType, href);
     }
 
-    public Status getStatus() {
-        return status;
+    public Status getScaStatus() {
+        return scaStatus;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setScaStatus(Status scaStatus) {
+        this.scaStatus = scaStatus;
     }
 
     public String getAuthorisationId() {

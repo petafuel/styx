@@ -26,6 +26,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
+/**
+ * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-FetchPaymentstatus
+ */
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @CheckAccessToken
@@ -41,7 +44,12 @@ public class PaymentStatusResource extends PSUResource {
     private String token;
 
     /**
+     * Returns the status of a payment
      *
+     * @param paymentTypeBean payment-service and payment-product
+     * @param paymentId       id of the target payment
+     * @return a PaymentStatus object
+     * @throws BankRequestFailedException if something went wrong between the core service and the aspsp
      */
     @GET
     @Path("/{paymentService}/{paymentProduct}/{paymentId}/status")

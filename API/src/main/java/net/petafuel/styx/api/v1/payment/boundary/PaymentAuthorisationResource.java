@@ -47,6 +47,16 @@ public class PaymentAuthorisationResource extends PSUResource {
     @Inject
     private SADService sadService;
 
+    /**
+     * If the ASPSP has not implicitly created an authorisation resource, this Endpoint can create an authorisation resource
+     *
+     * @param paymentTypeBean      payment-service and payment-product
+     * @param paymentId            id of the payment an authorisation should be started for
+     * @param authorisationRequest the request resource might contain an empty body or PSUData authentication
+     * @return returns an SCA container with further information on the Authorisation
+     * @throws BankRequestFailedException in case the communication between styx and aspsp was not successful
+     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-RedPOST/v1/{payment-service}/{payment-product}/{paymentId}/authorisations
+     */
     @POST
     @Path("/{paymentService}/{paymentProduct}/{paymentId}/authorisations")
     public Response startPaymentAuthorisation(@BeanParam PaymentTypeBean paymentTypeBean,
@@ -79,6 +89,21 @@ public class PaymentAuthorisationResource extends PSUResource {
         return Response.status(ResponseConstant.OK).entity(paymentSCA).build();
     }
 
+    /**
+     * This endpoint covers 4 use cases
+     * Empty authorisationRequest -> PSU Identification, the PSU-* Headers are transmitted to the aspsp
+     * PSUData -> PSU Authentication, login the PSU with pin/password on the ASPSP interface
+     * authenticationMethodId -> SCAMethod Selection, if there are multiple SCAMethods for the PSU to choose from
+     * scaAuthenticationData -> if the PSU has received a TAN for the SCA process we can forward it to the ASPSP
+     *
+     * @param paymentTypeBean
+     * @param paymentId
+     * @param authorisationId
+     * @param authorisationRequest
+     * @return
+     * @throws BankRequestFailedException
+     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-GreenPUT/v1/{payment-service}/{payment-product}/{paymentId}/authorisations/{authorisationId}
+     */
     @PUT
     @Path("/{paymentService}/{paymentProduct}/{paymentId}/authorisations/{authorisationId}")
     public Response updatePaymentAuthorisation(@BeanParam PaymentTypeBean paymentTypeBean,

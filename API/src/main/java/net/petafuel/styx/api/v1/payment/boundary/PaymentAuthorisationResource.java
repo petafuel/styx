@@ -9,12 +9,16 @@ import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.util.io.IOProcessor;
 import net.petafuel.styx.api.util.io.contracts.IOInputContainerPIS;
+import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
 import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
-import net.petafuel.styx.api.v1.payment.entity.StartSCARequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.SelectAuthenticationMethodRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUAuthenticationRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUIdentificationRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,6 +29,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -42,11 +47,21 @@ public class PaymentAuthorisationResource extends PSUResource {
     @Inject
     private SADService sadService;
 
+    /**
+     * If the ASPSP has not implicitly created an authorisation resource, this Endpoint can create an authorisation resource
+     *
+     * @param paymentTypeBean      payment-service and payment-product
+     * @param paymentId            id of the payment an authorisation should be started for
+     * @param authorisationRequest the request resource might contain an empty body or PSUData authentication
+     * @return returns an SCA container with further information on the Authorisation
+     * @throws BankRequestFailedException in case the communication between styx and aspsp was not successful
+     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-RedPOST/v1/{payment-service}/{payment-product}/{paymentId}/authorisations
+     */
     @POST
     @Path("/{paymentService}/{paymentProduct}/{paymentId}/authorisations")
     public Response startPaymentAuthorisation(@BeanParam PaymentTypeBean paymentTypeBean,
                                               @NotEmpty @NotBlank @PathParam("paymentId") String paymentId,
-                                              @Valid StartSCARequest startSCARequest) throws BankRequestFailedException {
+                                              @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
         IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(
                 IOInputContainerPIS.RequestType.FETCH,
                 sadService.getXs2AStandard(),
@@ -58,7 +73,7 @@ public class PaymentAuthorisationResource extends PSUResource {
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
         ioProcessor.applyOptions();
         XS2AAuthorisationRequest xs2AAuthorisationRequest = new StartAuthorisationRequest(getPsu(),
-                startSCARequest.getPsuData(),
+                authorisationRequest.getPsuData(),
                 paymentTypeBean.getPaymentService(),
                 ioProcessor.getIoInputContainerpis().getPaymentProduct(), paymentId);
         xs2AAuthorisationRequest.getHeaders().putAll(getSandboxHeaders());
@@ -71,6 +86,90 @@ public class PaymentAuthorisationResource extends PSUResource {
         aspspUrlMapper.map(paymentSCA.getLinks());
 
         LOG.info("Payment Authorisation started for paymentId={} scaStatus={} scaApproach={}", paymentId, paymentSCA.getScaStatus(), paymentSCA.getApproach());
+        return Response.status(ResponseConstant.OK).entity(paymentSCA).build();
+    }
+
+    /**
+     * This endpoint covers 4 use cases
+     * Empty authorisationRequest -> PSU Identification, the PSU-* Headers are transmitted to the aspsp
+     * PSUData -> PSU Authentication, login the PSU with pin/password on the ASPSP interface
+     * authenticationMethodId -> SCAMethod Selection, if there are multiple SCAMethods for the PSU to choose from
+     * scaAuthenticationData -> if the PSU has received a TAN for the SCA process we can forward it to the ASPSP
+     *
+     * @param paymentTypeBean
+     * @param paymentId
+     * @param authorisationId
+     * @param authorisationRequest
+     * @return
+     * @throws BankRequestFailedException
+     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-GreenPUT/v1/{payment-service}/{payment-product}/{paymentId}/authorisations/{authorisationId}
+     */
+    @PUT
+    @Path("/{paymentService}/{paymentProduct}/{paymentId}/authorisations/{authorisationId}")
+    public Response updatePaymentAuthorisation(@BeanParam PaymentTypeBean paymentTypeBean,
+                                               @NotEmpty @NotBlank @PathParam("paymentId") String paymentId,
+                                               @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId,
+                                               @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
+        IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(
+                IOInputContainerPIS.RequestType.FETCH,
+                sadService.getXs2AStandard(),
+                getPsu(),
+                paymentId,
+                paymentTypeBean.getPaymentService(),
+                paymentTypeBean.getPaymentProduct());
+
+        IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
+        ioProcessor.applyOptions();
+
+        SCA paymentSCA;
+        XS2AAuthorisationRequest xs2AAuthorisationRequest;
+
+        if (authorisationRequest.getPsuData() != null) {
+            xs2AAuthorisationRequest = new UpdatePSUAuthenticationRequest(
+                    getPsu(),
+                    authorisationRequest.getPsuData(),
+                    ioInputContainerPIS.getPaymentService(),
+                    ioInputContainerPIS.getPaymentProduct(),
+                    paymentId,
+                    authorisationId);
+            xs2AAuthorisationRequest.getHeaders().putAll(getSandboxHeaders());
+            paymentSCA = sadService.getXs2AStandard().getPis().updatePSUAuthentication(xs2AAuthorisationRequest);
+        } else if (authorisationRequest.getAuthenticationMethodId() != null) {
+            xs2AAuthorisationRequest = new SelectAuthenticationMethodRequest(
+                    authorisationRequest.getAuthenticationMethodId(),
+                    ioInputContainerPIS.getPaymentService(),
+                    ioInputContainerPIS.getPaymentProduct(),
+                    paymentId,
+                    authorisationId);
+            xs2AAuthorisationRequest.getHeaders().putAll(getSandboxHeaders());
+            paymentSCA = sadService.getXs2AStandard().getPis().selectAuthenticationMethod(xs2AAuthorisationRequest);
+        } else if (authorisationRequest.getScaAuthenticationData() != null) {
+            xs2AAuthorisationRequest = new AuthoriseTransactionRequest(
+                    authorisationRequest.getScaAuthenticationData(),
+                    ioInputContainerPIS.getPaymentService(),
+                    ioInputContainerPIS.getPaymentProduct(),
+                    paymentId,
+                    authorisationId);
+            xs2AAuthorisationRequest.getHeaders().putAll(getSandboxHeaders());
+            paymentSCA = sadService.getXs2AStandard().getPis().authoriseTransaction(xs2AAuthorisationRequest);
+        } else {
+            xs2AAuthorisationRequest = new UpdatePSUIdentificationRequest(
+                    getPsu(),
+                    ioInputContainerPIS.getPaymentService(),
+                    ioInputContainerPIS.getPaymentProduct(),
+                    paymentId,
+                    authorisationId);
+            xs2AAuthorisationRequest.getHeaders().putAll(getSandboxHeaders());
+            paymentSCA = sadService.getXs2AStandard().getPis().updatePSUIdentification(xs2AAuthorisationRequest);
+        }
+
+        AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(paymentTypeBean.getPaymentService(),
+                paymentTypeBean.getPaymentProduct(),
+                paymentId,
+                authorisationId);
+        aspspUrlMapper.map(paymentSCA.getLinks());
+
+        LOG.info("Payment Authorisation updated for paymentId={} authorisationId={} scaStatus={} scaApproach={}", paymentId, authorisationId,paymentSCA.getScaStatus(), paymentSCA.getApproach());
         return Response.status(ResponseConstant.OK).entity(paymentSCA).build();
     }
 }

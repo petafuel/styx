@@ -10,6 +10,7 @@ import java.util.List;
 /**
  * Account Information Service Interface
  *
+ * @documented https://confluence.petafuel.intern/display/TOOL/Styx+Account+Information+Service+Interface
  * @see Account
  * @see XS2ARequest
  * @see Balance

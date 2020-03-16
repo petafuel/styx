@@ -2,9 +2,7 @@ package net.petafuel.styx.api.v1.payment.boundary;
 
 import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
-import net.petafuel.styx.api.v1.payment.entity.PaymentResponse;
-import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
-import net.petafuel.styx.api.v1.payment.entity.StartSCARequest;
+import net.petafuel.styx.api.v1.payment.entity.*;
 import net.petafuel.styx.core.xs2a.entities.PSUData;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.entities.XS2AJsonKeys;
@@ -22,6 +20,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -30,6 +29,7 @@ import java.util.Date;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class SCAPaymentResourceTest extends StyxRESTTest {
     private static String paymentId;
+    private static String authorisationId;
     private String currentDate;
 
     @Override
@@ -89,8 +89,8 @@ public class SCAPaymentResourceTest extends StyxRESTTest {
 
     @Test
     @Category(IntegrationTest.class)
-    public void C_startSCAwithoutAuthentication_Targo() {
-        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations").request();
+    public void C_getAuthorisationIds_Targo() {
+        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/"+paymentId+"/authorisations").request();
         invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
         invocationBuilder.header("PSU-ID", "PSD2TEST2");
         invocationBuilder.header("PSU-BIC", "CMCIDEDD");
@@ -98,9 +98,27 @@ public class SCAPaymentResourceTest extends StyxRESTTest {
         invocationBuilder.header("redirectPreferred", true);
         invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
-        Invocation invocation = invocationBuilder.buildPost(Entity.entity("{}", MediaType.APPLICATION_JSON));
-        SCA response = invocation.invoke(SCA.class);
-        Assertions.assertEquals(SCA.Status.PSUIDENTIFIED, response.getScaStatus());
-        Assertions.assertEquals(SCA.Approach.EMBEDDED, response.getApproach());
+        Invocation invocation = invocationBuilder.buildGet();
+        AuthorisationIdsResponse response = invocation.invoke(AuthorisationIdsResponse.class);
+        Assertions.assertNotNull(response.getAuthorisationIds());
+        Assertions.assertTrue(response.getAuthorisationIds().size() > 0);
+        SCAPaymentResourceTest.authorisationId = response.getAuthorisationIds().get(0);
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void D_getAuthorisationStatus_Targo() {
+        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/"+paymentId+"/authorisations/"+authorisationId).request();
+        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("PSU-ID", "PSD2TEST2");
+        invocationBuilder.header("PSU-BIC", "CMCIDEDD");
+        invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
+        invocationBuilder.header("redirectPreferred", true);
+        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+
+        Invocation invocation = invocationBuilder.buildGet();
+        AuthorisationStatusResponse response = invocation.invoke(AuthorisationStatusResponse.class);
+        Assertions.assertNotNull(response.getScaStatus());
+        Assertions.assertEquals(SCA.Status.PSUAUTHENTICATED.getValue(), response.getScaStatus());
     }
 }

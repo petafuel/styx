@@ -33,6 +33,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
+/**
+ * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-PaymentInitiationRequest
+ */
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @Consumes({MediaType.APPLICATION_JSON + ";charset=UTF-8"})

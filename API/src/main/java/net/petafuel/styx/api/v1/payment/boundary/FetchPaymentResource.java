@@ -26,6 +26,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+/**
+ * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-FetchPaymentObject
+ */
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @Consumes({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
@@ -50,7 +53,7 @@ public class FetchPaymentResource extends PSUResource {
     public Response fetchPayment(@BeanParam PaymentTypeBean paymentTypeBean,
                                  @NotEmpty @NotBlank @PathParam("paymentId") String paymentId) throws BankRequestFailedException {
         ReadPaymentRequest aspspRequest = new FetchPaymentProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildFetchPaymentRequest(paymentId);
-
+        aspspRequest.getHeaders().putAll(getSandboxHeaders());
         InitializablePayment fetchedPayment = sadService.getXs2AStandard().getPis().getPayment(aspspRequest);
 
         LOG.info("Successfully fetched payment entity for bic={}, paymentId={}", sadService.getXs2AStandard().getAspsp().getBic(), paymentId);

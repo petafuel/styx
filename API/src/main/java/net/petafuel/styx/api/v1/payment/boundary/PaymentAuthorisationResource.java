@@ -13,7 +13,6 @@ import net.petafuel.styx.api.v1.payment.entity.AuthorisationIdsResponse;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
 import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
-import net.petafuel.styx.api.v1.payment.entity.StartSCARequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;

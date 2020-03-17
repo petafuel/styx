@@ -4,7 +4,6 @@ import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
 import net.petafuel.styx.api.v1.payment.entity.PaymentResponse;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
-import net.petafuel.styx.api.v1.payment.entity.StartSCARequest;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationIdsResponse;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
@@ -148,7 +147,7 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
         AuthorisationIdsResponse response = invocation.invoke(AuthorisationIdsResponse.class);
         Assertions.assertNotNull(response.getAuthorisationIds());
         Assertions.assertTrue(response.getAuthorisationIds().size() > 0);
-        SCAPaymentResourceTest.authorisationId = response.getAuthorisationIds().get(0);
+        authorisationId = response.getAuthorisationIds().get(0);
     }
 
     @Test
@@ -165,6 +164,6 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
         Invocation invocation = invocationBuilder.buildGet();
         AuthorisationStatusResponse response = invocation.invoke(AuthorisationStatusResponse.class);
         Assertions.assertNotNull(response.getScaStatus());
-        Assertions.assertEquals(SCA.Status.PSUAUTHENTICATED.getValue(), response.getScaStatus());
+        Assertions.assertEquals(SCA.Status.FINALISED.getValue(), response.getScaStatus());
     }
 }

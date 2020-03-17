@@ -3,7 +3,8 @@ package net.petafuel.styx.api.v1.payment.entity;
 import java.util.List;
 
 public class AuthorisationIdsResponse {
-    List<String> authorisationIds;
+
+    private List<String> authorisationIds;
 
     public List<String> getAuthorisationIds() {
         return authorisationIds;

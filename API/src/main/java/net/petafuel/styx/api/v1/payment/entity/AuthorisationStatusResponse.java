@@ -5,7 +5,8 @@ import net.petafuel.styx.core.xs2a.entities.SCA;
 import javax.json.bind.annotation.JsonbProperty;
 
 public class AuthorisationStatusResponse {
-    SCA.Status scaStatus;
+
+    private SCA.Status scaStatus;
 
     public String getScaStatus() {
         return scaStatus.getValue();

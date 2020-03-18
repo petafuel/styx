@@ -4,6 +4,8 @@ import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
 import net.petafuel.styx.api.v1.payment.entity.PaymentResponse;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
+import net.petafuel.styx.api.v1.payment.entity.AuthorisationIdsResponse;
+import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
 import net.petafuel.styx.core.xs2a.entities.PSUData;
 import net.petafuel.styx.core.xs2a.entities.SCA;
@@ -128,5 +130,40 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
         Invocation invocation = invocationBuilder.buildPut(Entity.entity(authorisationRequest, MediaType.APPLICATION_JSON));
         SCA response = invocation.invoke(SCA.class);
         Assertions.assertEquals(SCA.Status.FINALISED, response.getScaStatus());
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void E_getAuthorisationIds_Targo() {
+        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/"+paymentId+"/authorisations").request();
+        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("PSU-ID", "PSD2TEST2");
+        invocationBuilder.header("PSU-BIC", "CMCIDEDD");
+        invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
+        invocationBuilder.header("redirectPreferred", true);
+        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+
+        Invocation invocation = invocationBuilder.buildGet();
+        AuthorisationIdsResponse response = invocation.invoke(AuthorisationIdsResponse.class);
+        Assertions.assertNotNull(response.getAuthorisationIds());
+        Assertions.assertTrue(response.getAuthorisationIds().size() > 0);
+        authorisationId = response.getAuthorisationIds().get(0);
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void F_getAuthorisationStatus_Targo() {
+        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/"+paymentId+"/authorisations/"+authorisationId).request();
+        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("PSU-ID", "PSD2TEST2");
+        invocationBuilder.header("PSU-BIC", "CMCIDEDD");
+        invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
+        invocationBuilder.header("redirectPreferred", true);
+        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
+
+        Invocation invocation = invocationBuilder.buildGet();
+        AuthorisationStatusResponse response = invocation.invoke(AuthorisationStatusResponse.class);
+        Assertions.assertNotNull(response.getScaStatus());
+        Assertions.assertEquals(SCA.Status.FINALISED.getValue(), response.getScaStatus());
     }
 }

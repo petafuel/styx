@@ -83,9 +83,18 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
                     .registerTypeAdapter(Account.class, new AccountSerializer())
                     .create();
 
-            Consent consent = gson.fromJson(responseBody, Consent.class);
-            consent.setId(consentGetRequest.getConsentId());
-            return consent;
+            Consent consentFromResponse = gson.fromJson(responseBody, Consent.class);
+            consentFromResponse.setId(consentGetRequest.getConsentId());
+
+            Consent consentFromDatabase = new PersistentConsent().get(consentFromResponse);
+            consentFromDatabase.setAccess(consentFromResponse.getAccess());
+            consentFromDatabase.setRecurringIndicator(consentFromResponse.isRecurringIndicator());
+            consentFromDatabase.setValidUntil(consentFromResponse.getValidUntil());
+            consentFromDatabase.setFrequencyPerDay(consentFromResponse.getFrequencyPerDay());
+            consentFromDatabase.setState(consentFromResponse.getState());
+            consentFromDatabase.setLastAction(consentFromResponse.getLastAction());
+
+            return new PersistentConsent().update(consentFromDatabase);
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
@@ -104,7 +113,12 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
                     .serializeNulls()
                     .registerTypeAdapter(Consent.State.class, new ConsentStatusSerializer())
                     .create();
-            return gson.fromJson(responseBody, Consent.State.class);
+            PersistentConsent persistentConsent = new PersistentConsent();
+            Consent.State state = gson.fromJson(responseBody, Consent.State.class);
+            Consent consent = new Consent();
+            consent.setId(consentStatusRequest.getConsentId());
+            persistentConsent.updateState(consent, state);
+            return state;
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }

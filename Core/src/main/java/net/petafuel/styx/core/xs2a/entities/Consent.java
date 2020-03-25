@@ -1,5 +1,11 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import net.petafuel.styx.core.xs2a.entities.serializers.ISODateDeserializer;
+
+import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -10,16 +16,29 @@ import java.util.UUID;
  */
 public class Consent extends StrongAuthenticatableResource {
 
+    @JsonbProperty("consentId")
     private String id;
+
+    @JsonbTransient
     private UUID xRequestId;
     private int frequencyPerDay;
     private boolean recurringIndicator;
     private boolean combinedServiceIndicator;
+
+    @JsonbDateFormat(value = "yyyy-MM-dd HH:mm:ss")
+    @JsonbTypeDeserializer(ISODateDeserializer.class)
     private Date validUntil;
+    private Date lastAction;
+
+    @JsonbTransient
     private Date lastUpdated;
+
+    @JsonbTransient
     private Date createdAt;
     private Access access;
     private PSU psu;
+
+    @JsonbProperty("consentStatus")
     private State state;
 
     public Consent() {
@@ -60,6 +79,14 @@ public class Consent extends StrongAuthenticatableResource {
 
     public void setRecurringIndicator(boolean recurringIndicator) {
         this.recurringIndicator = recurringIndicator;
+    }
+
+    public Date getLastAction() {
+        return lastAction;
+    }
+
+    public void setLastAction(Date lastAction) {
+        this.lastAction = lastAction;
     }
 
     public Date getValidUntil() {

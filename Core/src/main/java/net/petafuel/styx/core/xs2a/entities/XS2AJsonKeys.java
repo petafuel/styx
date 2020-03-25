@@ -8,6 +8,7 @@ public enum XS2AJsonKeys {
     ACCESS("access"),
     RECURRING_INDICATOR("recurringIndicator"),
     CONSENT_STATUS("consentStatus"),
+    LAST_ACTION("lastAction"),
     VALID_UNTIL("validUntil"),
     FREQUENCY_PER_DAY("frequencyPerDay"),
     COMBINED_SERVICE_INDICATOR("combinedServiceIndicator"),

@@ -52,10 +52,10 @@ public abstract class XS2ARequest {
 
     protected XS2ARequest() {
         psu = new PSU();
-        this.xrequestId = String.valueOf(UUID.randomUUID());
+        xrequestId = String.valueOf(UUID.randomUUID());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss zz", Locale.ENGLISH);
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        this.date = simpleDateFormat.format(new Date());
+        date = simpleDateFormat.format(new Date());
         headers = new LinkedHashMap<>();
         queryParameters = new LinkedHashMap<>();
     }

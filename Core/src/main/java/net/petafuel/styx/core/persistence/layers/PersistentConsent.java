@@ -35,7 +35,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
     @Override
     public Consent create(Consent consent) {
         Connection connection = Persistence.getInstance().getConnection();
-        try (CallableStatement query = connection.prepareCall("{call create_consent(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}")) {
+        try (CallableStatement query = connection.prepareCall("{call create_consent(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}")) {
             setQueryValues(query, consent);
 
             try (ResultSet resultSet = query.executeQuery()) {
@@ -81,7 +81,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
     @Override
     public Consent update(Consent consent) {
         Connection connection = Persistence.getInstance().getConnection();
-        try (CallableStatement query = connection.prepareCall("{call update_consent(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}")) {
+        try (CallableStatement query = connection.prepareCall("{call update_consent(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}")) {
             setQueryValues(query, consent);
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
@@ -157,9 +157,10 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         consent.getAccess().setBalances(consentAccess.getBalances());
 
         consent.setRecurringIndicator(resultSet.getBoolean("recurring_indicator"));
-        consent.setValidUntil(new Date(resultSet.getTimestamp("valid_until").getTime()));
-        consent.setLastUpdated(new Date(resultSet.getTimestamp("last_updated").getTime()));
-        consent.setCreatedAt(new Date(resultSet.getTimestamp("created_at").getTime()));
+        consent.setLastAction(getDateFromTimestamp(resultSet.getTimestamp("last_action")));
+        consent.setValidUntil(getDateFromTimestamp(resultSet.getTimestamp("valid_until")));
+        consent.setLastUpdated(getDateFromTimestamp(resultSet.getTimestamp("last_updated")));
+        consent.setCreatedAt(getDateFromTimestamp(resultSet.getTimestamp("created_at")));
         consent.setFrequencyPerDay(resultSet.getInt("frequency_per_day"));
         consent.setState(Consent.State.getByString(resultSet.getString("state")));
         consent.getSca().setApproach(SCA.Approach.valueOf(resultSet.getString("chosen_sca_method")));
@@ -193,19 +194,34 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         query.setString(3, gson.toJsonTree(consent.getAccess()).toString()); // access string
 
         query.setBoolean(4, consent.isRecurringIndicator()); // recurring consent
-        query.setTimestamp(5, new Timestamp(consent.getValidUntil().getTime())); // valid until
-        query.setInt(6, consent.getFrequencyPerDay()); // frequency per day
-        query.setInt(7, (consent.getSca().getApproach().ordinal() + 1)); // sca approach
-        query.setBoolean(8, consent.isCombinedServiceIndicator()); // combined service
-        query.setString(9, consent.getPsu().getId()); // psu id
-        query.setString(10, consent.getPsu().getIp()); // psu ip
-        query.setObject(11, consent.getPsu().getPort(), Types.INTEGER);  // psu port
-        query.setString(12, consent.getPsu().getUserAgent()); // psu user agent
-        query.setString(13, consent.getPsu().getGeoLocation()); // psu geo location
-        query.setString(14, consent.getPsu().getIdType()); // psu id type
-        query.setString(15, consent.getPsu().getCorporateId()); // psu corporate id
-        query.setString(16, consent.getPsu().getCorporateIdType()); // psu corporate id type
-        query.setObject(17, consent.getxRequestId()); // x request id
+        query.setTimestamp(5, getTimestampFromDate(consent.getLastAction())); // last action
+        query.setTimestamp(6, getTimestampFromDate(consent.getValidUntil())); // valid until
+        query.setInt(7, consent.getFrequencyPerDay()); // frequency per day
+        query.setInt(8, (consent.getSca().getApproach().ordinal() + 1)); // sca approach
+        query.setBoolean(9, consent.isCombinedServiceIndicator()); // combined service
+        query.setString(10, consent.getPsu().getId()); // psu id
+        query.setString(11, consent.getPsu().getIp()); // psu ip
+        query.setObject(12, consent.getPsu().getPort(), Types.INTEGER);  // psu port
+        query.setString(13, consent.getPsu().getUserAgent()); // psu user agent
+        query.setString(14, consent.getPsu().getGeoLocation()); // psu geo location
+        query.setString(15, consent.getPsu().getIdType()); // psu id type
+        query.setString(16, consent.getPsu().getCorporateId()); // psu corporate id
+        query.setString(17, consent.getPsu().getCorporateIdType()); // psu corporate id type
+        query.setObject(18, consent.getxRequestId()); // x request id
+    }
+
+    private Timestamp getTimestampFromDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return new Timestamp(date.getTime());
+    }
+
+    private Date getDateFromTimestamp(Timestamp timestamp) {
+        if (timestamp == null) {
+            return null;
+        }
+        return new Date(timestamp.getTime());
     }
 
     private void logSQLError(SQLException e) {

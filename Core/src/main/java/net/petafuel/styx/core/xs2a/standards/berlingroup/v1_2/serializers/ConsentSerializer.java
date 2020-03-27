@@ -62,6 +62,7 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
     public Consent deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
         JsonObject consentResponse = json.getAsJsonObject();
         Consent consent = new Consent();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         if (consentResponse.get(XS2AJsonKeys.CONSENT_ID.value()) != null) {
             consent.setId(consentResponse.get(XS2AJsonKeys.CONSENT_ID.value()).getAsString());
         }
@@ -73,11 +74,17 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
             consent.setRecurringIndicator(consentResponse.get(XS2AJsonKeys.RECURRING_INDICATOR.value()).getAsBoolean());
         }
         if (consentResponse.get(XS2AJsonKeys.VALID_UNTIL.value()) != null) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
             try {
                 consent.setValidUntil(simpleDateFormat.parse(consentResponse.get(XS2AJsonKeys.VALID_UNTIL.value()).getAsString()));
             } catch (ParseException e) {
                 throw new SerializerException("Unable to deserialize Consent validUntil to Date format: " + e.getMessage());
+            }
+        }
+        if (consentResponse.get(XS2AJsonKeys.LAST_ACTION.value()) != null) {
+            try {
+                consent.setLastAction(simpleDateFormat.parse(consentResponse.get(XS2AJsonKeys.LAST_ACTION.value()).getAsString()));
+            } catch (ParseException e) {
+                throw new SerializerException("Unable to deserialize Consent lastAction to Date format: " + e.getMessage());
             }
         }
         if (consentResponse.get(XS2AJsonKeys.FREQUENCY_PER_DAY.value()) != null) {

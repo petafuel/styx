@@ -12,6 +12,11 @@ public class BankRequestFailedException extends Exception {
         this.httpStatusCode = httpStatusCode;
     }
 
+    public BankRequestFailedException(String message, Exception e, int httpStatusCode) {
+        super(message, e);
+        this.httpStatusCode = httpStatusCode;
+    }
+
     public Integer getHttpStatusCode() {
         return httpStatusCode;
     }

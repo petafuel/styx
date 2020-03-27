@@ -7,12 +7,14 @@ import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.AuthenticationObject;
 import net.petafuel.styx.core.xs2a.entities.AuthenticationType;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.InstructedAmount;
+import net.petafuel.styx.core.xs2a.entities.LinkType;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PSUData;
 import net.petafuel.styx.core.xs2a.entities.Payment;
@@ -67,7 +69,7 @@ public class AuthorisationsTest {
         StartAuthorisationRequest request = new StartAuthorisationRequest(new PSUData(), consent.getId());
         request.getPsu().setId(SPARKASSE_PSU_ID);
 
-        if (consent.getSca().getLinks().containsKey(SCA.LinkType.AUTHORISATION_WITH_PSU_AUTHENTICATION)) {
+        if (consent.getSca().getLinks().getUrlMapping().containsKey(LinkType.AUTHORISATION_WITH_PSU_AUTHENTICATION)) {
             PSUData psuData = new PSUData();
             psuData.setPassword(SPARKASSE_PIN);
             request.setPsuData(psuData);
@@ -159,7 +161,7 @@ public class AuthorisationsTest {
         StartAuthorisationRequest request = new StartAuthorisationRequest(null, consent.getId());
         request.getPsu().setId(FIDUCIA_PSU_ID);
 
-        if (consent.getSca().getLinks().containsKey(SCA.LinkType.AUTHORISATION_WITH_PSU_AUTHENTICATION)) {
+        if (consent.getSca().getLinks().getUrlMapping().containsKey(LinkType.AUTHORISATION_WITH_PSU_AUTHENTICATION)) {
             PSUData psuData = new PSUData();
             psuData.setPassword(FIDUCIA_PIN);
             request.setPsuData(psuData);
@@ -171,11 +173,11 @@ public class AuthorisationsTest {
 
     private Consent getSparkasseConsent(CSInterface csInterface) throws BankRequestFailedException {
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account(SPARKASSE_IBAN));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference(SPARKASSE_IBAN, AccountReference.Type.IBAN));
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account(SPARKASSE_IBAN));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference(SPARKASSE_IBAN, AccountReference.Type.IBAN));
 
         PSU psu = new PSU(SPARKASSE_PSU_ID);
         Consent consent = new Consent();
@@ -228,8 +230,8 @@ public class AuthorisationsTest {
 
     public Consent getConsentFiducia(CSInterface csInterface) throws BankRequestFailedException {
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE40100100103307118608"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN));
 
         PSU psu = new PSU(FIDUCIA_PSU_ID);
         Consent consent = new Consent();
@@ -314,7 +316,7 @@ public class AuthorisationsTest {
         StartAuthorisationRequest request = new StartAuthorisationRequest(new PSUData(), consent.getId());
         request.getPsu().setId(SPARKASSE_PSU_ID);
 
-        if (consent.getSca().getLinks().containsKey(SCA.LinkType.AUTHORISATION_WITH_PSU_AUTHENTICATION)) {
+        if (consent.getSca().getLinks().getUrlMapping().containsKey(LinkType.AUTHORISATION_WITH_PSU_AUTHENTICATION)) {
             PSUData psuData = new PSUData();
             psuData.setPassword(SPARKASSE_PIN);
             request.setPsuData(psuData);

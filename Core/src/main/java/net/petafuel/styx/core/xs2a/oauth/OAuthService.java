@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
-import net.petafuel.styx.core.xs2a.entities.SCA;
+import net.petafuel.styx.core.xs2a.entities.StrongAuthenticatableResource;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
@@ -33,39 +33,6 @@ public class OAuthService extends BasicService {
         super(LOG, null, new BerlinGroupSigner());
     }
 
-    public OAuthSession accessTokenRequest(String url, TokenRequest request) throws BankRequestFailedException {
-
-        this.setUrl(url);
-        this.createBody(RequestType.POST, JSON, request);
-
-        try (Response response = this.execute()) {
-            String body = response.body().string();
-
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(OAuthSession.class, new TokenSerializer())
-                    .create();
-            return gson.fromJson(body, OAuthSession.class);
-        } catch (Exception e) {
-            throw new BankRequestFailedException(e.getMessage(), e);
-        }
-    }
-
-    public Map<String, String> getEndpoints(String url){
-        this.setUrl(url);
-        this.createBody(RequestType.GET);
-
-        try (Response response = this.execute()) {
-            String body = response.body().string();
-
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(HashMap.class, new EndpointsSerializer())
-                    .create();
-            return gson.fromJson(body, HashMap.class);
-        } catch (Exception e) {
-            return new HashMap<>();
-        }
-    }
-
     public static String generateState() {
         return UUID.randomUUID().toString();
     }
@@ -86,7 +53,7 @@ public class OAuthService extends BasicService {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(bytes, 0, bytes.length);
             byte[] digest = md.digest();
-            return  Base64.getUrlEncoder().encodeToString(digest);
+            return Base64.getUrlEncoder().encodeToString(digest);
         } catch (Exception e) {
             return "";
         }
@@ -110,10 +77,10 @@ public class OAuthService extends BasicService {
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 
-    public static OAuthSession startSession(SCA sca, String scope) {
+    public static OAuthSession startSession(StrongAuthenticatableResource strongAuthenticatableResource, String scope) {
 
         OAuthService service = new OAuthService();
-        Map<String, String> endpoints = service.getEndpoints(sca.getLinks().get(SCA.LinkType.SCA_OAUTH));
+        Map<String, String> endpoints = service.getEndpoints(strongAuthenticatableResource.getLinks().getScaOAuth().getUrl());
         String state = OAuthService.generateState();
         String codeVerifier = OAuthService.generateCodeVerifier();
         OAuthSession session = new OAuthSession();
@@ -124,5 +91,38 @@ public class OAuthService extends BasicService {
         session.setState(state);
 
         return new PersistentOAuthSession().create(session);
+    }
+
+    public OAuthSession accessTokenRequest(String url, TokenRequest request) throws BankRequestFailedException {
+
+        this.setUrl(url);
+        this.createBody(RequestType.POST, JSON, request);
+
+        try (Response response = this.execute()) {
+            String body = response.body().string();
+
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(OAuthSession.class, new TokenSerializer())
+                    .create();
+            return gson.fromJson(body, OAuthSession.class);
+        } catch (Exception e) {
+            throw new BankRequestFailedException(e.getMessage(), e);
+        }
+    }
+
+    public Map<String, String> getEndpoints(String url) {
+        this.setUrl(url);
+        this.createBody(RequestType.GET);
+
+        try (Response response = this.execute()) {
+            String body = response.body().string();
+
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(HashMap.class, new EndpointsSerializer())
+                    .create();
+            return gson.fromJson(body, HashMap.class);
+        } catch (Exception e) {
+            return new HashMap<>();
+        }
     }
 }

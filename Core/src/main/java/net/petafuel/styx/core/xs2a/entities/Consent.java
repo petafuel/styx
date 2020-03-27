@@ -1,5 +1,12 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import net.petafuel.styx.core.xs2a.entities.serializers.ISODateDeserializer;
+
+import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
+import javax.json.bind.annotation.JsonbCreator;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -10,24 +17,44 @@ import java.util.UUID;
  */
 public class Consent extends StrongAuthenticatableResource {
 
+    @JsonbProperty("consentId")
     private String id;
+
+    @JsonbTransient
     private UUID xRequestId;
     private int frequencyPerDay;
     private boolean recurringIndicator;
     private boolean combinedServiceIndicator;
+
+    @JsonbTypeDeserializer(ISODateDeserializer.class)
+    @JsonbDateFormat("yyyy-MM-dd")
     private Date validUntil;
+    private Date lastAction;
+
+    @JsonbTransient
     private Date lastUpdated;
+
+    @JsonbTransient
     private Date createdAt;
-    private Access access;
+    private AccountAccess access;
+    @JsonbTransient
     private PSU psu;
+
     private State state;
 
     public Consent() {
         this.sca = new SCA();
-        this.access = new Access();
+        this.access = new AccountAccess();
         Calendar calendar = Calendar.getInstance();
-        calendar.set(9999, Calendar.JANUARY, 1);
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DATE, 90);
         this.validUntil = calendar.getTime();
+    }
+
+    @JsonbCreator
+    public Consent(@JsonbProperty("consentStatus") String consentStatus) {
+        this();
+        this.state = State.getByString(consentStatus);
     }
 
     public String getId() {
@@ -46,6 +73,11 @@ public class Consent extends StrongAuthenticatableResource {
         this.xRequestId = xRequestId;
     }
 
+    @JsonbProperty("consentStatus")
+    public String getStateJson(){
+        return state != null ? state.getJsonKey() : null;
+    }
+
     public State getState() {
         return state;
     }
@@ -60,6 +92,14 @@ public class Consent extends StrongAuthenticatableResource {
 
     public void setRecurringIndicator(boolean recurringIndicator) {
         this.recurringIndicator = recurringIndicator;
+    }
+
+    public Date getLastAction() {
+        return lastAction;
+    }
+
+    public void setLastAction(Date lastAction) {
+        this.lastAction = lastAction;
     }
 
     public Date getValidUntil() {
@@ -94,11 +134,11 @@ public class Consent extends StrongAuthenticatableResource {
         this.frequencyPerDay = frequencyPerDay;
     }
 
-    public Access getAccess() {
+    public AccountAccess getAccess() {
         return access;
     }
 
-    public void setAccess(Access access) {
+    public void setAccess(AccountAccess access) {
         this.access = access;
     }
 

@@ -23,7 +23,6 @@ import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationsRequest;
@@ -35,7 +34,6 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.SelectAuthent
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUAuthenticationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUIdentificationRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.InitiatedPaymentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentStatusSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PeriodicPaymentMultipartBodySerializer;
@@ -47,7 +45,6 @@ import org.apache.logging.log4j.Logger;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.mail.BodyPart;
-import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import javax.ws.rs.core.MediaType;
@@ -55,7 +52,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -92,17 +88,13 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
         this.setUrl(this.url + String.format(INITIATE_PAYMENT, service.getValue(), product.getValue()));
         this.createHeaders(xs2ARequest);
 
-        try (Response response = this.execute()) {
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String body = extractResponseBody(response, 201);
 
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(InitiatedPayment.class, new InitiatedPaymentSerializer())
-                    .create();
-            InitiatedPayment payment = gson.fromJson(body, InitiatedPayment.class);
+            InitiatedPayment payment = jsonb.fromJson(body, InitiatedPayment.class);
             payment.setxRequestId(UUID.fromString(xs2ARequest.getHeaders().get("x-request-id")));
 
-            //if the sca method was not set by previously parsing the body, use the bank supplied header
-            SCAUtils.parseSCAApproach(payment.getSca(), response);
+            payment.getSca().setApproach(SCAUtils.parseSCAApproach(payment.getLinks(), response));
             return payment;
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
@@ -166,7 +158,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
             request.addHeader(XS2AHeader.ACCEPT, JSON.toString());
         }
         this.createHeaders(request);
-        try (Response response = this.execute()) {
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String contentType;
             if ((contentType = response.headers().get("content-type")) == null) {
                 throw new BankRequestFailedException("Content-Type Header is not set, parsing of json or xml is not possible", response.code());
@@ -179,11 +171,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
                             .create();
                     return periodicPaymentGson.fromJson(responseBody, PeriodicPayment.class);
                 } else if (request.getPaymentService().equals(PaymentService.PAYMENTS)) {
-                    try (Jsonb jsonb = JsonbBuilder.create()) {
-                        return jsonb.fromJson(responseBody, Payment.class);
-                    } catch (Exception e) {
-                        throw new SerializerException("Cannot parse aspsp response", e);
-                    }
+                    return jsonb.fromJson(responseBody, Payment.class);
                 }
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(InitializablePayment.class, new PaymentSerializer(request.getPaymentService()))
@@ -223,7 +211,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
                     return PaymentSerializer.xmlDeserialize(sepaParser.parseSEPA().getSepaDocument(), request.getPaymentService());
                 }
             }
-        } catch (IOException | SEPAParsingException | ParseException | MessagingException e) {
+        } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }

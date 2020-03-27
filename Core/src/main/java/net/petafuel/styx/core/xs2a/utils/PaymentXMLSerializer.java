@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.Vector;
 
 public class PaymentXMLSerializer {
+    private static final String NOT_PROVIDED = "NOTPROVIDED";
     private PAIN00100303Document document;
     private CCTInitiation ccInitation;
     private GroupHeader groupHeader;
@@ -23,7 +24,8 @@ public class PaymentXMLSerializer {
     @SuppressWarnings("squid:S1149")
     private Vector<PaymentInstructionInformation> pmtInfos;
     private PmtInf pii;
-    private CreditTransferTransactionInformation cdtTrfTxInf;
+    private SimpleDateFormat requestedExecutionDateFormat;
+    private SimpleDateFormat creationTimeFormat;
 
     public PaymentXMLSerializer() {
         document = new PAIN00100303Document();
@@ -31,31 +33,29 @@ public class PaymentXMLSerializer {
         groupHeader = new GroupHeader();
         pmtInfos = new Vector<>();
         pii = new PmtInf();
-        cdtTrfTxInf = new CreditTransferTransactionInformation();
-
+        requestedExecutionDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        creationTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     }
 
     public PAIN00100303Document serialize(String messageId, Payment payment) {
 
         // Necessary variables for creating a PAIN00100303Document
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String creationTime = simpleDateFormat.format(new Date());
+        Date creationTime = new Date();
         double controlSum = 0d;
 
-        String paymentInformationId = "NOTPROVIDED";
         String paymentMethod = "TRF";
         String debtorName = payment.getDebtor().getName();
         String chargeBearer = "SLEV";
 
         // Setting values for each instance
-        groupHeader.setMessageId(messageId);
-        groupHeader.setCreationTime(creationTime);
+        groupHeader.setMessageId(messageId.substring(0, Math.min(messageId.length(), 35)));
+        groupHeader.setCreationTime(creationTimeFormat.format(creationTime));
         groupHeader.setNoOfTransactions(1);
 
         groupHeader.setInitiatingPartyName(debtorName);
 
         ArrayList<CreditTransferTransactionInformation> list = new ArrayList<>();
-
+        CreditTransferTransactionInformation cdtTrfTxInf = new CreditTransferTransactionInformation();
         controlSum += Double.parseDouble(payment.getInstructedAmount().getAmount());
         cdtTrfTxInf.setEndToEndID(payment.getEndToEndIdentification() != null ? payment.getEndToEndIdentification() : UUID.randomUUID().toString());
         cdtTrfTxInf.setAmount(Double.parseDouble(payment.getInstructedAmount().getAmount()));
@@ -66,7 +66,7 @@ public class PaymentXMLSerializer {
 
         groupHeader.setControlSum(controlSum);
 
-        pii.setPmtInfId(paymentInformationId);
+        pii.setPmtInfId(NOT_PROVIDED);
         pii.setPaymentMethod(paymentMethod);
         pii.setNoTxns(1);
         pii.setCtrlSum(controlSum);
@@ -74,6 +74,12 @@ public class PaymentXMLSerializer {
         pii.setDebtorAccountIBAN(payment.getDebtor().getIban());
         pii.setChargeBearer(chargeBearer);
         pii.setCreditTransferTransactionInformationVector(list);
+
+        if (payment.getRequestedExecutionDate() == null) {
+            pii.setRequestedExecutionDate(requestedExecutionDateFormat.format(creationTime));
+        } else {
+            pii.setRequestedExecutionDate(requestedExecutionDateFormat.format(payment.getRequestedExecutionDate()));
+        }
 
         pmtInfos.add(pii);
         ccInitation.setGrpHeader(groupHeader);
@@ -85,42 +91,48 @@ public class PaymentXMLSerializer {
     public PAIN00100303Document serialize(String messageId, BulkPayment bulkPayment) {
 
         // Necessary variables for creating a PAIN00100303Document
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String creationTime = simpleDateFormat.format(new Date());
+        Date creationTime = new Date();
         double controlSum = 0d;
 
-        String paymentInformationId = "NOTPROVIDED";
         String paymentMethod = "TRF";
-        String debtorName = bulkPayment.getDebtorAccount().getName();
         String chargeBearer = "SLEV";
 
         // Setting values for each instance
-        groupHeader.setMessageId(messageId);
-        groupHeader.setCreationTime(creationTime);
+        groupHeader.setMessageId(messageId.substring(0, Math.min(messageId.length(), 35)));
+        groupHeader.setCreationTime(creationTimeFormat.format(creationTime));
         groupHeader.setNoOfTransactions(bulkPayment.getPayments().size());
 
-        groupHeader.setInitiatingPartyName(debtorName);
+        groupHeader.setInitiatingPartyName(NOT_PROVIDED);
 
         ArrayList<CreditTransferTransactionInformation> list = new ArrayList<>();
         for (Payment payment : bulkPayment.getPayments()) {
+            CreditTransferTransactionInformation cdtTrfTxInf = new CreditTransferTransactionInformation();
             controlSum += Double.parseDouble(payment.getInstructedAmount().getAmount());
             cdtTrfTxInf.setEndToEndID(payment.getEndToEndIdentification() != null ? payment.getEndToEndIdentification() : UUID.randomUUID().toString());
             cdtTrfTxInf.setAmount(Double.parseDouble(payment.getInstructedAmount().getAmount()));
             cdtTrfTxInf.setCreditorName(payment.getCreditorName());
             cdtTrfTxInf.setCreditorIBAN(payment.getCreditor().getIban());
             cdtTrfTxInf.setVwz(payment.getRemittanceInformationUnstructured());
+            cdtTrfTxInf.setCreditorAgent(payment.getCreditorName());
             list.add(cdtTrfTxInf);
         }
         groupHeader.setControlSum(controlSum);
 
-        pii.setPmtInfId(paymentInformationId);
+        pii.setPmtInfId(NOT_PROVIDED);
         pii.setPaymentMethod(paymentMethod);
         pii.setNoTxns(bulkPayment.getPayments().size());
         pii.setCtrlSum(controlSum);
-        pii.setDebtorName(debtorName);
+        pii.setDebtorName(NOT_PROVIDED);
         pii.setDebtorAccountIBAN(bulkPayment.getDebtorAccount().getIban());
         pii.setChargeBearer(chargeBearer);
+        pii.setBatchBooking(bulkPayment.getBatchBookingPreferred());
         pii.setCreditTransferTransactionInformationVector(list);
+
+        if (bulkPayment.getRequestedExecutionDate() == null) {
+            pii.setRequestedExecutionDate(requestedExecutionDateFormat.format(creationTime));
+        } else {
+            pii.setRequestedExecutionDate(requestedExecutionDateFormat.format(bulkPayment.getRequestedExecutionDate()));
+        }
 
         pmtInfos.add(pii);
         ccInitation.setGrpHeader(groupHeader);

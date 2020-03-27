@@ -1,11 +1,10 @@
 package net.petafuel.styx.api.v1.payment.entity;
 
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
-import net.petafuel.styx.core.xs2a.entities.SCA;
+import net.petafuel.styx.core.xs2a.entities.Links;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 
 import javax.json.bind.annotation.JsonbProperty;
-import java.util.Map;
 
 public class PaymentResponse {
     @JsonbProperty("transactionStatus")
@@ -15,7 +14,7 @@ public class PaymentResponse {
     private String paymentId;
 
     @JsonbProperty("links")
-    private Map<SCA.LinkType, String> links;
+    private Links links;
 
     @JsonbProperty("psuMessage")
     private String psuMessage;
@@ -27,7 +26,7 @@ public class PaymentResponse {
     public PaymentResponse(InitiatedPayment initiatedPayment) {
         transactionStatus = initiatedPayment.getStatus();
         paymentId = initiatedPayment.getPaymentId();
-        links = initiatedPayment.getSca().getLinks();
+        links = initiatedPayment.getLinks();
         psuMessage = initiatedPayment.getSca().getPsuMessage();
     }
 
@@ -47,11 +46,11 @@ public class PaymentResponse {
         this.paymentId = paymentId;
     }
 
-    public Map<SCA.LinkType, String> getLinks() {
+    public Links getLinks() {
         return links;
     }
 
-    public void setLinks(Map<SCA.LinkType, String> links) {
+    public void setLinks(Links links) {
         this.links = links;
     }
 

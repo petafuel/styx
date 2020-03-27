@@ -21,7 +21,7 @@ public class InitiatedPaymentSerializer implements JsonDeserializer<InitiatedPay
             String paymentId = object.get("paymentId").getAsString();
             InitiatedPayment payment = new InitiatedPayment(paymentId, transactionStatus);
             JsonObject links = object.get("_links").getAsJsonObject();
-            DeserialisationHelper.parseSCALinksData(payment.getSca(), links);
+            DeserialisationHelper.parseSCALinksData(payment, links);
             return payment;
         } catch (Exception e) {
             throw new SerializerException("Unable to deserialize initiated payment", e);

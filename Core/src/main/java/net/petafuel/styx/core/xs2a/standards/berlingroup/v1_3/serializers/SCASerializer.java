@@ -14,7 +14,6 @@ import net.petafuel.styx.core.xs2a.entities.AuthenticationType;
 import net.petafuel.styx.core.xs2a.entities.Challenge;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.entities.XS2AJsonKeys;
-import net.petafuel.styx.core.xs2a.utils.DeserialisationHelper;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -42,16 +41,12 @@ public class SCASerializer implements JsonSerializer<SCA>, JsonDeserializer<SCA>
 
         //single authentication object
         if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.CHOSEN_SCA_METHOD.value())) != null && !currentJsonElement.isJsonNull()) {
-            sca.setChosenSCAMethod(parseAuthenticationObject(currentJsonElement));
+            sca.setChosenScaMethod(parseAuthenticationObject(currentJsonElement));
         }
 
         //Challenge object
         if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.CHALLENGE.value())) != null && !currentJsonElement.isJsonNull()) {
             sca.setChallengeData(parseChallenge(currentJsonElement));
-        }
-
-        if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.LINKS.value())) != null && !authorisationResponse.get(XS2AJsonKeys.LINKS.value()).isJsonNull()) {
-            DeserialisationHelper.parseSCALinksData(sca, currentJsonElement.getAsJsonObject());
         }
 
         if ((currentJsonElement = authorisationResponse.get(XS2AJsonKeys.PSU_MESSAGE.value())) != null && !currentJsonElement.isJsonNull()) {

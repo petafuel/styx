@@ -1,7 +1,7 @@
 package net.petafuel.styx.core.persistence;
 
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
-import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.SCA;
@@ -27,21 +27,13 @@ public class PersistentConsentIntegrationTest {
 
     @BeforeAll
     public void setup() {
-        Account IngoZebadich = new Account("DE48500105171271124579");
-        IngoZebadich.setName("Ingo Zebadich");
-        IngoZebadich.setType(Account.Type.IBAN);
+        AccountReference IngoZebadich = new AccountReference("DE48500105171271124579", AccountReference.Type.IBAN);
 
-        Account MiaDochegal = new Account("4253614013");
-        MiaDochegal.setName("Mia Dochegal");
-        MiaDochegal.setType(Account.Type.BBAN);
+        AccountReference MiaDochegal = new AccountReference("4253614013", AccountReference.Type.BBAN);
 
-        Account KlaraFall = new Account("AAAPL1234C");
-        KlaraFall.setName("Klara Fall");
-        KlaraFall.setType(Account.Type.PAN);
+        AccountReference KlaraFall = new AccountReference("AAAPL1234C", AccountReference.Type.PAN);
 
-        Account JohannesBeer = new Account("460323255272");
-        JohannesBeer.setName("Johannes Beer");
-        JohannesBeer.setType(Account.Type.MSISDN);
+        AccountReference JohannesBeer = new AccountReference("460323255272", AccountReference.Type.MSISDN);
 
         consent = new Consent();
         consent.setId(String.valueOf(UUID.randomUUID()));

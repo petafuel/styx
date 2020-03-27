@@ -1,6 +1,5 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
-import com.google.gson.JsonPrimitive;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
@@ -51,8 +50,8 @@ public class ConsorsbankPISTest {
         Date endDate = day.getTime();
         PeriodicPayment.ExecutionRule executionRule = PeriodicPayment.ExecutionRule.FOLLOWING;
         String frequency = PeriodicPayment.Frequency.MNTH.name();
-        if (((JsonPrimitive) standard.getAspsp().getConfig().getImplementerOptions().get("STYX01").getOptions()
-                .get("required")).getAsBoolean()) {
+        if (standard.getAspsp().getConfig().getImplementerOptions().get("STYX01").getOptions()
+                .get("required").getAsBoolean()) {
             frequency = PeriodicPayment.Frequency.MNTH.getValue();
         }
         String dayOfExecution = "20";

@@ -4,7 +4,7 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
-import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -30,13 +30,13 @@ public class RedirectSCATest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE60760300800500123456"));
-        balances.add(new Account("DE98701204008538752000"));
-        balances.add(new Account("DE36760300800500234565"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
+        balances.add(new AccountReference("DE98701204008538752000", AccountReference.Type.IBAN));
+        balances.add(new AccountReference("DE36760300800500234565", AccountReference.Type.IBAN));
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE60760300800500123456"));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("PSU-Successful");
         psu.setIp("192.168.8.78");

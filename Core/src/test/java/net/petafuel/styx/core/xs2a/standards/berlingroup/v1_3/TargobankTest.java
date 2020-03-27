@@ -5,6 +5,7 @@ import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.Currency;
@@ -21,7 +22,6 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.DeleteConsent
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.BulkPaymentInitiationJsonRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ConsentUpdatePSUDataRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PaymentInitiationJsonRequest;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -47,12 +47,11 @@ public class TargobankTest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        Account account = new Account("DE70300209005320320678");
-        account.setIdentifier("DE70300209005320320678");
+        List<AccountReference> balances = new LinkedList<>();
+        AccountReference account = new AccountReference("DE70300209005320320678", AccountReference.Type.IBAN);
         balances.add(account);
 
-        List<Account> transactions = new LinkedList<>();
+        List<AccountReference> transactions = new LinkedList<>();
         transactions.add(account);
 
         PSU psu = new PSU("PSD2TEST4");
@@ -135,9 +134,8 @@ public class TargobankTest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        Account account = new Account("DE40100100103307118608");
-        account.setIdentifier("DE40100100103307118608");
+        List<AccountReference> balances = new LinkedList<>();
+        AccountReference account = new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN);
         balances.add(account);
 
         PSU psu = new PSU("PSD2TEST4");
@@ -165,9 +163,9 @@ public class TargobankTest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> transactions = new LinkedList<>();
-        Account account = new Account("DE40100100103307118608");
-        account.setIdentifier("DE40100100103307118608");
+        List<AccountReference> transactions = new LinkedList<>();
+        AccountReference account = new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN);
+
         transactions.add(account);
 
         PSU psu = new PSU("PSD2TEST4");
@@ -191,7 +189,7 @@ public class TargobankTest {
     @Test
     @DisplayName("Create consent without balances or transactions")
     @Tag("integration")
-    public void createNoAccountsConsent() throws SignatureException, BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
+    public void createNoAccountReferencesConsent() throws SignatureException, BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
         Assert.assertTrue(standard.isCSImplemented());
@@ -218,11 +216,11 @@ public class TargobankTest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE40100100103307118608"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN));
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE40100100103307118608"));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("");
         Consent consent = new Consent();

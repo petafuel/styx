@@ -1,14 +1,16 @@
 package net.petafuel.styx.api.util;
 
+import net.petafuel.styx.core.xs2a.entities.LinkType;
+import net.petafuel.styx.core.xs2a.entities.Links;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
-import net.petafuel.styx.core.xs2a.entities.SCA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -51,12 +53,24 @@ public class AspspUrlMapper {
         this.isPIS = false;
     }
 
-    public void map(Map<SCA.LinkType, String> links) {
+    public static String extractAuthorisationId(Links links) {
+        for (Map.Entry<LinkType, Links.Href> entry : links.getUrlMapping().entrySet()) {
+            if (entry.getValue().getUrl().contains("authorisations/")) {
+                String[] routeParts = entry.getValue().getUrl().split("/");
+                return routeParts[routeParts.length - 1];
+            }
+        }
+        return null;
+    }
+
+    //Links need to be adapted depening on multiple cases
+    @SuppressWarnings("squid:S3776")
+    public void map(Links links) {
         if (!Boolean.parseBoolean(System.getProperty(ApiProperties.STYX_PROXY_ENABLED))) {
             return;
         }
 
-        links.entrySet().parallelStream().forEach(entry -> {
+        links.getUrlMapping().entrySet().parallelStream().forEach(entry -> {
             String route = null;
             switch (entry.getKey()) {
                 case AUTHORISATION_WITH_PSU_IDENTIFICATION:
@@ -76,6 +90,9 @@ public class AspspUrlMapper {
                 case UPDATE_ENCRYPTED_ADDITIONAL_PSU_AUTHENTICATION:
                 case AUTHORISE_TRANSACTION:
                 case SCA_STATUS:
+                    if (authorisationId == null || Objects.equals(authorisationId, "")) {
+                        authorisationId = extractAuthorisationId(links);
+                    }
                     if (isPIS) {
                         route = String.format(PIS_UPDATE_AUTHORISATION, paymentService.getValue(), paymentProduct.getValue(), paymentId, authorisationId);
                     } else {
@@ -88,7 +105,7 @@ public class AspspUrlMapper {
             }
 
             Optional<URL> styxWrapperUrl = getMappedURL(route);
-            styxWrapperUrl.ifPresent(presentValue -> entry.setValue(presentValue.toString()));
+            styxWrapperUrl.ifPresent(presentValue -> entry.getValue().setUrl(presentValue.toString()));
         });
 
         //Always add Status and Self links
@@ -103,8 +120,8 @@ public class AspspUrlMapper {
         }
         Optional<URL> styxWrapperUrlStatus = getMappedURL(getStatus);
         Optional<URL> styxWrapperUrlSelf = getMappedURL(getSelf);
-        styxWrapperUrlStatus.ifPresent(presentValue -> links.put(SCA.LinkType.STATUS, presentValue.toString()));
-        styxWrapperUrlSelf.ifPresent(presentValue -> links.put(SCA.LinkType.SELF, presentValue.toString()));
+        styxWrapperUrlStatus.ifPresent(presentValue -> links.setStatus(new Links.Href(presentValue.toString(), LinkType.STATUS)));
+        styxWrapperUrlSelf.ifPresent(presentValue -> links.setSelf(new Links.Href(presentValue.toString(), LinkType.SELF)));
     }
 
     //Only map the url if its mappable(route!=null) or if there was no error

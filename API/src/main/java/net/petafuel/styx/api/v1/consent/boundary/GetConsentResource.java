@@ -2,6 +2,7 @@ package net.petafuel.styx.api.v1.consent.boundary;
 
 import net.petafuel.styx.api.exception.ResponseConstant;
 import net.petafuel.styx.api.filter.CheckAccessToken;
+import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.rest.PSUResource;
 import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.v1.consent.control.ConsentProvider;
@@ -18,6 +19,7 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -27,7 +29,9 @@ import javax.ws.rs.core.Response;
 
 @ApplicationPath("/")
 @Path("/v1")
+@Consumes({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
+@RequiresBIC
 @CheckAccessToken
 public class GetConsentResource extends PSUResource {
 

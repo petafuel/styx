@@ -36,6 +36,8 @@ public class Consent extends StrongAuthenticatableResource {
     @JsonbTransient
     private Date createdAt;
     private Access access;
+
+    @JsonbTransient
     private PSU psu;
 
     @JsonbProperty("consentStatus")

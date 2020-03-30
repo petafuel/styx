@@ -7,6 +7,7 @@ import net.petafuel.styx.core.xs2a.entities.AccountAccess;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.SCA;
+import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,7 +23,6 @@ import java.util.Date;
 import java.util.UUID;
 
 public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
-
     private static final Logger LOG = LogManager.getLogger(PersistentConsent.class);
 
     /**
@@ -36,16 +36,9 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call create_consent(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}")) {
             setQueryValues(query, consent);
-
-            try (ResultSet resultSet = query.executeQuery()) {
-                if (resultSet.next()) {
-                    consent = this.dbToModel(resultSet);
-                }
-            }
+            consent = fetchModel(query);
         } catch (SQLException e) {
             logSQLError(e);
-        } catch (Exception e) {
-            LOG.error("Error creating consent within the database message={}", e.getMessage());
         }
         return consent;
     }
@@ -61,16 +54,9 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call get_consent(?)}")) {
             query.setString(1, consent.getId());
-            try (ResultSet resultSet = query.executeQuery()) {
-                if (resultSet.next()) {
-                    consent = this.dbToModel(resultSet);
-                }
-            } catch (Exception e) {
-                LOG.error("Error creating consent within the database message={}", e.getMessage());
-            }
+            consent = fetchModel(query);
         } catch (SQLException e) {
             logSQLError(e);
-            return null;
         }
         return consent;
     }
@@ -86,15 +72,9 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call update_consent(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}")) {
             setQueryValues(query, consent);
-            try (ResultSet resultSet = query.executeQuery()) {
-                if (resultSet.next()) {
-                    consent = this.dbToModel(resultSet);
-                }
-            }
+            consent = fetchModel(query);
         } catch (SQLException e) {
             logSQLError(e);
-        } catch (Exception e) {
-            LOG.error("Error creating consent within the database message={}", e.getMessage());
         }
         return consent;
     }
@@ -112,13 +92,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
             query.setString(1, consent.getId()); // consent id
             query.setInt(2, state.getIndex()); // consent status
 
-            try (ResultSet resultSet = query.executeQuery()) {
-                if (resultSet.next()) {
-                    consent = this.dbToModel(resultSet);
-                }
-            } catch (Exception e) {
-                LOG.error("Error creating consent within the database message={}", e.getMessage());
-            }
+            consent = fetchModel(query);
         } catch (SQLException e) {
             logSQLError(e);
         }
@@ -136,13 +110,8 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call delete_consent(?)}")) {
             query.setString(1, consent.getId());
-            try (ResultSet resultSet = query.executeQuery()) {
-                if (resultSet.next()) {
-                    consent = this.dbToModel(resultSet);
-                }
-            } catch (Exception e) {
-                LOG.error("Error creating consent within the database message={}", e.getMessage());
-            }
+            consent = fetchModel(query);
+
         } catch (SQLException e) {
             logSQLError(e);
         }
@@ -156,13 +125,15 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
      * @return Mapped Consent from the database columns
      * @throws SQLException If the expected database column is not available
      */
-    private Consent dbToModel(ResultSet resultSet) throws Exception {
+    private Consent dbToModel(ResultSet resultSet) throws SQLException {
         Consent consent = new Consent();
         consent.setId(resultSet.getString("id"));
 
         try (Jsonb jsonb = JsonbBuilder.create()) {
             AccountAccess consentAccess = jsonb.fromJson(resultSet.getString("access"), AccountAccess.class);
             consent.setAccess(consentAccess);
+        } catch (Exception e) {
+            throw new SerializerException(e.getMessage(), e);
         }
 
         consent.setRecurringIndicator(resultSet.getBoolean("recurring_indicator"));
@@ -195,12 +166,14 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
      * @param consent Consent to retrieve the query parameters from
      * @throws SQLException in case the function call within the query does not match with the retrieved parameters
      */
-    private void setQueryValues(CallableStatement query, Consent consent) throws Exception {
+    private void setQueryValues(CallableStatement query, Consent consent) throws SQLException {
         query.setString(1, consent.getId()); // consent id
         query.setInt(2, consent.getState().getIndex()); // consent status
 
         try (Jsonb jsonb = JsonbBuilder.create()) {
             query.setString(3, jsonb.toJson(consent.getAccess())); // access string
+        } catch (Exception e) {
+            throw new SerializerException(e.getMessage(), e);
         }
 
         query.setBoolean(4, consent.isRecurringIndicator()); // recurring consent
@@ -232,6 +205,15 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
             return null;
         }
         return new Date(timestamp.getTime());
+    }
+
+    private Consent fetchModel(CallableStatement query) throws SQLException {
+        try (ResultSet resultSet = query.executeQuery()) {
+            if (resultSet.next()) {
+                return this.dbToModel(resultSet);
+            }
+        }
+        throw new SQLException("Unable to fetch consent model from database");
     }
 
     private void logSQLError(SQLException e) {

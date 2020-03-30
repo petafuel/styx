@@ -1,7 +1,5 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
@@ -12,7 +10,6 @@ import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentStatusSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BasicAuthorisationService;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationsRequest;

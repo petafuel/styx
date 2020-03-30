@@ -126,4 +126,13 @@ public class AccountReference {
         MASKED_PAN,
         MSISDN
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AccountReference && this.iban != null) {
+            return ((AccountReference) obj).iban.equals(this.iban);
+        }
+
+        return super.equals(obj);
+    }
 }

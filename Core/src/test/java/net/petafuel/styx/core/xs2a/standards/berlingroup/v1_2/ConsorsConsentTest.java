@@ -4,7 +4,7 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
-import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -33,14 +33,14 @@ public class ConsorsConsentTest {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE60760300800500123456"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE60760300800500123456"));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
-        List<Account> accounts = new LinkedList<>();
-        accounts.add(new Account("DE60760300800500123456"));
+        List<AccountReference> accounts = new LinkedList<>();
+        accounts.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("PSU-Successful");
         psu.setIp("192.168.8.78");
@@ -113,8 +113,8 @@ public class ConsorsConsentTest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE60760300800500123456"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("PSU-Successful");
         psu.setIp("192.168.8.78");
@@ -140,8 +140,8 @@ public class ConsorsConsentTest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE60760300800500123456"));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("PSU-Successful");
         psu.setIp("192.168.8.78");
@@ -194,11 +194,11 @@ public class ConsorsConsentTest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE60760300800500123456"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE60760300800500123456"));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("");
         Consent consent = new Consent();

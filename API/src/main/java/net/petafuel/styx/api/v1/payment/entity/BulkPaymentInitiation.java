@@ -1,10 +1,13 @@
 package net.petafuel.styx.api.v1.payment.entity;
 
+import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.serializers.ISODateDeserializer;
 
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTypeDeserializer;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 public class BulkPaymentInitiation extends SinglePaymentInitiation {
@@ -16,8 +19,16 @@ public class BulkPaymentInitiation extends SinglePaymentInitiation {
     @JsonbTypeDeserializer(ISODateDeserializer.class)
     private Date requestedExecutionDate;
 
-    public BulkPaymentInitiation() {
-        //json bind constructor
+    @Valid
+    @NotNull
+    private Account debtorAccount;
+
+    public Account getDebtorAccount() {
+        return debtorAccount;
+    }
+
+    public void setDebtorAccount(Account debtorAccount) {
+        this.debtorAccount = debtorAccount;
     }
 
     public Boolean getBatchBookingPreferred() {

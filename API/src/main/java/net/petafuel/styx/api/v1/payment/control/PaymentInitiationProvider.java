@@ -45,7 +45,7 @@ public class PaymentInitiationProvider extends PaymentProvider {
         if (!singlePayment.isPresent()) {
             throw new StyxException(new ResponseEntity("No valid payment object was found within the bulk payments array", ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
         }
-        Account debtor = singlePayment.get().getDebtor();
+        Account debtor = bulkPaymentBody.getDebtorAccount();
         BulkPayment bulkPayment = new BulkPayment();
         bulkPayment.setBatchBookingPreferred(bulkPaymentBody.getBatchBookingPreferred());
         bulkPayment.setDebtorAccount(debtor);

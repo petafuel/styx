@@ -60,7 +60,7 @@ public class SparkassePISTest {
 
         Payment paymentBody = new Payment();
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
+        paymentBody.setCreditorName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
@@ -99,7 +99,7 @@ public class SparkassePISTest {
 
         Payment paymentBody = new Payment();
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
+        paymentBody.setCreditorName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);
@@ -142,7 +142,7 @@ public class SparkassePISTest {
         p1.setInstructedAmount(new InstructedAmount(instructedAmount1, instructedCurrency1));
         p1.setRemittanceInformationUnstructured(reference1);
         p1.setEndToEndIdentification("RI-234567890");
-
+        p1.setCreditorName(creditorName1);
 
         /** Payment 2 information*/
         String creditorIban2 = "DE12999999990000001002"; //Sparkasse
@@ -159,6 +159,7 @@ public class SparkassePISTest {
 
         p2.setDebtor(debtor);
         p2.setCreditor(creditor2);
+        p2.setCreditorName(creditorName2);
         p2.setInstructedAmount(new InstructedAmount(instructedAmount2, instructedCurrency2));
         p2.setRemittanceInformationUnstructured(reference2);
         p2.setEndToEndIdentification("WBG-123456789");
@@ -310,7 +311,7 @@ public class SparkassePISTest {
 
         PeriodicPayment paymentBody = new PeriodicPayment(startDate, frequency.name());
         Account creditor = new Account(creditorIban, creditorCurrency, Account.Type.IBAN);
-        creditor.setName(creditorName);
+        paymentBody.setCreditorName(creditorName);
         Account debtor = new Account(debtorIban, debtorCurrency, Account.Type.IBAN);
         paymentBody.setCreditor(creditor);
         paymentBody.setDebtor(debtor);

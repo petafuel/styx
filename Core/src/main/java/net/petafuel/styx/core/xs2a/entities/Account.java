@@ -24,7 +24,7 @@ public class Account implements Serializable {
      * This is the `account-id` used by the banks
      */
     private String resourceId;
-    @JsonbTransient
+
     private String name;
     @JsonbProperty("product")
     private String product;
@@ -58,35 +58,21 @@ public class Account implements Serializable {
         return type;
     }
 
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     public Currency getCurrency() {
         return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 
     @JsonbTransient
     public String getIdentifier() {
         return identifier;
-    }
-
-    public enum Type {
-        IBAN("iban"),
-        BBAN("bban"),
-        PAN("pan"),
-        MASKED_PAN("maskedPan"),
-        MSISDN("msisdn");
-
-        private String jsonKey;
-
-        Type(String str) {
-            this.jsonKey = str;
-        }
-
-        public String getJsonKey() {
-            return this.jsonKey;
-        }
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
     }
 
     public void setIdentifier(String identifier) {
@@ -101,6 +87,7 @@ public class Account implements Serializable {
         this.resourceId = resourceId;
     }
 
+    @JsonbTransient
     public String getName() {
         return name;
     }
@@ -123,10 +110,6 @@ public class Account implements Serializable {
 
     public void setCashAccountType(String cashAccountType) {
         this.cashAccountType = cashAccountType;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
     }
 
     public List<Balance> getBalances() {
@@ -163,5 +146,23 @@ public class Account implements Serializable {
 
     public void setAgent(String agent) {
         this.agent = agent;
+    }
+
+    public enum Type {
+        IBAN("iban"),
+        BBAN("bban"),
+        PAN("pan"),
+        MASKED_PAN("maskedPan"),
+        MSISDN("msisdn");
+
+        private String jsonKey;
+
+        Type(String str) {
+            this.jsonKey = str;
+        }
+
+        public String getJsonKey() {
+            return this.jsonKey;
+        }
     }
 }

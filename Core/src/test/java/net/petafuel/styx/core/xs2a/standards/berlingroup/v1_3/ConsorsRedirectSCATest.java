@@ -4,7 +4,7 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
-import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -31,14 +31,14 @@ public class ConsorsRedirectSCATest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE60760300800500123456"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE60760300800500123456"));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
-        List<Account> accounts = new LinkedList<>();
-        accounts.add(new Account("DE60760300800500123456"));
+        List<AccountReference> accounts = new LinkedList<>();
+        accounts.add(new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("555-5555555");
         psu.setIp("192.168.8.78");
@@ -61,7 +61,7 @@ public class ConsorsRedirectSCATest {
         SCAApproach redirectSCA = SCAHandler.decision(consent);
         Assert.assertTrue(redirectSCA instanceof Redirect);
         Assert.assertNotNull(((Redirect) redirectSCA).getAuthoriseLink());
-        String redirectLink = ((Redirect) redirectSCA).getAuthoriseLink().replace("\"","") + "?psu-id=PSU-Successful";
+        String redirectLink = ((Redirect) redirectSCA).getAuthoriseLink().replace("\"", "") + "?psu-id=PSU-Successful";
         //TODO call sca link
         //return redirect link to client
     }

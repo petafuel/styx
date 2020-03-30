@@ -2,7 +2,7 @@ package net.petafuel.styx.core.xs2a.utils;
 
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
-import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
@@ -26,13 +26,13 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 public class XS2AHeaderParserTest {
 
     static Stream<Arguments> requestClassProvider() {
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE40100100103307118608"));
-        balances.add(new Account("DE02100100109307118603"));
-        balances.add(new Account("DE67100100101306118605"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN));
+        balances.add(new AccountReference("DE02100100109307118603", AccountReference.Type.IBAN));
+        balances.add(new AccountReference("DE67100100101306118605", AccountReference.Type.IBAN));
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE40100100103307118608"));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN));
 
 
         PSU psu = new PSU("4321-87654321-4321");
@@ -67,19 +67,15 @@ public class XS2AHeaderParserTest {
 
     @Test
     void nestedParsing() {
-        class ClassDataMember
-        {
+        class ClassDataMember {
+            @XS2AHeader("isActive")
+            public boolean active;
+            @XS2AHeader("primitiveNumber")
+            protected int primitiveNumber;
             @XS2AHeader("id")
             private String id;
 
-            @XS2AHeader("primitiveNumber")
-            protected int primitiveNumber;
-
-            @XS2AHeader("isActive")
-            public boolean active;
-
-            public ClassDataMember()
-            {
+            public ClassDataMember() {
                 this.id = null;
                 this.primitiveNumber = 1;
                 this.active = false;
@@ -121,8 +117,7 @@ public class XS2AHeaderParserTest {
             @XS2AHeader("empty")
             private String empty;
 
-            public Request()
-            {
+            public Request() {
                 this.notNested = "notNested";
                 this.empty = "";
                 this.classDataMember = new ClassDataMember();

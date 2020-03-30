@@ -1,18 +1,18 @@
 package net.petafuel.styx.core.persistence.layers;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.persistence.Persistence;
 import net.petafuel.styx.core.persistence.PersistenceException;
 import net.petafuel.styx.core.persistence.PersistentDatabaseInterface;
-import net.petafuel.styx.core.xs2a.entities.Access;
+import net.petafuel.styx.core.xs2a.entities.AccountAccess;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.SCA;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
+import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.UUID;
 
 public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
-
     private static final Logger LOG = LogManager.getLogger(PersistentConsent.class);
 
     /**
@@ -37,12 +36,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call create_consent(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}")) {
             setQueryValues(query, consent);
-
-            try (ResultSet resultSet = query.executeQuery()) {
-                if (resultSet.next()) {
-                    consent = this.dbToModel(resultSet);
-                }
-            }
+            consent = fetchModel(query);
         } catch (SQLException e) {
             logSQLError(e);
         }
@@ -60,14 +54,9 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call get_consent(?)}")) {
             query.setString(1, consent.getId());
-            try (ResultSet resultSet = query.executeQuery()) {
-                if (resultSet.next()) {
-                    consent = this.dbToModel(resultSet);
-                }
-            }
+            consent = fetchModel(query);
         } catch (SQLException e) {
             logSQLError(e);
-            return null;
         }
         return consent;
     }
@@ -83,11 +72,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call update_consent(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}")) {
             setQueryValues(query, consent);
-            try (ResultSet resultSet = query.executeQuery()) {
-                if (resultSet.next()) {
-                    consent = this.dbToModel(resultSet);
-                }
-            }
+            consent = fetchModel(query);
         } catch (SQLException e) {
             logSQLError(e);
         }
@@ -98,7 +83,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
      * Update the state of a consent
      *
      * @param consent Consent required to have at least the consent id set
-     * @param state New state of the consent
+     * @param state   New state of the consent
      * @return Returns the consent with an updated state
      */
     public Consent updateState(Consent consent, Consent.State state) {
@@ -107,11 +92,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
             query.setString(1, consent.getId()); // consent id
             query.setInt(2, state.getIndex()); // consent status
 
-            try (ResultSet resultSet = query.executeQuery()) {
-                if (resultSet.next()) {
-                    consent = this.dbToModel(resultSet);
-                }
-            }
+            consent = fetchModel(query);
         } catch (SQLException e) {
             logSQLError(e);
         }
@@ -129,11 +110,8 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call delete_consent(?)}")) {
             query.setString(1, consent.getId());
-            try (ResultSet resultSet = query.executeQuery()) {
-                if (resultSet.next()) {
-                    consent = this.dbToModel(resultSet);
-                }
-            }
+            consent = fetchModel(query);
+
         } catch (SQLException e) {
             logSQLError(e);
         }
@@ -151,10 +129,12 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Consent consent = new Consent();
         consent.setId(resultSet.getString("id"));
 
-        Gson gson = new GsonBuilder().serializeNulls().create();
-        Access consentAccess = gson.fromJson(resultSet.getString("access"), Access.class);
-        consent.getAccess().setTransactions(consentAccess.getTransactions());
-        consent.getAccess().setBalances(consentAccess.getBalances());
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            AccountAccess consentAccess = jsonb.fromJson(resultSet.getString("access"), AccountAccess.class);
+            consent.setAccess(consentAccess);
+        } catch (Exception e) {
+            throw new SerializerException(e.getMessage(), e);
+        }
 
         consent.setRecurringIndicator(resultSet.getBoolean("recurring_indicator"));
         consent.setLastAction(getDateFromTimestamp(resultSet.getTimestamp("last_action")));
@@ -182,7 +162,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
     /**
      * set all consent values in the database query, modifies the query parameter
      *
-     * @param query current query object
+     * @param query   current query object
      * @param consent Consent to retrieve the query parameters from
      * @throws SQLException in case the function call within the query does not match with the retrieved parameters
      */
@@ -190,8 +170,11 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         query.setString(1, consent.getId()); // consent id
         query.setInt(2, consent.getState().getIndex()); // consent status
 
-        Gson gson = new GsonBuilder().serializeNulls().registerTypeAdapter(Consent.class, new ConsentSerializer()).create();
-        query.setString(3, gson.toJsonTree(consent.getAccess()).toString()); // access string
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            query.setString(3, jsonb.toJson(consent.getAccess())); // access string
+        } catch (Exception e) {
+            throw new SerializerException(e.getMessage(), e);
+        }
 
         query.setBoolean(4, consent.isRecurringIndicator()); // recurring consent
         query.setTimestamp(5, getTimestampFromDate(consent.getLastAction())); // last action
@@ -222,6 +205,15 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
             return null;
         }
         return new Date(timestamp.getTime());
+    }
+
+    private Consent fetchModel(CallableStatement query) throws SQLException {
+        try (ResultSet resultSet = query.executeQuery()) {
+            if (resultSet.next()) {
+                return this.dbToModel(resultSet);
+            }
+        }
+        throw new SQLException("Unable to fetch consent model from database");
     }
 
     private void logSQLError(SQLException e) {

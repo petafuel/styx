@@ -4,7 +4,7 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
-import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -37,11 +37,11 @@ public class ConsentTest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE86999999990000001000"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE86999999990000001000", AccountReference.Type.IBAN));
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE86999999990000001000"));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference("DE86999999990000001000", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("4321-87654321-4321");
         Consent consent = new Consent();
@@ -112,8 +112,8 @@ public class ConsentTest {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC_FIDUCIA, true);
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE40100100103307118608"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("4321-87654321-4321");
         Consent consent = new Consent();
@@ -139,8 +139,8 @@ public class ConsentTest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE40100100103307118608"));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("4321-87654321-4321");
         Consent consent = new Consent();
@@ -191,11 +191,11 @@ public class ConsentTest {
 
         Assert.assertTrue(standard.isCSImplemented());
 
-        List<Account> balances = new LinkedList<>();
-        balances.add(new Account("DE40100100103307118608"));
+        List<AccountReference> balances = new LinkedList<>();
+        balances.add(new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN));
 
-        List<Account> transactions = new LinkedList<>();
-        transactions.add(new Account("DE40100100103307118608"));
+        List<AccountReference> transactions = new LinkedList<>();
+        transactions.add(new AccountReference("DE40100100103307118608", AccountReference.Type.IBAN));
 
         PSU psu = new PSU("");
         Consent consent = new Consent();

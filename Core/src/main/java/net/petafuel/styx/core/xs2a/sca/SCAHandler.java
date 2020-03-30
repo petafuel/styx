@@ -13,17 +13,17 @@ public class SCAHandler {
     private SCAHandler() {
     }
 
-    public static SCAApproach decision(StrongAuthenticatableResource object) {
+    public static SCAApproach decision(StrongAuthenticatableResource strongAuthenticatableResource) {
 
         SCA sca;
         SCAApproach scaMethod = null;
         String scope;
-        if (object instanceof Consent) {
-            Consent consent = (Consent) object;
+        if (strongAuthenticatableResource instanceof Consent) {
+            Consent consent = (Consent) strongAuthenticatableResource;
             sca = consent.getSca();
             scope = "AIS: " + consent.getId();
-        } else if (object instanceof InitiatedPayment) {
-            InitiatedPayment payment = (InitiatedPayment) object;
+        } else if (strongAuthenticatableResource instanceof InitiatedPayment) {
+            InitiatedPayment payment = (InitiatedPayment) strongAuthenticatableResource;
             sca = payment.getSca();
             scope = "PIS: " + payment.getPaymentId();
         } else {
@@ -35,12 +35,12 @@ public class SCAHandler {
             case EMBEDDED:
                 break;
             case OAUTH2:
-                OAuthSession session = OAuthService.startSession(sca, scope);
+                OAuthSession session = OAuthService.startSession(strongAuthenticatableResource, scope);
                 String link = OAuthService.buildLink(session.getState());
                 scaMethod = new OAuth2(link);
                 break;
             case REDIRECT:
-                scaMethod = new Redirect(sca.getLinks().get(SCA.LinkType.SCA_REDIRECT));
+                scaMethod = new Redirect(strongAuthenticatableResource.getLinks().getScaRedirect().getUrl());
                 break;
             case REQUIRE_AUTHORISATION_RESOURCE:
                 //Do nothing

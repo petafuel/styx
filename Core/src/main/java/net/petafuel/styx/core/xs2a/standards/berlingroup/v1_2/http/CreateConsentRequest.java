@@ -1,16 +1,16 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Consent;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
 import net.petafuel.styx.core.xs2a.utils.Config;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import java.util.Optional;
 import java.util.UUID;
 
 public class CreateConsentRequest extends XS2ARequest {
+
     Consent consent;
 
     public CreateConsentRequest(Consent consent) {
@@ -29,8 +29,11 @@ public class CreateConsentRequest extends XS2ARequest {
 
     @Override
     public Optional<String> getRawBody() {
-        Gson gson = new GsonBuilder().registerTypeAdapter(CreateConsentRequest.class, new ConsentSerializer()).create();
-        return Optional.of(gson.toJson(this));
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            return Optional.of(jsonb.toJson(consent));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public Consent getConsent() {

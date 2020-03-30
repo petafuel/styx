@@ -104,20 +104,16 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
         this.createBody(RequestType.GET);
         this.createHeaders(consentStatusRequest);
 
-        try (Response response = this.execute()) {
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String responseBody = extractResponseBody(response, 200);
 
-            Gson gson = new GsonBuilder()
-                    .serializeNulls()
-                    .registerTypeAdapter(Consent.State.class, new ConsentStatusSerializer())
-                    .create();
             PersistentConsent persistentConsent = new PersistentConsent();
-            Consent.State state = gson.fromJson(responseBody, Consent.State.class);
+            Consent.State state = jsonb.fromJson(responseBody, Consent.State.class);
             Consent consent = new Consent();
             consent.setId(consentStatusRequest.getConsentId());
             persistentConsent.updateState(consent, state);
             return state;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }

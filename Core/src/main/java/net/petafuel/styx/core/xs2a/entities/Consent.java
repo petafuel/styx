@@ -2,11 +2,11 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import net.petafuel.styx.core.xs2a.entities.serializers.ISODateDeserializer;
 
+import javax.json.bind.annotation.JsonbCreator;
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbTypeDeserializer;
-import javax.json.bind.annotation.JsonbCreator;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,6 +29,10 @@ public class Consent extends StrongAuthenticatableResource {
     @JsonbTypeDeserializer(ISODateDeserializer.class)
     @JsonbDateFormat("yyyy-MM-dd")
     private Date validUntil;
+
+    @JsonbProperty("lastActionDate")
+    @JsonbTypeDeserializer(ISODateDeserializer.class)
+    @JsonbDateFormat("yyyy-MM-dd")
     private Date lastAction;
 
     @JsonbTransient
@@ -39,7 +43,7 @@ public class Consent extends StrongAuthenticatableResource {
     private AccountAccess access;
     @JsonbTransient
     private PSU psu;
-
+    @JsonbTransient
     private State state;
 
     public Consent() {
@@ -74,7 +78,7 @@ public class Consent extends StrongAuthenticatableResource {
     }
 
     @JsonbProperty("consentStatus")
-    public String getStateJson(){
+    public String getStateJson() {
         return state != null ? state.getJsonKey() : null;
     }
 
@@ -180,6 +184,14 @@ public class Consent extends StrongAuthenticatableResource {
         State(int index, String jsonKey) {
             this.index = index;
             this.jsonKey = jsonKey;
+        }
+
+        /**
+         * @deprecated jsonb default constructor
+         */
+        @Deprecated
+        State(){
+            //jsonb default constructor
         }
 
         public static Consent.State getByString(String search) {

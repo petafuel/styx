@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import javax.json.bind.annotation.JsonbProperty;
 import java.util.List;
 
 /**
@@ -76,6 +77,11 @@ public class Challenge {
 
     public OTP_FORMAT getOtpFormat() {
         return otpFormat;
+    }
+
+    @JsonbProperty("otpFormat")
+    public void setOtpFormatJson(String otpFormat) {
+        this.otpFormat = OTP_FORMAT.valueOf(otpFormat.toUpperCase());
     }
 
     public void setOtpFormat(OTP_FORMAT otpFormat) {

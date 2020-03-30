@@ -24,6 +24,14 @@ public class Persistence {
     private Connection databaseConnection;
 
     private Persistence() {
+        connect();
+    }
+
+    public static Persistence getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private void connect() {
         try {
             this.databaseConnection = new DbHelper().getConnection(Config.getInstance().getProperties().getProperty("persistence.dbname"));
         } catch (SQLException | NamingException e) {
@@ -32,11 +40,15 @@ public class Persistence {
         }
     }
 
-    public static Persistence getInstance() {
-        return Holder.INSTANCE;
-    }
 
     public Connection getConnection() {
+        try {
+            if (this.databaseConnection.isClosed()) {
+                connect();
+            }
+        } catch (SQLException e) {
+            LOG.error("Unable to recreate database connection={}", e.getMessage());
+        }
         return this.databaseConnection;
     }
 

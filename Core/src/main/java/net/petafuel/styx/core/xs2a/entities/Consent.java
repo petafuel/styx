@@ -2,6 +2,7 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import net.petafuel.styx.core.xs2a.entities.serializers.ISODateDeserializer;
 
+import javax.json.bind.annotation.JsonbCreator;
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
@@ -25,9 +26,13 @@ public class Consent extends StrongAuthenticatableResource {
     private boolean recurringIndicator;
     private boolean combinedServiceIndicator;
 
-    @JsonbDateFormat(value = "yyyy-MM-dd HH:mm:ss")
     @JsonbTypeDeserializer(ISODateDeserializer.class)
+    @JsonbDateFormat("yyyy-MM-dd")
     private Date validUntil;
+
+    @JsonbProperty("lastActionDate")
+    @JsonbTypeDeserializer(ISODateDeserializer.class)
+    @JsonbDateFormat("yyyy-MM-dd")
     private Date lastAction;
 
     @JsonbTransient
@@ -35,20 +40,25 @@ public class Consent extends StrongAuthenticatableResource {
 
     @JsonbTransient
     private Date createdAt;
-    private Access access;
-
+    private AccountAccess access;
     @JsonbTransient
     private PSU psu;
-
-    @JsonbProperty("consentStatus")
+    @JsonbTransient
     private State state;
 
     public Consent() {
         this.sca = new SCA();
-        this.access = new Access();
+        this.access = new AccountAccess();
         Calendar calendar = Calendar.getInstance();
-        calendar.set(9999, Calendar.JANUARY, 1);
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DATE, 90);
         this.validUntil = calendar.getTime();
+    }
+
+    @JsonbCreator
+    public Consent(@JsonbProperty("consentStatus") String consentStatus) {
+        this();
+        this.state = State.getByString(consentStatus);
     }
 
     public String getId() {
@@ -65,6 +75,11 @@ public class Consent extends StrongAuthenticatableResource {
 
     public void setxRequestId(UUID xRequestId) {
         this.xRequestId = xRequestId;
+    }
+
+    @JsonbProperty("consentStatus")
+    public String getStateJson() {
+        return state != null ? state.getJsonKey() : null;
     }
 
     public State getState() {
@@ -123,11 +138,11 @@ public class Consent extends StrongAuthenticatableResource {
         this.frequencyPerDay = frequencyPerDay;
     }
 
-    public Access getAccess() {
+    public AccountAccess getAccess() {
         return access;
     }
 
-    public void setAccess(Access access) {
+    public void setAccess(AccountAccess access) {
         this.access = access;
     }
 
@@ -169,6 +184,14 @@ public class Consent extends StrongAuthenticatableResource {
         State(int index, String jsonKey) {
             this.index = index;
             this.jsonKey = jsonKey;
+        }
+
+        /**
+         * @deprecated jsonb default constructor
+         */
+        @Deprecated
+        State(){
+            //jsonb default constructor
         }
 
         public static Consent.State getByString(String search) {

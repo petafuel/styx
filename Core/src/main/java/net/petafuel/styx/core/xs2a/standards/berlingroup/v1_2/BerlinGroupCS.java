@@ -1,21 +1,15 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
-import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.AccountSerializer;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentSerializer;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.serializers.ConsentStatusSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BasicAuthorisationService;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationsRequest;
@@ -28,6 +22,10 @@ import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
+import javax.json.bind.config.PropertyNamingStrategy;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -50,21 +48,23 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
         this.createBody(RequestType.POST, JSON, consentRequest);
         this.createHeaders(consentRequest);
 
-        try (Response response = this.execute()) {
+        JsonbConfig config = new JsonbConfig()
+                .withPropertyNamingStrategy(PropertyNamingStrategy.CASE_INSENSITIVE);
+
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create(config)) {
             String responseBody = extractResponseBody(response, 201);
 
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(Consent.class, new ConsentSerializer())
-                    .create();
-            Consent consent = gson.fromJson(responseBody, Consent.class);
+            Consent consent = jsonb.fromJson(responseBody, Consent.class);
             consent.setxRequestId(UUID.fromString(consentRequest.getHeaders().get("x-request-id")));
-            consent.setPsu(((CreateConsentRequest) consentRequest).getConsent().getPsu());
+            consent.setPsu(consentRequest.getPsu());
             //if the sca method was not set by previously parsing the body, use the bank supplied header
-            SCAUtils.parseSCAApproach(consent.getSca(), response);
+            consent.getSca().setApproach(SCAUtils.parseSCAApproach(consent.getLinks(), response));
             consent.setAccess(((CreateConsentRequest) consentRequest).getConsent().getAccess());
             new PersistentConsent().create(consent);
             return consent;
-        } catch (IOException e) {
+        } catch (BankRequestFailedException e) {
+            throw e;
+        } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
@@ -75,15 +75,10 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
         this.createBody(RequestType.GET);
         this.createHeaders(consentGetRequest);
 
-        try (Response response = this.execute()) {
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String responseBody = extractResponseBody(response, 200);
 
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(Consent.class, new ConsentSerializer())
-                    .registerTypeAdapter(Account.class, new AccountSerializer())
-                    .create();
-
-            Consent consentFromResponse = gson.fromJson(responseBody, Consent.class);
+            Consent consentFromResponse = jsonb.fromJson(responseBody, Consent.class);
             consentFromResponse.setId(consentGetRequest.getConsentId());
 
             Consent consentFromDatabase = new PersistentConsent().get(consentFromResponse);
@@ -95,7 +90,7 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
             consentFromDatabase.setLastAction(consentFromResponse.getLastAction());
 
             return new PersistentConsent().update(consentFromDatabase);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
@@ -106,20 +101,16 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
         this.createBody(RequestType.GET);
         this.createHeaders(consentStatusRequest);
 
-        try (Response response = this.execute()) {
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String responseBody = extractResponseBody(response, 200);
 
-            Gson gson = new GsonBuilder()
-                    .serializeNulls()
-                    .registerTypeAdapter(Consent.State.class, new ConsentStatusSerializer())
-                    .create();
             PersistentConsent persistentConsent = new PersistentConsent();
-            Consent.State state = gson.fromJson(responseBody, Consent.State.class);
+            Consent.State state = jsonb.fromJson(responseBody, Consent.State.class);
             Consent consent = new Consent();
             consent.setId(consentStatusRequest.getConsentId());
             persistentConsent.updateState(consent, state);
             return state;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }

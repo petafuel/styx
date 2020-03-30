@@ -14,7 +14,7 @@ import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class BulkPaymentInitiationJsonRequestSerializer implements JsonSerializer<BulkPaymentInitiationJsonRequest>{
+public class BulkPaymentInitiationJsonRequestSerializer implements JsonSerializer<BulkPaymentInitiationJsonRequest> {
 
     @Override
     public JsonElement serialize(BulkPaymentInitiationJsonRequest src, Type typeOfSrc, JsonSerializationContext context) {

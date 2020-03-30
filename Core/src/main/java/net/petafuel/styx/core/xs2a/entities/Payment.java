@@ -15,7 +15,6 @@ public class Payment implements InitializablePayment {
     @JsonbProperty("endToEndIdentification")
     private String endToEndIdentification;
 
-    @NotNull
     @Valid
     @JsonbProperty("debtorAccount")
     private Account debtor;

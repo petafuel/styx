@@ -1,15 +1,16 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
+import net.petafuel.styx.core.xs2a.entities.LinkType;
+import net.petafuel.styx.core.xs2a.entities.Links;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.SCASerializer;
 import okhttp3.Response;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import java.util.Map;
 
 /**
@@ -32,15 +33,14 @@ public class BerlinGroupPIS extends net.petafuel.styx.core.xs2a.standards.berlin
         this.createBody(RequestType.POST, JSON, xs2ARequest);
         this.createHeaders(xs2ARequest);
 
-        try (Response response = this.execute()) {
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String responseBody = extractResponseBody(response, 201);
-            Gson gson = new GsonBuilder().registerTypeAdapter(SCA.class, new SCASerializer()).create();
-            SCA sca = gson.fromJson(responseBody, SCA.class);
+            SCA sca = jsonb.fromJson(responseBody, SCA.class);
             SCAUtils.parseSCAApproach(sca, response);
             //extract the authorisation id out of an Href Object that contains the authorisations/... route
-            for (Map.Entry<SCA.LinkType, String> entry : sca.getLinks().entrySet()) {
-                if (entry.getValue().contains("authorisations/")) {
-                    String[] routeParts = entry.getValue().split("/");
+            for (Map.Entry<LinkType, Links.Href> entry : sca.getLinks().getUrlMapping().entrySet()) {
+                if (entry.getValue().getUrl().contains("authorisations/")) {
+                    String[] routeParts = entry.getValue().getUrl().split("/");
                     sca.setAuthorisationId(routeParts[routeParts.length - 1]);
                     break;
                 }

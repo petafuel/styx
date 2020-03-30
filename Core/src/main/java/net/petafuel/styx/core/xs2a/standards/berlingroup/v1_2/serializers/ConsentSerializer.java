@@ -95,7 +95,7 @@ public class ConsentSerializer implements JsonDeserializer<Consent>, JsonSeriali
         }
         if (consentResponse.get(XS2AJsonKeys.LINKS.value()) != null && !consentResponse.get(XS2AJsonKeys.LINKS.value()).isJsonNull()) {
             JsonObject links = consentResponse.get(XS2AJsonKeys.LINKS.value()).getAsJsonObject();
-            DeserialisationHelper.parseSCALinksData(consent.getSca(), links);
+            DeserialisationHelper.parseSCALinksData(consent, links);
         }
 
         return consent;

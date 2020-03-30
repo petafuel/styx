@@ -144,7 +144,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
                 return "";
             }
         }
-        return  consorsSinglePaymentId;
+        return consorsSinglePaymentId;
     }
 
     private String getConsorsPeriodicPaymentId() {
@@ -192,7 +192,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
                 return "";
             }
         }
-        return  sparkasseSinglePaymentId;
+        return sparkasseSinglePaymentId;
     }
 
     private String getSparkasseBulkPaymentId() {
@@ -207,7 +207,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
 
 
             Jsonb jsonb = JsonbBuilder.create();
-            BulkPaymentInitiation bulkPaymentInitiation = jsonb.fromJson("{\"payments\":[{\"endToEndIdentification\": \"endToEndId\", \"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE86999999990000001000\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE75999999990000001004\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\"},{\"endToEndIdentification\": \"endToEndId\", \"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE86999999990000001000\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"32.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE75999999990000001004\"},\"creditorName\":\"Gimmeyourmoney\",\"remittanceInformationUnstructured\":\"Myothervwz\"}]}", BulkPaymentInitiation.class);
+            BulkPaymentInitiation bulkPaymentInitiation = jsonb.fromJson("{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE86999999990000001000\", \"name\":\"NOTPROVIDED\"},\"payments\":[{\"endToEndIdentification\": \"endToEndId\", \"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE75999999990000001004\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\"},{\"endToEndIdentification\": \"endToEndId\", \"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE86999999990000001000\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"32.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE75999999990000001004\"},\"creditorName\":\"Gimmeyourmoney\",\"remittanceInformationUnstructured\":\"Myothervwz\"}]}", BulkPaymentInitiation.class);
             Invocation invocation = invocationBuilder.buildPost(Entity.entity(bulkPaymentInitiation, MediaType.APPLICATION_JSON));
             Response response = invocation.invoke(Response.class);
             try {
@@ -242,7 +242,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
                 return "";
             }
         }
-        return  sparkassePeriodicPaymentId;
+        return sparkassePeriodicPaymentId;
     }
 
 }

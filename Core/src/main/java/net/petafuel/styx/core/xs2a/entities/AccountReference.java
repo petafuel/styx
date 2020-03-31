@@ -132,7 +132,11 @@ public class AccountReference {
         if (obj instanceof AccountReference && this.iban != null) {
             return ((AccountReference) obj).iban.equals(this.iban);
         }
-
         return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return iban.hashCode();
     }
 }

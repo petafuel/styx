@@ -74,6 +74,6 @@ public class ConsentResourcesConsorsTest extends ConsentResourcesTest {
 
         Assertions.assertEquals(200, response.getStatus());
         GetConsentStatusResponse consentStatusResponse = jsonb.fromJson(IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8), GetConsentStatusResponse.class);
-        Assertions.assertEquals(consentStatusResponse.getState(), Consent.State.RECEIVED);
+        Assertions.assertEquals(Consent.State.RECEIVED, consentStatusResponse.getState());
     }
 }

@@ -129,14 +129,14 @@ public class AccountReference {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof AccountReference && this.iban != null) {
-            return ((AccountReference) obj).iban.equals(this.iban);
+        if (obj instanceof AccountReference && ((AccountReference) obj).getType() == this.getType()) {
+            return ((AccountReference) obj).getIdentifier(((AccountReference) obj).getType()).equals(this.getIdentifier(this.getType()));
         }
-        return super.equals(obj);
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return iban.hashCode();
+        return this.getIdentifier(this.getType()).hashCode();
     }
 }

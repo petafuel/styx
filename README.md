@@ -15,6 +15,13 @@ The Revised Payment Services Directive (PSD2) is intended to harmonise digital p
 
 For more information please have a look at the [Styx wiki](https://github.com/petafuel/styx/wiki) and [petafuel.github.io/styx/](https://petafuel.github.io/styx/).
 
+## Client API
+
+The Styx Client API is a REST interface that follows the Berlin Group NextGenPSD2 specification. The documentation is available 
+in OpenAPI format.
+
+[Styx Client API documentation](https://petafuel.github.io/styx/api/)
+
 ## Installation
 
 Styx is build using the Amazon Corretto 8 - the production-ready distribution of Open Java Development Kit (OpenJDK) and uses a PostgreSQL database.

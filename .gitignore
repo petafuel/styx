@@ -1,0 +1,9 @@
+styx*.iml
+.idea/*
+API/target/*
+API/log/*
+Core/target/*
+log/*
+connectionpool.properties
+API/src/main/resources/api.properties
+Core/src/main/resources/core.properties

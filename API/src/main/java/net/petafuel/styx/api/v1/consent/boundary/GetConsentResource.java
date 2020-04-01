@@ -53,6 +53,7 @@ public class GetConsentResource extends PSUResource {
         ConsentProvider provider = new ConsentProvider(sadService.getXs2AStandard(), getPsu());
 
         GetConsentRequest request = (GetConsentRequest) provider.buildFetchConsentRequest(consentId);
+        request.getHeaders().putAll(getSandboxHeaders());
         Consent consent = sadService.getXs2AStandard().getCs().getConsent(request);
         GetConsentResponse response = new GetConsentResponse(consent);
 
@@ -73,6 +74,7 @@ public class GetConsentResource extends PSUResource {
         ConsentProvider provider = new ConsentProvider(sadService.getXs2AStandard(), getPsu());
 
         StatusConsentRequest request = (StatusConsentRequest) provider.getConsentStatusRequest(consentId);
+        request.getHeaders().putAll(getSandboxHeaders());
         Consent.State state = sadService.getXs2AStandard().getCs().getStatus(request);
         GetConsentStatusResponse response = new GetConsentStatusResponse(state);
 

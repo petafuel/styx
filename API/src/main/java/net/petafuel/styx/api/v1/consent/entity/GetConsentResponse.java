@@ -6,6 +6,10 @@ public class GetConsentResponse {
 
     private Consent consent;
 
+    public GetConsentResponse() {
+
+    }
+
     public GetConsentResponse(Consent consent) {
         this.consent = consent;
     }

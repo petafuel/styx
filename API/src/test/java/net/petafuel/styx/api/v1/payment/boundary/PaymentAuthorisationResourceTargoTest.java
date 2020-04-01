@@ -33,7 +33,7 @@ import java.util.Date;
 public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
     private static final String PSU_ID = "PSD2TEST2";
     private static final String PSU_PIN = "123456";
-    private static final String PSU_OTP = "123456";
+    private static final String PSU_OTP = "222222";
     private static final String BIC = "CMCIDEDD";
     private static final String SCA_METHOD_ID = "901";
     private static String paymentId;

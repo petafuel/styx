@@ -9,6 +9,10 @@ public class GetConsentStatusResponse {
     @JsonbProperty("consentStatus")
     private Consent.State state;
 
+    public GetConsentStatusResponse() {
+
+    }
+
     public GetConsentStatusResponse(Consent.State state) {
         this.state = state;
     }

@@ -1,10 +1,13 @@
 package net.petafuel.styx.api.v1.consent.boundary;
 
 import net.petafuel.styx.api.IntegrationTest;
+import net.petafuel.styx.api.v1.consent.entity.GetConsentResponse;
+import net.petafuel.styx.api.v1.consent.entity.GetConsentStatusResponse;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentRequest;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentResponse;
 import net.petafuel.styx.core.xs2a.entities.AccountAccess;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
+import net.petafuel.styx.core.xs2a.entities.Consent;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.FixMethodOrder;
@@ -28,44 +31,34 @@ import java.util.ArrayList;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class ConsentResourceSparkasseTest extends GetConsentResourceTest {
-
-    private static String consentId;
-
-    @Override
-    protected Application configure() {
-        ResourceConfig config = setupFiltersAndErrorHandlers();
-        return config.register(GetConsentResource.class)
-                .register(CreateConsentResource.class);
-    }
+public class ConsentResourcesTargoTest extends ConsentResourcesTest {
 
     @Override
     protected String getBIC() {
-        return "BYLADEM1FSI";
+        return "CMCIDEDD";
+    }
+
+    @Override
+    protected String getPsuId(){
+        return "PSU-Successful";
+    }
+
+    @Override
+    protected String getPsuIpAddress() {
+        return "192.168.8.78";
+    }
+
+    @Override
+    protected AccountReference getAccountReference(){
+        return new AccountReference("DE70300209005320320678", AccountReference.Type.IBAN);
     }
 
     @Override
     @Test
     @Category(IntegrationTest.class)
     public void A_createConsentTest() throws IOException {
-        Invocation.Builder invocationBuilder = target("/v1/consents").request();
-        invocationBuilder.header("token", ACCESS_TOKEN);
-        invocationBuilder.header("PSU-ID", "PSU-Successful");
-        invocationBuilder.header("PSU-BIC", BIC);
-        invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
-        invocationBuilder.header("redirectPreferred", true);
-
-        Jsonb jsonb = JsonbBuilder.create();
-        AccountReference accountReference = new AccountReference("DE86999999990000001000", AccountReference.Type.IBAN);
-        POSTConsentRequest request = new POSTConsentRequest();
-        request.setAccess(new AccountAccess());
-        request.getAccess().setAccounts(new ArrayList<>());
-        request.getAccess().getAccounts().add(accountReference);
-
-        Invocation invocation = invocationBuilder.buildPost(Entity.entity(request, MediaType.APPLICATION_JSON));
-        Response response = invocation.invoke(Response.class);
+        Response response = createConsentEndpoint();
         Assertions.assertEquals(201, response.getStatus());
-
         POSTConsentResponse consentResponse = jsonb.fromJson(IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8), POSTConsentResponse.class);
         Assertions.assertNotNull(consentResponse.getConsentId());
         Assertions.assertNotNull(consentResponse.getAspspScaApproach());
@@ -77,11 +70,20 @@ public class ConsentResourceSparkasseTest extends GetConsentResourceTest {
     @Test
     @Category(IntegrationTest.class)
     public void B_fetchConsentTest() throws IOException {
-        Assertions.assertNotNull(1);
+        Response response = fetchConsentEndpoint();
+
+        Assertions.assertEquals(200, response.getStatus());
+        GetConsentResponse consentResponse = jsonb.fromJson(IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8), GetConsentResponse.class);
+        Assertions.assertNotNull(consentResponse.getConsent().getId());
+        Assertions.assertTrue(consentResponse.getConsent().getAccess().getAccounts().contains(getAccountReference()));
     }
 
     @Override
-    public void C_getConsentStatusTest() {
-        Assertions.assertNotNull(1);
+    public void C_getConsentStatusTest() throws IOException {
+        Response response = getConsentStatusEndpoint();
+
+        Assertions.assertEquals(200, response.getStatus());
+        GetConsentStatusResponse consentStatusResponse = jsonb.fromJson(IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8), GetConsentStatusResponse.class);
+        Assertions.assertEquals(Consent.State.RECEIVED, consentStatusResponse.getState());
     }
 }

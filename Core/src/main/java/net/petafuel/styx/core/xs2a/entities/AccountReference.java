@@ -126,4 +126,17 @@ public class AccountReference {
         MASKED_PAN,
         MSISDN
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AccountReference && ((AccountReference) obj).getType() == this.getType()) {
+            return ((AccountReference) obj).getIdentifier(((AccountReference) obj).getType()).equals(this.getIdentifier(this.getType()));
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getIdentifier(this.getType()).hashCode();
+    }
 }

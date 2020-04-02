@@ -1,20 +1,14 @@
 package net.petafuel.styx.api.v1.consent.boundary;
 
-import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
-import net.petafuel.styx.api.v1.consent.entity.GetConsentResponse;
-import net.petafuel.styx.api.v1.consent.entity.GetConsentStatusResponse;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentRequest;
-import net.petafuel.styx.api.v1.consent.entity.POSTConsentResponse;
+import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
 import net.petafuel.styx.core.xs2a.entities.AccountAccess;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
-import net.petafuel.styx.core.xs2a.entities.Consent;
-import org.apache.commons.io.IOUtils;
+import net.petafuel.styx.core.xs2a.entities.PSUData;
+import net.petafuel.styx.core.xs2a.entities.SCA;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runners.MethodSorters;
 
@@ -26,8 +20,6 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -39,6 +31,7 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
     private static final String POST_CONSENT = "/v1/consents";
     private static final String GET_CONSENT = "/v1/consents/%s";
     private static final String GET_CONSENT_STATUS = "/v1/consents/%s/status";
+    private static final String POST_CONSENT_AUTHORISATION = "/v1/consents/%s/authorisations";
 
     protected Jsonb jsonb = JsonbBuilder.create();
 
@@ -47,25 +40,21 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
     protected abstract String getBIC();
     protected abstract String getPsuId();
     protected abstract String getPsuIpAddress();
+    protected abstract String getPsuPassword();
     protected abstract AccountReference getAccountReference();
 
-    @Test
-    @Category(IntegrationTest.class)
     public abstract void A_createConsentTest() throws IOException;
 
-    @Test
-    @Category(IntegrationTest.class)
     public abstract void B_fetchConsentTest() throws IOException;
 
-    @Test
-    @Category(IntegrationTest.class)
     public abstract void C_getConsentStatusTest() throws IOException;
 
     @Override
     protected Application configure() {
         ResourceConfig config = setupFiltersAndErrorHandlers();
         return config.register(GetConsentResource.class)
-                .register(CreateConsentResource.class);
+                .register(CreateConsentResource.class)
+                .register(ConsentAuthorisationResource.class);
     }
 
     Response createConsentEndpoint() {
@@ -92,6 +81,16 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
         Invocation.Builder invocationBuilder = getInvocationBuilder(String.format(GET_CONSENT_STATUS, consentId));
         Invocation invocation = invocationBuilder.buildGet();
         return invocation.invoke(Response.class);
+    }
+
+    SCA startConsentAuthorisationEndpoint() {
+        Invocation.Builder invocationBuilder = getInvocationBuilder(String.format(POST_CONSENT_AUTHORISATION, consentId));
+        PSUData psuData = new PSUData();
+        psuData.setPassword(getPsuPassword());
+        AuthorisationRequest authorisationRequest = new AuthorisationRequest();
+        authorisationRequest.setPsuData(psuData);
+        Invocation invocation = invocationBuilder.buildPost(Entity.entity(authorisationRequest, MediaType.APPLICATION_JSON));
+        return invocation.invoke(SCA.class);
     }
 
     private Invocation.Builder getInvocationBuilder(String target) {

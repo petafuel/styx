@@ -1,6 +1,7 @@
 package net.petafuel.styx.api.v1.payment.boundary;
 
 import net.petafuel.styx.api.exception.ResponseConstant;
+import net.petafuel.styx.api.filter.AbstractTokenFilter;
 import net.petafuel.styx.api.filter.CheckAccessToken;
 import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.filter.RequiresMandatoryHeader;
@@ -29,7 +30,6 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -51,9 +51,6 @@ public class PaymentInitiationResource extends PSUResource {
 
     @Inject
     private SADService sadService;
-
-    @HeaderParam("token")
-    private String token;
 
     /**
      * Initiate single or future dated payments
@@ -83,7 +80,7 @@ public class PaymentInitiationResource extends PSUResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         aspspUrlMapper.map(paymentResponse.getLinks());
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString((String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName())), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 
@@ -115,7 +112,7 @@ public class PaymentInitiationResource extends PSUResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.BULK_PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         aspspUrlMapper.map(paymentResponse.getLinks());
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString((String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName())), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 
@@ -146,7 +143,7 @@ public class PaymentInitiationResource extends PSUResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PERIODIC_PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         aspspUrlMapper.map(paymentResponse.getLinks());
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString(token), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(paymentResponse.getPaymentId(), UUID.fromString((String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName())), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 }

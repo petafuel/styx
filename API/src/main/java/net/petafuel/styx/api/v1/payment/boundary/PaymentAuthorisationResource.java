@@ -83,6 +83,9 @@ public class PaymentAuthorisationResource extends PSUResource {
                 paymentTypeBean.getPaymentService(),
                 ioProcessor.getIoInputContainerpis().getPaymentProduct(), paymentId);
         xs2AAuthorisationRequest.getHeaders().putAll(getSandboxHeaders());
+        if (getRedirectPreferred() != null) {
+            xs2AAuthorisationRequest.setTppRedirectPreferred(getRedirectPreferred());
+        }
         SCA paymentSCA = sadService.getXs2AStandard().getPis().startAuthorisation(xs2AAuthorisationRequest);
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(paymentTypeBean.getPaymentService(),

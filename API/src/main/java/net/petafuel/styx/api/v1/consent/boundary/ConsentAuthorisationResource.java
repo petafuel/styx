@@ -55,7 +55,6 @@ public class ConsentAuthorisationResource extends PSUResource {
 
         XS2AAuthorisationRequest xs2AAuthorisationRequest = new StartAuthorisationRequest(authorisationRequest.getPsuData(),
                 consentId);
-        xs2AAuthorisationRequest.setTppRedirectPreferred(getRedirectPreferred());
         xs2AAuthorisationRequest.getHeaders().putAll(getSandboxHeaders());
         if (getRedirectPreferred() != null) {
             xs2AAuthorisationRequest.setTppRedirectPreferred(getRedirectPreferred());

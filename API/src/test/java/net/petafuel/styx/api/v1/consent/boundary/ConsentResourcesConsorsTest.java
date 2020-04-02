@@ -39,6 +39,11 @@ public class ConsentResourcesConsorsTest extends ConsentResourcesTest {
     }
 
     @Override
+    protected String getPsuPassword() {
+        return null;
+    }
+
+    @Override
     protected AccountReference getAccountReference() {
         return new AccountReference("DE60760300800500123456", AccountReference.Type.IBAN);
     }
@@ -69,6 +74,8 @@ public class ConsentResourcesConsorsTest extends ConsentResourcesTest {
     }
 
     @Override
+    @Test
+    @Category(IntegrationTest.class)
     public void C_getConsentStatusTest() throws IOException {
         Response response = getConsentStatusEndpoint();
 

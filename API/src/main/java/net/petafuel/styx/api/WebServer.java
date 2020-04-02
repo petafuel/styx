@@ -21,6 +21,7 @@ import net.petafuel.styx.api.util.ApiProperties;
 import net.petafuel.styx.api.v1.account.boundary.AccountResource;
 import net.petafuel.styx.api.v1.auth.boundary.AuthResource;
 import net.petafuel.styx.api.v1.callback.boundary.CallbackResource;
+import net.petafuel.styx.api.v1.consent.boundary.ConsentAuthorisationResource;
 import net.petafuel.styx.api.v1.consent.boundary.CreateConsentResource;
 import net.petafuel.styx.api.v1.consent.boundary.GetConsentResource;
 import net.petafuel.styx.api.v1.payment.boundary.FetchPaymentResource;
@@ -81,6 +82,7 @@ public class WebServer {
                 .register(AuthResource.class)                           // handle Authorisation
                 .register(GetConsentResource.class)                     // handle consent fetching
                 .register(CreateConsentResource.class)                  // handle consent creation
+                .register(ConsentAuthorisationResource.class)           // handle consent authorisation
                 .register(PaymentStatusResource.class)                  // handle payment status
                 .register(PaymentInitiationResource.class)              // handle payment initiation calls
                 .register(FetchPaymentResource.class)                   // handle fetch payment calls

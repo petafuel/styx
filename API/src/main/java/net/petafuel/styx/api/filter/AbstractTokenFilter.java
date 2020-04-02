@@ -33,5 +33,6 @@ public abstract class AbstractTokenFilter implements ContainerRequestFilter {
             ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_TOKEN_EXPIRED_OR_REVOKED, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
             throw new StyxException(responseEntity);
         }
+        context.setProperty(AbstractTokenFilter.class.getName(), token);
     }
 }

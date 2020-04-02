@@ -1,5 +1,6 @@
 package net.petafuel.styx.api.v1.consent.boundary;
 
+import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentRequest;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
@@ -9,6 +10,9 @@ import net.petafuel.styx.core.xs2a.entities.PSUData;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runners.MethodSorters;
 
@@ -32,15 +36,19 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
     private static final String GET_CONSENT = "/v1/consents/%s";
     private static final String GET_CONSENT_STATUS = "/v1/consents/%s/status";
     private static final String POST_CONSENT_AUTHORISATION = "/v1/consents/%s/authorisations";
+    private static final String UPDATE_CONSENT_AUTHORISATION = "/v1/consents/%s/authorisations/%s";
 
     protected Jsonb jsonb = JsonbBuilder.create();
 
     static String consentId;
+    static String authorisationId;
 
     protected abstract String getBIC();
     protected abstract String getPsuId();
     protected abstract String getPsuIpAddress();
     protected abstract String getPsuPassword();
+    protected abstract String getSCAMethodId();
+    protected abstract String getPsuOtp();
     protected abstract AccountReference getAccountReference();
 
     public abstract void A_createConsentTest() throws IOException;
@@ -93,6 +101,22 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
         return invocation.invoke(SCA.class);
     }
 
+    SCA selectSCAMethod() {
+        Invocation.Builder invocationBuilder = getInvocationBuilder(String.format(UPDATE_CONSENT_AUTHORISATION, consentId, authorisationId));
+        AuthorisationRequest authorisationRequest = new AuthorisationRequest();
+        authorisationRequest.setAuthenticationMethodId(getSCAMethodId());
+        Invocation invocation = invocationBuilder.buildPut(Entity.entity(authorisationRequest, MediaType.APPLICATION_JSON));
+        return invocation.invoke(SCA.class);
+    }
+
+    SCA authoriseTransactionWithTANOTP() {
+        Invocation.Builder invocationBuilder = getInvocationBuilder(String.format(UPDATE_CONSENT_AUTHORISATION, consentId, authorisationId));
+        AuthorisationRequest authorisationRequest = new AuthorisationRequest();
+        authorisationRequest.setScaAuthenticationData(getPsuOtp());
+        Invocation invocation = invocationBuilder.buildPut(Entity.entity(authorisationRequest, MediaType.APPLICATION_JSON));
+        return invocation.invoke(SCA.class);
+    }
+
     private Invocation.Builder getInvocationBuilder(String target) {
 
         Invocation.Builder invocationBuilder = target(target).request();
@@ -105,7 +129,6 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
         if (this.getClass().getSimpleName().toLowerCase().contains("targo")) {
             invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
         }
-
         return invocationBuilder;
     }
 }

@@ -45,6 +45,16 @@ public class ConsentResourcesTargoTest extends ConsentResourcesTest {
     }
 
     @Override
+    protected String getSCAMethodId() {
+        return "901";
+    }
+
+    @Override
+    protected String getPsuOtp() {
+        return "222222";
+    }
+
+    @Override
     protected AccountReference getAccountReference(){
         return new AccountReference("DE70300209005320320678", AccountReference.Type.IBAN);
     }
@@ -91,5 +101,20 @@ public class ConsentResourcesTargoTest extends ConsentResourcesTest {
         SCA response = startConsentAuthorisationEndpoint();
         Assertions.assertEquals(SCA.Status.PSUAUTHENTICATED, response.getScaStatus());
         Assertions.assertEquals(SCA.Approach.EMBEDDED, response.getApproach());
+        authorisationId = response.getAuthorisationId();
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void F_selectSCAMethod() throws IOException {
+        SCA response = selectSCAMethod();
+        Assertions.assertEquals(SCA.Status.SCAMETHODSELECTED, response.getScaStatus());
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void G_authoriseTransactionWithTANOTP() throws IOException {
+        SCA response = authoriseTransactionWithTANOTP();
+        Assertions.assertEquals(SCA.Status.FINALISED, response.getScaStatus());
     }
 }

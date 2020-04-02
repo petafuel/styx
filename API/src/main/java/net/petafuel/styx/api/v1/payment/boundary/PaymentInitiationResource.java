@@ -54,9 +54,6 @@ public class PaymentInitiationResource extends PSUResource {
     @Inject
     private SADService sadService;
 
-    @Context
-    private ContainerRequestContext containerRequestContext;
-
     /**
      * Initiate single or future dated payments
      *

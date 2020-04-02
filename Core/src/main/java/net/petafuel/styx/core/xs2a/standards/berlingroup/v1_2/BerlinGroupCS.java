@@ -13,6 +13,7 @@ import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import java.util.Map;
 
+@SuppressWarnings("squid:S2176")
 public class BerlinGroupCS extends net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.BerlinGroupCS {
     public BerlinGroupCS(String url, IXS2AHttpSigner signer) {
         super(url, signer);

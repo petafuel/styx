@@ -3,13 +3,10 @@ package net.petafuel.styx.api.v1.consent.boundary;
 import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.v1.consent.entity.GetConsentResponse;
 import net.petafuel.styx.api.v1.consent.entity.GetConsentStatusResponse;
-import net.petafuel.styx.api.v1.consent.entity.POSTConsentRequest;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentResponse;
-import net.petafuel.styx.core.xs2a.entities.AccountAccess;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import org.apache.commons.io.IOUtils;
-import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -17,17 +14,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runners.MethodSorters;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -40,12 +30,17 @@ public class ConsentResourcesSparkasseTest extends ConsentResourcesTest {
 
     @Override
     protected String getPsuId(){
-        return "PSU-Successful";
+        return "smsTAN_multiMed";
     }
 
     @Override
     protected String getPsuIpAddress() {
         return "192.168.8.78";
+    }
+
+    @Override
+    protected String getPsuPassword() {
+        return "okok1";
     }
 
     @Override
@@ -79,6 +74,8 @@ public class ConsentResourcesSparkasseTest extends ConsentResourcesTest {
     }
 
     @Override
+    @Test
+    @Category(IntegrationTest.class)
     public void C_getConsentStatusTest() throws IOException {
         Response response = getConsentStatusEndpoint();
 

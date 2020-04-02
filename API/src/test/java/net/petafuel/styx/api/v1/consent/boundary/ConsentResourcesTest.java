@@ -101,7 +101,7 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
         return invocation.invoke(SCA.class);
     }
 
-    SCA selectSCAMethod() {
+    SCA selectSCAMethodEndpoint() {
         Invocation.Builder invocationBuilder = getInvocationBuilder(String.format(UPDATE_CONSENT_AUTHORISATION, consentId, authorisationId));
         AuthorisationRequest authorisationRequest = new AuthorisationRequest();
         authorisationRequest.setAuthenticationMethodId(getSCAMethodId());
@@ -109,7 +109,7 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
         return invocation.invoke(SCA.class);
     }
 
-    SCA authoriseTransactionWithTANOTP() {
+    SCA authoriseTransactionWithTANOTPEndpoint() {
         Invocation.Builder invocationBuilder = getInvocationBuilder(String.format(UPDATE_CONSENT_AUTHORISATION, consentId, authorisationId));
         AuthorisationRequest authorisationRequest = new AuthorisationRequest();
         authorisationRequest.setScaAuthenticationData(getPsuOtp());

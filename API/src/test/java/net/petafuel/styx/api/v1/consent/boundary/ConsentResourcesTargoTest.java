@@ -107,14 +107,14 @@ public class ConsentResourcesTargoTest extends ConsentResourcesTest {
     @Test
     @Category(IntegrationTest.class)
     public void F_selectSCAMethod() throws IOException {
-        SCA response = selectSCAMethod();
+        SCA response = selectSCAMethodEndpoint();
         Assertions.assertEquals(SCA.Status.SCAMETHODSELECTED, response.getScaStatus());
     }
 
     @Test
     @Category(IntegrationTest.class)
     public void G_authoriseTransactionWithTANOTP() throws IOException {
-        SCA response = authoriseTransactionWithTANOTP();
+        SCA response = authoriseTransactionWithTANOTPEndpoint();
         Assertions.assertEquals(SCA.Status.FINALISED, response.getScaStatus());
     }
 }

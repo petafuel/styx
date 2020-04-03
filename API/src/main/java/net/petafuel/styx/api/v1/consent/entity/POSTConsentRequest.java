@@ -6,18 +6,18 @@ import javax.validation.constraints.NotNull;
 
 public class POSTConsentRequest {
     @NotNull
-    private boolean recurringIndicator;
+    private Boolean recurringIndicator;
 
     @NotNull
     private AccountAccess access;
 
     private String availableAccounts;
 
-    public boolean isRecurringIndicator() {
+    public Boolean isRecurringIndicator() {
         return recurringIndicator;
     }
 
-    public void setRecurringIndicator(boolean recurringIndicator) {
+    public void setRecurringIndicator(Boolean recurringIndicator) {
         this.recurringIndicator = recurringIndicator;
     }
 

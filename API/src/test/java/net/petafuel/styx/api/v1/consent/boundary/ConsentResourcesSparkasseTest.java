@@ -44,6 +44,16 @@ public class ConsentResourcesSparkasseTest extends ConsentResourcesTest {
     }
 
     @Override
+    protected String getSCAMethodId() {
+        return null; // Redirect SCA is supported. No need for the authorisation calls
+    }
+
+    @Override
+    protected String getPsuOtp() {
+        return null; // Redirect SCA is supported. No need for the authorisation calls
+    }
+
+    @Override
     protected AccountReference getAccountReference(){
         return new AccountReference("DE86999999990000001000", AccountReference.Type.IBAN);
     }

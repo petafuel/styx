@@ -1,6 +1,5 @@
 package net.petafuel.styx.api.v1.consent.boundary;
 
-import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentRequest;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
@@ -10,9 +9,6 @@ import net.petafuel.styx.core.xs2a.entities.PSUData;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runners.MethodSorters;
 
@@ -73,6 +69,7 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
         request.setAccess(new AccountAccess());
         request.getAccess().setAccounts(new ArrayList<>());
         request.getAccess().getAccounts().add(getAccountReference());
+        request.setRecurringIndicator(true);
         Invocation invocation = invocationBuilder.buildPost(Entity.entity(request, MediaType.APPLICATION_JSON));
         return invocation.invoke(Response.class);
     }

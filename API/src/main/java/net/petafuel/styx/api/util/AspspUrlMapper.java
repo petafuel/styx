@@ -88,6 +88,7 @@ public class AspspUrlMapper {
                 case UPDATE_ENCRYPTED_PSU_AUTHENTICATION:
                 case UPDATE_ADDITIONAL_PSU_AUTHENTICATION:
                 case UPDATE_ENCRYPTED_ADDITIONAL_PSU_AUTHENTICATION:
+                case SELECT_AUTHENTICATION_METHOD:
                 case AUTHORISE_TRANSACTION:
                 case SCA_STATUS:
                     if (authorisationId == null || Objects.equals(authorisationId, "")) {

@@ -11,9 +11,9 @@ import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.SelectAuthenticationMethodRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUAuthenticationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUIdentificationRequest;
 import org.apache.logging.log4j.LogManager;
@@ -26,12 +26,12 @@ import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.PUT;
 
 @ApplicationPath("/")
 @Path("/v1")
@@ -66,6 +66,9 @@ public class ConsentAuthorisationResource extends PSUResource {
             xs2AAuthorisationRequest.setTppRedirectPreferred(getRedirectPreferred());
         }
         SCA consentSCA = sadService.getXs2AStandard().getCs().startAuthorisation(xs2AAuthorisationRequest);
+
+        AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(consentId, consentSCA.getAuthorisationId());
+        aspspUrlMapper.map(consentSCA.getLinks());
 
         LOG.info("Consent Authorisation started for consentId={} scaStatus={} scaApproach={}", consentId, consentSCA.getScaStatus(), consentSCA.getApproach());
         return Response.status(ResponseConstant.CREATED).entity(consentSCA).build();

@@ -8,7 +8,7 @@ public abstract class StrongAuthenticatableResource {
     protected SCA sca;
 
     private String psuMessage;
-    @JsonbProperty("_links")
+    
     private Links links;
 
     public String getPsuMessage() {
@@ -26,11 +26,13 @@ public abstract class StrongAuthenticatableResource {
     public final void setSca(SCA sca) {
         this.sca = sca;
     }
-
+    
+    @JsonbProperty("links")
     public Links getLinks() {
         return links;
     }
-
+    
+    @JsonbProperty("_links")
     public void setLinks(Links links) {
         this.links = links;
     }

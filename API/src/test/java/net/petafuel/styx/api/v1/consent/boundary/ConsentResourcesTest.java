@@ -4,6 +4,7 @@ import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentRequest;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
+import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.core.xs2a.entities.AccountAccess;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.PSUData;
@@ -130,5 +131,11 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
             invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
         }
         return invocationBuilder;
+    }
+
+    AuthorisationStatusResponse getStatusAuthorisation() {
+        Invocation.Builder invocationBuilder = getInvocationBuilder(String.format(UPDATE_CONSENT_AUTHORISATION, consentId, authorisationId));
+            Invocation invocation = invocationBuilder.buildGet();
+            return invocation.invoke(AuthorisationStatusResponse .class);
     }
 }

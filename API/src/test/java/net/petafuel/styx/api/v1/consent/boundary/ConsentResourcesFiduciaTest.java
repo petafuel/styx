@@ -4,6 +4,7 @@ import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.v1.consent.entity.GetConsentResponse;
 import net.petafuel.styx.api.v1.consent.entity.GetConsentStatusResponse;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentResponse;
+import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
@@ -116,5 +117,13 @@ public class ConsentResourcesFiduciaTest extends ConsentResourcesTest {
     public void G_authoriseTransactionWithTANOTP() throws IOException {
         SCA response = authoriseTransactionWithTANOTPEndpoint();
         Assertions.assertEquals(SCA.Status.FINALISED, response.getScaStatus());
+    }
+
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void H_checkScaStatus()throws IOException {
+        AuthorisationStatusResponse response = getStatusAuthorisation();
+        Assertions.assertEquals(SCA.Status.FINALISED.getValue(), response.getScaStatus());
     }
 }

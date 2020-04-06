@@ -124,6 +124,6 @@ public class ConsentResourcesFiduciaTest extends ConsentResourcesTest {
     @Category(IntegrationTest.class)
     public void H_checkScaStatus()throws IOException {
         AuthorisationStatusResponse response = getStatusAuthorisation();
-        Assertions.assertEquals("SCA.Status.FINALISED", response.getScaStatus());
+        Assertions.assertEquals(SCA.Status.FINALISED.getValue(), response.getScaStatus());
     }
 }

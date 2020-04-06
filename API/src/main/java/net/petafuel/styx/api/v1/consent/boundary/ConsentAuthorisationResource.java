@@ -8,9 +8,12 @@ import net.petafuel.styx.api.rest.PSUResource;
 import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
+import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.SelectAuthenticationMethodRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
@@ -25,6 +28,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -122,4 +126,19 @@ public class ConsentAuthorisationResource extends PSUResource {
         return Response.status(ResponseConstant.OK).entity(consentSCA).build();
     }
 
+    @GET
+        @Path("/consents/{consentId}/authorisations/{authorisationId}")
+        public Response getScaStatus(
+                @NotEmpty @NotBlank @PathParam("consentId") String consentId,
+                @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId) throws BankRequestFailedException
+    {
+        XS2AAuthorisationRequest getAuthorisationStatusRequest = new GetSCAStatusRequest(consentId, authorisationId);
+        getAuthorisationStatusRequest.getHeaders().putAll(getSandboxHeaders());
+        SCA.Status authorisationStatus = sadService.getXs2AStandard().getCs().getSCAStatus(getAuthorisationStatusRequest);
+        AuthorisationStatusResponse response = new AuthorisationStatusResponse();
+        response.setScaStatus(authorisationStatus.getValue());
+
+        LOG.info("Consent Status requested for consentId={} authorisationId={} scaStatus={}", consentId, authorisationId, authorisationStatus.getValue());
+        return Response.status(ResponseConstant.OK).entity(response).build();
+    }
 }

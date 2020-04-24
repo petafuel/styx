@@ -19,6 +19,8 @@ public class TokenGenerator {
         return binaryToHex(bytes);
     }
 
+    //This hash method is only used for obfuscation of plain tokens when permanently saved e.g. into a database
+    @SuppressWarnings("squid:S4790")
     public static String hashSHA256(String token) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         md.update(token.getBytes());

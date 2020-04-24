@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.10</version>
+            <version>42.2.11</version>
         </dependency>
         <dependency>
             <groupId>com.carrotsearch.thirdparty</groupId>
@@ -89,20 +89,20 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.json</artifactId>
-            <version>1.1.5</version>
+            <version>1.1.6</version>
             <scope>runtime</scope>
         </dependency>
         <!-- JSON-B API -->
         <dependency>
             <groupId>jakarta.json.bind</groupId>
             <artifactId>jakarta.json.bind-api</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
         </dependency>
         <!-- Yasson (JSON-B implementation) -->
         <dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>yasson</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.6</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>

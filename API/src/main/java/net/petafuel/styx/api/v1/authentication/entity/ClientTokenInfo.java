@@ -1,12 +1,11 @@
 package net.petafuel.styx.api.v1.authentication.entity;
 
+import net.petafuel.styx.api.validator.ValidateIntAsString;
 import net.petafuel.styx.api.validator.ValidateString;
 import net.petafuel.styx.core.persistence.models.AccessToken;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
 import javax.ws.rs.HeaderParam;
 
 /**
@@ -24,10 +23,9 @@ public class ClientTokenInfo {
     @NotNull(message = "service header cannot be null")
     private String service;
 
-    @Max(value = Integer.MAX_VALUE, message = "expiresIn cannot be higher than max integer range")
-    @PositiveOrZero(message = "expiresIn integer value cannot be unsigned")
+    @ValidateIntAsString(min = 0, message = "expiresIn cannot be higher than max integer range or unsigned integer")
     @HeaderParam("expiresIn")
-    private Integer expiresIn;
+    private String expiresIn;
 
     public String getToken() {
         return token;
@@ -50,10 +48,10 @@ public class ClientTokenInfo {
     }
 
     public Integer getExpiresIn() {
-        return expiresIn;
+        return Integer.valueOf(expiresIn);
     }
 
     public void setExpiresIn(Integer expiresIn) {
-        this.expiresIn = expiresIn;
+        this.expiresIn = String.valueOf(expiresIn);
     }
 }

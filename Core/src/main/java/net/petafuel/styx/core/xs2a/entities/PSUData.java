@@ -42,10 +42,6 @@ public class PSUData {
     @JsonbProperty("additionalEncryptedPassword")
     private String additionalEncryptedPassword;
 
-    public PSUData(){
-
-    }
-
     public String getPassword() {
         return password;
     }

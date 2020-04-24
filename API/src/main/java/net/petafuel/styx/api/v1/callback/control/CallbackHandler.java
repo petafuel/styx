@@ -4,7 +4,6 @@ import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
-
 import net.petafuel.styx.core.xs2a.utils.Config;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -14,21 +13,20 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import java.net.URI;
-
 public class CallbackHandler {
-
     private static final Logger LOG = LogManager.getLogger(CallbackHandler.class);
+
     public Response handleRedirect(String xRequestId, HttpHeaders httpHeaders, String body) {
-        System.out.println("Handle Request " + xRequestId);
+        LOG.info("Handling callback request xrequsetid={}", xRequestId);
         StringBuilder output = new StringBuilder();
         for(String field : httpHeaders.getRequestHeaders().keySet()){
             output.append(" ").append(field).append(": ").append(httpHeaders.getRequestHeader(field)).append("\n");
         }
-        LOG.info("\n Request Header \n" + output + "\n Request Body \n" + body);
+        LOG.info("requestHeader={}, requestBody={}", output, body);
 
         return this.returnHTMLPage();
     }
@@ -41,6 +39,7 @@ public class CallbackHandler {
                 return this.returnHTMLPage();
             } else {
                 linkToRedirect = handleFailedOAuth2(state);
+                LOG.error("failed oauth2 callback error={}, errorMessage={}", error, errorMessage);
                 return Response.temporaryRedirect(new URI(linkToRedirect)).build();
             }
         } catch (Exception e) {

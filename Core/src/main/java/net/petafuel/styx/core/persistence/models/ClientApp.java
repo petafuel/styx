@@ -1,11 +1,12 @@
 package net.petafuel.styx.core.persistence.models;
 
 import java.util.Date;
-import java.util.UUID;
 
+/**
+ * This model holds the styx mastertoken + metadata
+ */
 public class ClientApp {
-
-    private UUID masterToken;
+    private String masterToken;
     private String name;
     private String redirectUrl;
     private boolean enabled;
@@ -20,11 +21,11 @@ public class ClientApp {
         this.name = name;
     }
 
-    public UUID getMasterToken() {
+    public String getMasterToken() {
         return masterToken;
     }
 
-    public void setMasterToken(UUID masterToken) {
+    public void setMasterToken(String masterToken) {
         this.masterToken = masterToken;
     }
 

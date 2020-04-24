@@ -45,7 +45,7 @@ public class FetchPaymentResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void fetchSinglePayment() throws IOException {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSU-Successful");
         invocationBuilder.header("PSU-BIC", "CSDBDE71");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -60,7 +60,7 @@ public class FetchPaymentResourceTest extends StyxRESTTest {
         PaymentResponse paymentResponse = jsonb.fromJson(IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8), PaymentResponse.class);
 
         Invocation getPayment = target("/v1/payments/sepa-credit-transfers/" + paymentResponse.getPaymentId()).request()
-                .header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08")
+                .header("token", pisAccessToken)
                 .header("PSU-ID", "PSU-Successful")
                 .header("PSU-BIC", "CSDBDE71")
                 .header("PSU-IP-Address", "192.168.8.78")
@@ -74,7 +74,7 @@ public class FetchPaymentResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void fetchPeriodicPayment() throws IOException {
         Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSU-Successful");
         invocationBuilder.header("PSU-BIC", "CSDBDE71");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -89,7 +89,7 @@ public class FetchPaymentResourceTest extends StyxRESTTest {
         PaymentResponse paymentResponse = jsonb.fromJson(IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8), PaymentResponse.class);
 
         Invocation getPayment = target("/v1/periodic-payments/sepa-credit-transfers/" + paymentResponse.getPaymentId()).request()
-                .header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08")
+                .header("token", pisAccessToken)
                 .header("PSU-ID", "PSU-Successful")
                 .header("PSU-BIC", "CSDBDE71")
                 .header("PSU-IP-Address", "192.168.8.78")
@@ -103,7 +103,7 @@ public class FetchPaymentResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void fetchBulkPayment() throws IOException {
         Invocation.Builder invocationBuilder = target("/v1/bulk-payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSU-1234");
         invocationBuilder.header("PSU-BIC", "GENODEF1M03");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -118,7 +118,7 @@ public class FetchPaymentResourceTest extends StyxRESTTest {
         PaymentResponse paymentResponse = jsonb.fromJson(IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8), PaymentResponse.class);
 
         Invocation getPayment = target("/v1/bulk-payments/sepa-credit-transfers/" + paymentResponse.getPaymentId()).request()
-                .header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08")
+                .header("token", pisAccessToken)
                 .header("PSU-ID", "PSU-1234")
                 .header("PSU-BIC", "GENODEF1M03")
                 .header("PSU-IP-Address", "192.168.8.78")
@@ -132,7 +132,7 @@ public class FetchPaymentResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void fetchPaymentInvalidPaymentService() throws IOException {
         Invocation.Builder invocationBuilder = target("/v1/bulk-payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSU-1234");
         invocationBuilder.header("PSU-BIC", "GENODEF1M03");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -147,7 +147,7 @@ public class FetchPaymentResourceTest extends StyxRESTTest {
         PaymentResponse paymentResponse = jsonb.fromJson(IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8), PaymentResponse.class);
 
         Invocation getPayment = target("/v1/periodic-payments/sepa-credit-transfers/" + paymentResponse.getPaymentId()).request()
-                .header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08")
+                .header("token", pisAccessToken)
                 .header("PSU-ID", "PSU-1234")
                 .header("PSU-BIC", "GENODEF1M03")
                 .header("PSU-IP-Address", "192.168.8.78")

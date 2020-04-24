@@ -5,14 +5,18 @@ import net.petafuel.styx.api.exception.ResponseConstant;
 import net.petafuel.styx.api.exception.ResponseEntity;
 import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxException;
+import net.petafuel.styx.api.v1.authentication.control.TokenGenerator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import java.util.UUID;
+import java.security.NoSuchAlgorithmException;
 
 public abstract class AbstractTokenFilter implements ContainerRequestFilter {
+    private static final Logger LOG = LogManager.getLogger(AbstractTokenFilter.class);
 
-    public abstract boolean checkToken(UUID uuid);
+    public abstract boolean checkToken(String tokenHash);
 
     @Override
     public void filter(ContainerRequestContext context) {
@@ -21,18 +25,26 @@ public abstract class AbstractTokenFilter implements ContainerRequestFilter {
             ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_MISSING_CLIENT_TOKEN, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
             throw new StyxException(responseEntity);
         }
-        UUID uuid;
-        try {
-            uuid = UUID.fromString(token);
-        } catch (IllegalArgumentException invalidTokenFormat) {
+        //token is hashed, constant length of 64 characters
+        if (token.length() != 64) {
             ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_INVALID_TOKEN_FORMAT, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
             throw new StyxException(responseEntity);
         }
-        boolean tokenValid = checkToken(uuid);
+
+        String tokenHash;
+        try {
+            tokenHash = TokenGenerator.hashSHA256(token);
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("plainToken could not be hashed error={}", e.getMessage());
+            ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_INVALID_TOKEN_FORMAT, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
+            throw new StyxException(responseEntity);
+        }
+
+        boolean tokenValid = checkToken(tokenHash);
         if (!tokenValid) {
             ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_TOKEN_EXPIRED_OR_REVOKED, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
             throw new StyxException(responseEntity);
         }
-        context.setProperty(AbstractTokenFilter.class.getName(), token);
+        context.setProperty(AbstractTokenFilter.class.getName(), tokenHash);
     }
 }

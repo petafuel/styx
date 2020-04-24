@@ -30,11 +30,8 @@ import java.util.Date;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PaymentStatusResourceTest extends StyxRESTTest {
-
     public static final String CONSORS_BIC = "CSDBDE71";
     public static final String SPARKASSE_BIC = "BYLADEM1FSI";
-
-    public static final String ACCESS_TOKEN = "d0b10916-7926-4b6c-a90c-3643c62e4b08";
 
     private String consorsSinglePaymentId;
     private String consorsPeriodicPaymentId;
@@ -61,7 +58,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void getSinglePaymentStatusConsors() {
         Invocation invocation = target("/v1/payments/sepa-credit-transfers/" + getConsorsSinglePaymentId() + "/status").request()
-                .header("token", ACCESS_TOKEN)
+                .header("token", pisAccessToken)
                 .header("PSU-ID", "PSU-Successful")
                 .header("PSU-BIC", CONSORS_BIC)
                 .header("PSU-IP-Address", "192.168.8.78")
@@ -74,7 +71,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void getPeriodicPaymentStatusConsors() {
         Invocation invocation = target("/v1/periodic-payments/sepa-credit-transfers/" + getConsorsPeriodicPaymentId() + "/status").request()
-                .header("token", ACCESS_TOKEN)
+                .header("token", pisAccessToken)
                 .header("PSU-ID", "PSU-Successful")
                 .header("PSU-BIC", CONSORS_BIC)
                 .header("PSU-IP-Address", "192.168.8.78")
@@ -87,7 +84,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void getSinglePaymentStatusSparkasse() {
         Invocation invocation = target("/v1/payments/sepa-credit-transfers/" + getSparkasseSinglePaymentId() + "/status").request()
-                .header("token", ACCESS_TOKEN)
+                .header("token", pisAccessToken)
                 .header("PSU-ID", "PSU-Successful")
                 .header("PSU-BIC", SPARKASSE_BIC)
                 .header("PSU-IP-Address", "192.168.8.78")
@@ -100,7 +97,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void getBulkPaymentStatusSparkasse() {
         Invocation invocation = target("/v1/bulk-payments/sepa-credit-transfers/" + getSparkasseBulkPaymentId() + "/status").request()
-                .header("token", ACCESS_TOKEN)
+                .header("token", pisAccessToken)
                 .header("PSU-ID", "PSU-Successful")
                 .header("PSU-BIC", SPARKASSE_BIC)
                 .header("PSU-IP-Address", "192.168.8.78")
@@ -113,7 +110,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void getPeriodicPaymentStatusSparkasse() {
         Invocation invocation = target("/v1/periodic-payments/sepa-credit-transfers/" + getSparkassePeriodicPaymentId() + "/status").request()
-                .header("token", ACCESS_TOKEN)
+                .header("token", pisAccessToken)
                 .header("PSU-ID", "PSU-Successful")
                 .header("PSU-BIC", SPARKASSE_BIC)
                 .header("PSU-IP-Address", "192.168.8.78")
@@ -125,7 +122,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
     private String getConsorsSinglePaymentId() {
         if (consorsSinglePaymentId == null) {
             Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers").request();
-            invocationBuilder.header("token", ACCESS_TOKEN);
+            invocationBuilder.header("token", pisAccessToken);
             invocationBuilder.header("PSU-ID", "PSU-Successful");
             invocationBuilder.header("PSU-BIC", CONSORS_BIC);
             invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -153,7 +150,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
             PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"startDate\":\"" + currentDate + "\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", PeriodicPaymentInitiation.class);
 
             Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
-            invocationBuilder.header("token", ACCESS_TOKEN);
+            invocationBuilder.header("token", pisAccessToken);
             invocationBuilder.header("PSU-ID", "PSU-Successful");
             invocationBuilder.header("PSU-BIC", CONSORS_BIC);
             invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -173,7 +170,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
     private String getSparkasseSinglePaymentId() {
         if (sparkasseSinglePaymentId == null) {
             Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers").request();
-            invocationBuilder.header("token", ACCESS_TOKEN);
+            invocationBuilder.header("token", pisAccessToken);
             invocationBuilder.header("PSU-ID", "PSU-Successful");
             invocationBuilder.header("PSU-BIC", SPARKASSE_BIC);
             invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -199,7 +196,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
         if (sparkasseBulkPaymentId == null) {
 
             Invocation.Builder invocationBuilder = target("/v1/bulk-payments/sepa-credit-transfers").request();
-            invocationBuilder.header("token", ACCESS_TOKEN);
+            invocationBuilder.header("token", pisAccessToken);
             invocationBuilder.header("PSU-ID", "PSU-Successful");
             invocationBuilder.header("PSU-BIC", SPARKASSE_BIC);
             invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -227,7 +224,7 @@ public class PaymentStatusResourceTest extends StyxRESTTest {
             PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"endToEndIdentification\": \"endToEndId\", \"startDate\":\"" + currentDate + "\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE86999999990000001000\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE75999999990000001004\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\"}]}", PeriodicPaymentInitiation.class);
 
             Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
-            invocationBuilder.header("token", ACCESS_TOKEN);
+            invocationBuilder.header("token", pisAccessToken);
             invocationBuilder.header("PSU-ID", "PSU-1234");
             invocationBuilder.header("PSU-BIC", SPARKASSE_BIC);
             invocationBuilder.header("PSU-IP-Address", "192.168.8.78");

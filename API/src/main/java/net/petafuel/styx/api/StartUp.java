@@ -17,8 +17,7 @@ public class StartUp {
         try {
             server.startHttpServer();
         } catch (Exception e) {
-            e.printStackTrace();
-            LOG.error("Server could not be started: " + e.getMessage());
+            LOG.error("Server could not be started message={} stacktrace={}", e.getMessage(), e.getStackTrace());
             server.stopHttpServer();
         }
     }

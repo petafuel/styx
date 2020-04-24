@@ -15,6 +15,10 @@ public class IntAsStringValidator implements ConstraintValidator<ValidateIntAsSt
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null) {
+            //nothing to validate, use @NotNull
+            return true;
+        }
         try {
             int intVal = Integer.parseInt(value);
             return intVal <= maxValue && intVal >= minValue;

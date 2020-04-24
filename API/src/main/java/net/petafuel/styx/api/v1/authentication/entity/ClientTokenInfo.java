@@ -48,7 +48,7 @@ public class ClientTokenInfo {
     }
 
     public Integer getExpiresIn() {
-        return Integer.valueOf(expiresIn);
+        return expiresIn != null ? Integer.parseInt(expiresIn) : null;
     }
 
     public void setExpiresIn(Integer expiresIn) {

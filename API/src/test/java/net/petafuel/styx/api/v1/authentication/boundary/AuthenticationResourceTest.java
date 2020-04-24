@@ -1,5 +1,6 @@
 package net.petafuel.styx.api.v1.authentication.boundary;
 
+import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
 import net.petafuel.styx.api.exception.ResponseCategory;
 import net.petafuel.styx.api.exception.ResponseConstant;
@@ -8,6 +9,7 @@ import net.petafuel.styx.api.v1.authentication.control.TokenGenerator;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentInitiationResource;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestInstance;
 
@@ -31,6 +33,7 @@ public class AuthenticationResourceTest extends StyxRESTTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void fetchAccessToken() {
         Invocation.Builder invocationBuilder = target("/v1/auth").request();
         invocationBuilder.header("token", masterToken);
@@ -46,6 +49,7 @@ public class AuthenticationResourceTest extends StyxRESTTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void fetchAccessTokenInvalidServiceBinding() {
         Invocation.Builder invocationBuilder = target("/v1/auth").request();
         invocationBuilder.header("token", masterToken);
@@ -62,6 +66,7 @@ public class AuthenticationResourceTest extends StyxRESTTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void fetchAccessTokenInvalidMasterToken() {
         Invocation.Builder invocationBuilder = target("/v1/auth").request();
         invocationBuilder.header("token", TokenGenerator.generateRandomBytes());
@@ -78,6 +83,7 @@ public class AuthenticationResourceTest extends StyxRESTTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void fetchAccessTokenExpiredBecauseUnused() {
         Invocation.Builder invocationBuilder = target("/v1/auth").request();
         invocationBuilder.header("token", TokenGenerator.generateRandomBytes());
@@ -95,6 +101,7 @@ public class AuthenticationResourceTest extends StyxRESTTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void useAccessTokenWithInvalidServiceBinding() {
         Invocation.Builder invocationBuilder = target("/v1/auth").request();
         invocationBuilder.header("token", masterToken);

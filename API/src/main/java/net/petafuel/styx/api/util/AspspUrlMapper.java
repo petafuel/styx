@@ -29,11 +29,15 @@ public class AspspUrlMapper {
     private static final String CS_GET_STATUS = "/v1/consents/%s/status";
     private static final String CS_GET_SELF = "/v1/consents/%s";
 
+    private static final String AIS_GET_TRANSACTIONS = "/v1/accounts/%s/transactions";
+    private static final String AIS_GET_BALANCES = "/v1/accounts/%s/balances";
+
     private PaymentService paymentService;
     private PaymentProduct paymentProduct;
     private String paymentId;
     private String authorisationId;
     private String consentId;
+    private String accountId;
     private final boolean isPIS;
     private final String proxySchema = System.getProperty(ApiProperties.STYX_PROXY_SCHEMA);
     private final String proxyHostname = System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME);
@@ -50,6 +54,11 @@ public class AspspUrlMapper {
     public AspspUrlMapper(String consentId, String authorisationId) {
         this.consentId = consentId;
         this.authorisationId = authorisationId;
+        this.isPIS = false;
+    }
+
+    public AspspUrlMapper(String accountId) {
+        this.accountId = accountId;
         this.isPIS = false;
     }
 
@@ -106,6 +115,12 @@ public class AspspUrlMapper {
                         route = String.format(CS_UPDATE_AUTHORISATION, consentId, authorisationId);
                     }
                     break;
+                case BALANCES:
+                    route = String.format(AIS_GET_BALANCES, accountId);
+                    break;
+                case TRANSACTIONS:
+                    route = String.format(AIS_GET_TRANSACTIONS, accountId);
+                    break;
                 default:
                     //Keep url as is
                     break;
@@ -116,12 +131,12 @@ public class AspspUrlMapper {
         });
 
         //Always add Status and Self links
-        String getStatus;
-        String getSelf;
+        String getStatus = null;
+        String getSelf = null;
         if (isPIS) {
             getStatus = String.format(PIS_GET_STATUS, paymentService.getValue(), paymentProduct.getValue(), paymentId);
             getSelf = String.format(PIS_GET_SELF, paymentService.getValue(), paymentProduct.getValue(), paymentId);
-        } else {
+        } else if (consentId != null) {
             getStatus = String.format(CS_GET_STATUS, consentId);
             getSelf = String.format(CS_GET_SELF, consentId);
         }

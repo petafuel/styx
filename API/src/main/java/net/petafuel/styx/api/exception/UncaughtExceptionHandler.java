@@ -16,7 +16,7 @@ public class UncaughtExceptionHandler implements ExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable throwable) {
         ResponseEntity responseEntity = new ResponseEntity(throwable.getMessage(), ResponseConstant.INTERNAL_SERVER_ERROR, ResponseCategory.ERROR, ResponseOrigin.STYX);
-        LOG.fatal("Uncaught Throwable happened: category={}, code={}, httpStatus={}, message={}, cause={}, trace={}",
+        LOG.error("Uncaught Throwable happened: category={}, code={}, httpStatus={}, message={}, cause={}, trace={}",
                 responseEntity.getCategory(),
                 responseEntity.getCode(),
                 responseEntity.getCode().getStatusCode(),

@@ -24,6 +24,7 @@ public class StyxRESTTest extends JerseyTest {
     protected static String aisAccessToken;
     protected static String pisAccessToken;
     protected static String masterToken;
+    protected static String targobankToken;
 
     protected ResourceConfig setupFiltersAndErrorHandlers() {
         new PropertyReader().loadProperties();
@@ -33,6 +34,8 @@ public class StyxRESTTest extends JerseyTest {
         if (aisAccessToken == null || pisAccessToken == null) {
             Assertions.fail("test.token.access.ais or test.token.access.pis is not set");
         }
+        targobankToken = System.getProperty("test.token.targobank");
+
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         ResourceConfig config = new ResourceConfig();
         //Register Middlewares / Filters

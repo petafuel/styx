@@ -28,6 +28,7 @@ import net.petafuel.styx.api.v1.payment.boundary.FetchPaymentResource;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentAuthorisationResource;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentInitiationResource;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentStatusResource;
+import net.petafuel.styx.api.v1.preauth.boundary.PreAuthResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Request;
@@ -86,7 +87,8 @@ public class WebServer {
                 .register(PaymentStatusResource.class)                  // handle payment status
                 .register(PaymentInitiationResource.class)              // handle payment initiation calls
                 .register(FetchPaymentResource.class)                   // handle fetch payment calls
-                .register(PaymentAuthorisationResource.class);          // handle payment SCA calls
+                .register(PaymentAuthorisationResource.class)           // handle payment SCA calls
+                .register(PreAuthResource.class);
         //Register Middlewares / Filters
         config.register(AuthorizedFilter.class)                         // request Requires valid client token and enabled master token
                 .register(PSUFilter.class)                              // request requires PSU data

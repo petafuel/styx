@@ -18,6 +18,10 @@ public class Url {
     private String pisUrl;
     @DatabaseColumn("piis_url")
     private String piisUrl;
+    @DatabaseColumn("preauth_authorization_endpoint")
+    private String preauthAuthorizationEndpoint;
+    @DatabaseColumn("preauth_token_endpoint")
+    private String preauthTokenEndpoint;
     @DatabaseColumn("updated_at")
     private Date updatedAt;
     @DatabaseColumn("created_at")
@@ -61,6 +65,22 @@ public class Url {
 
     public void setPiisUrl(String piisUrl) {
         this.piisUrl = piisUrl;
+    }
+
+    public String getPreauthAuthorizationEndpoint() {
+        return preauthAuthorizationEndpoint;
+    }
+
+    public void setPreauthAuthorizationEndpoint(String preauthAuthorizationEndpoint) {
+        this.preauthAuthorizationEndpoint = preauthAuthorizationEndpoint;
+    }
+
+    public String getPreauthTokenEndpoint() {
+        return preauthTokenEndpoint;
+    }
+
+    public void setPreauthTokenEndpoint(String preauthTokenEndpoint) {
+        this.preauthTokenEndpoint = preauthTokenEndpoint;
     }
 
     public Date getUpdatedAt() {

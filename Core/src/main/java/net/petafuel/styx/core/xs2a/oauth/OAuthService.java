@@ -2,6 +2,7 @@ package net.petafuel.styx.core.xs2a.oauth;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.petafuel.styx.core.banklookup.sad.entities.Url;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.entities.StrongAuthenticatableResource;
@@ -40,7 +41,7 @@ public class OAuthService extends BasicService {
     public static String generateCodeVerifier() {
 
         SecureRandom sr = new SecureRandom();
-        byte[] code = new byte[32];
+        byte[] code = new byte[32]; // TODO might not work for sca
         sr.nextBytes(code);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(code);
     }
@@ -53,28 +54,42 @@ public class OAuthService extends BasicService {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(bytes, 0, bytes.length);
             byte[] digest = md.digest();
-            return Base64.getUrlEncoder().encodeToString(digest);
+            String codeChallenge = Base64.getUrlEncoder().encodeToString(digest);
+            codeChallenge = codeChallenge.replace('+', '-')
+                    .replace('/', '_')
+                    .replace("=", "");
+            return codeChallenge;
         } catch (Exception e) {
             return "";
         }
     }
 
     public static String buildLink(String state) {
-
         OAuthSession stored = new PersistentOAuthSession().get(state);
+        HashMap<String, String> queryParams = getQueryParameters(stored);
+        return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
+    }
+
+    public static String buildLink(String state, String bic) {
+        OAuthSession stored = new PersistentOAuthSession().get(state);
+        HashMap<String, String> queryParams = getQueryParameters(stored);
+        queryParams.put("bic", bic);
+        return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
+    }
+
+    private static HashMap<String, String> getQueryParameters(OAuthSession oAuthSession) {
 
         Properties properties = Config.getInstance().getProperties();
-
         HashMap<String, String> queryParams = new HashMap<>();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
         queryParams.put("response_type", "code");
-        queryParams.put("scope", stored.getScope());
-        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl"));
-        queryParams.put("state", state);
-        queryParams.put("code_challenge", OAuthService.generateCodeChallenge(stored.getCodeVerifier()));
+        queryParams.put("scope", oAuthSession.getScope());
+        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + "oauth");
+        queryParams.put("state", oAuthSession.getState());
+        queryParams.put("code_challenge", OAuthService.generateCodeChallenge(oAuthSession.getCodeVerifier()));
         queryParams.put("code_challenge_method", "S256");
 
-        return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
+        return queryParams;
     }
 
     public static OAuthSession startSession(StrongAuthenticatableResource strongAuthenticatableResource, String scope) {
@@ -88,6 +103,20 @@ public class OAuthService extends BasicService {
         session.setScope(scope);
         session.setAuthorizationEndpoint(endpoints.get("authorization_endpoint"));
         session.setTokenEndpoint(endpoints.get("token_endpoint"));
+        session.setState(state);
+
+        return new PersistentOAuthSession().create(session);
+    }
+
+    public static OAuthSession startPreAuthSession(Url url, String scope) {
+
+        String state = OAuthService.generateState();
+        String codeVerifier = OAuthService.generateCodeVerifier();
+        OAuthSession session = new OAuthSession();
+        session.setCodeVerifier(codeVerifier);
+        session.setScope(scope);
+        session.setAuthorizationEndpoint(url.getPreauthAuthorizationEndpoint());
+        session.setTokenEndpoint(url.getPreauthTokenEndpoint());
         session.setState(state);
 
         return new PersistentOAuthSession().create(session);

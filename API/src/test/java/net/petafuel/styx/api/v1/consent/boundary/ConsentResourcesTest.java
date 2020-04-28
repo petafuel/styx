@@ -34,7 +34,7 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
 
     protected Jsonb jsonb = JsonbBuilder.create();
 
-    static String consentId;
+    static public String consentId;
     static String authorisationId;
 
     protected abstract String getBIC();

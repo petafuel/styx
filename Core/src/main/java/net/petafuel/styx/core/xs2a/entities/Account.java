@@ -9,7 +9,12 @@ import java.util.List;
 
 /**
  * Model to describe an Account in XS2A context
+ *
+ * @see AccountReference
+ * @see AccountDetails
+ * @deprecated this class is not berlin group compliant, this was split into AccountReference(pis related) and AccountDetails(ais related)
  */
+@Deprecated
 public class Account implements Serializable {
 
     /**
@@ -155,7 +160,7 @@ public class Account implements Serializable {
         MASKED_PAN("maskedPan"),
         MSISDN("msisdn");
 
-        private String jsonKey;
+        private final String jsonKey;
 
         Type(String str) {
             this.jsonKey = str;

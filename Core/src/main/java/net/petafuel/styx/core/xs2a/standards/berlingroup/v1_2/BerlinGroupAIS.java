@@ -8,10 +8,13 @@ import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.Balance;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsResponse;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
@@ -22,6 +25,8 @@ import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,24 +67,23 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public Account getAccount(XS2ARequest request) throws BankRequestFailedException {
+    public AccountDetails getAccount(XS2ARequest request) throws BankRequestFailedException {
         this.setUrl(this.url + String.format(GET_ACCOUNT_DETAILS, ((ReadAccountDetailsRequest) request).getAccountId()) + this.getHttpQueryString(request));
 
         this.createBody(RequestType.GET);
         this.createHeaders(request);
-
-        try (Response response = this.execute()) {
+        AccountDetails accountDetails = null;
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String responseBody = extractResponseBody(response, 200);
-            Type type = new TypeToken<ArrayList<Account>>() {
-            }.getType();
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(type, new AccountSerializer())
-                    .create();
-
-            List<Account> accounts = gson.fromJson(responseBody, type);
-            return accounts.get(0);
+            accountDetails = jsonb.fromJson(responseBody, ReadAccountDetailsResponse.class).getAccount();
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
+        }
+
+        if (accountDetails == null) {
+            throw new SerializerException("Unable to deserialize account details response body to AccountDetails object");
+        } else {
+            return accountDetails;
         }
     }
 

@@ -134,7 +134,7 @@ public class WebServer {
     static class ErrorHandler extends ErrorPageErrorHandler {
         @Override
         public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
-            LOG.fatal("An out of context error happened baseURI={} status={}", baseRequest.getRequestURI(), response.getStatus());
+            LOG.error("An out of context error happened baseURI={} status={}", baseRequest.getRequestURI(), response.getStatus());
             ResponseEntity responseEntity = new ResponseEntity("Internal Server Error", ResponseConstant.INTERNAL_SERVER_ERROR, ResponseCategory.ERROR, ResponseOrigin.STYX);
             try (Jsonb jsonb = JsonbBuilder.create()) {
                 response.setStatus(ResponseConstant.INTERNAL_SERVER_ERROR.getStatusCode());

@@ -9,8 +9,6 @@ import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
 
-import java.util.UUID;
-
 public class PaymentStatusProvider extends PaymentProvider {
     public PaymentStatusProvider(XS2AStandard xs2AStandard, PaymentTypeBean paymentTypeBean, PSU psu) {
         super(xs2AStandard, paymentTypeBean, psu);
@@ -22,7 +20,7 @@ public class PaymentStatusProvider extends PaymentProvider {
         return (ReadPaymentStatusRequest) ioProcessor.applyOptions();
     }
 
-    public void updateStatus(String paymentId, UUID clientToken, String bic, TransactionStatus status) {
+    public void updateStatus(String paymentId, String clientToken, String bic, TransactionStatus status) {
         if (PersistentPayment.get(paymentId) == null) {
             PersistentPayment.create(paymentId, clientToken, bic, status);
         } else {

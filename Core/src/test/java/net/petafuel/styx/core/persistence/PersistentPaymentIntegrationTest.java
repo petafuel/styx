@@ -4,7 +4,9 @@ package net.petafuel.styx.core.persistence;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.persistence.models.PaymentEntry;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
+import net.petafuel.styx.core.xs2a.utils.Config;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -21,7 +23,7 @@ import java.util.UUID;
 public class PersistentPaymentIntegrationTest {
     private PaymentEntry paymentEntry;
     private String paymentId;
-    private UUID clientToken;
+    private String clientToken;
     private String bic;
 
     @BeforeAll
@@ -29,7 +31,10 @@ public class PersistentPaymentIntegrationTest {
         paymentEntry = new PaymentEntry();
         paymentId = UUID.randomUUID().toString();
         //TODO create accesstoken beforehand
-        clientToken = UUID.fromString("d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        clientToken = Config.getInstance().getProperties().getProperty("test.token.access.pis");
+        if (clientToken == null) {
+            Assertions.fail("test.token.client.pis has to be set to a valid access token hash in the test resource for Core");
+        }
         bic = "1231233D";
     }
 

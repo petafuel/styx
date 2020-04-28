@@ -13,23 +13,12 @@ import java.util.Properties;
 public class Config {
     private static final Logger LOG = LogManager.getLogger(Config.class);
 
-    public Properties getProperties() {
-        return config;
-    }
-
-    private Properties config;
-    private static Config singletonInstance;
     private static final String PROP_FILENAME = "core.properties";
-
-    public static Config getInstance() {
-        if (Config.singletonInstance == null) {
-            Config.singletonInstance = new Config();
-        }
-        return Config.singletonInstance;
-    }
+    private static Config singletonInstance;
+    private final Properties properties;
 
     private Config() {
-        config = new Properties();
+        properties = new Properties();
 
         InputStream stream;
         try {
@@ -38,11 +27,22 @@ public class Config {
             } else {
                 stream = Config.class.getClassLoader().getResourceAsStream(PROP_FILENAME);
             }
-            config.load(stream); // loads all properties of the config.properties - file
+            properties.load(stream); // loads all properties of the config.properties - file
         } catch (FileNotFoundException e) {
             LOG.error("Properties file not found: " + e.getMessage());
         } catch (IOException e) {
             LOG.error("Exception in getting properties file: " + e.getMessage());
         }
+    }
+
+    public static Config getInstance() {
+        if (Config.singletonInstance == null) {
+            Config.singletonInstance = new Config();
+        }
+        return Config.singletonInstance;
+    }
+
+    public Properties getProperties() {
+        return properties;
     }
 }

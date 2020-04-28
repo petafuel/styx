@@ -6,6 +6,7 @@ import net.petafuel.styx.api.v1.consent.entity.GetConsentStatusResponse;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentResponse;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
+import net.petafuel.styx.core.xs2a.entities.AuthenticationObject;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import org.apache.commons.io.IOUtils;
@@ -20,10 +21,12 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ConsentResourcesTargoTest extends ConsentResourcesTest {
+    private static String scaMethodId;
 
     @Override
     protected String getBIC() {
@@ -31,13 +34,13 @@ public class ConsentResourcesTargoTest extends ConsentResourcesTest {
     }
 
     @Override
-    protected String getPsuId(){
-        return "PSU-Successful";
+    protected String getPsuId() {
+        return "PSD2TEST2";
     }
 
     @Override
     protected String getPsuIpAddress() {
-        return "192.168.8.78";
+        return "172.0.0.1";
     }
 
     @Override
@@ -47,7 +50,7 @@ public class ConsentResourcesTargoTest extends ConsentResourcesTest {
 
     @Override
     protected String getSCAMethodId() {
-        return "901";
+        return scaMethodId;
     }
 
     @Override
@@ -56,7 +59,7 @@ public class ConsentResourcesTargoTest extends ConsentResourcesTest {
     }
 
     @Override
-    protected AccountReference getAccountReference(){
+    protected AccountReference getAccountReference() {
         return new AccountReference("DE70300209005320320678", AccountReference.Type.IBAN);
     }
 
@@ -98,11 +101,14 @@ public class ConsentResourcesTargoTest extends ConsentResourcesTest {
 
     @Test
     @Category(IntegrationTest.class)
-    public void D_startConsentAuthorisationTest(){
+    public void D_startConsentAuthorisationTest() {
         SCA response = startConsentAuthorisationEndpoint();
         Assertions.assertEquals(SCA.Status.PSUAUTHENTICATED, response.getScaStatus());
         Assertions.assertEquals(SCA.Approach.EMBEDDED, response.getApproach());
         authorisationId = response.getAuthorisationId();
+
+        Optional<AuthenticationObject> selectableScaMethod = response.getScaMethods().stream().filter(scaMethod -> scaMethod.getAuthenticationMethodId() != null).findFirst();
+        scaMethodId = selectableScaMethod.get().getAuthenticationMethodId();
     }
 
     @Test
@@ -120,9 +126,9 @@ public class ConsentResourcesTargoTest extends ConsentResourcesTest {
     }
 
     @Test
-        @Category(IntegrationTest.class)
-        public void H_checkScaStatus()throws IOException {
-            AuthorisationStatusResponse response = getStatusAuthorisation();
-            Assertions.assertEquals(SCA.Status.FINALISED.getValue(), response.getScaStatus());
-        }
+    @Category(IntegrationTest.class)
+    public void H_checkScaStatus() throws IOException {
+        AuthorisationStatusResponse response = getStatusAuthorisation();
+        Assertions.assertEquals(SCA.Status.FINALISED.getValue(), response.getScaStatus());
+    }
 }

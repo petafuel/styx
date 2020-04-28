@@ -98,11 +98,23 @@ public class ConsentResourcesFiduciaTest extends ConsentResourcesTest {
 
     @Test
     @Category(IntegrationTest.class)
-    public void D_startConsentAuthorisationTest(){
+    public void D_startConsentAuthorisationTest() {
         SCA response = startConsentAuthorisationEndpoint();
         Assertions.assertEquals(SCA.Status.PSUAUTHENTICATED, response.getScaStatus());
         Assertions.assertEquals(SCA.Approach.EMBEDDED, response.getApproach());
         authorisationId = response.getAuthorisationId();
+    }
+
+    /**
+     * SCA Status request for fiducia can only be made before the sca is finalised, afterwards this results in a 404 unknown resource
+     *
+     * @throws IOException
+     */
+    @Test
+    @Category(IntegrationTest.class)
+    public void E_checkScaStatus() throws IOException {
+        AuthorisationStatusResponse response = getStatusAuthorisation();
+        Assertions.assertEquals(SCA.Status.PSUAUTHENTICATED.getValue(), response.getScaStatus());
     }
 
     @Test
@@ -119,11 +131,4 @@ public class ConsentResourcesFiduciaTest extends ConsentResourcesTest {
         Assertions.assertEquals(SCA.Status.FINALISED, response.getScaStatus());
     }
 
-
-    @Test
-    @Category(IntegrationTest.class)
-    public void H_checkScaStatus()throws IOException {
-        AuthorisationStatusResponse response = getStatusAuthorisation();
-        Assertions.assertEquals(SCA.Status.FINALISED.getValue(), response.getScaStatus());
-    }
 }

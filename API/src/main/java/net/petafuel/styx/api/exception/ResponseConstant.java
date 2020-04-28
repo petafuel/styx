@@ -49,6 +49,7 @@ public enum ResponseConstant implements Response.StatusType, Serializable {
     STYX_MISSING_CLIENT_TOKEN(400, "Styx API Token was not contained or empty in request"),
     STYX_INVALID_TOKEN_FORMAT(400, "Styx API Token value has an invalid format"),
     STYX_TOKEN_EXPIRED_OR_REVOKED(401, "Styx API Token is expired or revoked"),
+    STYX_TOKEN_ACCESS_VIOLATION(403, "Styx API Token is not authorized to invoke the request"),
     SAD_ASPSP_NOT_FOUND(404, "The requested ASPSP was not found within SAD");
 
     private final int code;

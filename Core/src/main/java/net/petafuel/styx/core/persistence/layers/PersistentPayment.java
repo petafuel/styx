@@ -15,7 +15,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
 
 public class PersistentPayment {
     private static final Logger LOG = LogManager.getLogger(PersistentPayment.class);
@@ -26,20 +25,20 @@ public class PersistentPayment {
     private PersistentPayment() {
     }
 
-    public static PaymentEntry create(String paymentId, UUID clientToken, String bic, TransactionStatus status) {
+    public static PaymentEntry create(String paymentId, String clientToken, String bic, TransactionStatus status) {
         Connection connection = Persistence.getInstance().getConnection();
         PaymentEntry paymentEntry = null;
         try (PreparedStatement query = connection.prepareStatement("SELECT * FROM create_payment(?,?,?,?)")) {
 
             query.setString(1, paymentId);
-            query.setObject(2, clientToken);
+            query.setString(2, clientToken);
             query.setString(3, bic);
             query.setString(4, status.name());
 
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     paymentEntry = StyxifySQL.fetchModel(PaymentEntry.class, resultSet);
-                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString(COLUMN_CLIENT_TOKEN)));
+                    AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
@@ -65,7 +64,7 @@ public class PersistentPayment {
                 if (resultSet.next()) {
                     paymentEntry = StyxifySQL.fetchModel(PaymentEntry.class, resultSet);
                     if (resultSet.getString(COLUMN_CLIENT_TOKEN) != null) {
-                        AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString(COLUMN_CLIENT_TOKEN)));
+                        AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                         paymentEntry.setClientToken(accessToken);
                     }
                     if (resultSet.getString(COLUMN_STATUS) != null) {
@@ -83,20 +82,20 @@ public class PersistentPayment {
         return paymentEntry;
     }
 
-    public static PaymentEntry update(String paymentId, UUID clientToken, String bic, TransactionStatus transactionStatus) {
+    public static PaymentEntry update(String paymentId, String clientToken, String bic, TransactionStatus transactionStatus) {
         Connection connection = Persistence.getInstance().getConnection();
         PaymentEntry paymentEntry = null;
         try (PreparedStatement query = connection.prepareStatement("SELECT * FROM update_payment(?, ?, ?, ?)")) {
 
             query.setString(1, paymentId);
-            query.setObject(2, clientToken);
+            query.setString(2, clientToken);
             query.setString(3, bic);
             query.setString(4, transactionStatus.name());
 
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     paymentEntry = StyxifySQL.fetchModel(PaymentEntry.class, resultSet);
-                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString(COLUMN_CLIENT_TOKEN)));
+                    AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
@@ -122,7 +121,7 @@ public class PersistentPayment {
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     paymentEntry = StyxifySQL.fetchModel(PaymentEntry.class, resultSet);
-                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString(COLUMN_CLIENT_TOKEN)));
+                    AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }
@@ -147,7 +146,7 @@ public class PersistentPayment {
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     paymentEntry = StyxifySQL.fetchModel(PaymentEntry.class, resultSet);
-                    AccessToken accessToken = new PersistentAccessToken().get(UUID.fromString(resultSet.getString(COLUMN_CLIENT_TOKEN)));
+                    AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                 }

@@ -10,7 +10,7 @@ import net.petafuel.styx.api.exception.ResponseEntity;
 import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxExceptionHandler;
 import net.petafuel.styx.api.exception.UncaughtExceptionHandler;
-import net.petafuel.styx.api.filter.AuthorizedFilter;
+import net.petafuel.styx.api.filter.AccessTokenFilter;
 import net.petafuel.styx.api.filter.BICFilter;
 import net.petafuel.styx.api.filter.MandatoryHeaderFilter;
 import net.petafuel.styx.api.filter.MasterTokenFilter;
@@ -19,7 +19,7 @@ import net.petafuel.styx.api.filter.SandboxHeaderPassthroughs;
 import net.petafuel.styx.api.injection.ServiceBinder;
 import net.petafuel.styx.api.util.ApiProperties;
 import net.petafuel.styx.api.v1.account.boundary.AccountResource;
-import net.petafuel.styx.api.v1.auth.boundary.AuthResource;
+import net.petafuel.styx.api.v1.authentication.boundary.AuthenticationResource;
 import net.petafuel.styx.api.v1.callback.boundary.CallbackResource;
 import net.petafuel.styx.api.v1.consent.boundary.ConsentAuthorisationResource;
 import net.petafuel.styx.api.v1.consent.boundary.CreateConsentResource;
@@ -50,9 +50,9 @@ import java.net.InetSocketAddress;
 
 public class WebServer {
     private static final Logger LOG = LogManager.getLogger(WebServer.class);
-    private static Boolean isSandbox = Boolean.parseBoolean(System.getProperty(ApiProperties.STYX_API_SAD_SANDBOX_ENABLED, "true"));
-    private String ip;
-    private String port;
+    private static final Boolean SANDBOX_ENABLED = Boolean.parseBoolean(System.getProperty(ApiProperties.STYX_API_SAD_SANDBOX_ENABLED, "true"));
+    private final String ip;
+    private final String port;
     private Server server = null;
 
     public WebServer() {
@@ -61,7 +61,7 @@ public class WebServer {
     }
 
     public static Boolean isSandbox() {
-        return isSandbox;
+        return SANDBOX_ENABLED;
     }
 
     public void startHttpServer() throws Exception {
@@ -79,7 +79,7 @@ public class WebServer {
         //Register Resources / REST Endpoints
         config.register(CallbackResource.class)
                 .register(AccountResource.class)
-                .register(AuthResource.class)                           // handle Authorisation
+                .register(AuthenticationResource.class)                 // handle Styx API Authentication for access and master tokens
                 .register(GetConsentResource.class)                     // handle consent fetching
                 .register(CreateConsentResource.class)                  // handle consent creation
                 .register(ConsentAuthorisationResource.class)           // handle consent authorisation
@@ -88,13 +88,13 @@ public class WebServer {
                 .register(FetchPaymentResource.class)                   // handle fetch payment calls
                 .register(PaymentAuthorisationResource.class);          // handle payment SCA calls
         //Register Middlewares / Filters
-        config.register(AuthorizedFilter.class)                         // request Requires valid client token and enabled master token
+        config.register(AccessTokenFilter.class)                        // request Requires valid client token and enabled master token
                 .register(PSUFilter.class)                              // request requires PSU data
                 .register(BICFilter.class)                              // request requires PSU data
                 .register(MandatoryHeaderFilter.class)                  // request requires certain header fields
                 .register(MasterTokenFilter.class);                     // Request requires enabled master token
 
-        if (WebServer.isSandbox()) {
+        if (Boolean.TRUE.equals(WebServer.isSandbox())) {
             config.register(SandboxHeaderPassthroughs.class);            // makes all X-STYX-... headers available in the request context, if styx is running in sandbox mode
         }
 

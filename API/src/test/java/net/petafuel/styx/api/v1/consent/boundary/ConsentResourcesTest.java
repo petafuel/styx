@@ -26,9 +26,6 @@ import java.util.ArrayList;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class ConsentResourcesTest extends StyxRESTTest {
-
-    private static final String ACCESS_TOKEN = "d0b10916-7926-4b6c-a90c-3643c62e4b08";
-
     private static final String POST_CONSENT = "/v1/consents";
     private static final String GET_CONSENT = "/v1/consents/%s";
     private static final String GET_CONSENT_STATUS = "/v1/consents/%s/status";
@@ -118,7 +115,7 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
     private Invocation.Builder getInvocationBuilder(String target) {
 
         Invocation.Builder invocationBuilder = target(target).request();
-        invocationBuilder.header("token", ACCESS_TOKEN);
+        invocationBuilder.header("token", aisAccessToken);
         invocationBuilder.header("PSU-ID", getPsuId());
         invocationBuilder.header("PSU-BIC", getBIC());
         invocationBuilder.header("PSU-IP-Address", getPsuIpAddress());

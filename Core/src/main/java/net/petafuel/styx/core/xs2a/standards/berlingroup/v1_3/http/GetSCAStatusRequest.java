@@ -4,14 +4,12 @@ import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 
-import javax.json.Json;
-import javax.json.bind.JsonbConfig;
 import java.util.Optional;
 
 public class GetSCAStatusRequest extends XS2AAuthorisationRequest {
     public static final String PIS_GET_SCA_STATUS = "/v1/%s/%s/%s/authorisations/%s";
     public static final String CS_GET_SCA_STATUS = "/v1/consents/%s/authorisations/%s";
-    private String authorisationId;
+    private final String authorisationId;
 
     public GetSCAStatusRequest(PaymentService paymentService, PaymentProduct paymentProduct, String paymentId, String authorisationId) {
         super(paymentService, paymentProduct, paymentId);
@@ -26,14 +24,7 @@ public class GetSCAStatusRequest extends XS2AAuthorisationRequest {
 
     @Override
     public Optional<String> getRawBody() {
-        JsonbConfig jsonbConfig = new JsonbConfig();
-        jsonbConfig.withNullValues(false);
-        try {
-            String responseBody = Json.createObjectBuilder().toString();
-            return Optional.ofNullable(responseBody);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     @Override

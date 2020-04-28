@@ -45,7 +45,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void initiateSinglePayment_Consors() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSU-Successful");
         invocationBuilder.header("PSU-BIC", "CSDBDE71");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -63,7 +63,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void initiateSinglePayment_Targo() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSD2TEST4");
         invocationBuilder.header("PSU-BIC", "CMCIDEDD");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -85,7 +85,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
         BulkPaymentInitiation bulkPaymentInitiation = jsonb.fromJson("{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"requestedExecutionDate\":\"" + currentDate + "\",\"payments\":[{\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"},{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", BulkPaymentInitiation.class);
 
         Invocation.Builder invocationBuilder = target("/v1/bulk-payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSU-Successful");
         invocationBuilder.header("PSU-BIC", "CMCIDEDD");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -104,7 +104,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
         PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"startDate\":\"" + currentDate + "\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", PeriodicPaymentInitiation.class);
 
         Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSU-Successful");
         invocationBuilder.header("PSU-BIC", "CSDBDE71");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -123,7 +123,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
         PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"startDate\":\"" + currentDate + "\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", PeriodicPaymentInitiation.class);
 
         Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSD2TEST4");
         invocationBuilder.header("PSU-BIC", "CMCIDEDD");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -141,7 +141,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
             "initiateSinglePayment_Fiducia -> Test json to XML conversion of payment initation request within styx to aspsp interface")
     public void initiateSinglePayment_Fiducia() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSU-1234");
         invocationBuilder.header("PSU-BIC", "GENODEF1M03");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -159,7 +159,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void initiateBulkPayment_Fiducia() {
         Invocation.Builder invocationBuilder = target("/v1/bulk-payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSU-1234");
         invocationBuilder.header("PSU-BIC", "GENODEF1M03");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -179,7 +179,7 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
         PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson("{\"startDate\":\"" + currentDate + "\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE87200500001234567890\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE23100120020123456789\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\"}]}", PeriodicPaymentInitiation.class);
 
         Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSU-1234");
         invocationBuilder.header("PSU-BIC", "GENODEF1M03");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");

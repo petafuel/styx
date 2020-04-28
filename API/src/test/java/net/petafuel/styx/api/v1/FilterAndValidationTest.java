@@ -48,7 +48,7 @@ public class FilterAndValidationTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void revokedOrExpiredAPIToken() throws IOException {
         Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b01");
+        invocationBuilder.header("token", "expiredexpiredexpiredexpiredexpiredexpiredexpiredexpiredexpirede");
         invocationBuilder.header("PSU-ID", "PSU-1234");
         invocationBuilder.header("PSU-BIC", "GENODEF1M03");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -57,7 +57,7 @@ public class FilterAndValidationTest extends StyxRESTTest {
         Response response = invocation.invoke();
         Assertions.assertEquals(401, response.getStatus());
         String strResponse = IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8);
-        Assertions.assertTrue(strResponse.contains(ResponseConstant.STYX_TOKEN_EXPIRED_OR_REVOKED.name()));
+        Assertions.assertTrue(strResponse.contains(ResponseConstant.UNAUTHORIZED.name()));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class FilterAndValidationTest extends StyxRESTTest {
     public void missingBIC() throws IOException {
         Invocation.Builder invocationBuilder = target("/v1/periodic-payments/sepa-credit-transfers").request();
         invocationBuilder.header("PSU-ID", "PSU-1234");
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
         invocationBuilder.header("redirectPreferred", true);
         Invocation invocation = invocationBuilder.buildPost(Entity.entity("test", MediaType.APPLICATION_JSON));

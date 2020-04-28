@@ -14,6 +14,14 @@
         <module>Core</module>
     </modules>
 
+    <repositories>
+        <repository>
+            <id>styxgithub</id>
+            <name>Styx GitHub Packages</name>
+            <url>https://maven.pkg.github.com/petafuel/styx</url>
+        </repository>
+    </repositories>
+
     <build>
         <defaultGoal>clean install</defaultGoal>
         <plugins>

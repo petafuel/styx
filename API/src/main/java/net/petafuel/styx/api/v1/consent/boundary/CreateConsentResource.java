@@ -8,6 +8,7 @@ import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentRequest;
 import net.petafuel.styx.api.v1.consent.entity.POSTConsentResponse;
+import net.petafuel.styx.core.persistence.models.AccessToken;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -20,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -32,7 +34,7 @@ import javax.ws.rs.core.Response;
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @Consumes({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
-@CheckAccessToken
+@CheckAccessToken(allowedServices = {AccessToken.ServiceType.AISPIS, AccessToken.ServiceType.AIS})
 @RequiresBIC
 public class CreateConsentResource extends PSUResource {
     private static final Logger LOG = LogManager.getLogger(CreateConsentResource.class);
@@ -51,7 +53,7 @@ public class CreateConsentResource extends PSUResource {
     @POST
     @Path("/consents")
     @RequiresMandatoryHeader
-    public Response createConsent(@Valid POSTConsentRequest postConsentRequest) throws BankRequestFailedException {
+    public Response createConsent(@Valid @NotNull POSTConsentRequest postConsentRequest) throws BankRequestFailedException {
         Consent requestConsent = new Consent();
         requestConsent.setCombinedServiceIndicator(false);
         requestConsent.setRecurringIndicator(postConsentRequest.isRecurringIndicator());
@@ -76,7 +78,7 @@ public class CreateConsentResource extends PSUResource {
         }
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(consent.getId(), null);
-        aspspUrlMapper.map(postConsentResponse.getLinks());
+        postConsentResponse.setLinks(aspspUrlMapper.map(postConsentResponse.getLinks()));
 
         LOG.info("Created new AIS consent for bic={}", sadService.getXs2AStandard().getAspsp().getBic());
         return Response.status(Response.Status.CREATED).entity(postConsentResponse).build();

@@ -30,17 +30,17 @@ import java.util.StringJoiner;
 public abstract class BasicService {
     protected static final MediaType JSON = MediaType.get("application/json;charset=utf-8");
     protected static final MediaType XML = MediaType.get("application/xml;charset=utf-8");
-    private final Logger LOG;
+    private final Logger logger;
     protected String url;
-    private Request.Builder builder;
-    private IXS2AHttpSigner signer;
+    private final Request.Builder builder;
+    private final IXS2AHttpSigner signer;
 
     public BasicService(String url, IXS2AHttpSigner signer) {
         this(LogManager.getLogger(BasicService.class), url, signer);
     }
 
     public BasicService(Logger log, String url, IXS2AHttpSigner signer) {
-        LOG = log;
+        logger = log;
 
         this.url = url;
         this.builder = new Request.Builder();
@@ -72,7 +72,7 @@ public abstract class BasicService {
 
     protected void createBody(RequestType requestType, MediaType mediaType, XS2ARequest request) {
         if (!requestType.equals(RequestType.GET) && !request.getRawBody().isPresent()) {
-            LOG.warn("Sending empty request body for non GET http-method");
+            logger.warn("Sending empty request body for non GET http-method");
         }
         createBody(requestType, RequestBody.create(request.getRawBody().orElse(""), mediaType));
     }
@@ -117,9 +117,9 @@ public abstract class BasicService {
                 }
             }
         } catch (KeyStoreException | NoSuchAlgorithmException e) {
-            LOG.error(e.getMessage());
+            logger.error(e.getMessage());
         } catch (NullPointerException e) {
-            LOG.error("Unable to get Trust Managers from TrustManager Factory");
+            logger.error("Unable to get Trust Managers from TrustManager Factory");
         }
         if (x509Tm == null) {
             throw new CertificateException("There is no default Trust store available");
@@ -144,10 +144,10 @@ public abstract class BasicService {
         if ((expectBody && responseBody == null) || response.code() != expectedResponseCode) {
             String msg = "Request failed with ResponseCode {} -> {}";
             if (responseBody == null) {
-                LOG.error(msg, response.code(), "empty response body");
+                logger.error(msg, response.code(), "empty response body");
                 throw new BankRequestFailedException("empty response body", response.code());
             } else {
-                LOG.error(msg, response.code(), responseBody);
+                logger.error(msg, response.code(), responseBody);
                 throw new BankRequestFailedException(responseBody, response.code());
             }
         }

@@ -56,7 +56,7 @@ public class PaymentAuthorisationResourceFiduciaTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void A_initiateSinglePayment() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", PSU_ID);
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -75,7 +75,7 @@ public class PaymentAuthorisationResourceFiduciaTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void B_startSCAwithAuthentication() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", PSU_ID);
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -96,7 +96,7 @@ public class PaymentAuthorisationResourceFiduciaTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void C_selectSCAMethod() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations/" + authorisationId).request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", PSU_ID);
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -113,7 +113,7 @@ public class PaymentAuthorisationResourceFiduciaTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void D_authoriseTransactionWithTANOTP() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations/" + authorisationId).request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", PSU_ID);
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");

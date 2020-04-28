@@ -1,10 +1,10 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers;
 
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
@@ -88,6 +88,7 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
             String bookingDateString = object.get("valueDate").getAsString();
             valueDate = new SimpleDateFormat("yyyy-MM-dd").parse(bookingDateString);
         } catch (Exception ignored) {
+            //ignored - optional value
         }
 
         if (bookingStatus == Transaction.BookingStatus.BOOKED) {
@@ -95,6 +96,7 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
                 String bookingDateString = object.get("bookingDate").getAsString();
                 bookingDate = new SimpleDateFormat("yyyy-MM-dd").parse(bookingDateString);
             } catch (Exception ignored) {
+                //ignored - optional value
             }
         }
 

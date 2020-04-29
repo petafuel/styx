@@ -3,31 +3,36 @@ package net.petafuel.styx.core.xs2a.entities;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
-/**
- * @see Amount
- * @deprecated use the Amount class instead, "instructedAmount" should only be a json/variable name, not the type name - berlingroup compliant
- */
-@Deprecated
-public class InstructedAmount {
+public class Amount implements Serializable {
     @JsonbProperty("currency")
     Currency currency;
 
-    @NotNull(message = "InstructedAmount cannot be null")
-    @NotEmpty(message = "InstructedAmount cannot be empty")
+    @NotNull(message = "Amount cannot be null")
+    @NotEmpty(message = "Amount cannot be empty")
     @JsonbProperty("amount")
+    @SuppressWarnings("squid:S1700")
     String amount;
 
-
-    public InstructedAmount() {
+    /**
+     * @deprecated default constructor for json binding
+     */
+    @Deprecated
+    public Amount() {
         //Default constructor for json bind
     }
 
-    public InstructedAmount(String amount) {
+    /**
+     * Default currency is EUR
+     *
+     * @param amount float amount as string
+     */
+    public Amount(String amount) {
         this(amount, Currency.EUR);
     }
 
-    public InstructedAmount(String amount, Currency currency) {
+    public Amount(String amount, Currency currency) {
         this.amount = amount;
         this.currency = currency;
     }

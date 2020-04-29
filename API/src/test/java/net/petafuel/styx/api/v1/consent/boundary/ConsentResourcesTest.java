@@ -67,6 +67,10 @@ public abstract class ConsentResourcesTest extends StyxRESTTest {
         request.setAccess(new AccountAccess());
         request.getAccess().setAccounts(new ArrayList<>());
         request.getAccess().getAccounts().add(getAccountReference());
+        request.getAccess().setBalances(new ArrayList<>());
+        request.getAccess().getBalances().add(getAccountReference());
+        request.getAccess().setTransactions(new ArrayList<>());
+        request.getAccess().getTransactions().add(getAccountReference());
         request.setRecurringIndicator(true);
         Invocation invocation = invocationBuilder.buildPost(Entity.entity(request, MediaType.APPLICATION_JSON));
         return invocation.invoke(Response.class);

@@ -9,7 +9,7 @@ import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
-import net.petafuel.styx.core.xs2a.entities.Balance;
+import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -80,9 +80,9 @@ public class ConsorsAISTest {
 
         ReadBalancesRequest r1 = new ReadBalancesRequest(ACCOUNT_ID, CONSENT);
 
-        List<Balance> result = standard.getAis().getBalancesByAccount(r1);
+        BalanceContainer result = standard.getAis().getBalancesByAccount(r1);
         Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.size() >= 1);
+        Assertions.assertTrue(result.getBalances().size() >= 1);
     }
 
     @Test

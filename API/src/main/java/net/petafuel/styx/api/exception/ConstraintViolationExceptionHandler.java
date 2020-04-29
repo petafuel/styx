@@ -23,12 +23,11 @@ public class ConstraintViolationExceptionHandler implements ExceptionMapper<Cons
             message.append(cv.getPropertyPath()).append(": ").append(cv.getMessage()).append("\n");
         }
         ResponseEntity responseEntity = new ResponseEntity(message.toString(), ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
-        LOG.warn("ConstraintViolationException happened: category={}, code={}, httpStatus={}, message={}, trace={}",
+        LOG.warn("ConstraintViolationException happened: category={}, code={}, httpStatus={}, message={}",
                 responseEntity.getCategory(),
                 responseEntity.getCode(),
                 responseEntity.getCode().getStatusCode(),
-                exception.getMessage(),
-                exception.getStackTrace());
+                exception.getMessage());
         return Response.status(responseEntity.getCode()).type(MediaType.APPLICATION_JSON).entity(responseEntity).build();
     }
 

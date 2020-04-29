@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runners.MethodSorters;
 
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,6 +69,9 @@ public class ConsentResourcesConsorsTest extends ConsentResourcesTest {
         Assertions.assertNotNull(consentResponse.getConsentId());
         Assertions.assertNotNull(consentResponse.getAspspScaApproach());
         Assertions.assertNotNull(consentResponse.getLinks());
+
+        Response validateConsent = ClientBuilder.newClient().target(consentResponse.getLinks().getScaRedirect().getUrl() + "?psu-id=" + getPsuId()).request().buildGet().invoke();
+        Assertions.assertTrue(validateConsent.readEntity(String.class).contains("valid"));
         consentId = consentResponse.getConsentId();
     }
 
@@ -91,6 +95,6 @@ public class ConsentResourcesConsorsTest extends ConsentResourcesTest {
 
         Assertions.assertEquals(200, response.getStatus());
         GetConsentStatusResponse consentStatusResponse = jsonb.fromJson(IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8), GetConsentStatusResponse.class);
-        Assertions.assertEquals(Consent.State.RECEIVED, consentStatusResponse.getState());
+        Assertions.assertEquals(Consent.State.VALID, consentStatusResponse.getState());
     }
 }

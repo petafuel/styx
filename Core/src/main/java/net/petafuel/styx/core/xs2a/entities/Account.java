@@ -41,7 +41,7 @@ public class Account implements Serializable {
     private Address address;
     private String agent;
     @JsonbTransient
-    private List<Balance> balances;
+    private List<BalanceDeprecated> balances;
 
     public Account() {
         //ctor for json binding
@@ -117,15 +117,15 @@ public class Account implements Serializable {
         this.cashAccountType = cashAccountType;
     }
 
-    public List<Balance> getBalances() {
+    public List<BalanceDeprecated> getBalances() {
         return balances;
     }
 
-    public void setBalances(List<Balance> balances) {
+    public void setBalances(List<BalanceDeprecated> balances) {
         this.balances = balances;
     }
 
-    public void addBalance(Balance balance) {
+    public void addBalance(BalanceDeprecated balance) {
         this.balances.add(balance);
     }
 

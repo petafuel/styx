@@ -1,6 +1,5 @@
-package net.petafuel.styx.core.xs2a;
+package net.petafuel.styx.core.xs2a.contracts;
 
-import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;

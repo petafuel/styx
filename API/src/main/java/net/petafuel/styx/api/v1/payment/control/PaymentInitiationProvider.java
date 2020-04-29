@@ -12,7 +12,7 @@ import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
 import net.petafuel.styx.api.v1.payment.entity.PeriodicPaymentInitiation;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
-import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;

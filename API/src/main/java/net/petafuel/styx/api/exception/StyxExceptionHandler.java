@@ -19,10 +19,11 @@ public class StyxExceptionHandler implements ExceptionMapper<StyxException> {
         } else {
             logLevel = Level.ERROR;
         }
+        String code = e.getResponseEntity().getCode().name();
         LOG.log(logLevel, "StyxException happened: category={}, origin={}, code={}, httpStatus={}, message={}, throwableMessage={}, trace={}",
                 e.getResponseEntity().getCategory(),
                 e.getResponseEntity().getOrigin(),
-                e.getResponseEntity().getCode().toEnum(),
+                code,
                 e.getResponseEntity().getCode().getStatusCode(),
                 e.getResponseEntity().getMessage(),
                 e.getAttachedThrowable() != null ? e.getAttachedThrowable().getMessage() : "",

@@ -2,11 +2,12 @@ package net.petafuel.styx.api.v1.payment.boundary;
 
 import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
+import net.petafuel.styx.api.v1.payment.entity.AuthorisationIdsResponse;
+import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
+import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.api.v1.payment.entity.PaymentResponse;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
-import net.petafuel.styx.api.v1.payment.entity.AuthorisationIdsResponse;
-import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
-import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
+import net.petafuel.styx.core.xs2a.entities.AuthenticationObject;
 import net.petafuel.styx.core.xs2a.entities.PSUData;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.entities.XS2AJsonKeys;
@@ -27,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -35,7 +37,7 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
     private static final String PSU_PIN = "123456";
     private static final String PSU_OTP = "222222";
     private static final String BIC = "CMCIDEDD";
-    private static final String SCA_METHOD_ID = "901";
+    private static String scaMethodId;
     private static String paymentId;
     private static String authorisationId;
     private String currentDate;
@@ -58,7 +60,7 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void A_initiateSinglePayment() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", PSU_ID);
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -78,7 +80,7 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void B_startSCAwithAuthentication() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", PSU_ID);
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -94,13 +96,16 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
         Assertions.assertEquals(SCA.Status.PSUAUTHENTICATED, response.getScaStatus());
         Assertions.assertEquals(SCA.Approach.EMBEDDED, response.getApproach());
         authorisationId = response.getAuthorisationId();
+
+        Optional<AuthenticationObject> selectableScaMethod = response.getScaMethods().stream().filter(scaMethod -> scaMethod.getAuthenticationMethodId() != null).findFirst();
+        scaMethodId = selectableScaMethod.get().getAuthenticationMethodId();
     }
 
     @Test
     @Category(IntegrationTest.class)
     public void C_selectSCAMethod() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations/" + authorisationId).request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", PSU_ID);
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -108,7 +113,7 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
         invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
         AuthorisationRequest authorisationRequest = new AuthorisationRequest();
-        authorisationRequest.setAuthenticationMethodId(SCA_METHOD_ID);
+        authorisationRequest.setAuthenticationMethodId(scaMethodId);
         Invocation invocation = invocationBuilder.buildPut(Entity.entity(authorisationRequest, MediaType.APPLICATION_JSON));
         SCA response = invocation.invoke(SCA.class);
         Assertions.assertEquals(SCA.Status.SCAMETHODSELECTED, response.getScaStatus());
@@ -118,7 +123,7 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
     @Category(IntegrationTest.class)
     public void D_authoriseTransactionWithTANOTP() {
         Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations/" + authorisationId).request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", PSU_ID);
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -135,8 +140,8 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
     @Test
     @Category(IntegrationTest.class)
     public void E_getAuthorisationIds_Targo() {
-        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/"+paymentId+"/authorisations").request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations").request();
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSD2TEST2");
         invocationBuilder.header("PSU-BIC", "CMCIDEDD");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
@@ -153,8 +158,8 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
     @Test
     @Category(IntegrationTest.class)
     public void F_getAuthorisationStatus_Targo() {
-        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/"+paymentId+"/authorisations/"+authorisationId).request();
-        invocationBuilder.header("token", "d0b10916-7926-4b6c-a90c-3643c62e4b08");
+        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations/" + authorisationId).request();
+        invocationBuilder.header("token", pisAccessToken);
         invocationBuilder.header("PSU-ID", "PSD2TEST2");
         invocationBuilder.header("PSU-BIC", "CMCIDEDD");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");

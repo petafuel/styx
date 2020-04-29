@@ -9,12 +9,12 @@ import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
+import net.petafuel.styx.core.persistence.models.AccessToken;
 import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.SelectAuthenticationMethodRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUAuthenticationRequest;
@@ -41,7 +41,7 @@ import javax.ws.rs.core.Response;
 @Path("/v1")
 @Consumes({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
-@CheckAccessToken
+@CheckAccessToken(allowedServices = {AccessToken.ServiceType.AIS, AccessToken.ServiceType.AISPIS})
 @RequiresBIC
 @RequiresMandatoryHeader
 public class ConsentAuthorisationResource extends PSUResource {
@@ -72,7 +72,7 @@ public class ConsentAuthorisationResource extends PSUResource {
         SCA consentSCA = sadService.getXs2AStandard().getCs().startAuthorisation(xs2AAuthorisationRequest);
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(consentId, consentSCA.getAuthorisationId());
-        aspspUrlMapper.map(consentSCA.getLinks());
+        consentSCA.setLinks(aspspUrlMapper.map(consentSCA.getLinks()));
 
         LOG.info("Consent Authorisation started for consentId={} scaStatus={} scaApproach={}", consentId, consentSCA.getScaStatus(), consentSCA.getApproach());
         return Response.status(ResponseConstant.CREATED).entity(consentSCA).build();
@@ -120,18 +120,17 @@ public class ConsentAuthorisationResource extends PSUResource {
         }
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(consentId, authorisationId);
-        aspspUrlMapper.map(consentSCA.getLinks());
+        consentSCA.setLinks(aspspUrlMapper.map(consentSCA.getLinks()));
 
         LOG.info("Consent Authorisation updated for consentId={} authorisationId={} scaStatus={} scaApproach={}", consentId, authorisationId, consentSCA.getScaStatus(), consentSCA.getApproach());
         return Response.status(ResponseConstant.OK).entity(consentSCA).build();
     }
 
     @GET
-        @Path("/consents/{consentId}/authorisations/{authorisationId}")
-        public Response getScaStatus(
-                @NotEmpty @NotBlank @PathParam("consentId") String consentId,
-                @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId) throws BankRequestFailedException
-    {
+    @Path("/consents/{consentId}/authorisations/{authorisationId}")
+    public Response getScaStatus(
+            @NotEmpty @NotBlank @PathParam("consentId") String consentId,
+            @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId) throws BankRequestFailedException {
         XS2AAuthorisationRequest getAuthorisationStatusRequest = new GetSCAStatusRequest(consentId, authorisationId);
         getAuthorisationStatusRequest.getHeaders().putAll(getSandboxHeaders());
         SCA.Status authorisationStatus = sadService.getXs2AStandard().getCs().getSCAStatus(getAuthorisationStatusRequest);

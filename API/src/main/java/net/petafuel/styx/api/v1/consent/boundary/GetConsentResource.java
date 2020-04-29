@@ -8,6 +8,7 @@ import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.v1.consent.control.ConsentProvider;
 import net.petafuel.styx.api.v1.consent.entity.GetConsentResponse;
 import net.petafuel.styx.api.v1.consent.entity.GetConsentStatusResponse;
+import net.petafuel.styx.core.persistence.models.AccessToken;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
@@ -32,7 +33,7 @@ import javax.ws.rs.core.Response;
 @Consumes({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @RequiresBIC
-@CheckAccessToken
+@CheckAccessToken(allowedServices = {AccessToken.ServiceType.AISPIS, AccessToken.ServiceType.AIS})
 public class GetConsentResource extends PSUResource {
 
     private static final Logger LOG = LogManager.getLogger(GetConsentResource.class);

@@ -1,6 +1,7 @@
 package net.petafuel.styx.core.xs2a.contracts;
 
 import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.Balance;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -34,7 +35,7 @@ public interface AISInterface {
      * @return Returns a full Account object
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    Account getAccount(XS2ARequest request) throws BankRequestFailedException;
+    AccountDetails getAccount(XS2ARequest request) throws BankRequestFailedException;
 
     /**
      * Returns a List of type Balance which belong to the given Account ID (path parameter account-id)

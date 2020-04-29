@@ -8,6 +8,7 @@ import net.petafuel.styx.api.rest.PSUResource;
 import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.v1.payment.control.FetchPaymentProvider;
 import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
+import net.petafuel.styx.core.persistence.models.AccessToken;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentRequest;
@@ -32,7 +33,7 @@ import javax.ws.rs.core.Response;
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @Consumes({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
-@CheckAccessToken
+@CheckAccessToken(allowedServices = {AccessToken.ServiceType.AISPIS, AccessToken.ServiceType.PIS})
 @RequiresPSU
 @RequiresBIC
 public class FetchPaymentResource extends PSUResource {

@@ -43,61 +43,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
-                <executions>
-                    <execution>
-                        <id>Install JSEPA jar into local m2</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <groupId>net.petafuel.library</groupId>
-                            <artifactId>JSEPA</artifactId>
-                            <version>1.473</version>
-                            <packaging>jar</packaging>
-                            <file>${basedir}/lib/JSEPA-1.473.jar</file>
-                            <repositoryLayout>default</repositoryLayout>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>Install DBUtils jar into local m2</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <groupId>net.petafuel.prepaid.library</groupId>
-                            <artifactId>DBUtils</artifactId>
-                            <version>1.461</version>
-                            <packaging>jar</packaging>
-                            <file>${basedir}/lib/DBUtils-1.461.jar</file>
-                            <repositoryLayout>default</repositoryLayout>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>Install ConnectionPool jar into local m2</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <groupId>net.petafuel.prepaid.library</groupId>
-                            <artifactId>ConnectionPool</artifactId>
-                            <version>1.459</version>
-                            <packaging>jar</packaging>
-                            <file>${basedir}/lib/ConnectionPool-1.459.jar</file>
-                            <repositoryLayout>default</repositoryLayout>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -114,7 +59,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.10</version>
+            <version>42.2.11</version>
         </dependency>
         <dependency>
             <groupId>com.carrotsearch.thirdparty</groupId>
@@ -124,40 +69,34 @@
         <dependency>
             <groupId>net.petafuel.library</groupId>
             <artifactId>JSEPA</artifactId>
-            <version>1.473</version>
+            <version>1.483</version>
         </dependency>
         <dependency>
             <groupId>net.petafuel.prepaid.library</groupId>
             <artifactId>DBUtils</artifactId>
-            <version>1.461</version>
+            <version>1.471</version>
         </dependency>
         <dependency>
             <groupId>net.petafuel.prepaid.library</groupId>
             <artifactId>ConnectionPool</artifactId>
-            <version>1.459</version>
+            <version>1.467</version>
         </dependency>
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
             <version>1.4</version>
         </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.json</artifactId>
-            <version>1.1.5</version>
-            <scope>runtime</scope>
-        </dependency>
         <!-- JSON-B API -->
         <dependency>
             <groupId>jakarta.json.bind</groupId>
             <artifactId>jakarta.json.bind-api</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
         </dependency>
         <!-- Yasson (JSON-B implementation) -->
         <dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>yasson</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.6</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>

@@ -29,15 +29,19 @@ public class AspspUrlMapper {
     private static final String CS_GET_STATUS = "/v1/consents/%s/status";
     private static final String CS_GET_SELF = "/v1/consents/%s";
 
+    private static final String AIS_GET_TRANSACTIONS = "/v1/accounts/%s/transactions";
+    private static final String AIS_GET_BALANCES = "/v1/accounts/%s/balances";
+
     private PaymentService paymentService;
     private PaymentProduct paymentProduct;
     private String paymentId;
     private String authorisationId;
     private String consentId;
-    private Boolean isPIS;
-    private String proxySchema = System.getProperty(ApiProperties.STYX_PROXY_SCHEMA);
-    private String proxyHostname = System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME);
-    private int proxyPort = System.getProperty(ApiProperties.STYX_PROXY_PORT, null) != null ? Integer.parseInt(System.getProperty(ApiProperties.STYX_PROXY_PORT)) : -1;
+    private String accountId;
+    private final boolean isPIS;
+    private final String proxySchema = System.getProperty(ApiProperties.STYX_PROXY_SCHEMA);
+    private final String proxyHostname = System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME);
+    private final int proxyPort = System.getProperty(ApiProperties.STYX_PROXY_PORT, null) != null ? Integer.parseInt(System.getProperty(ApiProperties.STYX_PROXY_PORT)) : -1;
 
     public AspspUrlMapper(PaymentService paymentService, PaymentProduct paymentProduct, String paymentId, String authorisationId) {
         this.paymentService = paymentService;
@@ -53,6 +57,11 @@ public class AspspUrlMapper {
         this.isPIS = false;
     }
 
+    public AspspUrlMapper(String accountId) {
+        this.accountId = accountId;
+        this.isPIS = false;
+    }
+
     public static String extractAuthorisationId(Links links) {
         for (Map.Entry<LinkType, Links.Href> entry : links.getUrlMapping().entrySet()) {
             if (entry.getValue().getUrl().contains("authorisations/")) {
@@ -65,12 +74,18 @@ public class AspspUrlMapper {
 
     //Links need to be adapted depening on multiple cases
     @SuppressWarnings("squid:S3776")
-    public void map(Links links) {
+    public Links map(Links links) {
         if (!Boolean.parseBoolean(System.getProperty(ApiProperties.STYX_PROXY_ENABLED))) {
-            return;
+            return links;
         }
+        if (links == null) {
+            //If the aspsp did not deliver any links within the HAL protocol create a new links object so we can at least add self and status
+            links = new Links();
+        }
+        //copy object for lambda expression
+        Links finalLinks = links;
 
-        links.getUrlMapping().entrySet().parallelStream().forEach(entry -> {
+        finalLinks.getUrlMapping().entrySet().parallelStream().forEach(entry -> {
             String route = null;
             switch (entry.getKey()) {
                 case AUTHORISATION_WITH_PSU_IDENTIFICATION:
@@ -92,13 +107,19 @@ public class AspspUrlMapper {
                 case AUTHORISE_TRANSACTION:
                 case SCA_STATUS:
                     if (authorisationId == null || Objects.equals(authorisationId, "")) {
-                        authorisationId = extractAuthorisationId(links);
+                        authorisationId = extractAuthorisationId(finalLinks);
                     }
                     if (isPIS) {
                         route = String.format(PIS_UPDATE_AUTHORISATION, paymentService.getValue(), paymentProduct.getValue(), paymentId, authorisationId);
                     } else {
                         route = String.format(CS_UPDATE_AUTHORISATION, consentId, authorisationId);
                     }
+                    break;
+                case BALANCES:
+                    route = String.format(AIS_GET_BALANCES, accountId);
+                    break;
+                case TRANSACTIONS:
+                    route = String.format(AIS_GET_TRANSACTIONS, accountId);
                     break;
                 default:
                     //Keep url as is
@@ -110,19 +131,20 @@ public class AspspUrlMapper {
         });
 
         //Always add Status and Self links
-        String getStatus;
-        String getSelf;
+        String getStatus = null;
+        String getSelf = null;
         if (isPIS) {
             getStatus = String.format(PIS_GET_STATUS, paymentService.getValue(), paymentProduct.getValue(), paymentId);
             getSelf = String.format(PIS_GET_SELF, paymentService.getValue(), paymentProduct.getValue(), paymentId);
-        } else {
+        } else if (consentId != null) {
             getStatus = String.format(CS_GET_STATUS, consentId);
             getSelf = String.format(CS_GET_SELF, consentId);
         }
         Optional<URL> styxWrapperUrlStatus = getMappedURL(getStatus);
         Optional<URL> styxWrapperUrlSelf = getMappedURL(getSelf);
-        styxWrapperUrlStatus.ifPresent(presentValue -> links.setStatus(new Links.Href(presentValue.toString(), LinkType.STATUS)));
-        styxWrapperUrlSelf.ifPresent(presentValue -> links.setSelf(new Links.Href(presentValue.toString(), LinkType.SELF)));
+        styxWrapperUrlStatus.ifPresent(presentValue -> finalLinks.setStatus(new Links.Href(presentValue.toString(), LinkType.STATUS)));
+        styxWrapperUrlSelf.ifPresent(presentValue -> finalLinks.setSelf(new Links.Href(presentValue.toString(), LinkType.SELF)));
+        return finalLinks;
     }
 
     //Only map the url if its mappable(route!=null) or if there was no error

@@ -1,7 +1,7 @@
 package net.petafuel.styx.api.util.io.contracts;
 
 import net.petafuel.styx.core.banklookup.XS2AStandard;
-import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;

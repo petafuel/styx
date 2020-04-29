@@ -8,8 +8,10 @@ import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.core.persistence.models.AccessToken;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
+import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -66,16 +68,26 @@ public class AccountResource extends PSUResource {
         return Response.status(200).entity(new AccountDetailResponse(account)).build();
     }
 
-//    Reads account data from a given account addressed by account id.
+    /**
+     * Fetch a list of balances(mandatory) with an optional linked account
+     *
+     * @param accountId the xs2a account id
+     * @param consentId a consent with status VALID
+     * @return returns a list of balances, optionally a linked account
+     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+AIS+-+Interface+Definition#StyxAISInterfaceDefinition-YellowGET/v1/accounts/{resourceId}/balances
+     */
     @GET
-    @Path("/account/balances/{account_id}")
-    public Response processAccountBalances(@PathParam("account_id") String accountId) {
-        String message = "Getting Balance of Account with the ID: " + accountId;
-        LOG.info(message);
-        return Response.status(200).entity(message).build();
+    @Path("/accounts/{resourceId}/balances")
+    public Response fetchBalances(@NotNull @NotBlank @HeaderParam("consentId") String consentId, @NotNull @NotBlank @PathParam("resourceId") String accountId) throws BankRequestFailedException {
+        ReadBalancesRequest readBalancesRequest = new ReadBalancesRequest(accountId, consentId);
+        readBalancesRequest.getHeaders().putAll(getSandboxHeaders());
+        BalanceContainer balances = sadService.getXs2AStandard().getAis().getBalancesByAccount(readBalancesRequest);
+        LOG.info("Successfully fetched balances bic={}", sadService.getXs2AStandard().getAspsp().getBic());
+
+        return Response.status(200).entity(balances).build();
     }
 
-//    Reads a transaction list of booked transactions of a given account addressed by account id.
+    //    Reads a transaction list of booked transactions of a given account addressed by account id.
     @GET
     @Path("/account/transactions/{account_id}")
     public Response processAccountTransactions(@PathParam("account_id") String accountId) {

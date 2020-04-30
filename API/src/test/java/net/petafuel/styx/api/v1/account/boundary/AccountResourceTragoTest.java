@@ -4,6 +4,7 @@ import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.api.v1.consent.boundary.ConsentResourcesTargoTest;
+import net.petafuel.styx.core.xs2a.entities.AccountListResponse;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -21,8 +22,7 @@ import javax.ws.rs.core.Response;
 public class AccountResourceTragoTest extends StyxRESTTest {
     private static final String BIC = "CMCIDEDD";
     static String consentId;
-    //@TODO replace this with an account id selected from the account list call
-    static String accountId = "6612c7532cf7566e170a5788adc141c601dda17514bc1f498c054013137835e4";
+    static String accountId;
 
     @Override
     protected Application configure() {
@@ -46,6 +46,24 @@ public class AccountResourceTragoTest extends StyxRESTTest {
         }
 
         return config;
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void testAccountList() {
+        Invocation.Builder invocationBuilder = target("/v1/accounts").request();
+        invocationBuilder.header("token", aisAccessToken);
+        invocationBuilder.header("PSU-BIC", BIC);
+        invocationBuilder.header("consentId", consentId);
+
+        Invocation invocation = invocationBuilder.buildGet();
+        Response response = invocation.invoke(Response.class);
+        Assertions.assertEquals(200, response.getStatus());
+        AccountListResponse accountListResponse = response.readEntity(AccountListResponse.class);
+
+        Assertions.assertNotNull(accountListResponse.getAccounts());
+        Assertions.assertEquals("DE45499999600000005100", accountListResponse.getAccounts().get(0).getIban());
+        accountId = accountListResponse.getAccounts().get(0).getResourceId();
     }
 
     @Test

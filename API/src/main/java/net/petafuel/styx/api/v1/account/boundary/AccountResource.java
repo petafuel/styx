@@ -7,11 +7,14 @@ import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.core.persistence.models.AccessToken;
+import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import net.petafuel.styx.core.xs2a.entities.AccountListResponse;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListRequest;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotBlank;
@@ -24,24 +27,35 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
+@RequiresBIC
 @ApplicationPath("/")
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @CheckAccessToken(allowedServices = {AccessToken.ServiceType.AISPIS, AccessToken.ServiceType.AIS})
-@RequiresBIC
 public class AccountResource extends PSUResource {
+
     private static final Logger LOG = LogManager.getLogger(AccountResource.class);
     @Inject
     private SADService sadService;
 
-    //    Reads the accounts of the available payment account depending on the consent granted.
+    /**
+     * Returns a List of Accounts
+     *
+     * @param consentId
+     * @return returns an account list
+     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+AIS+-+Interface+Definition#StyxAISInterfaceDefinition-YellowGET/v1/accounts
+     * @see AccountListResponse
+     */
     @GET
-    @Path("/account/list")
-    public Response processAccountList() {
-        String message = "Getting List of Accounts";
-        LOG.info(message);
-        return Response.status(200).entity(message).build();
+    @Path("/accounts")
+    public Response processAccountList(@NotNull @NotBlank @HeaderParam("consentId") String consentId) throws BankRequestFailedException {
+        ReadAccountListRequest accountListRequest = new ReadAccountListRequest(consentId);
+        accountListRequest.getHeaders().putAll(getSandboxHeaders());
+        List<Account> accountList = sadService.getXs2AStandard().getAis().getAccountList(accountListRequest);
+
+        return Response.status(200).entity(new AccountListResponse(accountList)).build();
     }
 
 

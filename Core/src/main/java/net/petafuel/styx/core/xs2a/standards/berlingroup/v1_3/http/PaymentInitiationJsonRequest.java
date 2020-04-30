@@ -1,6 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
-import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;

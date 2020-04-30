@@ -4,6 +4,7 @@ import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.api.v1.consent.boundary.ConsentResourcesConsorsTest;
+import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -50,8 +51,6 @@ public class AccountResourceConsorsTest extends StyxRESTTest {
         Invocation.Builder invocationBuilder = target("/v1/accounts/" + accountId).request();
         invocationBuilder.header("token", aisAccessToken);
         invocationBuilder.header("PSU-BIC", BIC);
-        invocationBuilder.header("PSU-IP-Address", "127.0.0.1");
-        invocationBuilder.header("redirectPreferred", true);
         invocationBuilder.header("consentId", consentId);
 
         Invocation invocation = invocationBuilder.buildGet();
@@ -61,5 +60,27 @@ public class AccountResourceConsorsTest extends StyxRESTTest {
 
         Assertions.assertEquals(accountId, accountDetails.getResourceId());
         Assertions.assertNotNull(accountDetails.getIban());
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void testAccountBalances() {
+        Invocation.Builder invocationBuilder = target("/v1/accounts/" + accountId + "/balances").request();
+        invocationBuilder.header("token", aisAccessToken);
+        invocationBuilder.header("PSU-BIC", BIC);
+        invocationBuilder.header("consentId", consentId);
+
+        Invocation invocation = invocationBuilder.buildGet();
+        Response response = invocation.invoke(Response.class);
+        Assertions.assertEquals(200, response.getStatus());
+        BalanceContainer accountDetails = response.readEntity(BalanceContainer.class);
+        if (accountDetails.getAccount() != null) {
+            Assertions.assertNotNull(accountDetails.getAccount().getIban());
+        }
+        accountDetails.getBalances().forEach(balance -> {
+            Assertions.assertNotNull(balance.getBalanceAmount().getAmount());
+            Assertions.assertNotNull(balance.getBalanceAmount().getCurrency());
+            Assertions.assertNotNull(balance.getBalanceType());
+        });
     }
 }

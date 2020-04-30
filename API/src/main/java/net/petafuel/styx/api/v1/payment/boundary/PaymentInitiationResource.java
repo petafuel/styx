@@ -17,7 +17,7 @@ import net.petafuel.styx.api.v1.payment.entity.PeriodicPaymentInitiation;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.persistence.models.AccessToken;
-import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;

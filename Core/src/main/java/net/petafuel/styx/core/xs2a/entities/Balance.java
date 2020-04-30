@@ -4,6 +4,7 @@ import net.petafuel.styx.core.xs2a.entities.serializers.BalanceTypeAdapter;
 import net.petafuel.styx.core.xs2a.entities.serializers.ISODateDeserializer;
 import net.petafuel.styx.core.xs2a.entities.serializers.ISODateTimeDeserializer;
 
+import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbTypeAdapter;
 import javax.json.bind.annotation.JsonbTypeDeserializer;
 import java.io.Serializable;
@@ -14,10 +15,15 @@ public class Balance implements Serializable {
     private Amount balanceAmount;
     private BalanceType balanceType;
     private Boolean creditLimitIncluded;
+
+    @JsonbDateFormat("yyyy-MM-dd")
     @JsonbTypeDeserializer(ISODateTimeDeserializer.class)
     private Date lastChangeDateTime;
+
+    @JsonbDateFormat("yyyy-MM-dd")
     @JsonbTypeDeserializer(ISODateDeserializer.class)
     private Date referenceDate;
+
     private String lastCommittedTransaction;
 
     public Amount getBalanceAmount() {

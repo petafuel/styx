@@ -17,6 +17,10 @@ public class StringValidator implements ConstraintValidator<ValidateString, Stri
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null) {
+            //nothing to validate, use @NotNull
+            return true;
+        }
         return valueList.contains(value);
     }
 }

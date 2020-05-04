@@ -9,13 +9,11 @@ import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.api.v1.account.entity.TransactionListRequestBean;
 import net.petafuel.styx.core.persistence.models.AccessToken;
-import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
 import org.apache.logging.log4j.LogManager;
@@ -34,7 +32,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
 @ApplicationPath("/")
 @Path("/v1")
@@ -48,14 +45,11 @@ public class AccountResource extends PSUResource {
 
     //    Reads the accounts of the available payment account depending on the consent granted.
     @GET
-    @Path("/accounts")
-    public Response processAccountList(@HeaderParam("consentId") String consentId) throws BankRequestFailedException {
+    @Path("/account/list")
+    public Response processAccountList() {
         String message = "Getting List of Accounts";
-        ReadAccountListRequest readAccountListRequest = new ReadAccountListRequest(consentId);
-        readAccountListRequest.getHeaders().putAll(getSandboxHeaders());
-        List<Account> accounts = sadService.getXs2AStandard().getAis().getAccountList(readAccountListRequest);
         LOG.info(message);
-        return Response.status(200).entity(accounts).build();
+        return Response.status(200).entity(message).build();
     }
 
 

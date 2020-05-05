@@ -43,7 +43,7 @@ public class OAuthService extends BasicService {
     private static String generateCodeVerifier() {
 
         SecureRandom sr = new SecureRandom();
-        byte[] code = new byte[32]; // TODO might not work for sca
+        byte[] code = new byte[32];
         sr.nextBytes(code);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(code);
     }

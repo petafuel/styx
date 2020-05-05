@@ -8,12 +8,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = {StringValidator.class})
+@Constraint(validatedBy = {DateFormatValidator.class})
 @Target({ElementType.FIELD, ElementType.PARAMETER})
-public @interface ValidateString {
-    String[] allowedValues();
+public @interface ValidateDateFormat {
+    String value() default "yyyy-MM-dd";
 
-    String message() default "{net.petafuel.styx.api.validator.ValidateString.message}";
+    String message() default "{net.petafuel.styx.api.validator.ValidateDateFormat.message}";
 
     Class<?>[] groups() default {};
 

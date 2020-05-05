@@ -10,7 +10,8 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
-import net.petafuel.styx.core.xs2a.entities.Transaction;
+import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
+import net.petafuel.styx.core.xs2a.entities.TransactionDeprecated;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
@@ -101,29 +102,22 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public List<Transaction> getTransactionsByAccount(XS2ARequest request) throws BankRequestFailedException {
+    public TransactionContainer getTransactionsByAccount(XS2ARequest request) throws BankRequestFailedException {
         ReadTransactionsRequest r1 = (ReadTransactionsRequest) request;
         this.setUrl(this.url + String.format(GET_TRANSACTIONS, r1.getAccountId()) + this.getHttpQueryString(request));
         this.createBody(RequestType.GET);
         this.createHeaders(request);
 
-        try (Response response = this.execute()) {
-
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String responseBody = extractResponseBody(response, 200);
-            Type type = new TypeToken<ArrayList<Transaction>>() {
-            }.getType();
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(type, new TransactionsSerializer())
-                    .create();
-
-            return gson.fromJson(responseBody, type);
+            return jsonb.fromJson(responseBody, TransactionContainer.class);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
     @Override
-    public Transaction getTransaction(XS2ARequest request) throws BankRequestFailedException {
+    public TransactionDeprecated getTransaction(XS2ARequest request) throws BankRequestFailedException {
 
         ReadTransactionDetailsRequest r1 = (ReadTransactionDetailsRequest) request;
         this.setUrl(this.url + String.format(GET_TRANSACTION_DETAILS, r1.getAccountId(), r1.getTransactionId()));
@@ -133,13 +127,13 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
         try (Response response = this.execute()) {
 
             String responseBody = extractResponseBody(response, 200);
-            Type type = new TypeToken<ArrayList<Transaction>>() {
+            Type type = new TypeToken<ArrayList<TransactionDeprecated>>() {
             }.getType();
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(type, new TransactionsSerializer())
                     .create();
 
-            List<Transaction> transactions = gson.fromJson(responseBody, type);
+            List<TransactionDeprecated> transactions = gson.fromJson(responseBody, type);
             return transactions.get(0);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);

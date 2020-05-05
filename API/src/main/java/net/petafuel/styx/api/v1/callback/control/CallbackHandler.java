@@ -20,22 +20,22 @@ import java.util.Optional;
 public class CallbackHandler {
     private static final Logger LOG = LogManager.getLogger(CallbackHandler.class);
 
-    public Response handleRedirect(String xRequestId, HttpHeaders httpHeaders, String body) {
+    public Response handleRedirect(String xRequestId, HttpHeaders httpHeaders) {
         LOG.info("Handling callback request xrequsetid={}", xRequestId);
         StringBuilder output = new StringBuilder();
         for(String field : httpHeaders.getRequestHeaders().keySet()){
             output.append(" ").append(field).append(": ").append(httpHeaders.getRequestHeader(field)).append("\n");
         }
-        LOG.info("requestHeader={}, requestBody={}", output, body);
+        LOG.info("requestHeader={}", output);
 
         return this.returnHTMLPage();
     }
 
-    public Response handleOAuth2(String code, String state, String error, String errorMessage) {
+    public Response handleOAuth2(String code, String state, String error, String errorMessage, String param) {
         String linkToRedirect;
 
         try {
-            if (error == null && handleSuccessfulOAuth2(code, state)) {
+            if (error == null && handleSuccessfulOAuth2(code, state, param)) {
                 return this.returnHTMLPage();
             } else {
                 linkToRedirect = handleFailedOAuth2(state);
@@ -48,12 +48,16 @@ public class CallbackHandler {
         }
     }
 
-    private boolean handleSuccessfulOAuth2(String code, String state) {
+    private boolean handleSuccessfulOAuth2(String code, String state, String param) {
         OAuthService service = new OAuthService();
         PersistentOAuthSession db = new PersistentOAuthSession();
         OAuthSession stored = db.get(state);
         try {
             TokenRequest request = new TokenRequest(code, stored.getCodeVerifier());
+            if (param.equals(OAuthService.PREAUTH)) {
+                request.setJsonBody(false);
+                request.setRedirectUri(request.getRedirectUri() + OAuthService.PREAUTH);
+            }
             OAuthSession authorized = service.accessTokenRequest(stored.getTokenEndpoint(), request);
             authorized.setState(state);
             db.update(authorized);

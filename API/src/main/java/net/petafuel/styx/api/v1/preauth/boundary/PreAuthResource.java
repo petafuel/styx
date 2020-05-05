@@ -2,25 +2,15 @@ package net.petafuel.styx.api.v1.preauth.boundary;
 
 import net.petafuel.styx.api.WebServer;
 import net.petafuel.styx.api.exception.ResponseConstant;
-import net.petafuel.styx.api.filter.CheckAccessToken;
-import net.petafuel.styx.api.filter.RequiresBIC;
-import net.petafuel.styx.api.filter.RequiresPSU;
 import net.petafuel.styx.api.rest.PSUResource;
 import net.petafuel.styx.api.service.SADService;
-import net.petafuel.styx.api.v1.payment.boundary.FetchPaymentResource;
-import net.petafuel.styx.api.v1.payment.control.FetchPaymentProvider;
-import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
 import net.petafuel.styx.api.v1.preauth.entity.PreAuthResponse;
-import net.petafuel.styx.core.banklookup.XS2AStandard;
-import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 import net.petafuel.styx.core.banklookup.sad.entities.Url;
-import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.LinkType;
 import net.petafuel.styx.core.xs2a.entities.Links;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

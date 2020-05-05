@@ -29,16 +29,18 @@ import java.util.UUID;
 public class OAuthService extends BasicService {
 
     private static final Logger LOG = LogManager.getLogger(OAuthService.class);
+    public static final String PREAUTH = "preauth";
+    public static final String SCA = "SCA";
 
     public OAuthService() {
         super(LOG, null, new BerlinGroupSigner());
     }
 
-    public static String generateState() {
+    private static String generateState() {
         return UUID.randomUUID().toString();
     }
 
-    public static String generateCodeVerifier() {
+    private static String generateCodeVerifier() {
 
         SecureRandom sr = new SecureRandom();
         byte[] code = new byte[32]; // TODO might not work for sca
@@ -67,6 +69,9 @@ public class OAuthService extends BasicService {
     public static String buildLink(String state) {
         OAuthSession stored = new PersistentOAuthSession().get(state);
         HashMap<String, String> queryParams = getQueryParameters(stored);
+        Properties properties = Config.getInstance().getProperties();
+        queryParams.put("client_id", properties.getProperty("keystore.client_id"));
+        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + SCA);
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 
@@ -74,17 +79,17 @@ public class OAuthService extends BasicService {
         OAuthSession stored = new PersistentOAuthSession().get(state);
         HashMap<String, String> queryParams = getQueryParameters(stored);
         queryParams.put("bic", bic);
+        Properties properties = Config.getInstance().getProperties();
+        queryParams.put("client_id", properties.getProperty("keystore.client_id"));
+        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + PREAUTH);
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 
     private static HashMap<String, String> getQueryParameters(OAuthSession oAuthSession) {
 
-        Properties properties = Config.getInstance().getProperties();
         HashMap<String, String> queryParams = new HashMap<>();
-        queryParams.put("client_id", properties.getProperty("keystore.client_id"));
         queryParams.put("response_type", "code");
         queryParams.put("scope", oAuthSession.getScope());
-        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + "oauth");
         queryParams.put("state", oAuthSession.getState());
         queryParams.put("code_challenge", OAuthService.generateCodeChallenge(oAuthSession.getCodeVerifier()));
         queryParams.put("code_challenge_method", "S256");
@@ -125,7 +130,11 @@ public class OAuthService extends BasicService {
     public OAuthSession accessTokenRequest(String url, TokenRequest request) throws BankRequestFailedException {
 
         this.setUrl(url);
-        this.createBody(RequestType.POST, JSON, request);
+        if (request.isJsonBody()) {
+            this.createBody(RequestType.POST, JSON, request);
+        } else {
+            this.createBody(RequestType.POST, FORM_URLENCODED, request);
+        }
 
         try (Response response = this.execute()) {
             String body = response.body().string();

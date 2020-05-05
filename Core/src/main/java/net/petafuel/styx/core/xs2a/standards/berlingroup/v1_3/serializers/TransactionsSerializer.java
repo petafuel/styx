@@ -7,7 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.Currency;
-import net.petafuel.styx.core.xs2a.entities.Transaction;
+import net.petafuel.styx.core.xs2a.entities.TransactionDeprecated;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 
 import java.lang.reflect.Type;
@@ -17,10 +17,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class TransactionsSerializer implements JsonDeserializer<List<Transaction>> {
+public class TransactionsSerializer implements JsonDeserializer<List<TransactionDeprecated>> {
 
-    public List<Transaction> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
-        ArrayList<Transaction> result = new ArrayList<>();
+    public List<TransactionDeprecated> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+        ArrayList<TransactionDeprecated> result = new ArrayList<>();
 
         // Checking if it's a Read Transaction List request or Read Transaction Details request
         if (json.getAsJsonObject().getAsJsonObject("transactions") != null) {
@@ -29,31 +29,31 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
             JsonArray pending = response.getAsJsonArray("pending");
             if (booked != null) {
                 for (JsonElement element : booked) {
-                    result.add(this.mapToModel((JsonObject) element, Transaction.BookingStatus.BOOKED));
+                    result.add(this.mapToModel((JsonObject) element, TransactionDeprecated.BookingStatus.BOOKED));
                 }
             }
             if (pending != null) {
                 for (JsonElement element : pending) {
-                    result.add(this.mapToModel((JsonObject) element, Transaction.BookingStatus.PENDING));
+                    result.add(this.mapToModel((JsonObject) element, TransactionDeprecated.BookingStatus.PENDING));
                 }
             }
         } else {
             JsonObject object = json.getAsJsonObject().getAsJsonObject("transactionsDetails");
-            Transaction.BookingStatus bookingStatus = (object.get("bookingDate") != null) ? Transaction.BookingStatus.BOOKED : Transaction.BookingStatus.PENDING;
+            TransactionDeprecated.BookingStatus bookingStatus = (object.get("bookingDate") != null) ? TransactionDeprecated.BookingStatus.BOOKED : TransactionDeprecated.BookingStatus.PENDING;
 
             result.add(this.mapToModel(object, bookingStatus));
         }
         return result;
     }
 
-    private Transaction mapToModel(JsonObject object, Transaction.BookingStatus bookingStatus) {
+    private TransactionDeprecated mapToModel(JsonObject object, TransactionDeprecated.BookingStatus bookingStatus) {
 
         String transactionId = object.get("transactionId").getAsString();
 
         JsonObject amountObj = object.getAsJsonObject("transactionAmount");
         float amount = amountObj.get("amount").getAsFloat();
         Currency currency = Currency.valueOf(amountObj.get("currency").getAsString().toUpperCase());
-        Transaction.Type type;
+        TransactionDeprecated.Type type;
         String name;
         Date bookingDate = null;
         Date valueDate = null;
@@ -64,11 +64,11 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
 
         JsonObject accountObj;
         if (object.get("creditorName") != null) {
-            type = Transaction.Type.CREDIT;
+            type = TransactionDeprecated.Type.CREDIT;
             name = object.get("creditorName").getAsString();
             accountObj = object.getAsJsonObject("creditorAccount");
         } else {
-            type = Transaction.Type.DEBIT;
+            type = TransactionDeprecated.Type.DEBIT;
             name = object.get("debtorName").getAsString();
             accountObj = object.getAsJsonObject("debtorAccount");
         }
@@ -91,7 +91,7 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
             //ignored - optional value
         }
 
-        if (bookingStatus == Transaction.BookingStatus.BOOKED) {
+        if (bookingStatus == TransactionDeprecated.BookingStatus.BOOKED) {
             try {
                 String bookingDateString = object.get("bookingDate").getAsString();
                 bookingDate = new SimpleDateFormat("yyyy-MM-dd").parse(bookingDateString);
@@ -100,7 +100,7 @@ public class TransactionsSerializer implements JsonDeserializer<List<Transaction
             }
         }
 
-        Transaction t1 = new Transaction(transactionId, bookingStatus, type, account, currency, amount, remittanceInformationUnstructured);
+        TransactionDeprecated t1 = new TransactionDeprecated(transactionId, bookingStatus, type, account, currency, amount, remittanceInformationUnstructured);
         t1.setValueDate(valueDate);
         t1.setBookingDate(bookingDate);
         t1.setMandateId(mandateId);

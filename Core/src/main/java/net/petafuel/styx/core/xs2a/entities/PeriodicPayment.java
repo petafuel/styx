@@ -1,10 +1,12 @@
 package net.petafuel.styx.core.xs2a.entities;
 
 import net.petafuel.styx.core.xs2a.entities.serializers.ExecutionRuleAdapter;
+import net.petafuel.styx.core.xs2a.entities.serializers.FrequencyTypeAdapter;
 
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTypeAdapter;
+import java.util.Arrays;
 import java.util.Date;
 
 public class PeriodicPayment extends Payment {
@@ -95,7 +97,7 @@ public class PeriodicPayment extends Payment {
         FOLLOWING("following"),
         PRECEDING("preceding");
 
-        private String value;
+        private final String value;
 
         ExecutionRule(String fullName) {
             this.value = fullName;
@@ -106,6 +108,7 @@ public class PeriodicPayment extends Payment {
         }
     }
 
+    @JsonbTypeAdapter(FrequencyTypeAdapter.class)
     public enum Frequency {
         YEAR("Annual"),
         SEMI("SemiAnnual"),
@@ -120,10 +123,15 @@ public class PeriodicPayment extends Payment {
         INDA("IntraDay"),
         OVNG("Overnight"),
         ONDE("OnDemand");
-        private String value;
+
+        private final String value;
 
         Frequency(String fullName) {
             this.value = fullName;
+        }
+
+        public static Frequency getValue(String s) {
+            return Arrays.asList(values()).parallelStream().filter(bookingStatus -> bookingStatus.value.equals(s)).findFirst().orElse(null);
         }
 
         public String getValue() {

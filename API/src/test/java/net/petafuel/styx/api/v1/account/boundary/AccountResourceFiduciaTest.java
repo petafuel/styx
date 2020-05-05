@@ -2,6 +2,7 @@ package net.petafuel.styx.api.v1.account.boundary;
 
 import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
+import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -68,5 +69,29 @@ public class AccountResourceFiduciaTest extends StyxRESTTest {
             Assertions.assertNotNull(balance.getBalanceAmount().getCurrency());
             Assertions.assertNotNull(balance.getBalanceType());
         });
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void testAccountTransactions() {
+        Invocation.Builder invocationBuilder = target("/v1/accounts/" + accountId + "/transactions").queryParam("dateFrom", "2019-01-01").queryParam("bookingStatus", "booked").request();
+        invocationBuilder.header("token", aisAccessToken);
+        invocationBuilder.header("PSU-BIC", BIC);
+        invocationBuilder.header("consentId", consentId);
+
+        Invocation invocation = invocationBuilder.buildGet();
+        Response response = invocation.invoke(Response.class);
+        Assertions.assertEquals(200, response.getStatus());
+        TransactionListResponseAdapter accountDetails = response.readEntity(TransactionListResponseAdapter.class);
+        if (accountDetails.getTransactions() != null) {
+            accountDetails.getTransactions().forEach(transactionAdapted -> {
+                Assertions.assertNotNull(transactionAdapted.getBookingStatus());
+                Assertions.assertNotNull(transactionAdapted.getTransactionAmount());
+                Assertions.assertNotNull(transactionAdapted.getTransactionAmount().getAmount());
+                Assertions.assertNotNull(transactionAdapted.getBookingDate());
+                Assertions.assertNotNull(transactionAdapted.getValueDate());
+                Assertions.assertNotNull(transactionAdapted.getPurpose());
+            });
+        }
     }
 }

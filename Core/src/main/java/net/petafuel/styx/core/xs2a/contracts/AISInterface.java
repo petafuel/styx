@@ -3,7 +3,8 @@ package net.petafuel.styx.core.xs2a.contracts;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
-import net.petafuel.styx.core.xs2a.entities.Transaction;
+import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
+import net.petafuel.styx.core.xs2a.entities.TransactionDeprecated;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 
 import java.util.List;
@@ -15,7 +16,8 @@ import java.util.List;
  * @see Account
  * @see XS2ARequest
  * @see BalanceContainer
- * @see Transaction
+ * @see TransactionDeprecated
+ * @see TransactionContainer
  */
 public interface AISInterface {
 
@@ -50,11 +52,11 @@ public interface AISInterface {
      * Returns a List of type Transaction which belong to the given Account ID (path parameter account-id)
      *
      * @param request XS2AGetRequest which should contain the account id
-     * @return Returns a list of Transaction objects associated with the given account id
+     * @return Returns a TransactionContainer which holds all the requested transactions
      * @throws BankRequestFailedException If the request towards the bank fails
      * @see AISInterface#getBalancesByAccount(XS2ARequest)
      */
-    List<Transaction> getTransactionsByAccount(XS2ARequest request) throws BankRequestFailedException;
+    TransactionContainer getTransactionsByAccount(XS2ARequest request) throws BankRequestFailedException;
 
     /**
      * Returns the Transaction which belongs to the given Account ID and Transaction ID (path parameters account-id and transactionId)
@@ -63,5 +65,5 @@ public interface AISInterface {
      * @return Returns a single Transaction object associated with the account id and transaction id
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    Transaction getTransaction(XS2ARequest request) throws BankRequestFailedException;
+    TransactionDeprecated getTransaction(XS2ARequest request) throws BankRequestFailedException;
 }

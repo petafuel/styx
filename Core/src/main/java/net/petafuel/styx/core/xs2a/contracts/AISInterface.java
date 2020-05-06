@@ -28,7 +28,7 @@ public interface AISInterface {
      * @return Returns a list of the possible accounts
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    List<Account> getAccountList(XS2ARequest request) throws BankRequestFailedException;
+    List<AccountDetails> getAccountList(XS2ARequest request) throws BankRequestFailedException;
 
     /**
      * Returns the Account found by the given Account ID (path parameter resourceId)

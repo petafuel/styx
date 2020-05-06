@@ -5,13 +5,13 @@ import net.petafuel.styx.api.StyxRESTTest;
 import net.petafuel.styx.api.exception.ResponseCategory;
 import net.petafuel.styx.api.exception.ResponseConstant;
 import net.petafuel.styx.api.exception.ResponseOrigin;
+import net.petafuel.styx.api.v1.account.control.AccountListResponseAdapter;
 import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.api.v1.authentication.boundary.AuthenticationResource;
 import net.petafuel.styx.api.v1.consent.boundary.ConsentResourcesConsorsTest;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentInitiationResource;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
-import net.petafuel.styx.core.xs2a.entities.AccountListResponse;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -74,16 +74,16 @@ public class AccountResourceConsorsTest extends StyxRESTTest {
         Invocation invocation = invocationBuilder.buildGet();
         Response response = invocation.invoke(Response.class);
         Assertions.assertEquals(200, response.getStatus());
-        AccountListResponse accountListResponse = response.readEntity(AccountListResponse.class);
+        AccountListResponseAdapter accountListResponseAdapter = response.readEntity(AccountListResponseAdapter.class);
 
-        Assertions.assertNotNull(accountListResponse.getAccounts());
-        Assertions.assertEquals("DE45499999600000005100", accountListResponse.getAccounts().get(0).getIban());
-        accountId = accountListResponse.getAccounts().get(0).getResourceId();
+        Assertions.assertNotNull(accountListResponseAdapter.getAccounts());
+        Assertions.assertNotNull(accountListResponseAdapter.getAccounts().get(0).getIban());
+        accountId = accountListResponseAdapter.getAccounts().get(0).getResourceId();
     }
 
     @Test
     @Category(IntegrationTest.class)
-    public void B_testAccountDetails() {
+    public void testAccountDetails() {
         Invocation.Builder invocationBuilder = target("/v1/accounts/" + accountId).request();
         invocationBuilder.header("token", aisAccessToken);
         invocationBuilder.header("PSU-BIC", BIC);
@@ -100,7 +100,7 @@ public class AccountResourceConsorsTest extends StyxRESTTest {
 
     @Test
     @Category(IntegrationTest.class)
-    public void C_testAccountBalances() {
+    public void testAccountBalances() {
         Invocation.Builder invocationBuilder = target("/v1/accounts/" + accountId + "/balances").request();
         invocationBuilder.header("token", aisAccessToken);
         invocationBuilder.header("PSU-BIC", BIC);
@@ -148,7 +148,7 @@ public class AccountResourceConsorsTest extends StyxRESTTest {
 
     @Test
     @Category(IntegrationTest.class)
-    public void D_testAccountTransactions() {
+    public void testAccountTransactions() {
         Invocation.Builder invocationBuilder = target("/v1/accounts/" + accountId + "/transactions").queryParam("dateFrom", "2019-01-01").queryParam("bookingStatus", "booked").request();
         invocationBuilder.header("token", aisAccessToken);
         invocationBuilder.header("PSU-BIC", BIC);

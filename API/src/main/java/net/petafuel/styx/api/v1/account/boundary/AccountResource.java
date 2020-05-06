@@ -5,22 +5,21 @@ import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.rest.PSUResource;
 import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.util.AspspUrlMapper;
+import net.petafuel.styx.api.v1.account.control.AccountListResponseAdapter;
 import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.api.v1.account.entity.TransactionListRequestBean;
 import net.petafuel.styx.core.persistence.models.AccessToken;
-import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.petafuel.styx.core.xs2a.entities.AccountListResponse;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListRequest;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -51,19 +50,20 @@ public class AccountResource extends PSUResource {
     /**
      * Returns a List of Accounts
      *
-     * @param consentId
+     * @param consentId consentId with access to the requested account list
      * @return returns an account list
      * @documented https://confluence.petafuel.intern/display/TOOL/Styx+AIS+-+Interface+Definition#StyxAISInterfaceDefinition-YellowGET/v1/accounts
-     * @see AccountListResponse
+     * @see AccountListResponseAdapter
      */
     @GET
     @Path("/accounts")
     public Response processAccountList(@NotNull @NotBlank @HeaderParam("consentId") String consentId) throws BankRequestFailedException {
         ReadAccountListRequest accountListRequest = new ReadAccountListRequest(consentId);
         accountListRequest.getHeaders().putAll(getSandboxHeaders());
-        List<Account> accountList = sadService.getXs2AStandard().getAis().getAccountList(accountListRequest);
+        List<AccountDetails> accountList = sadService.getXs2AStandard().getAis().getAccountList(accountListRequest);
 
-        return Response.status(200).entity(new AccountListResponse(accountList)).build();
+        LOG.info("Successfully fetched account list for bic={}", sadService.getXs2AStandard().getAspsp().getBic());
+        return Response.status(200).entity(new AccountListResponseAdapter(accountList)).build();
     }
 
 

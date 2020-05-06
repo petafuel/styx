@@ -33,6 +33,8 @@ public class Aspsp {
             @DatabaseColumnOverride(original = "ais_url", replacement = "production_ais_url"),
             @DatabaseColumnOverride(original = "pis_url", replacement = "production_pis_url"),
             @DatabaseColumnOverride(original = "piis_url", replacement = "production_piis_url"),
+            @DatabaseColumnOverride(original = "preauth_authorization_endpoint", replacement = "production_preauth_authorization_endpoint"),
+            @DatabaseColumnOverride(original = "preauth_token_endpoint", replacement = "production_preauth_token_endpoint"),
             @DatabaseColumnOverride(original = "updated_at", replacement = "production_url_updated_at"),
             @DatabaseColumnOverride(original = "created_at", replacement = "production_url_created_at")
     })
@@ -44,6 +46,8 @@ public class Aspsp {
             @DatabaseColumnOverride(original = "ais_url", replacement = "sandbox_ais_url"),
             @DatabaseColumnOverride(original = "pis_url", replacement = "sandbox_pis_url"),
             @DatabaseColumnOverride(original = "piis_url", replacement = "sandbox_piis_url"),
+            @DatabaseColumnOverride(original = "preauth_authorization_endpoint", replacement = "sandbox_preauth_authorization_endpoint"),
+            @DatabaseColumnOverride(original = "preauth_token_endpoint", replacement = "sandbox_preauth_token_endpoint"),
             @DatabaseColumnOverride(original = "updated_at", replacement = "sandbox_url_updated_at"),
             @DatabaseColumnOverride(original = "created_at", replacement = "sandbox_url_created_at")
     })

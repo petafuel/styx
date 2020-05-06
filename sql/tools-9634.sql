@@ -1,10 +1,9 @@
-alter table configs
-    add styx_config json;
+alter table urls
+add column preauth_authorization_endpoint varchar(255),
+add column preauth_token_endpoint varchar(255);
 
-alter table public.standards
-    add styx_config_template json;
 
-drop function get_bank_by_bic(varchar);
+DROP FUNCTION get_bank_by_bic(character varying);
 
 create function get_bank_by_bic(input_bic character varying)
     returns TABLE
@@ -26,6 +25,8 @@ create function get_bank_by_bic(input_bic character varying)
                 production_ais_url             character varying,
                 production_pis_url             character varying,
                 production_piis_url            character varying,
+	            production_preauth_authorization_endpoint character varying,
+	            production_preauth_token_endpoint character varying,
                 production_url_updated_at      timestamp without time zone,
                 production_url_created_at      timestamp without time zone,
                 sandbox_url_id                 integer,
@@ -33,6 +34,8 @@ create function get_bank_by_bic(input_bic character varying)
                 sandbox_ais_url                character varying,
                 sandbox_pis_url                character varying,
                 sandbox_piis_url               character varying,
+	            sandbox_preauth_authorization_endpoint character varying,
+	            sandbox_preauth_token_endpoint character varying,
                 sandbox_url_updated_at         timestamp without time zone,
                 sandbox_url_created_at         timestamp without time zone,
                 configs_id                     integer,
@@ -72,6 +75,8 @@ SELECT aspsps.id,
        urls_production.ais_url        as production_ais_url,
        urls_production.pis_url        as production_pis_url,
        urls_production.piis_url       as production_piis_url,
+	   urls_production.preauth_authorization_endpoint as production_preauth_authorization_endpoint,
+	   urls_production.preauth_token_endpoint as production_preauth_token_endpoint,
        urls_production.updated_at     as production_url_updated_at,
        urls_production.created_at     as production_url_created_at,
        --sandbox url data
@@ -80,6 +85,8 @@ SELECT aspsps.id,
        urls_sandbox.ais_url           as sandbox_ais_url,
        urls_sandbox.pis_url           as sandbox_pis_url,
        urls_sandbox.piis_url          as sandbox_piis_url,
+	   urls_sandbox.preauth_authorization_endpoint as sandbox_preauth_authorization_endpoint,
+	   urls_sandbox.preauth_token_endpoint as sandbox_preauth_token_endpoint,
        urls_sandbox.updated_at        as sandbox_url_updated_at,
        urls_sandbox.created_at        as sandbox_url_created_at,
        --configs data

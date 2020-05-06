@@ -35,4 +35,8 @@ public class SADService {
         }
         return xs2AStandard;
     }
+
+    public String getBic() {
+        return bic;
+    }
 }

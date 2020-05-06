@@ -10,6 +10,7 @@ public enum LinkType {
     AUTHORISATION_WITH_PSU_IDENTIFICATION("startAuthorisationWithPsuIdentfication"),
     AUTHORISATION_WITH_TRANSACTION_AUTHORISATION("startAuthorisationWithTransactionAuthorisation"),
     AUTHORISE_TRANSACTION("authoriseTransaction"),
+    AUTHORIZATION_ENDPOINT("authorization_endpoint"),
     BALANCES("balances"),
     CARD_ACCOUNTS("cardAccounts"),
     CARD_TRANSACTIONS("cardTransactions"),

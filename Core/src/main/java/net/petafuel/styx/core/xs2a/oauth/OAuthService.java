@@ -2,6 +2,7 @@ package net.petafuel.styx.core.xs2a.oauth;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.petafuel.styx.core.banklookup.sad.entities.Url;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.entities.StrongAuthenticatableResource;
@@ -28,16 +29,18 @@ import java.util.UUID;
 public class OAuthService extends BasicService {
 
     private static final Logger LOG = LogManager.getLogger(OAuthService.class);
+    public static final String PREAUTH = "preauth";
+    public static final String SCA = "SCA";
 
     public OAuthService() {
         super(LOG, null, new BerlinGroupSigner());
     }
 
-    public static String generateState() {
+    private static String generateState() {
         return UUID.randomUUID().toString();
     }
 
-    public static String generateCodeVerifier() {
+    private static String generateCodeVerifier() {
 
         SecureRandom sr = new SecureRandom();
         byte[] code = new byte[32];
@@ -53,28 +56,45 @@ public class OAuthService extends BasicService {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(bytes, 0, bytes.length);
             byte[] digest = md.digest();
-            return Base64.getUrlEncoder().encodeToString(digest);
+            String codeChallenge = Base64.getUrlEncoder().encodeToString(digest);
+            codeChallenge = codeChallenge.replace('+', '-')
+                    .replace('/', '_')
+                    .replace("=", "");
+            return codeChallenge;
         } catch (Exception e) {
             return "";
         }
     }
 
     public static String buildLink(String state) {
-
         OAuthSession stored = new PersistentOAuthSession().get(state);
-
+        HashMap<String, String> queryParams = getQueryParameters(stored);
         Properties properties = Config.getInstance().getProperties();
+        queryParams.put("client_id", properties.getProperty("keystore.client_id"));
+        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + SCA);
+        return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
+    }
+
+    public static String buildLink(String state, String bic) {
+        OAuthSession stored = new PersistentOAuthSession().get(state);
+        HashMap<String, String> queryParams = getQueryParameters(stored);
+        queryParams.put("bic", bic);
+        Properties properties = Config.getInstance().getProperties();
+        queryParams.put("client_id", properties.getProperty("keystore.client_id"));
+        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + PREAUTH);
+        return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
+    }
+
+    private static HashMap<String, String> getQueryParameters(OAuthSession oAuthSession) {
 
         HashMap<String, String> queryParams = new HashMap<>();
-        queryParams.put("client_id", properties.getProperty("keystore.client_id"));
         queryParams.put("response_type", "code");
-        queryParams.put("scope", stored.getScope());
-        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl"));
-        queryParams.put("state", state);
-        queryParams.put("code_challenge", OAuthService.generateCodeChallenge(stored.getCodeVerifier()));
+        queryParams.put("scope", oAuthSession.getScope());
+        queryParams.put("state", oAuthSession.getState());
+        queryParams.put("code_challenge", OAuthService.generateCodeChallenge(oAuthSession.getCodeVerifier()));
         queryParams.put("code_challenge_method", "S256");
 
-        return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
+        return queryParams;
     }
 
     public static OAuthSession startSession(StrongAuthenticatableResource strongAuthenticatableResource, String scope) {
@@ -93,10 +113,28 @@ public class OAuthService extends BasicService {
         return new PersistentOAuthSession().create(session);
     }
 
+    public static OAuthSession startPreAuthSession(Url url, String scope) {
+
+        String state = OAuthService.generateState();
+        String codeVerifier = OAuthService.generateCodeVerifier();
+        OAuthSession session = new OAuthSession();
+        session.setCodeVerifier(codeVerifier);
+        session.setScope(scope);
+        session.setAuthorizationEndpoint(url.getPreauthAuthorizationEndpoint());
+        session.setTokenEndpoint(url.getPreauthTokenEndpoint());
+        session.setState(state);
+
+        return new PersistentOAuthSession().create(session);
+    }
+
     public OAuthSession accessTokenRequest(String url, TokenRequest request) throws BankRequestFailedException {
 
         this.setUrl(url);
-        this.createBody(RequestType.POST, JSON, request);
+        if (request.isJsonBody()) {
+            this.createBody(RequestType.POST, JSON, request);
+        } else {
+            this.createBody(RequestType.POST, FORM_URLENCODED, request);
+        }
 
         try (Response response = this.execute()) {
             String body = response.body().string();

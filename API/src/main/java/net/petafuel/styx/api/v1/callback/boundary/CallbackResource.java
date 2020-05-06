@@ -22,18 +22,19 @@ public class CallbackResource extends Application {
     private CallbackHandler handler = new CallbackHandler();
 
     @GET
-    @Path("/callbacks/{x-request-id}")
+    @Path("/callbacks/{param}")
     @Produces(MediaType.TEXT_HTML)
-    public Response processCallback(@Context HttpHeaders httpHeaders,
-                                    @PathParam("x-request-id") String xRequestId,
-                                    @QueryParam("code") String code,
-                                    @QueryParam("state") String state,
-                                    @QueryParam("error") String error,
-                                    @QueryParam("error_description") String errorMessage) {
+    public Response processCallback(
+            @Context HttpHeaders httpHeaders,
+            @PathParam("param") String param,
+            @QueryParam("code") String code,
+            @QueryParam("state") String state,
+            @QueryParam("error") String error,
+            @QueryParam("error_description") String errorMessage) {
 
         if (state == null) {
-            return handler.handleRedirect(xRequestId, httpHeaders, "");
+            return handler.handleRedirect(param, httpHeaders);
         }
-        return handler.handleOAuth2(code, state, error, errorMessage);
+        return handler.handleOAuth2(code, state, error, errorMessage, param);
     }
 }

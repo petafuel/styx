@@ -327,6 +327,16 @@ public class Links {
         urlMapping.put(LinkType.DOWNLOAD, download);
     }
 
+    @JsonbProperty("authorization_endpoint")
+    public Href getAuthorizationEndpoint() {
+        return urlMapping.get(LinkType.AUTHORIZATION_ENDPOINT);
+    }
+
+    @JsonbProperty("authorization_endpoint")
+    public void setAuthorizationEndpoint(Href authorizationEndpoint) {
+        urlMapping.put(LinkType.AUTHORIZATION_ENDPOINT, authorizationEndpoint);
+    }
+
     public static class Href {
         @JsonbProperty("href")
         private String url;

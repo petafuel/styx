@@ -5,21 +5,29 @@ import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.rest.PSUResource;
 import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.util.AspspUrlMapper;
+import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
+import net.petafuel.styx.api.v1.account.entity.TransactionListRequestBean;
 import net.petafuel.styx.core.persistence.models.AccessToken;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
+import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
+import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.petafuel.styx.core.xs2a.entities.AccountListResponse;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListRequest;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -80,21 +88,51 @@ public class AccountResource extends PSUResource {
         return Response.status(200).entity(new AccountDetailResponse(account)).build();
     }
 
-//    Reads account data from a given account addressed by account id.
+    /**
+     * Fetch a list of balances(mandatory) with an optional linked account
+     *
+     * @param accountId the xs2a account id
+     * @param consentId a consent with status VALID
+     * @return returns a list of balances, optionally a linked account
+     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+AIS+-+Interface+Definition#StyxAISInterfaceDefinition-YellowGET/v1/accounts/{resourceId}/balances
+     */
     @GET
-    @Path("/account/balances/{account_id}")
-    public Response processAccountBalances(@PathParam("account_id") String accountId) {
-        String message = "Getting Balance of Account with the ID: " + accountId;
-        LOG.info(message);
-        return Response.status(200).entity(message).build();
+    @Path("/accounts/{resourceId}/balances")
+    public Response fetchBalances(@NotNull @NotBlank @HeaderParam("consentId") String consentId, @NotNull @NotBlank @PathParam("resourceId") String accountId) throws BankRequestFailedException {
+        ReadBalancesRequest readBalancesRequest = new ReadBalancesRequest(accountId, consentId);
+        readBalancesRequest.getHeaders().putAll(getSandboxHeaders());
+        BalanceContainer balances = sadService.getXs2AStandard().getAis().getBalancesByAccount(readBalancesRequest);
+        LOG.info("Successfully fetched balances bic={}", sadService.getXs2AStandard().getAspsp().getBic());
+
+        return Response.status(200).entity(balances).build();
     }
 
-//    Reads a transaction list of booked transactions of a given account addressed by account id.
+    /**
+     * This yields the transactions for the specified account. The amount of data varies heavily between banks
+     *
+     * @param consentId                  consent which has access to the transactions of the specified account
+     * @param accountId                  account that containes the requested transactions
+     * @param transactionListRequestBean QueryParams bookingStatus, dateFrom and dateTo
+     * @return TransactionContainer which holds the transactions/revenues grouped by booking status
+     * @throws BankRequestFailedException in case the Request to the Bank failed
+     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+AIS+-+Interface+Definition#StyxAISInterfaceDefinition-YellowGET/v1/accounts/{resourceId}/transactions
+     */
     @GET
-    @Path("/account/transactions/{account_id}")
-    public Response processAccountTransactions(@PathParam("account_id") String accountId) {
-        String message = "Getting Transactions of Account with the ID: " + accountId;
-        LOG.info(message);
-        return Response.status(200).entity(message).build();
+    @Path("/accounts/{resourceId}/transactions")
+    public Response fetchTransactions(@NotNull @NotBlank @HeaderParam("consentId") String consentId,
+                                      @NotNull @NotBlank @PathParam("resourceId") String accountId,
+                                      @BeanParam @Valid TransactionListRequestBean transactionListRequestBean) throws BankRequestFailedException {
+        ReadTransactionsRequest readTransactionsRequest = new ReadTransactionsRequest(
+                accountId,
+                consentId,
+                transactionListRequestBean.getBookingStatus(),
+                transactionListRequestBean.getDateFrom(),
+                transactionListRequestBean.getDateTo());
+
+        readTransactionsRequest.getHeaders().putAll(getSandboxHeaders());
+        TransactionContainer transactionContainer = sadService.getXs2AStandard().getAis().getTransactionsByAccount(readTransactionsRequest);
+        LOG.info("Successfully fetched transactions bic={}", sadService.getXs2AStandard().getAspsp().getBic());
+        TransactionListResponseAdapter transactionListResponseAdapter = new TransactionListResponseAdapter(transactionContainer);
+        return Response.status(200).entity(transactionListResponseAdapter).build();
     }
 }

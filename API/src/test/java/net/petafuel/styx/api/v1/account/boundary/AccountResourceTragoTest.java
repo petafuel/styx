@@ -2,10 +2,13 @@ package net.petafuel.styx.api.v1.account.boundary;
 
 import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
+import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.api.v1.consent.boundary.ConsentResourcesTargoTest;
 import net.petafuel.styx.core.xs2a.entities.AccountListResponse;
+import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.internal.TextListener;
@@ -24,15 +27,8 @@ public class AccountResourceTragoTest extends StyxRESTTest {
     static String consentId;
     static String accountId;
 
-    @Override
-    protected Application configure() {
-        ResourceConfig config = setupFiltersAndErrorHandlers();
-        config.register(AccountResource.class);
-
-        if (targobankToken == null) {
-            Assertions.fail("test.token.targobank is not set in test api.properties");
-        }
-
+    @BeforeClass
+    public static void getConsentId() {
         JUnitCore junit = new JUnitCore();
         junit.addListener(new TextListener(System.out));
 
@@ -43,6 +39,16 @@ public class AccountResourceTragoTest extends StyxRESTTest {
 
         if (consentId == null) {
             Assertions.fail("consentId could not be retrieved from previous ConsentResourcesTargoTest execution");
+        }
+    }
+
+    @Override
+    protected Application configure() {
+        ResourceConfig config = setupFiltersAndErrorHandlers();
+        config.register(AccountResource.class);
+
+        if (targobankToken == null) {
+            Assertions.fail("test.token.targobank is not set in test api.properties");
         }
 
         return config;
@@ -72,8 +78,6 @@ public class AccountResourceTragoTest extends StyxRESTTest {
         Invocation.Builder invocationBuilder = target("/v1/accounts/" + accountId).request();
         invocationBuilder.header("token", aisAccessToken);
         invocationBuilder.header("PSU-BIC", BIC);
-        invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
-        invocationBuilder.header("redirectPreferred", true);
         invocationBuilder.header("consentId", consentId);
         invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", targobankToken);
 
@@ -84,5 +88,53 @@ public class AccountResourceTragoTest extends StyxRESTTest {
 
         Assertions.assertEquals(accountId, accountDetails.getResourceId());
         Assertions.assertNotNull(accountDetails.getIban());
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void testAccountBalances() {
+        Invocation.Builder invocationBuilder = target("/v1/accounts/" + accountId + "/balances").request();
+        invocationBuilder.header("token", aisAccessToken);
+        invocationBuilder.header("PSU-BIC", BIC);
+        invocationBuilder.header("consentId", consentId);
+        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", targobankToken);
+
+        Invocation invocation = invocationBuilder.buildGet();
+        Response response = invocation.invoke(Response.class);
+        Assertions.assertEquals(200, response.getStatus());
+        BalanceContainer accountDetails = response.readEntity(BalanceContainer.class);
+        if (accountDetails.getAccount() != null) {
+            Assertions.assertNotNull(accountDetails.getAccount().getIban());
+        }
+        accountDetails.getBalances().forEach(balance -> {
+            Assertions.assertNotNull(balance.getBalanceAmount().getAmount());
+            Assertions.assertNotNull(balance.getBalanceAmount().getCurrency());
+            Assertions.assertNotNull(balance.getBalanceType());
+        });
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void testAccountTransactions() {
+        Invocation.Builder invocationBuilder = target("/v1/accounts/" + accountId + "/transactions").queryParam("dateFrom", "2019-01-01").queryParam("bookingStatus", "booked").request();
+        invocationBuilder.header("token", aisAccessToken);
+        invocationBuilder.header("PSU-BIC", BIC);
+        invocationBuilder.header("consentId", consentId);
+        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", targobankToken);
+
+        Invocation invocation = invocationBuilder.buildGet();
+        Response response = invocation.invoke(Response.class);
+        Assertions.assertEquals(200, response.getStatus());
+        TransactionListResponseAdapter accountDetails = response.readEntity(TransactionListResponseAdapter.class);
+        if (accountDetails.getTransactions() != null) {
+            accountDetails.getTransactions().forEach(transactionAdapted -> {
+                Assertions.assertNotNull(transactionAdapted.getBookingStatus());
+                Assertions.assertNotNull(transactionAdapted.getTransactionAmount());
+                Assertions.assertNotNull(transactionAdapted.getTransactionAmount().getAmount());
+                Assertions.assertNotNull(transactionAdapted.getBookingDate());
+                Assertions.assertNotNull(transactionAdapted.getValueDate());
+                Assertions.assertNotNull(transactionAdapted.getPurpose());
+            });
+        }
     }
 }

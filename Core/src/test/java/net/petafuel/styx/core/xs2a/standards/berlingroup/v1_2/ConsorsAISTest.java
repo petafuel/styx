@@ -9,9 +9,10 @@ import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
-import net.petafuel.styx.core.xs2a.entities.Balance;
+import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import net.petafuel.styx.core.xs2a.entities.Currency;
-import net.petafuel.styx.core.xs2a.entities.Transaction;
+import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
+import net.petafuel.styx.core.xs2a.entities.TransactionDeprecated;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListRequest;
@@ -80,9 +81,9 @@ public class ConsorsAISTest {
 
         ReadBalancesRequest r1 = new ReadBalancesRequest(ACCOUNT_ID, CONSENT);
 
-        List<Balance> result = standard.getAis().getBalancesByAccount(r1);
+        BalanceContainer result = standard.getAis().getBalancesByAccount(r1);
         Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.size() >= 1);
+        Assertions.assertTrue(result.getBalances().size() >= 1);
     }
 
     @Test
@@ -95,9 +96,9 @@ public class ConsorsAISTest {
         Date from = format.parse("2019-03-03");
         Date to = new Date();
         ReadTransactionsRequest r1 = new ReadTransactionsRequest(ACCOUNT_ID, CONSENT, "booked", from, to);
-        List<Transaction> result = standard.getAis().getTransactionsByAccount(r1);
+        TransactionContainer result = standard.getAis().getTransactionsByAccount(r1);
         Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.size() >= 1);
+        Assertions.assertNotNull(result.getTransactions());
     }
 
     @Test
@@ -105,7 +106,7 @@ public class ConsorsAISTest {
     public void testTransactionDetails() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
         ReadTransactionDetailsRequest r1 = new ReadTransactionDetailsRequest(ACCOUNT_ID, TRANSACTION_ID, CONSENT);
-        Transaction result = standard.getAis().getTransaction(r1);
+        TransactionDeprecated result = standard.getAis().getTransaction(r1);
         Assertions.assertNotNull(result);
         Assertions.assertNotNull(result.getAccount());
     }
@@ -172,16 +173,17 @@ public class ConsorsAISTest {
                 "  }\n" +
                 "}";
 
-        Type type = new TypeToken<ArrayList<Transaction>>(){}.getType();
+        Type type = new TypeToken<ArrayList<TransactionDeprecated>>() {
+        }.getType();
         Gson gson = new GsonBuilder().registerTypeAdapter(type, new TransactionsSerializer()).create();
-        ArrayList<Transaction> transactions = gson.fromJson(json, type);
-        Transaction transaction1 = transactions.get(0);
-        Transaction transaction2 = transactions.get(1);
+        ArrayList<TransactionDeprecated> transactions = gson.fromJson(json, type);
+        TransactionDeprecated transaction1 = transactions.get(0);
+        TransactionDeprecated transaction2 = transactions.get(1);
 
         Assert.assertEquals(2, transactions.size());
 
         Assert.assertEquals(transactionId1, transaction1.getTransactionId());
-        Assert.assertEquals(Transaction.Type.CREDIT, transaction1.getType());
+        Assert.assertEquals(TransactionDeprecated.Type.CREDIT, transaction1.getType());
         Assert.assertEquals(creditorName, transaction1.getAccount().getName());
         Assert.assertEquals(Account.Type.IBAN, transaction1.getAccount().getType());
         Assert.assertEquals(creditorIban, transaction1.getAccount().getIdentifier());
@@ -192,7 +194,7 @@ public class ConsorsAISTest {
         Assert.assertEquals(valueDate, transaction1.getValueDate());
 
         Assert.assertEquals(transactionId2, transaction2.getTransactionId());
-        Assert.assertEquals(Transaction.Type.DEBIT, transaction2.getType());
+        Assert.assertEquals(TransactionDeprecated.Type.DEBIT, transaction2.getType());
         Assert.assertEquals(debtorName, transaction2.getAccount().getName());
         Assert.assertEquals(Account.Type.IBAN, transaction2.getAccount().getType());
         Assert.assertEquals(debtorIban, transaction2.getAccount().getIdentifier());

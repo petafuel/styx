@@ -1,6 +1,5 @@
 package net.petafuel.styx.core.xs2a.contracts;
 
-import net.petafuel.styx.core.xs2a.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;

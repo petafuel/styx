@@ -5,7 +5,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.petafuel.styx.core.xs2a.entities.Balance;
+import net.petafuel.styx.core.xs2a.entities.BalanceDeprecated;
 import net.petafuel.styx.core.xs2a.entities.Currency;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 
@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class BalancesSerializer implements JsonDeserializer<List<Balance>> {
+public class BalancesSerializer implements JsonDeserializer<List<BalanceDeprecated>> {
 
-    public List<Balance> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
-        ArrayList<Balance> result = new ArrayList<>();
+    public List<BalanceDeprecated> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+        ArrayList<BalanceDeprecated> result = new ArrayList<>();
         JsonObject response = json.getAsJsonObject();
         JsonArray jsonArray = response.getAsJsonArray("balances");
         for (JsonElement element : jsonArray) {
@@ -27,12 +27,12 @@ public class BalancesSerializer implements JsonDeserializer<List<Balance>> {
         return result;
     }
 
-    public Balance mapToModel(JsonObject object) {
+    public BalanceDeprecated mapToModel(JsonObject object) {
 
         if (object.get("balanceType") == null) {
             throw new SerializerException("Unable to deserialize the Balance Object: Attribute balanceType not given");
         }
-        Balance.Type type = Balance.Type.valueOf(
+        BalanceDeprecated.Type type = BalanceDeprecated.Type.valueOf(
                 object.get("balanceType").getAsString()
                         // camelCase to SNAKE_CASE
                         .replaceAll("(.)(\\p{Upper})", "$1_$2").toUpperCase()
@@ -43,7 +43,7 @@ public class BalancesSerializer implements JsonDeserializer<List<Balance>> {
         JsonObject amountObj = object.get("balanceAmount").getAsJsonObject();
         Currency currency = Currency.valueOf(amountObj.get("currency").getAsString().toUpperCase());
         float amount = amountObj.get("amount").getAsFloat();
-        Balance b1 = new Balance(amount, type, currency);
+        BalanceDeprecated b1 = new BalanceDeprecated(amount, type, currency);
 
         try {
             String referenceDateString = object.get("referenceDate").getAsString();

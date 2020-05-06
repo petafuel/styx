@@ -1,5 +1,7 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
 import java.util.EnumMap;
@@ -10,6 +12,8 @@ import java.util.Map;
  * through the LinkType
  */
 public class Links {
+    private static final Logger LOG = LogManager.getLogger(Links.class);
+
     @JsonbTransient
     private Map<LinkType, Href> urlMapping = new EnumMap<>(LinkType.class);
 
@@ -74,6 +78,7 @@ public class Links {
     @Deprecated
     @JsonbProperty("startAuthorisationWithPsuIdentfication")
     public void setStartAuthorisationWithPsuIdentificationWithTypo(Href startAuthorisationWithPsuIdentification) {
+        LOG.warn("ASPSP used incorrect method 'startAuthorisationWithPsuIdentfication' (containing typo).");
         urlMapping.put(LinkType.AUTHORISATION_WITH_PSU_IDENTIFICATION, startAuthorisationWithPsuIdentification);
     }
 
@@ -173,6 +178,7 @@ public class Links {
     @Deprecated
     @JsonbProperty("startAuthorisationWithAuthentciationMethodSelection")
     public void setStartAuthorisationWithAuthenticationMethodSelectionWithTypo(Href startAuthorisationWithAuthenticationMethodSelection) {
+        LOG.warn("ASPSP used incorrect method 'startAuthorisationWithAuthentciationMethodSelection' (containing typo).");
         urlMapping.put(LinkType.AUTHORISATION_WITH_METHOD_SELECTION, startAuthorisationWithAuthenticationMethodSelection);
     }
 

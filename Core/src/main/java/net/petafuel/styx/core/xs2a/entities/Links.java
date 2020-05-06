@@ -68,14 +68,23 @@ public class Links {
         urlMapping.put(LinkType.AUTHORISATION_WITH_PSU_IDENTIFICATION, startAuthorisationWithPsuIdentification);
     }
 
-    @JsonbProperty("updatePsuIdentificationstartAuthorisationWithProprietaryData")
-    public Href getUpdatePsuIdentificationstartAuthorisationWithProprietaryData() {
-        return urlMapping.get(LinkType.UPDATE_PSU_IDENTIFICATION_WITH_PROPRIETARY_DATA);
+    /*
+     * Handle possible typo from Berlin Group spec in case ASPSP implemented it.
+     */
+    @Deprecated
+    @JsonbProperty("startAuthorisationWithPsuIdentfication")
+    public void setStartAuthorisationWithPsuIdentificationWithTypo(Href startAuthorisationWithPsuIdentification) {
+        urlMapping.put(LinkType.AUTHORISATION_WITH_PSU_IDENTIFICATION, startAuthorisationWithPsuIdentification);
     }
 
-    @JsonbProperty("updatePsuIdentificationstartAuthorisationWithProprietaryData")
-    public void setUpdatePsuIdentificationstartAuthorisationWithProprietaryData(Href updatePsuIdentificationstartAuthorisationWithProprietaryData) {
-        urlMapping.put(LinkType.UPDATE_PSU_IDENTIFICATION_WITH_PROPRIETARY_DATA, updatePsuIdentificationstartAuthorisationWithProprietaryData);
+    @JsonbProperty("startAuthorisationWithProprietaryData")
+    public Href startAuthorisationWithProprietaryData() {
+        return urlMapping.get(LinkType.START_AUTHORISATION_WITH_PROPRIETARY_DATA);
+    }
+
+    @JsonbProperty("startAuthorisationWithProprietaryData")
+    public void setStartAuthorisationWithProprietaryData(Href startAuthorisationWithProprietaryData) {
+        urlMapping.put(LinkType.START_AUTHORISATION_WITH_PROPRIETARY_DATA, startAuthorisationWithProprietaryData);
     }
 
     @JsonbProperty("updateProprietaryData")
@@ -155,6 +164,15 @@ public class Links {
 
     @JsonbProperty("startAuthorisationWithAuthenticationMethodSelection")
     public void setStartAuthorisationWithAuthenticationMethodSelection(Href startAuthorisationWithAuthenticationMethodSelection) {
+        urlMapping.put(LinkType.AUTHORISATION_WITH_METHOD_SELECTION, startAuthorisationWithAuthenticationMethodSelection);
+    }
+
+    /*
+     * Handle possible typo from Berlin Group spec in case ASPSP implemented it.
+     */
+    @Deprecated
+    @JsonbProperty("startAuthorisationWithAuthentciationMethodSelection")
+    public void setStartAuthorisationWithAuthenticationMethodSelectionWithTypo(Href startAuthorisationWithAuthenticationMethodSelection) {
         urlMapping.put(LinkType.AUTHORISATION_WITH_METHOD_SELECTION, startAuthorisationWithAuthenticationMethodSelection);
     }
 

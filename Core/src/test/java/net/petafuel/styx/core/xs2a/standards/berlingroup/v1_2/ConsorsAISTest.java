@@ -58,7 +58,7 @@ public class ConsorsAISTest {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
         ReadAccountListRequest r1 = new ReadAccountListRequest(CONSENT);
         r1.setWithBalance(true);
-        List<Account> list = standard.getAis().getAccountList(r1);
+        List<AccountDetails> list = standard.getAis().getAccountList(r1);
         Assertions.assertTrue(list.size() >= 1);
     }
 

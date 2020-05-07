@@ -5,9 +5,9 @@ import java.util.Arrays;
 public enum LinkType {
     ACCOUNT("account"),
     AUTHORISATION_WITH_ENCRYPTED_PSU_AUTHENTICATION("startAuthorisationWithEncryptedPsuAuthentication"),
-    AUTHORISATION_WITH_METHOD_SELECTION("startAuthorisationWithAuthentciationMethodSelection"),
+    AUTHORISATION_WITH_METHOD_SELECTION("startAuthorisationWithAuthenticationMethodSelection"),
     AUTHORISATION_WITH_PSU_AUTHENTICATION("startAuthorisationWithPsuAuthentication"),
-    AUTHORISATION_WITH_PSU_IDENTIFICATION("startAuthorisationWithPsuIdentfication"),
+    AUTHORISATION_WITH_PSU_IDENTIFICATION("startAuthorisationWithPsuIdentification"),
     AUTHORISATION_WITH_TRANSACTION_AUTHORISATION("startAuthorisationWithTransactionAuthorisation"),
     AUTHORISE_TRANSACTION("authoriseTransaction"),
     AUTHORIZATION_ENDPOINT("authorization_endpoint"),
@@ -35,7 +35,7 @@ public enum LinkType {
     UPDATE_PROPRIETARY_DATA("updateProprietaryData"),
     UPDATE_PSU_AUTHENTICATION("updatePsuAuthentication"),
     UPDATE_PSU_IDENTIFICATION("updatePsuIdentification"),
-    UPDATE_PSU_IDENTIFICATION_WITH_PROPRIETARY_DATA("updatePsuIdentificationstartAuthorisationWithProprietaryData");
+    START_AUTHORISATION_WITH_PROPRIETARY_DATA("startAuthorisationWithProprietaryData");
 
     private String jsonKey;
 

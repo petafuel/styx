@@ -2,6 +2,7 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
 import java.util.EnumMap;
@@ -15,7 +16,7 @@ public class Links {
     private static final Logger LOG = LogManager.getLogger(Links.class);
 
     @JsonbTransient
-    private Map<LinkType, Href> urlMapping = new EnumMap<>(LinkType.class);
+    private final Map<LinkType, Href> urlMapping = new EnumMap<>(LinkType.class);
 
     public Map<LinkType, Href> getUrlMapping() {
         return urlMapping;
@@ -72,8 +73,11 @@ public class Links {
         urlMapping.put(LinkType.AUTHORISATION_WITH_PSU_IDENTIFICATION, startAuthorisationWithPsuIdentification);
     }
 
-    /*
+    /**
      * Handle possible typo from Berlin Group spec in case ASPSP implemented it.
+     *
+     * @param startAuthorisationWithPsuIdentification Href Link
+     * @deprecated This should only be viable until the typo is fixed in the specification
      */
     @Deprecated
     @JsonbProperty("startAuthorisationWithPsuIdentfication")
@@ -172,8 +176,11 @@ public class Links {
         urlMapping.put(LinkType.AUTHORISATION_WITH_METHOD_SELECTION, startAuthorisationWithAuthenticationMethodSelection);
     }
 
-    /*
+    /**
      * Handle possible typo from Berlin Group spec in case ASPSP implemented it.
+     *
+     * @param startAuthorisationWithAuthenticationMethodSelection Href Link
+     * @deprecated This should only be viable until the typo is fixed in the specification
      */
     @Deprecated
     @JsonbProperty("startAuthorisationWithAuthentciationMethodSelection")

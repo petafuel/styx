@@ -5,6 +5,7 @@ import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.rest.PSUResource;
 import net.petafuel.styx.api.service.SADService;
 import net.petafuel.styx.api.util.AspspUrlMapper;
+import net.petafuel.styx.api.v1.account.control.AccountListResponseAdapter;
 import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.api.v1.account.entity.TransactionListRequestBean;
@@ -14,6 +15,7 @@ import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
 import org.apache.logging.log4j.LogManager;
@@ -32,24 +34,36 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
+@RequiresBIC
 @ApplicationPath("/")
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @CheckAccessToken(allowedServices = {AccessToken.ServiceType.AISPIS, AccessToken.ServiceType.AIS})
-@RequiresBIC
 public class AccountResource extends PSUResource {
+
     private static final Logger LOG = LogManager.getLogger(AccountResource.class);
     @Inject
     private SADService sadService;
 
-    //    Reads the accounts of the available payment account depending on the consent granted.
+    /**
+     * Returns a List of Accounts
+     *
+     * @param consentId consentId with access to the requested account list
+     * @return returns an account list
+     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+AIS+-+Interface+Definition#StyxAISInterfaceDefinition-YellowGET/v1/accounts
+     * @see AccountListResponseAdapter
+     */
     @GET
-    @Path("/account/list")
-    public Response processAccountList() {
-        String message = "Getting List of Accounts";
-        LOG.info(message);
-        return Response.status(200).entity(message).build();
+    @Path("/accounts")
+    public Response processAccountList(@NotNull @NotBlank @HeaderParam("consentId") String consentId) throws BankRequestFailedException {
+        ReadAccountListRequest accountListRequest = new ReadAccountListRequest(consentId);
+        accountListRequest.getHeaders().putAll(getSandboxHeaders());
+        List<AccountDetails> accountList = sadService.getXs2AStandard().getAis().getAccountList(accountListRequest);
+
+        LOG.info("Successfully fetched account list for bic={}", sadService.getXs2AStandard().getAspsp().getBic());
+        return Response.status(200).entity(new AccountListResponseAdapter(accountList)).build();
     }
 
 

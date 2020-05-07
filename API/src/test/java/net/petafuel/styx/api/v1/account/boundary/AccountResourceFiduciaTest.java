@@ -2,32 +2,53 @@ package net.petafuel.styx.api.v1.account.boundary;
 
 import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
+import net.petafuel.styx.api.v1.account.control.AccountListResponseAdapter;
 import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.runners.MethodSorters;
 
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AccountResourceFiduciaTest extends StyxRESTTest {
     private static final String BIC = "GENODEF1M03";
     //This consent is always valid for the fiducia
     private static final String consentId = "CONSENTVALID";
-    //@TODO replace this with an account id selected from the account list call
-    static String accountId = "imxyy9AzEHJ0RSVTRUKJtt";
+    static String accountId;
 
     @Override
     protected Application configure() {
         ResourceConfig config = setupFiltersAndErrorHandlers();
         config.register(AccountResource.class);
         return config;
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void A_testAccountList() {
+        Invocation.Builder invocationBuilder = target("/v1/accounts").request();
+        invocationBuilder.header("token", aisAccessToken);
+        invocationBuilder.header("PSU-BIC", BIC);
+        invocationBuilder.header("consentId", consentId);
+
+        Invocation invocation = invocationBuilder.buildGet();
+        Response response = invocation.invoke(Response.class);
+        Assertions.assertEquals(200, response.getStatus());
+        AccountListResponseAdapter accountListResponseAdapter = response.readEntity(AccountListResponseAdapter.class);
+
+        Assertions.assertNotNull(accountListResponseAdapter.getAccounts());
+        Assertions.assertNotNull(accountListResponseAdapter.getAccounts().get(0).getIban());
+        accountId = accountListResponseAdapter.getAccounts().get(0).getResourceId();
     }
 
     @Test

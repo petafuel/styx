@@ -62,7 +62,7 @@
 		</nav>
 
     <section id="wrapper">
-
+<header>
 		<!-- HEADER-BANNER -->
                 <div class="row">
 
@@ -77,14 +77,14 @@
                   </header>
             </div>
 
-
+</header>
 
         <!-- Teiler -->
         <div class="divider"></div>
 
 
         <!-- ÜBER-UNS-BEREICH -->
-
+<main>
         <section id="über-uns-bereich">
 
             <div class="container">
@@ -92,24 +92,27 @@
                     <div class="col-6">
                         <div class="col-3">
                             <header class="intro-styxvision-container">
-                                <article id="styx-vision-container">
-                                    <h1>The vision of Styx</h1>
-                                    <p>
+                                 <article id="styx-vision-container">
+                                     <h1>The vision of Styx</h1>
+                                     <p>
                                     The Revised Payment Services Directive (PSD2) is intended to harmonise digital payment transactions within the European Economic Area. In addition to banks, PSD2 also provides many opportunities for third-party service providers (TTPs) to offer innovative services through the payment services provided by banks.
                                     Although PSD2 is based on a standard for bank interfaces, there remains considerable scope for implementation. For TTPs, developing and maintaining an XS2A interface is a time-consuming challenge.
                                     With the PSD2 XS2A Client Styx we offer TTPs a free and easy solution to interact with the different PSD2 interfaces of banks from Germany and Europe.
-                                    </p>
+                                     </p>
                                 </article>
                             </header>
-                        </div>
+                         </div>
                         <div class="col-3">
-                            <div id="logo-box">
-                                <img class="styx-logo" src="./src/img/01_styx_opensourceclient_logo_open_source_client_300x300mm_rgb.png" alt="styx open source client logo">
-                            </div>
+                           <div id="logo-box">
+                              <img class="styx-logo" src="./src/img/01_styx_opensourceclient_logo_open_source_client_300x300mm_rgb.png" alt="styx open source client logo">
+
+                <!--            <img class="styx-logo" src="./src/img/01_styx_serverunit_logo_open_source_client_300x300mm_rgb.png" alt="styx serverunit logo">  -->
+
+                        </div>
                         </div>
                     </div>
-                </div>
-            </div>
+				</div>
+		   </div>
         </section>
 
 
@@ -231,8 +234,8 @@
 
         </div>
         </div>
-        </div>
-    </section>
+         </div>
+     </section>
 
 
         <!-- USE CASE -->
@@ -244,30 +247,30 @@
                     <div class="col-6">
                         <div class="col-3">
                             <header class="intro-use-case-container">
-                                <article id="use-case-container">
-                                    <h1>Use Cases for Styx</h1>
+                                 <article id="use-case-container">
+                                     <h1>Use Cases for Styx</h1>
 
-                                    <p>
-                                        <strong>
-                                        Various multibanking tools such as payment instigations or accessing account information can be implemented by the XS2A Client Styx.
-                                        </strong> <br> <br>
+                                     <p>
+                                         <strong>
+                                       Various multibanking tools such as payment instigations or accessing account information can be implemented by the XS2A Client Styx.
+                                         </strong> <br> <br>
 
-                                        A depositer (PSU) is for example able to use a TPP App to initiate a payment. The TPP App interfaces with the Styx CM to receive approval from the PSU through a SCA method.
+                                       A depositer (PSU) is for example able to use a TPP App to initiate a payment. The TPP App interfaces with the Styx CM to receive approval from the PSU through a SCA method.
 
-                                        After having received approval the Styx PIS-Client is opened via the Styx API to access the XS2A API of the bank in charge of the account to initiate the payment.
-                                    </p>
+                                       After having received approval the Styx PIS-Client is opened via the Styx API to access the XS2A API of the bank in charge of the account to initiate the payment.
+                                     </p>
                                     <img class="styx-logo-usecase" src="./src/img/01_styx_opensourceclient_logo_open_source_client_300x300mm_rgb.png" alt="styx opensource client logo">
                                 </article>
                             </header>
-                        </div>
+                         </div>
                         <div class="col-3">
-                            <div id="img-box">
+                           <div id="img-box">
                               <img class="use-case-diagram" src="./src/img/01_styx_usecase_grafik.png" alt="styx use case grafik">
-                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                        </div>
+				</div>
+             </div>
+		   </div>
         </section>
 
 
@@ -303,7 +306,7 @@
                                         <h2>Styx Wiki</h2>
                                         <p>Everything you need to know</p>
                                         <a class="btn-typ-2" href="https://github.com/petafuel/styx/wiki" target="_blank">Learn More</a>
-                                    </article>
+                                     </article>
                                 </a>
                             </div>
                         </div>
@@ -314,38 +317,51 @@
                                         <h2>Styx Client API</h2>
                                         <p>Find out how to use Styx with your client</p>
                                         <a class="btn-typ-2" href="https://petafuel.github.io/styx/api" target="_blank">Learn More</a>
-                                    </article>
+                                     </article>
                                 </a>
                             </div>
                         </div>
                     </div>
 				</div>
-				<div class="row">
-					<div class="col-6">
-						<header class="intro-container">
-						<p>Subscribe to our mailing list! Send an e-mail to <a href="mailto:styx-announce-join@mailman.petafuel.de">styx-announce-join@mailman.petafuel.de</a> to receive the latest news about Styx
-						or subscribe to <a href="mailto:styx-dev-join@mailman.petafuel.de">styx-dev-join@mailman.petafuel.de</a> to receive developer information about Styx.</p>
-						</header>
-					</div>
-				</div>
 			</div>
 		</section>
 
-
-
-        <!-- BE PART OF STYX -->
-        <section id="bepart">
+     <!-- Teiler -->
+        <div class="divider-white"></div>
+    
+        <!-- Subscribe Newsletter --> 
+       <section id="announcement">
             <div class="row">
                 <div class="col-6">
-                    <header class="headline-container-mid">
-                        <h1>Be part of Styx</h1>
-                        <p>Use the free XS2A Client Styx for your own applications and services.
-                        Get in touch and work with us to create the ultimate XS2A Client.</p>
-                        <a class="btn-typ-3" href="https://www.petafuel.de/kontakt/" target="_blank">Get in touch</a>
+                     <header class="intro-container-sec4">
+                         <h1>Subscribe to our mailing list!</h1>
+                         <p>Send an e-mail to 
+                             <a href="mailto:styx-announce-join@mailman.petafuel.de" rel="noreferrer" data-ss1588676443="1">styx-announce-join@mailman.petafuel.de</a><br>
+                             to receive the latest news about Styx or subscribe to 
+                             <a href="mailto:styx-dev-join@mailman.petafuel.de" rel="noreferrer" data-ss1588676443="1">styx-dev-join@mailman.petafuel.de</a> 
+                             to receive developer information about Styx.</p>
                     </header>
+                   
                 </div>
-                <header id="content-banner">
+            </div>
+    </section>
+    
+     <!-- Teiler -->
+        <div class="divider-white"></div>
+    
+        <!-- BE PART OF STYX -->
+       <section id="bepart">
+            <div class="row">
+            <div class="col-6">
+                <header class="headline-container-mid">
+                    <h1>Be part of Styx</h1>
+                    <p>Use the free XS2A Client Styx for your own applications and services.
+                        Get in touch and work with us to create the ultimate XS2A Client.</p>
+                    <a class="btn-typ-3" href="https://www.petafuel.de/psd2-xs2a-styx/#kontakt" target="_blank">Get in touch</a>
                 </header>
+                 </div>
+		            <header id="content-banner">
+                  </header>
             </div>
         </section>
 
@@ -380,18 +396,23 @@
             </div>
 		</section>
 
-
+</main>
 		<!-- FOOTER-->
 
 		<footer id="footer">
 			<div class="container">
 				<div class="row">
-					<div class="col-6">
-						<span>Styx XS2A &copy; petaFuel GmbH 2020</span>
+					<div class="col-6"> 
+						
 						<nav id="footer-nav">
-                            <a href="https://www.petafuel.de/">visit petaFuel.de</a>
+                        <ul>
+                            <li><a class="punkt-1" href="https://www.petafuel.de/" target="_blank">visit petaFuel.de</a></li><br>
+                            <li><a href="dsb.html" target="_blank">data privacy</a></li><br>
+                            <li><a class="punkt-3" href="https://www.petafuel.de/impressum/" target="_blank">imprint</a></li><br>
+                            <li><p> Styx XS2A 	&copy; petaFuel GmbH 2020</p></li>
+                        </ul>    
 						</nav>
-					</div>
+					</div> 
 				</div>
 			</div>
 		</footer>

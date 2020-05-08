@@ -2,12 +2,14 @@ package net.petafuel.styx.api.v1.account.boundary;
 
 import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
+import net.petafuel.styx.api.v1.account.control.AccountListResponseAdapter;
 import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.api.v1.consent.boundary.ConsentResourcesTargoTest;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.internal.TextListener;
@@ -15,17 +17,18 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+import org.junit.runners.MethodSorters;
 
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AccountResourceTragoTest extends StyxRESTTest {
     private static final String BIC = "CMCIDEDD";
     static String consentId;
-    //@TODO replace this with an account id selected from the account list call
-    static String accountId = "6612c7532cf7566e170a5788adc141c601dda17514bc1f498c054013137835e4";
+    static String accountId;
 
     @BeforeClass
     public static void getConsentId() {
@@ -52,6 +55,25 @@ public class AccountResourceTragoTest extends StyxRESTTest {
         }
 
         return config;
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void A_testAccountList() {
+        Invocation.Builder invocationBuilder = target("/v1/accounts").request();
+        invocationBuilder.header("token", aisAccessToken);
+        invocationBuilder.header("PSU-BIC", BIC);
+        invocationBuilder.header("consentId", consentId);
+        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", targobankToken);
+
+        Invocation invocation = invocationBuilder.buildGet();
+        Response response = invocation.invoke(Response.class);
+        Assertions.assertEquals(200, response.getStatus());
+        AccountListResponseAdapter accountListResponseAdapter = response.readEntity(AccountListResponseAdapter.class);
+
+        Assertions.assertNotNull(accountListResponseAdapter.getAccounts());
+        Assertions.assertNotNull(accountListResponseAdapter.getAccounts().get(0).getIban());
+        accountId = accountListResponseAdapter.getAccounts().get(0).getResourceId();
     }
 
     @Test

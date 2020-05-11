@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.Vector;
 
 public class OAuthSCATest {
@@ -123,24 +122,5 @@ public class OAuthSCATest {
         OAuthService service = new OAuthService();
         OAuthSession t3 = service.tokenRequest("https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/oauth/12345678/token", request);
         Assert.assertNotNull(t3);
-    }
-
-    @Tag("integration")
-    @Test
-    public void refreshTokenTest() throws BankRequestFailedException {
-
-        String preAuthId = "898aa5f3-51f7-4717-ab5f-fa6c59bee9b9";
-
-        PersistentOAuthSession persistentOAuthSession = new PersistentOAuthSession();
-        OAuthSession session = persistentOAuthSession.get(preAuthId);
-
-        if (session.getAccessTokenExpiresAt().before(new Date())) {
-            System.out.println("Token has expired");
-            RefreshTokenRequest request = new RefreshTokenRequest(session.getRefreshToken());
-            OAuthService service = new OAuthService();
-            OAuthSession refreshed = service.tokenRequest(session.getTokenEndpoint(), request);
-            persistentOAuthSession.update(refreshed);
-            System.out.println("Token is refreshed");
-        }
     }
 }

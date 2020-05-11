@@ -4,6 +4,7 @@ import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.styx.api.util.io.IOHelper;
 import net.petafuel.styx.api.util.io.PaymentRequestHelper;
 import net.petafuel.styx.api.util.io.contracts.ApplicableImplementerOption;
+import net.petafuel.styx.api.util.io.contracts.IOInputContainer;
 import net.petafuel.styx.api.util.io.contracts.IOInputContainerPIS;
 import net.petafuel.styx.api.util.io.contracts.IOOrder;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
@@ -17,13 +18,14 @@ import java.util.UUID;
 /**
  * create a bulk payment request
  */
-public class IO3 implements ApplicableImplementerOption<IOInputContainerPIS> {
+public class IO3 implements ApplicableImplementerOption {
     private static final String IO = "IO3";
 
     @Override
-    public void apply(IOInputContainerPIS ioInputContainer) {
+    public IOInputContainer apply(IOInputContainer ioInput) throws ImplementerOptionException {
+        IOInputContainerPIS ioInputContainer = (IOInputContainerPIS) ioInput;
         if (ioInputContainer.getPaymentService() != PaymentService.BULK_PAYMENTS) {
-            return;
+            return ioInputContainer;
         }
         IOHelper.processPaymentProduct(IO, ioInputContainer);
 
@@ -41,6 +43,7 @@ public class IO3 implements ApplicableImplementerOption<IOInputContainerPIS> {
         } else {
             throw new IllegalArgumentException("RequestType cannot be null on request creation");
         }
+        return ioInputContainer;
     }
 
     @Override

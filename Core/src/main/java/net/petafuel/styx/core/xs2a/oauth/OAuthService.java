@@ -67,7 +67,7 @@ public class OAuthService extends BasicService {
     }
 
     public static String buildLink(String state) {
-        OAuthSession stored = new PersistentOAuthSession().get(state);
+        OAuthSession stored = PersistentOAuthSession.get(state);
         HashMap<String, String> queryParams = getQueryParameters(stored);
         Properties properties = Config.getInstance().getProperties();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
@@ -76,7 +76,7 @@ public class OAuthService extends BasicService {
     }
 
     public static String buildLink(String state, String bic) {
-        OAuthSession stored = new PersistentOAuthSession().get(state);
+        OAuthSession stored = PersistentOAuthSession.get(state);
         HashMap<String, String> queryParams = getQueryParameters(stored);
         queryParams.put("bic", bic);
         Properties properties = Config.getInstance().getProperties();
@@ -110,7 +110,7 @@ public class OAuthService extends BasicService {
         session.setTokenEndpoint(endpoints.get("token_endpoint"));
         session.setState(state);
 
-        return new PersistentOAuthSession().create(session);
+        return PersistentOAuthSession.create(session);
     }
 
     public static OAuthSession startPreAuthSession(Url url, String scope) {
@@ -124,7 +124,7 @@ public class OAuthService extends BasicService {
         session.setTokenEndpoint(url.getPreauthTokenEndpoint());
         session.setState(state);
 
-        return new PersistentOAuthSession().create(session);
+        return PersistentOAuthSession.create(session);
     }
 
     public OAuthSession accessTokenRequest(String url, TokenRequest request) throws BankRequestFailedException {

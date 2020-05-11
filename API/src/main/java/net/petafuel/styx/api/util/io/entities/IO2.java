@@ -4,6 +4,7 @@ import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.styx.api.util.io.IOHelper;
 import net.petafuel.styx.api.util.io.PaymentRequestHelper;
 import net.petafuel.styx.api.util.io.contracts.ApplicableImplementerOption;
+import net.petafuel.styx.api.util.io.contracts.IOInputContainer;
 import net.petafuel.styx.api.util.io.contracts.IOInputContainerPIS;
 import net.petafuel.styx.api.util.io.contracts.IOOrder;
 import net.petafuel.styx.core.xs2a.entities.Payment;
@@ -18,13 +19,14 @@ import java.util.UUID;
 /**
  * create a single payment request
  */
-public class IO2 implements ApplicableImplementerOption<IOInputContainerPIS> {
+public class IO2 implements ApplicableImplementerOption {
     private static final String IO = "IO2";
 
     @Override
-    public void apply(IOInputContainerPIS ioInputContainer) {
+    public IOInputContainer apply(IOInputContainer ioInput) throws ImplementerOptionException {
+        IOInputContainerPIS ioInputContainer = (IOInputContainerPIS) ioInput;
         if (ioInputContainer.getPaymentService() != PaymentService.PAYMENTS) {
-            return;
+            return ioInputContainer;
         }
         IOHelper.processPaymentProduct(IO, ioInputContainer);
 
@@ -41,8 +43,9 @@ public class IO2 implements ApplicableImplementerOption<IOInputContainerPIS> {
         } else if (ioInputContainer.getRequestType() == IOInputContainerPIS.RequestType.STATUS) {
             PaymentRequestHelper.buildStatusRequest(ioInputContainer);
         } else {
-            throw new IllegalArgumentException("RequestType cannot be null on request creation");
+            throw new ImplementerOptionException("RequestType cannot be null on request creation");
         }
+        return ioInputContainer;
     }
 
     @Override

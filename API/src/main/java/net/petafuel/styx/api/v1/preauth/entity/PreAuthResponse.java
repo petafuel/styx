@@ -7,6 +7,14 @@ public class PreAuthResponse {
     private String preAuthId;
     private Links links;
 
+    /**
+     * @deprecated default ctor for json binding
+     */
+    @Deprecated
+    public PreAuthResponse() {
+        //default ctor for json binding
+    }
+
     public PreAuthResponse(String preAuthId, Links links) {
         this.preAuthId = preAuthId;
         this.links = links;

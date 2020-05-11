@@ -9,7 +9,7 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsent
 public class IOInputContainerAIS extends IOInputContainer {
     private XS2ARequest aisRequest;
 
-    protected IOInputContainerAIS(XS2AStandard xs2AStandard, PSU psu) {
+    public IOInputContainerAIS(XS2AStandard xs2AStandard, PSU psu) {
         super(xs2AStandard, psu);
     }
 

@@ -55,7 +55,7 @@ public class PersistentOAuthSession {
 
     public OAuthSession update(OAuthSession model) {
         Connection connection = Persistence.getInstance().getConnection();
-        try (CallableStatement query = connection.prepareCall("{call update_oauth_session(?, ?, ?, ?, ?, ?)}")) { // TODO remove prefix dev_
+        try (CallableStatement query = connection.prepareCall("{call update_oauth_session(?, ?, ?, ?, ?, ?)}")) {
             query.setString(1, model.getAccessToken());
             query.setString(2, model.getTokenType());
             query.setString(3, model.getRefreshToken());

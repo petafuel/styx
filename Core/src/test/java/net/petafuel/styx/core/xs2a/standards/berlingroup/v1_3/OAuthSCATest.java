@@ -9,6 +9,7 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
+import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
@@ -16,7 +17,8 @@ import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
-import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
+import net.petafuel.styx.core.xs2a.oauth.http.AuthorizationCodeRequest;
+import net.petafuel.styx.core.xs2a.oauth.http.RefreshTokenRequest;
 import net.petafuel.styx.core.xs2a.sca.OAuth2;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
 import net.petafuel.styx.core.xs2a.sca.SCAHandler;
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.Vector;
 
 public class OAuthSCATest {
@@ -116,9 +119,28 @@ public class OAuthSCATest {
         String code = "E5E0949D3DA2CFAC80581BE843D55003";
         String code_verifier = "Sa699pmGwDsJX5IxaojDZ282euq8HGvQP_cT1Z4rHdw";
 
-        TokenRequest request = new TokenRequest(code, code_verifier);
+        AuthorizationCodeRequest request = new AuthorizationCodeRequest(code, code_verifier);
         OAuthService service = new OAuthService();
-        OAuthSession t3 = service.accessTokenRequest("https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/oauth/12345678/token", request);
+        OAuthSession t3 = service.tokenRequest("https://xs2a-sandbox.f-i-apim.de:8444/fixs2a-env/oauth/12345678/token", request);
         Assert.assertNotNull(t3);
+    }
+
+    @Tag("integration")
+    @Test
+    public void refreshTokenTest() throws BankRequestFailedException {
+
+        String preAuthId = "898aa5f3-51f7-4717-ab5f-fa6c59bee9b9";
+
+        PersistentOAuthSession persistentOAuthSession = new PersistentOAuthSession();
+        OAuthSession session = persistentOAuthSession.get(preAuthId);
+
+        if (session.getAccessTokenExpiresAt().before(new Date())) {
+            System.out.println("Token has expired");
+            RefreshTokenRequest request = new RefreshTokenRequest(session.getRefreshToken());
+            OAuthService service = new OAuthService();
+            OAuthSession refreshed = service.tokenRequest(session.getTokenEndpoint(), request);
+            persistentOAuthSession.update(refreshed);
+            System.out.println("Token is refreshed");
+        }
     }
 }

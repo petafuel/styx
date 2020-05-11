@@ -55,12 +55,13 @@ public class PersistentOAuthSession {
 
     public OAuthSession update(OAuthSession model) {
         Connection connection = Persistence.getInstance().getConnection();
-        try (CallableStatement query = connection.prepareCall("{call update_oauth_session(?, ?, ?, ?, ?)}")) {
+        try (CallableStatement query = connection.prepareCall("{call dev_update_oauth_session(?, ?, ?, ?, ?, ?)}")) { // TODO remove prefix dev_
             query.setString(1, model.getAccessToken());
             query.setString(2, model.getTokenType());
             query.setString(3, model.getRefreshToken());
-            query.setTimestamp(4, new Timestamp(model.getExpiresAt().getTime()));
-            query.setString(5, model.getState());
+            query.setTimestamp(4, new Timestamp(model.getAccessTokenExpiresAt().getTime()));
+            query.setTimestamp(5, new Timestamp(model.getRefreshTokenExpiresAt().getTime()));
+            query.setString(6, model.getState());
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     return this.dbToModel(resultSet);
@@ -84,7 +85,8 @@ public class PersistentOAuthSession {
         model.setAccessToken(resultSet.getString("access_token"));
         model.setTokenType(resultSet.getString("token_type"));
         model.setRefreshToken(resultSet.getString("refresh_token"));
-        model.setExpiresAt(resultSet.getTimestamp("expires_at"));
+        model.setAccessTokenExpiresAt(resultSet.getTimestamp("access_token_expires_at"));
+        model.setRefreshTokenExpiresAt(resultSet.getTimestamp("refresh_token_expires_at"));
         model.setAuthorizedAt(resultSet.getTimestamp("authorized_at"));
         model.setCreatedAt(resultSet.getTimestamp("created_at"));
         return model;

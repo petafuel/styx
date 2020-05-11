@@ -8,7 +8,7 @@ import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.entities.StrongAuthenticatableResource;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
-import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
+import net.petafuel.styx.core.xs2a.oauth.http.OAuthTokenRequest;
 import net.petafuel.styx.core.xs2a.oauth.serializers.EndpointsSerializer;
 import net.petafuel.styx.core.xs2a.oauth.serializers.TokenSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
@@ -127,7 +127,7 @@ public class OAuthService extends BasicService {
         return new PersistentOAuthSession().create(session);
     }
 
-    public OAuthSession accessTokenRequest(String url, TokenRequest request) throws BankRequestFailedException {
+    public OAuthSession tokenRequest(String url, OAuthTokenRequest request) throws BankRequestFailedException {
 
         this.setUrl(url);
         if (request.isJsonBody()) {

@@ -6,8 +6,7 @@ import net.petafuel.styx.api.filter.CheckAccessToken;
 import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.filter.RequiresMandatoryHeader;
 import net.petafuel.styx.api.filter.RequiresPSU;
-import net.petafuel.styx.api.rest.PSUResource;
-import net.petafuel.styx.api.service.SADService;
+import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.v1.payment.control.PaymentInitiationProvider;
 import net.petafuel.styx.api.v1.payment.entity.BulkPaymentInitiation;
@@ -27,7 +26,6 @@ import net.petafuel.styx.core.xs2a.sca.SCAHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
@@ -46,11 +44,8 @@ import javax.ws.rs.core.Response;
 @CheckAccessToken(allowedServices = {AccessToken.ServiceType.AISPIS, AccessToken.ServiceType.PIS})
 @RequiresPSU
 @RequiresBIC
-public class PaymentInitiationResource extends PSUResource {
+public class PaymentInitiationResource extends RestResource {
     private static final Logger LOG = LogManager.getLogger(PaymentInitiationResource.class);
-
-    @Inject
-    private SADService sadService;
 
     /**
      * Initiate single or future dated payments
@@ -65,22 +60,24 @@ public class PaymentInitiationResource extends PSUResource {
     @RequiresMandatoryHeader
     public Response initiateSinglePayment(@BeanParam PaymentTypeBean paymentTypeBean,
                                           @Valid SinglePaymentInitiation singlePaymentBody) throws BankRequestFailedException {
-        XS2APaymentRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildSinglePaymentRequest(singlePaymentBody);
+        PaymentInitiationProvider paymentInitiationProvider = new PaymentInitiationProvider(getXS2AStandard(), paymentTypeBean, getPsu());
+        paymentInitiationProvider.addAdditionalHeaders(getAdditionalHeaders());
+        XS2APaymentRequest aspspRequest = paymentInitiationProvider.buildSinglePaymentRequest(singlePaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
-        aspspRequest.getHeaders().putAll(getSandboxHeaders());
-        InitiatedPayment initiatedPayment = sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest);
+
+        InitiatedPayment initiatedPayment = getXS2AStandard().getPis().initiatePayment(aspspRequest);
         PaymentResponse paymentResponse = new PaymentResponse(initiatedPayment);
         SCAApproach approach = SCAHandler.decision(initiatedPayment);
         if (approach instanceof OAuth2) {
             paymentResponse.getLinks().getScaOAuth().setUrl(((OAuth2) approach).getAuthoriseLink());
         }
 
-        LOG.info("Initiate single payment bic={} aspsp_name={} aspsp_id={} paymentId={}", sadService.getXs2AStandard().getAspsp().getBic(), sadService.getXs2AStandard().getAspsp().getName(), sadService.getXs2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
+        LOG.info("Initiate single payment bic={} aspsp_name={} aspsp_id={} paymentId={}", getXS2AStandard().getAspsp().getBic(), getXS2AStandard().getAspsp().getName(), getXS2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 
@@ -98,21 +95,23 @@ public class PaymentInitiationResource extends PSUResource {
     public Response initiateBulkPayment(
             @BeanParam PaymentTypeBean paymentTypeBean,
             @Valid BulkPaymentInitiation bulkPaymentBody) throws BankRequestFailedException {
-        XS2APaymentRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildBulkPaymentRequest(bulkPaymentBody);
+        PaymentInitiationProvider paymentInitiationProvider = new PaymentInitiationProvider(getXS2AStandard(), paymentTypeBean, getPsu());
+        paymentInitiationProvider.addAdditionalHeaders(getAdditionalHeaders());
+        XS2APaymentRequest aspspRequest = paymentInitiationProvider.buildBulkPaymentRequest(bulkPaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
-        aspspRequest.getHeaders().putAll(getSandboxHeaders());
-        InitiatedPayment initiatedPayment = sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest);
+
+        InitiatedPayment initiatedPayment = getXS2AStandard().getPis().initiatePayment(aspspRequest);
         PaymentResponse paymentResponse = new PaymentResponse(initiatedPayment);
         SCAApproach approach = SCAHandler.decision(initiatedPayment);
         if (approach instanceof OAuth2) {
             paymentResponse.getLinks().getScaOAuth().setUrl(((OAuth2) approach).getAuthoriseLink());
         }
-        LOG.info("Initiate bulk payment bic={} aspsp_name={} aspsp_id={} paymentId={}", sadService.getXs2AStandard().getAspsp().getBic(), sadService.getXs2AStandard().getAspsp().getName(), sadService.getXs2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
+        LOG.info("Initiate bulk payment bic={} aspsp_name={} aspsp_id={} paymentId={}", getXS2AStandard().getAspsp().getBic(), getXS2AStandard().getAspsp().getName(), getXS2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.BULK_PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 
@@ -129,21 +128,23 @@ public class PaymentInitiationResource extends PSUResource {
     @RequiresMandatoryHeader
     public Response initiatePeriodicPayment(@BeanParam PaymentTypeBean paymentTypeBean,
                                             @Valid PeriodicPaymentInitiation periodicPaymentBody) throws BankRequestFailedException {
-        XS2APaymentRequest aspspRequest = new PaymentInitiationProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu()).buildPeriodicPaymentRequest(periodicPaymentBody);
+        PaymentInitiationProvider paymentInitiationProvider = new PaymentInitiationProvider(getXS2AStandard(), paymentTypeBean, getPsu());
+        paymentInitiationProvider.addAdditionalHeaders(getAdditionalHeaders());
+        XS2APaymentRequest aspspRequest = paymentInitiationProvider.buildPeriodicPaymentRequest(periodicPaymentBody);
         aspspRequest.setTppRedirectPreferred(getRedirectPreferred());
-        aspspRequest.getHeaders().putAll(getSandboxHeaders());
-        InitiatedPayment initiatedPayment = sadService.getXs2AStandard().getPis().initiatePayment(aspspRequest);
+
+        InitiatedPayment initiatedPayment = getXS2AStandard().getPis().initiatePayment(aspspRequest);
         PaymentResponse paymentResponse = new PaymentResponse(initiatedPayment);
         SCAApproach approach = SCAHandler.decision(initiatedPayment);
         if (approach instanceof OAuth2) {
             paymentResponse.getLinks().getScaOAuth().setUrl(((OAuth2) approach).getAuthoriseLink());
         }
-        LOG.info("Initiate periodic payment bic={} aspsp_name={} aspsp_id={}", sadService.getXs2AStandard().getAspsp().getBic(), sadService.getXs2AStandard().getAspsp().getName(), sadService.getXs2AStandard().getAspsp().getId());
+        LOG.info("Initiate periodic payment bic={} aspsp_name={} aspsp_id={}", getXS2AStandard().getAspsp().getBic(), getXS2AStandard().getAspsp().getName(), getXS2AStandard().getAspsp().getId());
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PERIODIC_PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), sadService.getXs2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 }

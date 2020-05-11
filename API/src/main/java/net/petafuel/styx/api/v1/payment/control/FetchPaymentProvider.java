@@ -14,6 +14,7 @@ public class FetchPaymentProvider extends PaymentProvider {
 
     public ReadPaymentRequest buildFetchPaymentRequest(String paymentId) {
         IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(IOInputContainerPIS.RequestType.FETCH, xs2AStandard, psu, paymentId, paymentTypeBean.getPaymentService(), paymentTypeBean.getPaymentProduct());
+        ioInputContainerPIS.setAdditionalHeaders(additionalHeaders);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
         return (ReadPaymentRequest) ioProcessor.applyOptions();
     }

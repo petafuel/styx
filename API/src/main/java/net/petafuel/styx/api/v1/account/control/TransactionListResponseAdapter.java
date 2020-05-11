@@ -26,10 +26,10 @@ public class TransactionListResponseAdapter {
         transactions = new ArrayList<>();
         if (transactionContainer.getTransactions() != null) {
             if (transactionContainer.getTransactions().getBooked() != null) {
-                transactionContainer.getTransactions().getBooked().parallelStream().forEach(bookedTranscation -> convertTransaction(bookedTranscation, BookingStatus.BOOKED));
+                transactionContainer.getTransactions().getBooked().forEach(bookedTransaction -> convertTransaction(bookedTransaction, BookingStatus.BOOKED));
             }
             if (transactionContainer.getTransactions().getPending() != null) {
-                transactionContainer.getTransactions().getPending().parallelStream().forEach(pendingTranscation -> convertTransaction(pendingTranscation, BookingStatus.PENDING));
+                transactionContainer.getTransactions().getPending().forEach(pendingTransaction -> convertTransaction(pendingTransaction, BookingStatus.PENDING));
             }
         } else {
             links.setDownload(transactionContainer.getLinks().getDownload());

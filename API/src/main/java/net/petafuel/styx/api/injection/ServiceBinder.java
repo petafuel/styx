@@ -1,6 +1,5 @@
 package net.petafuel.styx.api.injection;
 
-import net.petafuel.styx.api.service.SADService;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 /**
@@ -9,6 +8,6 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 public class ServiceBinder extends AbstractBinder {
     @Override
     protected void configure() {
-        bind(SADService.class).to(SADService.class);
+        //In case we need CDI at some point, put it here
     }
 }

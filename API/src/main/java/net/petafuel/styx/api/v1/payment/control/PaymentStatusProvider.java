@@ -16,6 +16,7 @@ public class PaymentStatusProvider extends PaymentProvider {
 
     public ReadPaymentStatusRequest buildRequest(String paymentId) {
         IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(IOInputContainerPIS.RequestType.STATUS, xs2AStandard, psu, paymentId, paymentTypeBean.getPaymentService(), paymentTypeBean.getPaymentProduct());
+        ioInputContainerPIS.setAdditionalHeaders(additionalHeaders);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
         return (ReadPaymentStatusRequest) ioProcessor.applyOptions();
     }

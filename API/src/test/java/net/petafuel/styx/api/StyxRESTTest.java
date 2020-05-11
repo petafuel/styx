@@ -10,6 +10,8 @@ import net.petafuel.styx.api.filter.BICFilter;
 import net.petafuel.styx.api.filter.MandatoryHeaderFilter;
 import net.petafuel.styx.api.filter.MasterTokenFilter;
 import net.petafuel.styx.api.filter.PSUFilter;
+import net.petafuel.styx.api.filter.PreAuthAccessFilter;
+import net.petafuel.styx.api.filter.SADInitialisationFilter;
 import net.petafuel.styx.api.filter.SandboxHeaderPassthroughs;
 import net.petafuel.styx.api.injection.ServiceBinder;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -44,6 +46,8 @@ public class StyxRESTTest extends JerseyTest {
                 .register(BICFilter.class)                              // request requires PSU data
                 .register(MandatoryHeaderFilter.class)                  // request requires certain header fields
                 .register(SandboxHeaderPassthroughs.class)              // allow X-STYX- headers to be forwarded to the aspsp
+                .register(SADInitialisationFilter.class)              // allow X-STYX- headers to be forwarded to the aspsp
+                .register(PreAuthAccessFilter.class)              // allow X-STYX- headers to be forwarded to the aspsp
                 .register(MasterTokenFilter.class);                     // Request requires enabled master token
         //Register Errorhandlers
         config.register(UncaughtExceptionHandler.class)                 // handle any uncaught exceptions

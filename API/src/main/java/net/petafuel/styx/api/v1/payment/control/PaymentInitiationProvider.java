@@ -35,7 +35,9 @@ public class PaymentInitiationProvider extends PaymentProvider {
             throw new StyxException(new ResponseEntity("No valid single payment object was found within the payments array", ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
         }
         Payment payment = singlePayment.get();
-        IOProcessor ioProcessor = new IOProcessor(new IOInputContainerPIS(IOInputContainerPIS.RequestType.INITIATE, xs2AStandard, psu, payment, PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct()));
+        IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(IOInputContainerPIS.RequestType.INITIATE, xs2AStandard, psu, payment, PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct());
+        ioInputContainerPIS.setAdditionalHeaders(additionalHeaders);
+        IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
         return (XS2APaymentRequest) ioProcessor.applyOptions();
     }
 
@@ -51,8 +53,9 @@ public class PaymentInitiationProvider extends PaymentProvider {
         bulkPayment.setDebtorAccount(debtor);
         bulkPayment.setPayments(bulkPaymentBody.getPayments());
         bulkPayment.setRequestedExecutionDate(bulkPaymentBody.getRequestedExecutionDate());
-
-        IOProcessor ioProcessor = new IOProcessor(new IOInputContainerPIS(IOInputContainerPIS.RequestType.INITIATE, xs2AStandard, psu, bulkPayment, PaymentService.BULK_PAYMENTS, paymentTypeBean.getPaymentProduct()));
+        IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(IOInputContainerPIS.RequestType.INITIATE, xs2AStandard, psu, bulkPayment, PaymentService.BULK_PAYMENTS, paymentTypeBean.getPaymentProduct());
+        ioInputContainerPIS.setAdditionalHeaders(additionalHeaders);
+        IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
         return (XS2APaymentRequest) ioProcessor.applyOptions();
     }
 
@@ -74,8 +77,9 @@ public class PaymentInitiationProvider extends PaymentProvider {
         periodicPayment.setExecutionRule(periodicPaymentBody.getExecutionRule());
         periodicPayment.setStartDate(Date.from(periodicPaymentBody.getStartDate().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
         periodicPayment.setFrequency(periodicPaymentBody.getFrequency().name());
-
-        IOProcessor ioProcessor = new IOProcessor(new IOInputContainerPIS(IOInputContainerPIS.RequestType.INITIATE, xs2AStandard, psu, periodicPayment, PaymentService.PERIODIC_PAYMENTS, paymentTypeBean.getPaymentProduct()));
+        IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(IOInputContainerPIS.RequestType.INITIATE, xs2AStandard, psu, periodicPayment, PaymentService.PERIODIC_PAYMENTS, paymentTypeBean.getPaymentProduct());
+        ioInputContainerPIS.setAdditionalHeaders(additionalHeaders);
+        IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
         return (XS2APaymentRequest) ioProcessor.applyOptions();
     }
 }

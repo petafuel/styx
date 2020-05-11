@@ -4,8 +4,7 @@ import net.petafuel.styx.api.filter.AbstractTokenFilter;
 import net.petafuel.styx.api.filter.CheckAccessToken;
 import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.filter.RequiresPSU;
-import net.petafuel.styx.api.rest.PSUResource;
-import net.petafuel.styx.api.service.SADService;
+import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.v1.payment.control.PaymentStatusProvider;
 import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
 import net.petafuel.styx.core.persistence.models.AccessToken;
@@ -15,7 +14,6 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentSt
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.inject.Inject;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.BeanParam;
@@ -34,11 +32,8 @@ import javax.ws.rs.core.Response;
 @CheckAccessToken(allowedServices = {AccessToken.ServiceType.AISPIS, AccessToken.ServiceType.PIS})
 @RequiresPSU
 @RequiresBIC
-public class PaymentStatusResource extends PSUResource {
+public class PaymentStatusResource extends RestResource {
     private static final Logger LOG = LogManager.getLogger(PaymentStatusResource.class);
-
-    @Inject
-    private SADService sadService;
 
     /**
      * Returns the status of a payment
@@ -53,13 +48,14 @@ public class PaymentStatusResource extends PSUResource {
     public Response getSinglePaymentStatus(@BeanParam PaymentTypeBean paymentTypeBean,
                                            @PathParam("paymentId") @NotEmpty @NotBlank String paymentId
     ) throws BankRequestFailedException {
-        PaymentStatusProvider provider = new PaymentStatusProvider(sadService.getXs2AStandard(), paymentTypeBean, getPsu());
+        PaymentStatusProvider provider = new PaymentStatusProvider(getXS2AStandard(), paymentTypeBean, getPsu());
+        provider.addAdditionalHeaders(getAdditionalHeaders());
         ReadPaymentStatusRequest request = provider.buildRequest(paymentId);
-        request.getHeaders().putAll(getSandboxHeaders());
-        PaymentStatus status = sadService.getXs2AStandard().getPis().getPaymentStatus(request);
-        provider.updateStatus(paymentId, (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), sadService.getXs2AStandard().getAspsp().getBic(), status.getTransactionStatus());
 
-        LOG.info("Successfully read the payment status entity for bic={}, paymentId={}", sadService.getXs2AStandard().getAspsp().getBic(), paymentId);
+        PaymentStatus status = getXS2AStandard().getPis().getPaymentStatus(request);
+        provider.updateStatus(paymentId, (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), status.getTransactionStatus());
+
+        LOG.info("Successfully read the payment status entity for bic={}, paymentId={}", getXS2AStandard().getAspsp().getBic(), paymentId);
         return Response.status(200).entity(status).build();
     }
 }

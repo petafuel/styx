@@ -44,11 +44,11 @@ public class SpardaPreauthParseTest {
         xs2AStandard.getAspsp().getConfig().getImplementerOptions().put("IO6", IO6);
 
         IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(xs2AStandard, new PSU());
-        ioInputContainerAIS.setAisRequest(basicRequest);
+        ioInputContainerAIS.setXs2ARequest(basicRequest);
 
         STYX02 styx02 = new STYX02();
         IOInputContainerAIS ioInputContainer = (IOInputContainerAIS) styx02.apply(ioInputContainerAIS);
-        Assertions.assertEquals("STYXTest;PSD2;XS2A;someid", ioInputContainer.getAisRequest().getPsu().getId());
+        Assertions.assertEquals("STYXTest;PSD2;XS2A;someid", ioInputContainer.getXs2ARequest().getPsu().getId());
 
     }
 

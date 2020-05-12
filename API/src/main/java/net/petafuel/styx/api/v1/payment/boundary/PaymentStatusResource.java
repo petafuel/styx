@@ -1,12 +1,15 @@
 package net.petafuel.styx.api.v1.payment.boundary;
 
 import net.petafuel.styx.api.filter.AbstractTokenFilter;
+import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
 import net.petafuel.styx.api.filter.CheckAccessToken;
 import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.filter.RequiresPSU;
 import net.petafuel.styx.api.rest.RestResource;
-import net.petafuel.styx.api.v1.payment.control.PaymentStatusProvider;
+import net.petafuel.styx.api.util.io.IOProcessor;
+import net.petafuel.styx.api.util.io.contracts.IOInputContainerPIS;
 import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
+import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.persistence.models.AccessToken;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -43,18 +46,25 @@ public class PaymentStatusResource extends RestResource {
      * @return a PaymentStatus object
      * @throws BankRequestFailedException if something went wrong between the core service and the aspsp
      */
+    @AcceptsPreStepAuth
     @GET
     @Path("/{paymentService}/{paymentProduct}/{paymentId}/status")
     public Response getSinglePaymentStatus(@BeanParam PaymentTypeBean paymentTypeBean,
                                            @PathParam("paymentId") @NotEmpty @NotBlank String paymentId
     ) throws BankRequestFailedException {
-        PaymentStatusProvider provider = new PaymentStatusProvider(getXS2AStandard(), paymentTypeBean, getPsu());
-        provider.addAdditionalHeaders(getAdditionalHeaders());
-        ReadPaymentStatusRequest request = provider.buildRequest(paymentId);
+        ReadPaymentStatusRequest readPaymentStatusRequest = new ReadPaymentStatusRequest(paymentTypeBean.getPaymentService(), paymentTypeBean.getPaymentProduct(), paymentId);
+        readPaymentStatusRequest.getHeaders().putAll(getAdditionalHeaders());
 
-        PaymentStatus status = getXS2AStandard().getPis().getPaymentStatus(request);
-        provider.updateStatus(paymentId, (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), status.getTransactionStatus());
+        IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(getXS2AStandard(), getPsu(), paymentId, paymentTypeBean.getPaymentService(), paymentTypeBean.getPaymentProduct(), readPaymentStatusRequest);
+        IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
+        readPaymentStatusRequest = (ReadPaymentStatusRequest) ioProcessor.applyOptions();
 
+        PaymentStatus status = getXS2AStandard().getPis().getPaymentStatus(readPaymentStatusRequest);
+        if (PersistentPayment.get(paymentId) == null) {
+            PersistentPayment.create(paymentId, (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), status.getTransactionStatus());
+        } else {
+            PersistentPayment.updateStatus(paymentId, status.getTransactionStatus());
+        }
         LOG.info("Successfully read the payment status entity for bic={}, paymentId={}", getXS2AStandard().getAspsp().getBic(), paymentId);
         return Response.status(200).entity(status).build();
     }

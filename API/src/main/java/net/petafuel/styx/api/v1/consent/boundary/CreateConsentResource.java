@@ -67,7 +67,7 @@ public class CreateConsentResource extends RestResource {
         xs2ARequest.setTppRedirectPreferred(getRedirectPreferred());
 
         IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setAisRequest(xs2ARequest);
+        ioInputContainerAIS.setXs2ARequest(xs2ARequest);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
         xs2ARequest = ioProcessor.applyOptions();
 

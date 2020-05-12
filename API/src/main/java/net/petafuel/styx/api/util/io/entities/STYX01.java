@@ -19,7 +19,7 @@ public class STYX01 implements ApplicableImplementerOption {
     public IOInputContainer apply(IOInputContainer ioInput) throws ImplementerOptionException {
         IOInputContainerPIS ioInputContainer = (IOInputContainerPIS) ioInput;
         //Only apply if service is periodic payment and if target request is a payment initiation
-        if (ioInputContainer.getPaymentService() != PaymentService.PERIODIC_PAYMENTS || ioInputContainer.getRequestType() != IOInputContainerPIS.RequestType.INITIATE) {
+        if (ioInputContainer.getPaymentService() != PaymentService.PERIODIC_PAYMENTS || ioInputContainer.getPayment() == null) {
             return ioInputContainer;
         }
         JsonElement aspspUsesFrequencyName = ioInputContainer.getIoParser().getOption(IO, IOParser.Option.REQUIRED);

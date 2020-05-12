@@ -56,7 +56,7 @@ public class GetConsentResource extends RestResource {
         GetConsentRequest request = (GetConsentRequest) provider.buildFetchConsentRequest(consentId);
         request.getHeaders().putAll(getAdditionalHeaders());
         IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setAisRequest(request);
+        ioInputContainerAIS.setXs2ARequest(request);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
         request = (GetConsentRequest) ioProcessor.applyOptions();
         Consent consent = getXS2AStandard().getCs().getConsent(request);
@@ -82,7 +82,7 @@ public class GetConsentResource extends RestResource {
         StatusConsentRequest request = (StatusConsentRequest) provider.getConsentStatusRequest(consentId);
         request.getHeaders().putAll(getAdditionalHeaders());
         IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setAisRequest(request);
+        ioInputContainerAIS.setXs2ARequest(request);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
         request = (StatusConsentRequest) ioProcessor.applyOptions();
         Consent.State state = getXS2AStandard().getCs().getStatus(request);

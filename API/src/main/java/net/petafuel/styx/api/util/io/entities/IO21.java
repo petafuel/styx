@@ -23,7 +23,7 @@ public class IO21 implements ApplicableImplementerOption {
     public IOInputContainer apply(IOInputContainer ioInput) throws ImplementerOptionException {
         IOInputContainerPIS ioInputContainer = (IOInputContainerPIS) ioInput;
         //Only apply if a single payment and if payment initiation is the target request
-        if (ioInputContainer.getPaymentService() != PaymentService.PAYMENTS || ioInputContainer.getRequestType() != IOInputContainerPIS.RequestType.INITIATE) {
+        if (ioInputContainer.getPaymentService() != PaymentService.PAYMENTS || ioInputContainer.getPayment() == null) {
             return ioInputContainer;
         }
         Payment payment = (Payment) ioInputContainer.getPayment();

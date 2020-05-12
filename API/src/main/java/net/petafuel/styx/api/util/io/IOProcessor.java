@@ -32,27 +32,28 @@ public class IOProcessor {
         this.ioInputContainer = ioInputContainer;
         applicableImplementerOptions = new EnumMap<>(IOOrder.class);
         applicableImplementerOptions.put(IOOrder.PRE_CREATION, new ArrayList<>());
-        applicableImplementerOptions.put(IOOrder.CREATION, new ArrayList<>());
         applicableImplementerOptions.put(IOOrder.POST_CREATION, new ArrayList<>());
         initCommonIOs();
+
+        if (ioInputContainer instanceof IOInputContainerPIS) {
+            initPisIOs();
+            ioInputContainerPIS = (IOInputContainerPIS) ioInputContainer;
+            applicableImplementerOptions.get(IOOrder.PRE_CREATION).forEach(option -> applySafe(ioInputContainerPIS, option));
+        } else if (ioInputContainer instanceof IOInputContainerAIS) {
+            initAisIOs();
+            ioInputContainerAIS = (IOInputContainerAIS) ioInputContainer;
+            applicableImplementerOptions.get(IOOrder.PRE_CREATION).forEach(option -> applySafe(ioInputContainerAIS, option));
+        }
     }
 
     public XS2ARequest applyOptions() {
         XS2ARequest xs2ARequest = null;
         if (ioInputContainer instanceof IOInputContainerPIS) {
-            initPisIOs();
-            ioInputContainerPIS = (IOInputContainerPIS) ioInputContainer;
-            applicableImplementerOptions.get(IOOrder.PRE_CREATION).forEach(option -> applySafe(ioInputContainerPIS, option));
-            applicableImplementerOptions.get(IOOrder.CREATION).forEach(option -> applySafe(ioInputContainerPIS, option));
             applicableImplementerOptions.get(IOOrder.POST_CREATION).forEach(option -> applySafe(ioInputContainerPIS, option));
-            xs2ARequest = ioInputContainerPIS.getPaymentRequest();
+            xs2ARequest = ioInputContainerPIS.getXs2ARequest();
         } else if (ioInputContainer instanceof IOInputContainerAIS) {
-            initAisIOs();
-            ioInputContainerAIS = (IOInputContainerAIS) ioInputContainer;
-            applicableImplementerOptions.get(IOOrder.PRE_CREATION).forEach(option -> applySafe(ioInputContainerAIS, option));
-            applicableImplementerOptions.get(IOOrder.CREATION).forEach(option -> applySafe(ioInputContainerAIS, option));
             applicableImplementerOptions.get(IOOrder.POST_CREATION).forEach(option -> applySafe(ioInputContainerAIS, option));
-            xs2ARequest = ioInputContainerAIS.getAisRequest();
+            xs2ARequest = ioInputContainerAIS.getXs2ARequest();
         }
 
         return xs2ARequest;

@@ -62,7 +62,7 @@ public class AccountResource extends RestResource {
         ReadAccountListRequest accountListRequest = new ReadAccountListRequest(consentId);
         accountListRequest.getHeaders().putAll(getAdditionalHeaders());
         IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setAisRequest(accountListRequest);
+        ioInputContainerAIS.setXs2ARequest(accountListRequest);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
         accountListRequest = (ReadAccountListRequest) ioProcessor.applyOptions();
         List<AccountDetails> accountList = getXS2AStandard().getAis().getAccountList(accountListRequest);
@@ -87,7 +87,7 @@ public class AccountResource extends RestResource {
         ReadAccountDetailsRequest accountDetailsRequest = new ReadAccountDetailsRequest(accountId, consentId);
         accountDetailsRequest.getHeaders().putAll(getAdditionalHeaders());
         IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setAisRequest(accountDetailsRequest);
+        ioInputContainerAIS.setXs2ARequest(accountDetailsRequest);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
         accountDetailsRequest = (ReadAccountDetailsRequest) ioProcessor.applyOptions();
         AccountDetails account = getXS2AStandard().getAis().getAccount(accountDetailsRequest);
@@ -113,7 +113,7 @@ public class AccountResource extends RestResource {
         ReadBalancesRequest readBalancesRequest = new ReadBalancesRequest(accountId, consentId);
         readBalancesRequest.getHeaders().putAll(getAdditionalHeaders());
         IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setAisRequest(readBalancesRequest);
+        ioInputContainerAIS.setXs2ARequest(readBalancesRequest);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
         readBalancesRequest = (ReadBalancesRequest) ioProcessor.applyOptions();
         BalanceContainer balances = getXS2AStandard().getAis().getBalancesByAccount(readBalancesRequest);
@@ -147,7 +147,7 @@ public class AccountResource extends RestResource {
 
         readTransactionsRequest.getHeaders().putAll(getAdditionalHeaders());
         IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setAisRequest(readTransactionsRequest);
+        ioInputContainerAIS.setXs2ARequest(readTransactionsRequest);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
         readTransactionsRequest = (ReadTransactionsRequest) ioProcessor.applyOptions();
 

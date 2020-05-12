@@ -70,7 +70,7 @@ public class ConsentAuthorisationResource extends RestResource {
             xs2AAuthorisationRequest.setTppRedirectPreferred(getRedirectPreferred());
         }
         IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setAisRequest(xs2AAuthorisationRequest);
+        ioInputContainerAIS.setXs2ARequest(xs2AAuthorisationRequest);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
         xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
         SCA consentSCA = getXS2AStandard().getCs().startAuthorisation(xs2AAuthorisationRequest);
@@ -110,7 +110,7 @@ public class ConsentAuthorisationResource extends RestResource {
             xs2AAuthorisationRequest = new UpdatePSUAuthenticationRequest(getPsu(), authorisationRequest.getPsuData(), consentId, authorisationId);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
             IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-            ioInputContainerAIS.setAisRequest(xs2AAuthorisationRequest);
+            ioInputContainerAIS.setXs2ARequest(xs2AAuthorisationRequest);
             IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
             xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
             consentSCA = getXS2AStandard().getCs().updatePSUAuthentication(xs2AAuthorisationRequest);
@@ -118,7 +118,7 @@ public class ConsentAuthorisationResource extends RestResource {
             xs2AAuthorisationRequest = new SelectAuthenticationMethodRequest(authorisationRequest.getAuthenticationMethodId(), consentId, authorisationId);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
             IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-            ioInputContainerAIS.setAisRequest(xs2AAuthorisationRequest);
+            ioInputContainerAIS.setXs2ARequest(xs2AAuthorisationRequest);
             IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
             xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
             consentSCA = getXS2AStandard().getCs().selectAuthenticationMethod(xs2AAuthorisationRequest);
@@ -126,7 +126,7 @@ public class ConsentAuthorisationResource extends RestResource {
             xs2AAuthorisationRequest = new AuthoriseTransactionRequest(authorisationRequest.getScaAuthenticationData(), consentId, authorisationId);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
             IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-            ioInputContainerAIS.setAisRequest(xs2AAuthorisationRequest);
+            ioInputContainerAIS.setXs2ARequest(xs2AAuthorisationRequest);
             IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
             xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
             consentSCA = getXS2AStandard().getCs().authoriseTransaction(xs2AAuthorisationRequest);
@@ -134,7 +134,7 @@ public class ConsentAuthorisationResource extends RestResource {
             xs2AAuthorisationRequest = new UpdatePSUIdentificationRequest(getPsu(), consentId, authorisationId);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
             IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-            ioInputContainerAIS.setAisRequest(xs2AAuthorisationRequest);
+            ioInputContainerAIS.setXs2ARequest(xs2AAuthorisationRequest);
             IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
             xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
             consentSCA = getXS2AStandard().getCs().updatePSUIdentification(xs2AAuthorisationRequest);
@@ -156,7 +156,7 @@ public class ConsentAuthorisationResource extends RestResource {
         XS2AAuthorisationRequest getAuthorisationStatusRequest = new GetSCAStatusRequest(consentId, authorisationId);
         getAuthorisationStatusRequest.getHeaders().putAll(getAdditionalHeaders());
         IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setAisRequest(getAuthorisationStatusRequest);
+        ioInputContainerAIS.setXs2ARequest(getAuthorisationStatusRequest);
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
         getAuthorisationStatusRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
         SCA.Status authorisationStatus = getXS2AStandard().getCs().getSCAStatus(getAuthorisationStatusRequest);

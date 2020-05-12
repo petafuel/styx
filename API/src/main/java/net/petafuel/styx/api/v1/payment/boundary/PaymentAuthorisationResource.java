@@ -67,28 +67,27 @@ public class PaymentAuthorisationResource extends RestResource {
     public Response startPaymentAuthorisation(@BeanParam PaymentTypeBean paymentTypeBean,
                                               @NotEmpty @NotBlank @PathParam("paymentId") String paymentId,
                                               @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
-        XS2AAuthorisationRequest xs2AAuthorisationRequest = new StartAuthorisationRequest(getPsu(),
-                authorisationRequest.getPsuData(),
-                paymentTypeBean.getPaymentService(),
-                paymentTypeBean.getPaymentProduct(), paymentId);
-        if (getRedirectPreferred() != null) {
-            xs2AAuthorisationRequest.setTppRedirectPreferred(getRedirectPreferred());
-        }
-
         IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(
-                IOInputContainerPIS.RequestType.FETCH,
                 getXS2AStandard(),
                 getPsu(),
                 paymentId,
                 paymentTypeBean.getPaymentService(),
                 paymentTypeBean.getPaymentProduct());
-        ioInputContainerPIS.setAdditionalHeaders(getAdditionalHeaders());
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
-        ioProcessor.applyOptions();
 
+        XS2AAuthorisationRequest xs2AAuthorisationRequest = new StartAuthorisationRequest(ioProcessor.getIoInputContainerPIS().getPsu(),
+                authorisationRequest.getPsuData(),
+                ioProcessor.getIoInputContainerPIS().getPaymentService(),
+                ioProcessor.getIoInputContainerPIS().getPaymentProduct(), paymentId);
         if (getRedirectPreferred() != null) {
             xs2AAuthorisationRequest.setTppRedirectPreferred(getRedirectPreferred());
         }
+        xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
+        ioProcessor.getIoInputContainerPIS().setXs2ARequest(xs2AAuthorisationRequest);
+
+        xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
+
+
         SCA paymentSCA = getXS2AStandard().getPis().startAuthorisation(xs2AAuthorisationRequest);
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(paymentTypeBean.getPaymentService(),
@@ -116,6 +115,7 @@ public class PaymentAuthorisationResource extends RestResource {
      * @throws BankRequestFailedException
      * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-GreenPUT/v1/{payment-service}/{payment-product}/{paymentId}/authorisations/{authorisationId}
      */
+    @AcceptsPreStepAuth
     @PUT
     @Path("/{paymentService}/{paymentProduct}/{paymentId}/authorisations/{authorisationId}")
     public Response updatePaymentAuthorisation(@BeanParam PaymentTypeBean paymentTypeBean,
@@ -123,7 +123,6 @@ public class PaymentAuthorisationResource extends RestResource {
                                                @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId,
                                                @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
         IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(
-                IOInputContainerPIS.RequestType.FETCH,
                 getXS2AStandard(),
                 getPsu(),
                 paymentId,
@@ -131,8 +130,6 @@ public class PaymentAuthorisationResource extends RestResource {
                 paymentTypeBean.getPaymentProduct());
 
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
-        ioProcessor.applyOptions();
-
         SCA paymentSCA;
         XS2AAuthorisationRequest xs2AAuthorisationRequest;
 
@@ -145,6 +142,8 @@ public class PaymentAuthorisationResource extends RestResource {
                     paymentId,
                     authorisationId);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
+            ioProcessor.getIoInputContainerPIS().setXs2ARequest(xs2AAuthorisationRequest);
+            xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
             paymentSCA = getXS2AStandard().getPis().updatePSUAuthentication(xs2AAuthorisationRequest);
         } else if (authorisationRequest.getAuthenticationMethodId() != null) {
             xs2AAuthorisationRequest = new SelectAuthenticationMethodRequest(
@@ -154,6 +153,8 @@ public class PaymentAuthorisationResource extends RestResource {
                     paymentId,
                     authorisationId);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
+            ioProcessor.getIoInputContainerPIS().setXs2ARequest(xs2AAuthorisationRequest);
+            xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
             paymentSCA = getXS2AStandard().getPis().selectAuthenticationMethod(xs2AAuthorisationRequest);
         } else if (authorisationRequest.getScaAuthenticationData() != null) {
             xs2AAuthorisationRequest = new AuthoriseTransactionRequest(
@@ -163,6 +164,8 @@ public class PaymentAuthorisationResource extends RestResource {
                     paymentId,
                     authorisationId);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
+            ioProcessor.getIoInputContainerPIS().setXs2ARequest(xs2AAuthorisationRequest);
+            xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
             paymentSCA = getXS2AStandard().getPis().authoriseTransaction(xs2AAuthorisationRequest);
         } else {
             xs2AAuthorisationRequest = new UpdatePSUIdentificationRequest(
@@ -172,6 +175,8 @@ public class PaymentAuthorisationResource extends RestResource {
                     paymentId,
                     authorisationId);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
+            ioProcessor.getIoInputContainerPIS().setXs2ARequest(xs2AAuthorisationRequest);
+            xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
             paymentSCA = getXS2AStandard().getPis().updatePSUIdentification(xs2AAuthorisationRequest);
         }
 
@@ -193,12 +198,12 @@ public class PaymentAuthorisationResource extends RestResource {
      * @return
      * @throws BankRequestFailedException
      */
+    @AcceptsPreStepAuth
     @GET
     @Path("/{paymentService}/{paymentProduct}/{paymentId}/authorisations")
     public Response getAuthorisationIds(@BeanParam PaymentTypeBean paymentTypeBean,
                                         @NotEmpty @NotBlank @PathParam("paymentId") String paymentId) throws BankRequestFailedException {
         IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(
-                IOInputContainerPIS.RequestType.FETCH,
                 getXS2AStandard(),
                 getPsu(),
                 paymentId,
@@ -206,9 +211,11 @@ public class PaymentAuthorisationResource extends RestResource {
                 paymentTypeBean.getPaymentProduct());
 
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
-        ioProcessor.applyOptions();
         XS2AAuthorisationRequest getAuthorisationRequest = new GetAuthorisationsRequest(ioInputContainerPIS.getPaymentService(), ioInputContainerPIS.getPaymentProduct(), paymentId);
         getAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
+        ioProcessor.getIoInputContainerPIS().setXs2ARequest(getAuthorisationRequest);
+        getAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
+
         List<String> authorisationIds = getXS2AStandard().getPis().getAuthorisations(getAuthorisationRequest);
         AuthorisationIdsResponse response = new AuthorisationIdsResponse();
         response.setAuthorisationIds(authorisationIds);
@@ -225,13 +232,13 @@ public class PaymentAuthorisationResource extends RestResource {
      * @return
      * @throws BankRequestFailedException
      */
+    @AcceptsPreStepAuth
     @GET
     @Path("/{paymentService}/{paymentProduct}/{paymentId}/authorisations/{authorisationId}")
     public Response getScaStatus(@BeanParam PaymentTypeBean paymentTypeBean,
                                  @NotEmpty @NotBlank @PathParam("paymentId") String paymentId,
                                  @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId) throws BankRequestFailedException {
         IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(
-                IOInputContainerPIS.RequestType.FETCH,
                 getXS2AStandard(),
                 getPsu(),
                 paymentId,
@@ -239,9 +246,11 @@ public class PaymentAuthorisationResource extends RestResource {
                 paymentTypeBean.getPaymentProduct());
 
         IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
-        ioProcessor.applyOptions();
+
         XS2AAuthorisationRequest getAuthorisationStatusRequest = new GetSCAStatusRequest(ioInputContainerPIS.getPaymentService(), ioInputContainerPIS.getPaymentProduct(), paymentId, authorisationId);
         getAuthorisationStatusRequest.getHeaders().putAll(getAdditionalHeaders());
+        ioProcessor.getIoInputContainerPIS().setXs2ARequest(getAuthorisationStatusRequest);
+        getAuthorisationStatusRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
         SCA.Status authorisationStatus = getXS2AStandard().getPis().getSCAStatus(getAuthorisationStatusRequest);
         AuthorisationStatusResponse response = new AuthorisationStatusResponse();
         response.setScaStatus(authorisationStatus.getValue());

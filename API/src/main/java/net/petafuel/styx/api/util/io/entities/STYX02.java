@@ -3,11 +3,8 @@ package net.petafuel.styx.api.util.io.entities;
 import net.petafuel.styx.api.util.IOParser;
 import net.petafuel.styx.api.util.io.contracts.ApplicableImplementerOption;
 import net.petafuel.styx.api.util.io.contracts.IOInputContainer;
-import net.petafuel.styx.api.util.io.contracts.IOInputContainerAIS;
-import net.petafuel.styx.api.util.io.contracts.IOInputContainerPIS;
 import net.petafuel.styx.api.util.io.contracts.IOOrder;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
-import net.petafuel.styx.core.xs2a.contracts.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 
 import javax.json.JsonObject;
@@ -33,22 +30,15 @@ public class STYX02 implements ApplicableImplementerOption {
         //extract PSU-ID from authorisation header
         //set the extracted psu id to the current psu within the xs2a request
         //override the iocontainer request with the modified request
-        if (ioInput instanceof IOInputContainerAIS) {
-            XS2ARequest xs2ARequest = ((IOInputContainerAIS) ioInput).getAisRequest();
-            String psuId = extractPsuId(xs2ARequest.getHeaders().get(XS2AHeader.AUTHORIZATION));
 
-            if (psuId == null) {
-                throw new ImplementerOptionException("Unable to extract psu id from access token");
-            }
-            ((IOInputContainerAIS) ioInput).getAisRequest().getPsu().setId(psuId);
-        } else {
-            XS2APaymentRequest xs2APaymentRequest = ((IOInputContainerPIS) ioInput).getPaymentRequest();
-            String psuId = extractPsuId(xs2APaymentRequest.getHeaders().get(XS2AHeader.AUTHORIZATION));
-            if (psuId == null) {
-                throw new ImplementerOptionException("Unable to extract psu id from access token");
-            }
-            ((IOInputContainerPIS) ioInput).getPaymentRequest().getPsu().setId(psuId);
+        XS2ARequest xs2ARequest = ioInput.getXs2ARequest();
+        String psuId = extractPsuId(xs2ARequest.getHeaders().get(XS2AHeader.AUTHORIZATION));
+
+        if (psuId == null) {
+            throw new ImplementerOptionException("Unable to extract psu id from access token");
         }
+        ioInput.getXs2ARequest().getPsu().setId(psuId);
+
         return ioInput;
     }
 

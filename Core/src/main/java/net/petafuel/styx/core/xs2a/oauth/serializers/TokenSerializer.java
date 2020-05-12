@@ -56,12 +56,13 @@ public class TokenSerializer implements JsonDeserializer<OAuthSession>, JsonSeri
         }
         if (object.has(EXPIRES_IN)) {
              int seconds = object.get(EXPIRES_IN).getAsInt();
-             Date date = new Date();
-             date.setTime(date.getTime() + seconds * 1000);
-             session.setAccessTokenExpiresAt(date);
+             Date date1 = new Date();
+             date1.setTime(date1.getTime() + seconds * 1000);
+             session.setAccessTokenExpiresAt(date1);
              long milliseconds = 7776000000L; // 90 days in milliseconds 90 * 24 * 60 * 60 * 1000
-             date.setTime(date.getTime() + milliseconds);
-             session.setRefreshTokenExpiresAt(date);
+             Date date2 = new Date();
+             date2.setTime(date2.getTime() + milliseconds);
+             session.setRefreshTokenExpiresAt(date2);
         }
         if (object.has(SCOPE)) {
             String scope = object.get(SCOPE).getAsString();

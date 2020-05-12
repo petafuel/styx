@@ -13,7 +13,8 @@ public class OAuthSession {
     private String accessToken;
     private String tokenType;
     private String refreshToken;
-    private Date expiresAt;
+    private Date accessTokenExpiresAt;
+    private Date refreshTokenExpiresAt;
     private String scope;
 
     public OAuthSession(String accessToken, String tokenType) {
@@ -47,12 +48,20 @@ public class OAuthSession {
         this.refreshToken = refreshToken;
     }
 
-    public Date getExpiresAt() {
-        return expiresAt;
+    public Date getAccessTokenExpiresAt() {
+        return accessTokenExpiresAt;
     }
 
-    public void setExpiresAt(Date expiresAt) {
-        this.expiresAt = expiresAt;
+    public void setAccessTokenExpiresAt(Date accessTokenExpiresAt) {
+        this.accessTokenExpiresAt = accessTokenExpiresAt;
+    }
+
+    public Date getRefreshTokenExpiresAt() {
+        return refreshTokenExpiresAt;
+    }
+
+    public void setRefreshTokenExpiresAt(Date refreshTokenExpiresAt) {
+        this.refreshTokenExpiresAt = refreshTokenExpiresAt;
     }
 
     public String getScope() {

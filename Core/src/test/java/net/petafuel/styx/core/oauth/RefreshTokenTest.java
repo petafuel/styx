@@ -19,8 +19,7 @@ public class RefreshTokenTest {
 
         String preAuthId = "cfa0cfd3-d4db-47c6-ad45-addececcfb02";
 
-        PersistentOAuthSession persistentOAuthSession = new PersistentOAuthSession();
-        OAuthSession session = persistentOAuthSession.get(preAuthId);
+        OAuthSession session = PersistentOAuthSession.get(preAuthId);
 
         if (session.getAccessTokenExpiresAt().before(new Date()) && session.getRefreshTokenExpiresAt().after(new Date())) {
             System.out.println("Token has expired");
@@ -28,7 +27,7 @@ public class RefreshTokenTest {
             OAuthService service = new OAuthService();
             OAuthSession refreshed = service.tokenRequest(session.getTokenEndpoint(), request);
             refreshed.setState(preAuthId);
-            persistentOAuthSession.update(refreshed);
+            PersistentOAuthSession.update(refreshed);
 
             Assert.assertNotEquals(session.getAccessToken(), refreshed.getAccessToken());
             System.out.println("Token is refreshed");

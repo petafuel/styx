@@ -137,7 +137,7 @@ public class OAuthService extends BasicService {
         }
 
         try (Response response = this.execute()) {
-            String body = response.body().string();
+            String body = extractResponseBody(response, 200);
 
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(OAuthSession.class, new TokenSerializer())

@@ -412,7 +412,7 @@ $$
           },
           "STYX02": {
             "options": {
-              "required": false
+              "required": true
             },
             "description": "PSU-ID needs to be extracted from the oauth pre-step access token"
           }

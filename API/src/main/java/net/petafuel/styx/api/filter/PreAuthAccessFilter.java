@@ -53,15 +53,7 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
 
                 if (oAuthSession.getAccessTokenExpiresAt().before(new Date())) {
                     if (oAuthSession.getRefreshTokenExpiresAt().after(new Date())) {
-                        RefreshTokenRequest request = new RefreshTokenRequest(oAuthSession.getRefreshToken());
-                        OAuthService service = new OAuthService();
-                        try {
-                            oAuthSession = service.tokenRequest(oAuthSession.getTokenEndpoint(), request);
-                            oAuthSession.setState(preAuthId);
-                            PersistentOAuthSession.update(oAuthSession);
-                        } catch (BankRequestFailedException expiredToken) {
-                            throw new OAuthTokenExpiredException(OAuthTokenExpiredException.MESSAGE);
-                        }
+                       oAuthSession = refreshToken(oAuthSession);
                     } else {
                         throw new OAuthTokenExpiredException(OAuthTokenExpiredException.MESSAGE);
                     }
@@ -78,6 +70,20 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
             } catch (OAuthTokenExpiredException tokenExpired) {
                 throw new StyxException(new ResponseEntity(tokenExpired.getMessage(), ResponseConstant.STYX_PREAUTH_EXPIRED, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
             }
+        }
+    }
+
+    private OAuthSession refreshToken(OAuthSession oAuthSession) throws OAuthTokenExpiredException {
+        String preAuthId = oAuthSession.getState();
+        RefreshTokenRequest request = new RefreshTokenRequest(oAuthSession.getRefreshToken());
+        OAuthService service = new OAuthService();
+        try {
+            oAuthSession = service.tokenRequest(oAuthSession.getTokenEndpoint(), request);
+            oAuthSession.setState(preAuthId);
+            PersistentOAuthSession.update(oAuthSession);
+            return oAuthSession;
+        } catch (BankRequestFailedException expiredToken) {
+            throw new OAuthTokenExpiredException(OAuthTokenExpiredException.MESSAGE);
         }
     }
 }

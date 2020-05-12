@@ -16,7 +16,7 @@ $$
           "IO2": {
             "options": {
               "sepa-credit-transfers": true,
-              "instant-sepa-credit-transfers": true,
+              "instant-sepa-credit-transfers": false,
               "target-2-payments": false,
               "cross-border-credit-transfers": false,
               "pain.001-sepa-credit-transfers": false,
@@ -28,8 +28,8 @@ $$
           },
           "IO3": {
             "options": {
-              "sepa-credit-transfers": true,
-              "instant-sepa-credit-transfers": true,
+              "sepa-credit-transfers": false,
+              "instant-sepa-credit-transfers": false,
               "target-2-payments": false,
               "cross-border-credit-transfers": false,
               "pain.001-sepa-credit-transfers": false,
@@ -42,7 +42,7 @@ $$
           "IO4": {
             "options": {
               "sepa-credit-transfers": true,
-              "instant-sepa-credit-transfers": true,
+              "instant-sepa-credit-transfers": false,
               "target-2-payments": false,
               "cross-border-credit-transfers": false,
               "pain.001-sepa-credit-transfers": false,
@@ -503,8 +503,8 @@ $$
         WHERE bic IN ('GENODED1SPW', 'GENODED1SPE', 'GENODED1SPK', 'GENODEF1S08');
 
         --change the main config to not use pre-step
-        INSERT INTO public.configs (id, standard_id, config, updated_at, created_at, styx_config)
-        VALUES (1, 2, '{
+        UPDATE public.configs
+        SET config='{
           "IO1": {
             "options": {
               "required": true
@@ -901,8 +901,8 @@ $$
             },
             "description": "Endpoint signing-baskets/{basketId}/status supported"
           }
-        }', '2019-12-17 10:19:26.000000', '2019-12-17 10:19:27.000000', null);
+        }'
+        WHERE id = 1;
 
     END
 $$;
-

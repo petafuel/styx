@@ -51,6 +51,9 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
             try {
                 OAuthSession oAuthSession = PersistentOAuthSession.get(preAuthId);
 
+                if (oAuthSession.getAccessToken() == null || oAuthSession.getAccessTokenExpiresAt() == null) {
+                    throw new PersistenceEmptyResultSetException("The access_token data should be set");
+                }
                 if (oAuthSession.getAccessTokenExpiresAt().before(new Date())) {
                     if (oAuthSession.getRefreshTokenExpiresAt().after(new Date())) {
                        oAuthSession = refreshToken(oAuthSession);

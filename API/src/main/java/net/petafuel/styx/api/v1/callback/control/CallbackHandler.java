@@ -3,7 +3,7 @@ package net.petafuel.styx.api.v1.callback.control;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
-import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
+import net.petafuel.styx.core.xs2a.oauth.http.AuthorizationCodeRequest;
 import net.petafuel.styx.core.xs2a.utils.Config;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -53,12 +53,12 @@ public class CallbackHandler {
         PersistentOAuthSession db = new PersistentOAuthSession();
         OAuthSession stored = db.get(state);
         try {
-            TokenRequest request = new TokenRequest(code, stored.getCodeVerifier());
+            AuthorizationCodeRequest request = new AuthorizationCodeRequest(code, stored.getCodeVerifier());
             if (param.equals(OAuthService.PREAUTH)) {
                 request.setJsonBody(false);
                 request.setRedirectUri(request.getRedirectUri() + OAuthService.PREAUTH);
             }
-            OAuthSession authorized = service.accessTokenRequest(stored.getTokenEndpoint(), request);
+            OAuthSession authorized = service.tokenRequest(stored.getTokenEndpoint(), request);
             authorized.setState(state);
             db.update(authorized);
 

@@ -3,7 +3,6 @@ package net.petafuel.styx.core.xs2a.oauth.http;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
-import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.oauth.serializers.TokenSerializer;
 import net.petafuel.styx.core.xs2a.utils.Config;
 
@@ -11,19 +10,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-
-public class TokenRequest extends XS2ARequest {
+public class AuthorizationCodeRequest extends OAuthTokenRequest {
 
     private String code;
-    private String grantType = "authorization_code";
-    private String clientId = Config.getInstance().getProperties().getProperty("keystore.client_id");
     private String codeVerifier;
     private String redirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl");
-    private boolean jsonBody = true;
 
-    public TokenRequest(String code, String codeVerifier) {
+    public AuthorizationCodeRequest(String code, String codeVerifier) {
         this.code = code;
         this.codeVerifier = codeVerifier;
+        setGrantType("authorization_code");
     }
 
     public String getCode() {
@@ -32,22 +28,6 @@ public class TokenRequest extends XS2ARequest {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public String getGrantType() {
-        return grantType;
-    }
-
-    public void setGrantType(String grantType) {
-        this.grantType = grantType;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
     }
 
     public String getCodeVerifier() {
@@ -66,30 +46,21 @@ public class TokenRequest extends XS2ARequest {
         this.redirectUri = redirectUri;
     }
 
-    public boolean isJsonBody() {
-        return jsonBody;
-    }
-
-    public void setJsonBody(boolean jsonBody) {
-        this.jsonBody = jsonBody;
-    }
-
     @Override
     public Optional<String> getRawBody() {
         String rawBody;
-        if (jsonBody) {
-            Gson gson = new GsonBuilder().registerTypeAdapter(TokenRequest.class, new TokenSerializer()).create();
+        if (isJsonBody()) {
+            Gson gson = new GsonBuilder().registerTypeAdapter(AuthorizationCodeRequest.class, new TokenSerializer()).create();
             rawBody = gson.toJson(this);
         } else {
             Map<String, String> params = new HashMap<>();
-            params.put("grant_type", grantType);
-            params.put("client_id", clientId);
-            params.put("code", code);
-            params.put("code_verifier", codeVerifier);
-            params.put("redirect_uri", redirectUri);
+            params.put("grant_type", getGrantType());
+            params.put("client_id", getClientId());
+            params.put("code", getCode());
+            params.put("code_verifier", getCodeVerifier());
+            params.put("redirect_uri", getRedirectUri());
             rawBody = BasicService.httpBuildQuery(params).substring(1);
         }
-
         return Optional.ofNullable(rawBody);
     }
 }

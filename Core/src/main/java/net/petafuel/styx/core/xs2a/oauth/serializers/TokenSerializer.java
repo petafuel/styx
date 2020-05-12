@@ -7,12 +7,14 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonDeserializationContext;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
-import net.petafuel.styx.core.xs2a.oauth.http.TokenRequest;
+import net.petafuel.styx.core.xs2a.oauth.http.AuthorizationCodeRequest;
+import net.petafuel.styx.core.xs2a.oauth.http.OAuthTokenRequest;
+import net.petafuel.styx.core.xs2a.oauth.http.RefreshTokenRequest;
 
 import java.lang.reflect.Type;
 import java.util.Date;
 
-public class TokenSerializer implements JsonDeserializer<OAuthSession>, JsonSerializer<TokenRequest> {
+public class TokenSerializer implements JsonDeserializer<OAuthSession>, JsonSerializer<OAuthTokenRequest> {
 
     private static final String GRANT_TYPE = "grant_type";
     private static final String CODE = "code";
@@ -26,13 +28,19 @@ public class TokenSerializer implements JsonDeserializer<OAuthSession>, JsonSeri
     private static final String SCOPE = "scope";
 
     @Override
-    public JsonElement serialize(TokenRequest tokenRequest, Type type, JsonSerializationContext jsonSerializationContext) {
+    public JsonElement serialize(OAuthTokenRequest tokenRequest, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonObject object = new JsonObject();
         object.addProperty(GRANT_TYPE, tokenRequest.getGrantType());
-        object.addProperty(CODE, tokenRequest.getCode());
         object.addProperty(CLIENT_ID, tokenRequest.getClientId());
-        object.addProperty(CODE_VERIFIER, tokenRequest.getCodeVerifier());
-        object.addProperty(REDIRECT_URI, tokenRequest.getRedirectUri());
+        if (tokenRequest instanceof AuthorizationCodeRequest) {
+            AuthorizationCodeRequest request = (AuthorizationCodeRequest) tokenRequest;
+            object.addProperty(CODE, request.getCode());
+            object.addProperty(CODE_VERIFIER, request.getCodeVerifier());
+            object.addProperty(REDIRECT_URI, request.getRedirectUri());
+        } else {
+            RefreshTokenRequest request = (RefreshTokenRequest) tokenRequest;
+            object.addProperty(REFRESH_TOKEN, request.getRefreshToken());
+        }
         return object;
     }
 
@@ -50,7 +58,10 @@ public class TokenSerializer implements JsonDeserializer<OAuthSession>, JsonSeri
              int seconds = object.get(EXPIRES_IN).getAsInt();
              Date date = new Date();
              date.setTime(date.getTime() + seconds * 1000);
-             session.setExpiresAt(date);
+             session.setAccessTokenExpiresAt(date);
+             long milliseconds = 7776000000L; // 90 days in milliseconds 90 * 24 * 60 * 60 * 1000
+             date.setTime(date.getTime() + milliseconds);
+             session.setRefreshTokenExpiresAt(date);
         }
         if (object.has(SCOPE)) {
             String scope = object.get(SCOPE).getAsString();

@@ -12,13 +12,17 @@ import net.petafuel.styx.core.xs2a.entities.PaymentService;
  */
 public class IOInputContainerPIS extends IOInputContainer {
     public static final String XML_PAYMENT_PRODUCT_PREFIX = "pain.001-";
-
     private InitializablePayment payment;
     private String paymentId;
     private PaymentService paymentService;
     private PaymentProduct paymentProduct;
-    private XS2APaymentRequest paymentRequest;
-    private RequestType requestType;
+
+    public IOInputContainerPIS(XS2AStandard xs2AStandard, PSU psu, InitializablePayment payment, PaymentService paymentService, PaymentProduct paymentProduct) {
+        super(xs2AStandard, psu);
+        this.payment = payment;
+        this.paymentService = paymentService;
+        this.paymentProduct = paymentProduct;
+    }
 
     /**
      * initiate Payment
@@ -29,20 +33,27 @@ public class IOInputContainerPIS extends IOInputContainer {
      * @param paymentService current paymentService
      * @param paymentProduct current PaymentProduct
      */
-    public IOInputContainerPIS(RequestType requestType, XS2AStandard xs2AStandard, PSU psu, InitializablePayment payment, PaymentService paymentService, PaymentProduct paymentProduct) {
+    public IOInputContainerPIS(XS2AStandard xs2AStandard, PSU psu, InitializablePayment payment, PaymentService paymentService, PaymentProduct paymentProduct, XS2APaymentRequest xs2APaymentRequest) {
         super(xs2AStandard, psu);
         this.payment = payment;
         this.paymentService = paymentService;
         this.paymentProduct = paymentProduct;
-        this.requestType = requestType;
+        xs2ARequest = xs2APaymentRequest;
     }
 
-    public IOInputContainerPIS(RequestType requestType, XS2AStandard xs2AStandard, PSU psu, String paymentId, PaymentService paymentService, PaymentProduct paymentProduct) {
+    public IOInputContainerPIS(XS2AStandard xs2AStandard, PSU psu, String paymentId, PaymentService paymentService, PaymentProduct paymentProduct, XS2APaymentRequest xs2APaymentRequest) {
         super(xs2AStandard, psu);
         this.paymentId = paymentId;
         this.paymentService = paymentService;
         this.paymentProduct = paymentProduct;
-        this.requestType = requestType;
+        xs2ARequest = xs2APaymentRequest;
+    }
+
+    public IOInputContainerPIS(XS2AStandard xs2AStandard, PSU psu, String paymentId, PaymentService paymentService, PaymentProduct paymentProduct) {
+        super(xs2AStandard, psu);
+        this.paymentId = paymentId;
+        this.paymentService = paymentService;
+        this.paymentProduct = paymentProduct;
     }
 
     public InitializablePayment getPayment() {
@@ -51,18 +62,6 @@ public class IOInputContainerPIS extends IOInputContainer {
 
     public void setPayment(InitializablePayment payment) {
         this.payment = payment;
-    }
-
-    public XS2APaymentRequest getPaymentRequest() {
-        return paymentRequest;
-    }
-
-    public void setPaymentRequest(XS2APaymentRequest paymentRequest) {
-        if (this.paymentRequest != null) {
-            //prevent implementer options from overriding an already defined request object
-            throw new IllegalStateException("Request object was already created by ApplicableImplementerOption, overriding is not allowed");
-        }
-        this.paymentRequest = paymentRequest;
     }
 
     public PaymentService getPaymentService() {
@@ -81,25 +80,11 @@ public class IOInputContainerPIS extends IOInputContainer {
         this.paymentProduct = paymentProduct;
     }
 
-    public RequestType getRequestType() {
-        return requestType;
-    }
-
-    public void setRequestType(RequestType requestType) {
-        this.requestType = requestType;
-    }
-
     public String getPaymentId() {
         return paymentId;
     }
 
     public void setPaymentId(String paymentId) {
         this.paymentId = paymentId;
-    }
-
-    public enum RequestType {
-        INITIATE,
-        FETCH,
-        STATUS
     }
 }

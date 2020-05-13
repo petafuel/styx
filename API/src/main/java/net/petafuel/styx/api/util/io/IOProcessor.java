@@ -9,8 +9,12 @@ import net.petafuel.styx.api.util.io.entities.IO2;
 import net.petafuel.styx.api.util.io.entities.IO21;
 import net.petafuel.styx.api.util.io.entities.IO3;
 import net.petafuel.styx.api.util.io.entities.IO4;
+import net.petafuel.styx.api.util.io.entities.ImplementerOptionException;
 import net.petafuel.styx.api.util.io.entities.STYX01;
+import net.petafuel.styx.api.util.io.entities.STYX02;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -18,50 +22,57 @@ import java.util.List;
 import java.util.Map;
 
 public class IOProcessor {
-    private final Map<IOOrder, List<ApplicableImplementerOption<IOInputContainer>>> applicableImplementerOptionsCommon;
-    private Map<IOOrder, List<ApplicableImplementerOption<IOInputContainerPIS>>> applicableImplementerOptionsPIS;
-    private Map<IOOrder, List<ApplicableImplementerOption<IOInputContainerAIS>>> applicableImplementerOptionsAIS;
-    private IOInputContainerPIS ioInputContainerpis;
-    private IOInputContainerAIS ioInputContainerais;
+    private static final Logger LOG = LogManager.getLogger(IOProcessor.class);
+    private final Map<IOOrder, List<ApplicableImplementerOption>> applicableImplementerOptions;
+    IOInputContainer ioInputContainer;
+    IOInputContainerPIS ioInputContainerPIS;
+    IOInputContainerAIS ioInputContainerAIS;
 
     public IOProcessor(IOInputContainer ioInputContainer) {
-        applicableImplementerOptionsCommon = new EnumMap<>(IOOrder.class);
-        this.applicableImplementerOptionsCommon.put(IOOrder.PRE_CREATION, new ArrayList<>());
-        this.applicableImplementerOptionsCommon.put(IOOrder.POST_CREATION, new ArrayList<>());
+        this.ioInputContainer = ioInputContainer;
+        applicableImplementerOptions = new EnumMap<>(IOOrder.class);
+        applicableImplementerOptions.put(IOOrder.PRE_CREATION, new ArrayList<>());
+        applicableImplementerOptions.put(IOOrder.POST_CREATION, new ArrayList<>());
         initCommonIOs();
+
         if (ioInputContainer instanceof IOInputContainerPIS) {
-            this.applicableImplementerOptionsPIS = new EnumMap<>(IOOrder.class);
-            this.applicableImplementerOptionsPIS.put(IOOrder.PRE_CREATION, new ArrayList<>());
-            this.applicableImplementerOptionsPIS.put(IOOrder.CREATION, new ArrayList<>());
-            this.applicableImplementerOptionsPIS.put(IOOrder.POST_CREATION, new ArrayList<>());
-            ioInputContainerpis = (IOInputContainerPIS) ioInputContainer;
             initPisIOs();
+            ioInputContainerPIS = (IOInputContainerPIS) ioInputContainer;
+            applicableImplementerOptions.get(IOOrder.PRE_CREATION).forEach(option -> applySafe(ioInputContainerPIS, option));
         } else if (ioInputContainer instanceof IOInputContainerAIS) {
-            this.applicableImplementerOptionsAIS = new EnumMap<>(IOOrder.class);
-            this.applicableImplementerOptionsAIS.put(IOOrder.PRE_CREATION, new ArrayList<>());
-            this.applicableImplementerOptionsAIS.put(IOOrder.CREATION, new ArrayList<>());
-            this.applicableImplementerOptionsAIS.put(IOOrder.POST_CREATION, new ArrayList<>());
-            ioInputContainerais = (IOInputContainerAIS) ioInputContainer;
             initAisIOs();
+            ioInputContainerAIS = (IOInputContainerAIS) ioInputContainer;
+            applicableImplementerOptions.get(IOOrder.PRE_CREATION).forEach(option -> applySafe(ioInputContainerAIS, option));
         }
     }
 
     public XS2ARequest applyOptions() {
-        XS2ARequest xs2ARequest;
-        applicableImplementerOptionsCommon.get(IOOrder.PRE_CREATION).forEach(option -> option.apply(ioInputContainerpis));
-        if (ioInputContainerpis != null) {
-            applicableImplementerOptionsPIS.get(IOOrder.PRE_CREATION).forEach(option -> option.apply(ioInputContainerpis));
-            applicableImplementerOptionsPIS.get(IOOrder.CREATION).forEach(option -> option.apply(ioInputContainerpis));
-            applicableImplementerOptionsPIS.get(IOOrder.POST_CREATION).forEach(option -> option.apply(ioInputContainerpis));
-            xs2ARequest = ioInputContainerpis.getPaymentRequest();
-        } else {
-            applicableImplementerOptionsAIS.get(IOOrder.PRE_CREATION).forEach(option -> option.apply(ioInputContainerais));
-            applicableImplementerOptionsAIS.get(IOOrder.CREATION).forEach(option -> option.apply(ioInputContainerais));
-            applicableImplementerOptionsAIS.get(IOOrder.POST_CREATION).forEach(option -> option.apply(ioInputContainerais));
-            xs2ARequest = ioInputContainerais.getAisRequest();
+        XS2ARequest xs2ARequest = null;
+        if (ioInputContainer instanceof IOInputContainerPIS) {
+            applicableImplementerOptions.get(IOOrder.POST_CREATION).forEach(option -> applySafe(ioInputContainerPIS, option));
+            xs2ARequest = ioInputContainerPIS.getXs2ARequest();
+        } else if (ioInputContainer instanceof IOInputContainerAIS) {
+            applicableImplementerOptions.get(IOOrder.POST_CREATION).forEach(option -> applySafe(ioInputContainerAIS, option));
+            xs2ARequest = ioInputContainerAIS.getXs2ARequest();
         }
-        applicableImplementerOptionsCommon.get(IOOrder.POST_CREATION).forEach(option -> option.apply(ioInputContainerais));
+
         return xs2ARequest;
+    }
+
+    private void applySafe(IOInputContainerAIS ioInput, ApplicableImplementerOption applicableImplementerOption) {
+        try {
+            ioInputContainerAIS = (IOInputContainerAIS) applicableImplementerOption.apply(ioInput);
+        } catch (ImplementerOptionException e) {
+            LOG.warn("error applying IOs option={} order={} message={}", applicableImplementerOption.getClass().getSimpleName(), applicableImplementerOption.order(), e.getMessage());
+        }
+    }
+
+    private void applySafe(IOInputContainerPIS ioInput, ApplicableImplementerOption applicableImplementerOption) {
+        try {
+            ioInputContainerPIS = (IOInputContainerPIS) applicableImplementerOption.apply(ioInput);
+        } catch (ImplementerOptionException e) {
+            LOG.warn("error applying implementer option {}: {}", applicableImplementerOption.getClass().getSimpleName(), e.getMessage());
+        }
     }
 
     /**
@@ -75,13 +86,13 @@ public class IOProcessor {
      * init ios for PIS requests
      */
     private void initPisIOs() {
-        addPISOption(new IO2());
-        addPISOption(new IO3());
-        addPISOption(new IO4());
-        addPISOption(new IO21());
+        addOption(new IO2());
+        addOption(new IO3());
+        addOption(new IO4());
+        addOption(new IO21());
 
-        addPISOption(new STYX01());
-
+        addOption(new STYX01());
+        addOption(new STYX02());
     }
 
     /**
@@ -89,25 +100,34 @@ public class IOProcessor {
      */
     private void initAisIOs() {
         //Add options that apply to AIS/CS requests
+        addOption(new STYX02());
     }
 
-    private void addPISOption(ApplicableImplementerOption<IOInputContainerPIS> applicableImplementerOption) {
-        applicableImplementerOptionsPIS.get(applicableImplementerOption.order()).add(applicableImplementerOption);
+    private void addOption(ApplicableImplementerOption applicableImplementerOption) {
+        applicableImplementerOptions.get(applicableImplementerOption.order()).add(applicableImplementerOption);
     }
 
-    private void addAISOption(ApplicableImplementerOption<IOInputContainerAIS> applicableImplementerOption) {
-        applicableImplementerOptionsAIS.get(applicableImplementerOption.order()).add(applicableImplementerOption);
+    public IOInputContainer getIoInputContainer() {
+        return ioInputContainer;
     }
 
-    private void addCommonOption(ApplicableImplementerOption<IOInputContainer> applicableImplementerOption) {
-        applicableImplementerOptionsCommon.get(applicableImplementerOption.order()).add(applicableImplementerOption);
+    public void setIoInputContainer(IOInputContainer ioInputContainer) {
+        this.ioInputContainer = ioInputContainer;
     }
 
-    public IOInputContainerPIS getIoInputContainerpis() {
-        return ioInputContainerpis;
+    public IOInputContainerPIS getIoInputContainerPIS() {
+        return ioInputContainerPIS;
     }
 
-    public IOInputContainerAIS getIoInputContainerais() {
-        return ioInputContainerais;
+    public void setIoInputContainerPIS(IOInputContainerPIS ioInputContainerPIS) {
+        this.ioInputContainerPIS = ioInputContainerPIS;
+    }
+
+    public IOInputContainerAIS getIoInputContainerAIS() {
+        return ioInputContainerAIS;
+    }
+
+    public void setIoInputContainerAIS(IOInputContainerAIS ioInputContainerAIS) {
+        this.ioInputContainerAIS = ioInputContainerAIS;
     }
 }

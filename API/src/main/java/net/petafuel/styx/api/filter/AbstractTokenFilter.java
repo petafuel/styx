@@ -9,10 +9,13 @@ import net.petafuel.styx.api.v1.authentication.control.TokenGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import java.security.NoSuchAlgorithmException;
 
+@Priority(Priorities.AUTHORIZATION)
 public abstract class AbstractTokenFilter implements ContainerRequestFilter {
     private static final Logger LOG = LogManager.getLogger(AbstractTokenFilter.class);
 

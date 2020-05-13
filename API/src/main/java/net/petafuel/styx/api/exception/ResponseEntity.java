@@ -21,6 +21,10 @@ public class ResponseEntity implements Serializable {
     @JsonbProperty(value = "links", nillable = true)
     private Map<String, String> links;
 
+    /**
+     * @deprecated only for default constructor in json binding
+     */
+    @Deprecated
     public ResponseEntity() {
         //ctor for json binding
     }

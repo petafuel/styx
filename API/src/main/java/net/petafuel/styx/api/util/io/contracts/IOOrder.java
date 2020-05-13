@@ -5,6 +5,5 @@ package net.petafuel.styx.api.util.io.contracts;
  */
 public enum IOOrder {
     PRE_CREATION,
-    CREATION,
     POST_CREATION
 }

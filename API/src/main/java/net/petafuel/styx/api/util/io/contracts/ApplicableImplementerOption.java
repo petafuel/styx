@@ -1,17 +1,20 @@
 package net.petafuel.styx.api.util.io.contracts;
 
+import net.petafuel.styx.api.util.io.entities.ImplementerOptionException;
+
 /**
  * Interface defines an applicable Implementer Option
  * The IOProcessor will
- * @param <T>
  */
-public interface ApplicableImplementerOption<T extends IOInputContainer> {
+public interface ApplicableImplementerOption {
     /**
      * define the logic of applying one option. This should include returning before execution if this option is not
      * applicable to the current request
+     *
      * @param ioInputContainer inputContainer for AIS or PIS data
+     * @return
      */
-    void apply(T ioInputContainer);
+    IOInputContainer apply(IOInputContainer ioInputContainer) throws ImplementerOptionException;
 
     /**
      * defines where this option should be applied

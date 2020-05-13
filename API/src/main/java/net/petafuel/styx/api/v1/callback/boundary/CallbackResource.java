@@ -8,18 +8,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.URISyntaxException;
 
 @ApplicationPath("/")
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
-public class CallbackResource extends Application {
+public class CallbackResource {
 
-    private CallbackHandler handler = new CallbackHandler();
+    private final CallbackHandler handler = new CallbackHandler();
 
     @GET
     @Path("/callbacks/{param}")
@@ -30,7 +30,7 @@ public class CallbackResource extends Application {
             @QueryParam("code") String code,
             @QueryParam("state") String state,
             @QueryParam("error") String error,
-            @QueryParam("error_description") String errorMessage) {
+            @QueryParam("error_description") String errorMessage) throws URISyntaxException {
 
         if (state == null) {
             return handler.handleRedirect(param, httpHeaders);

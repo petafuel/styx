@@ -1,6 +1,7 @@
 package net.petafuel.styx.core.persistence.layers;
 
 import net.petafuel.styx.core.persistence.Persistence;
+import net.petafuel.styx.core.persistence.PersistenceEmptyResultSetException;
 import net.petafuel.styx.core.persistence.PersistenceException;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import org.apache.logging.log4j.LogManager;
@@ -13,10 +14,12 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 public class PersistentOAuthSession {
-
     private static final Logger LOG = LogManager.getLogger(PersistentOAuthSession.class);
 
-    public OAuthSession create(OAuthSession model) {
+    private PersistentOAuthSession() {
+    }
+
+    public static OAuthSession create(OAuthSession model) {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call create_oauth_session(?, ?, ?, ?, ?)}")) {
             query.setString(1, model.getAuthorizationEndpoint());
@@ -27,7 +30,7 @@ public class PersistentOAuthSession {
 
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
-                    model = this.dbToModel(resultSet);
+                    model = dbToModel(resultSet);
                 }
             }
         } catch (SQLException e) {
@@ -37,23 +40,23 @@ public class PersistentOAuthSession {
     }
 
 
-    public OAuthSession get(String state) {
+    public static OAuthSession get(String state) {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call get_oauth_session(?)}")) {
             query.setString(1, state);
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
-                    return this.dbToModel(resultSet);
+                    return dbToModel(resultSet);
                 }
             }
-            throw new PersistenceException("No OAuth session found for the given state");
+            throw new PersistenceEmptyResultSetException("No OAuth session found for the given state");
         } catch (SQLException e) {
             logSQLError(e);
             throw new PersistenceException(e.getMessage(), e);
         }
     }
 
-    public OAuthSession update(OAuthSession model) {
+    public static OAuthSession update(OAuthSession model) {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call update_oauth_session(?, ?, ?, ?, ?, ?)}")) {
             query.setString(1, model.getAccessToken());
@@ -64,7 +67,7 @@ public class PersistentOAuthSession {
             query.setString(6, model.getState());
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
-                    return this.dbToModel(resultSet);
+                    return dbToModel(resultSet);
                 }
             }
             throw new PersistenceException("No OAuthSession found for the given state");
@@ -74,7 +77,7 @@ public class PersistentOAuthSession {
         }
     }
 
-    private OAuthSession dbToModel(ResultSet resultSet) throws SQLException {
+    private static OAuthSession dbToModel(ResultSet resultSet) throws SQLException {
         OAuthSession model = new OAuthSession();
         model.setId(resultSet.getInt("id"));
         model.setAuthorizationEndpoint(resultSet.getString("authorization_endpoint"));
@@ -92,7 +95,7 @@ public class PersistentOAuthSession {
         return model;
     }
 
-    private void logSQLError(SQLException e) {
+    private static void logSQLError(SQLException e) {
         LOG.error("Error executing SQL Query: {} SQL State: {}, StackTrace: {}", e.getMessage(), e.getSQLState(), e.getStackTrace());
         throw new PersistenceException(e.getMessage(), e);
     }

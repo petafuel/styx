@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -23,7 +24,7 @@ public class CallbackHandler {
     public Response handleRedirect(String xRequestId, HttpHeaders httpHeaders) {
         LOG.info("Handling callback request xrequsetid={}", xRequestId);
         StringBuilder output = new StringBuilder();
-        for(String field : httpHeaders.getRequestHeaders().keySet()){
+        for (String field : httpHeaders.getRequestHeaders().keySet()) {
             output.append(" ").append(field).append(": ").append(httpHeaders.getRequestHeader(field)).append("\n");
         }
         LOG.info("requestHeader={}", output);
@@ -31,27 +32,20 @@ public class CallbackHandler {
         return this.returnHTMLPage();
     }
 
-    public Response handleOAuth2(String code, String state, String error, String errorMessage, String param) {
+    public Response handleOAuth2(String code, String state, String error, String errorMessage, String param) throws URISyntaxException {
         String linkToRedirect;
-
-        try {
-            if (error == null && handleSuccessfulOAuth2(code, state, param)) {
-                return this.returnHTMLPage();
-            } else {
-                linkToRedirect = handleFailedOAuth2(state);
-                LOG.error("failed oauth2 callback error={}, errorMessage={}", error, errorMessage);
-                return Response.temporaryRedirect(new URI(linkToRedirect)).build();
-            }
-        } catch (Exception e) {
-            String message = "Handling callback with code: " + code + " and state: " + state;
-            return Response.status(200).entity(message).build();
+        if (error == null && handleSuccessfulOAuth2(code, state, param)) {
+            return this.returnHTMLPage();
+        } else {
+            linkToRedirect = handleFailedOAuth2(state);
+            LOG.error("failed oauth2 callback error={}, errorMessage={}", error, errorMessage);
+            return Response.temporaryRedirect(new URI(linkToRedirect)).build();
         }
     }
 
     private boolean handleSuccessfulOAuth2(String code, String state, String param) {
         OAuthService service = new OAuthService();
-        PersistentOAuthSession db = new PersistentOAuthSession();
-        OAuthSession stored = db.get(state);
+        OAuthSession stored = PersistentOAuthSession.get(state);
         try {
             AuthorizationCodeRequest request = new AuthorizationCodeRequest(code, stored.getCodeVerifier());
             if (param.equals(OAuthService.PREAUTH)) {
@@ -60,10 +54,11 @@ public class CallbackHandler {
             }
             OAuthSession authorized = service.tokenRequest(stored.getTokenEndpoint(), request);
             authorized.setState(state);
-            db.update(authorized);
+            PersistentOAuthSession.update(authorized);
 
             return true;
-        }  catch (Exception e) {
+        } catch (Exception e) {
+            LOG.error(e);
             return false;
         }
     }
@@ -80,7 +75,7 @@ public class CallbackHandler {
         try (InputStream input = new FileInputStream("API/src/main/resources/index.html")) {
             Optional<String> o1 = Optional.of(IOUtils.toString(input, StandardCharsets.UTF_8.toString()));
             String linkToRedirect = this.getTppLink();
-            String htmlContent = o1.get().replace("scaLink",  linkToRedirect);
+            String htmlContent = o1.get().replace("scaLink", linkToRedirect);
             return Response.status(Response.Status.TEMPORARY_REDIRECT).entity(htmlContent).build();
         } catch (Exception e) {
             return Response.status(200).entity("hello world").build();

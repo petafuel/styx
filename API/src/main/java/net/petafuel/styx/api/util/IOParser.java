@@ -1,11 +1,7 @@
 package net.petafuel.styx.api.util;
 
 import com.google.gson.JsonElement;
-import net.petafuel.styx.api.exception.ResponseCategory;
-import net.petafuel.styx.api.exception.ResponseConstant;
-import net.petafuel.styx.api.exception.ResponseEntity;
-import net.petafuel.styx.api.exception.ResponseOrigin;
-import net.petafuel.styx.api.exception.StyxException;
+import net.petafuel.styx.api.util.io.entities.ImplementerOptionException;
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;
 
@@ -25,11 +21,10 @@ public final class IOParser {
         return implementerOptions.get(io);
     }
 
-    public JsonElement getOption(String io, String key) {
+    public JsonElement getOption(String io, String key) throws ImplementerOptionException {
         ImplementerOption option = implementerOptions.get(io);
         if (option == null) {
-            throw new StyxException(new ResponseEntity(String.format("ImplementerOption list does not contain option=%s for key=%s", io, key),
-                    ResponseConstant.INTERNAL_SERVER_ERROR, ResponseCategory.ERROR, ResponseOrigin.STYX));
+            throw new ImplementerOptionException(String.format("ImplementerOption list does not contain option=%s for key=%s", io, key));
         }
         return option.getOptions().get(key);
     }

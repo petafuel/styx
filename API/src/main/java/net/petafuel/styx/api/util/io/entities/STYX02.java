@@ -37,7 +37,12 @@ public class STYX02 implements ApplicableImplementerOption {
         if (psuId == null) {
             throw new ImplementerOptionException("Unable to extract psu id from access token");
         }
-        ioInput.getXs2ARequest().getPsu().setId(psuId);
+        if(ioInput.getXs2ARequest() != null) {
+            if(ioInput.getXs2ARequest().getPsu() == null){
+                ioInput.getXs2ARequest().setPsu(ioInput.getPsu());
+            }
+            ioInput.getXs2ARequest().getPsu().setId(psuId);
+        }
 
         return ioInput;
     }

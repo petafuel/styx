@@ -5,6 +5,7 @@ import net.petafuel.styx.core.xs2a.contracts.AISInterface;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.PIISInterface;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
+import net.petafuel.styx.core.xs2a.factory.XS2ARequestClassProvider;
 
 public class XS2AStandard {
 
@@ -13,6 +14,7 @@ public class XS2AStandard {
     private PIISInterface piis;
     private CSInterface cs;
     private Aspsp aspsp;
+    private XS2ARequestClassProvider requestClassProvider;
 
     public XS2AStandard(AISInterface ais, PISInterface pis, PIISInterface piis, CSInterface cs) {
         this.ais = ais;
@@ -21,7 +23,16 @@ public class XS2AStandard {
         this.cs = cs;
     }
 
-    public XS2AStandard () {}
+    public XS2AStandard() {
+    }
+
+    public XS2ARequestClassProvider getRequestClassProvider() {
+        return requestClassProvider;
+    }
+
+    public void setRequestClassProvider(XS2ARequestClassProvider requestClassProvider) {
+        this.requestClassProvider = requestClassProvider;
+    }
 
     public Boolean isAISImplemented() {
         return this.ais != null;

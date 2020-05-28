@@ -32,7 +32,7 @@ public abstract class BasicAuthorisationService extends BasicService {
     }
 
     protected SCA startAuthorisation(StartAuthorisationRequest request) throws BankRequestFailedException {
-        this.setUrl(this.url + request.getServiceURL());
+        this.setUrl(this.url + request.getServicePath());
 
         this.createBody(RequestType.POST, JSON, request);
         this.createHeaders(request);
@@ -48,7 +48,7 @@ public abstract class BasicAuthorisationService extends BasicService {
     }
 
     protected List<String> getAuthorisations(GetAuthorisationsRequest xs2ARequest) throws BankRequestFailedException {
-        this.setUrl(this.url + xs2ARequest.getServiceURL());
+        this.setUrl(this.url + xs2ARequest.getServicePath());
         this.createBody(RequestType.GET);
         this.createHeaders(xs2ARequest);
 
@@ -62,7 +62,7 @@ public abstract class BasicAuthorisationService extends BasicService {
     }
 
     protected SCA.Status getSCAStatus(GetSCAStatusRequest xs2ARequest) throws BankRequestFailedException {
-        this.setUrl(this.url + xs2ARequest.getServiceURL());
+        this.setUrl(this.url + xs2ARequest.getServicePath());
         this.createBody(RequestType.GET);
         this.createHeaders(xs2ARequest);
 
@@ -76,7 +76,7 @@ public abstract class BasicAuthorisationService extends BasicService {
     }
 
     protected SCA updatePSUIdentification(UpdatePSUIdentificationRequest updatePSUIdentificationRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + updatePSUIdentificationRequest.getServiceURL());
+        this.setUrl(this.url + updatePSUIdentificationRequest.getServicePath());
         this.createBody(RequestType.PUT, JSON, updatePSUIdentificationRequest);
         this.createHeaders(updatePSUIdentificationRequest);
         try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
@@ -90,7 +90,7 @@ public abstract class BasicAuthorisationService extends BasicService {
     }
 
     protected SCA updatePSUAuthentication(UpdatePSUAuthenticationRequest updatePSUAuthenticationRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + updatePSUAuthenticationRequest.getServiceURL());
+        this.setUrl(this.url + updatePSUAuthenticationRequest.getServicePath());
         this.createBody(RequestType.PUT, JSON, updatePSUAuthenticationRequest);
         this.createHeaders(updatePSUAuthenticationRequest);
         try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
@@ -104,7 +104,7 @@ public abstract class BasicAuthorisationService extends BasicService {
     }
 
     protected SCA selectAuthenticationMethod(SelectAuthenticationMethodRequest selectAuthenticationMethodRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + selectAuthenticationMethodRequest.getServiceURL());
+        this.setUrl(this.url + selectAuthenticationMethodRequest.getServicePath());
         this.createBody(RequestType.PUT, JSON, selectAuthenticationMethodRequest);
         this.createHeaders(selectAuthenticationMethodRequest);
         try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
@@ -118,7 +118,7 @@ public abstract class BasicAuthorisationService extends BasicService {
     }
 
     protected SCA authoriseTransaction(AuthoriseTransactionRequest authoriseTransactionRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + authoriseTransactionRequest.getServiceURL());
+        this.setUrl(this.url + authoriseTransactionRequest.getServicePath());
         this.createBody(RequestType.PUT, JSON, authoriseTransactionRequest);
         this.createHeaders(authoriseTransactionRequest);
         try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {

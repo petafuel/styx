@@ -5,23 +5,18 @@ import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
 import net.petafuel.styx.api.filter.CheckAccessToken;
 import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.filter.RequiresMandatoryHeader;
+import net.petafuel.styx.api.filter.RequiresPSU;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.util.io.IOProcessor;
-import net.petafuel.styx.api.util.io.contracts.IOInputContainerAIS;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.core.persistence.models.AccessToken;
-import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
-import net.petafuel.styx.core.xs2a.entities.PSU;
+import net.petafuel.styx.core.xs2a.contracts.SCARequest;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.SelectAuthenticationMethodRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUAuthenticationRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUIdentificationRequest;
+import net.petafuel.styx.core.xs2a.factory.SCARequestFactory;
+import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,25 +54,28 @@ public class ConsentAuthorisationResource extends RestResource {
      */
     @AcceptsPreStepAuth
     @POST
+    @RequiresPSU
     @Path("/consents/{consentId}/authorisations")
     public Response startConsentAuthorisation(@NotEmpty @NotBlank @PathParam("consentId") String consentId,
                                               @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setConsentId(consentId);
+        xs2AFactoryInput.setPsuData(authorisationRequest.getPsuData());
 
-        XS2AAuthorisationRequest xs2AAuthorisationRequest = new StartAuthorisationRequest(authorisationRequest.getPsuData(),
-                consentId);
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
+
+        SCARequest xs2AAuthorisationRequest = new SCARequestFactory().create(getXS2AStandard().getRequestClassProvider().scaStart(), xs2AFactoryInput);
         xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
         if (getRedirectPreferred() != null) {
             xs2AAuthorisationRequest.setTppRedirectPreferred(getRedirectPreferred());
         }
-        IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setXs2ARequest(xs2AAuthorisationRequest);
-        IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-        xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
+
+        ioProcessor.modifyRequest(xs2AAuthorisationRequest, xs2AFactoryInput);
         SCA consentSCA = getXS2AStandard().getCs().startAuthorisation(xs2AAuthorisationRequest);
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(consentId, consentSCA.getAuthorisationId());
         consentSCA.setLinks(aspspUrlMapper.map(consentSCA.getLinks()));
-
         LOG.info("Consent Authorisation started for consentId={} scaStatus={} scaApproach={}", consentId, consentSCA.getScaStatus(), consentSCA.getApproach());
         return Response.status(ResponseConstant.CREATED).entity(consentSCA).build();
     }
@@ -102,41 +100,40 @@ public class ConsentAuthorisationResource extends RestResource {
             @NotEmpty @NotBlank @PathParam("consentId") String consentId,
             @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId,
             @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setConsentId(consentId);
+        xs2AFactoryInput.setPsu(getPsu());
+
+        xs2AFactoryInput.setAuthorisationId(authorisationId);
+        xs2AFactoryInput.setPsuData(authorisationRequest.getPsuData());
+        xs2AFactoryInput.setAuthorisationMethodId(authorisationRequest.getAuthenticationMethodId());
+        xs2AFactoryInput.setScaAuthenticationData(authorisationRequest.getScaAuthenticationData());
+
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
 
         SCA consentSCA;
-        XS2AAuthorisationRequest xs2AAuthorisationRequest;
+        SCARequest xs2AAuthorisationRequest;
 
         if (authorisationRequest.getPsuData() != null) {
-            xs2AAuthorisationRequest = new UpdatePSUAuthenticationRequest(getPsu(), authorisationRequest.getPsuData(), consentId, authorisationId);
+            xs2AAuthorisationRequest = new SCARequestFactory().create(getXS2AStandard().getRequestClassProvider().scaUpdateAuthentication(), xs2AFactoryInput);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
-            IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-            ioInputContainerAIS.setXs2ARequest(xs2AAuthorisationRequest);
-            IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-            xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
+            ioProcessor.modifyRequest(xs2AAuthorisationRequest, xs2AFactoryInput);
             consentSCA = getXS2AStandard().getCs().updatePSUAuthentication(xs2AAuthorisationRequest);
         } else if (authorisationRequest.getAuthenticationMethodId() != null) {
-            xs2AAuthorisationRequest = new SelectAuthenticationMethodRequest(authorisationRequest.getAuthenticationMethodId(), consentId, authorisationId);
+            xs2AAuthorisationRequest = new SCARequestFactory().create(getXS2AStandard().getRequestClassProvider().scaUpdateAuthenticationMethod(), xs2AFactoryInput);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
-            IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-            ioInputContainerAIS.setXs2ARequest(xs2AAuthorisationRequest);
-            IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-            xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
+            ioProcessor.modifyRequest(xs2AAuthorisationRequest, xs2AFactoryInput);
             consentSCA = getXS2AStandard().getCs().selectAuthenticationMethod(xs2AAuthorisationRequest);
         } else if (authorisationRequest.getScaAuthenticationData() != null) {
-            xs2AAuthorisationRequest = new AuthoriseTransactionRequest(authorisationRequest.getScaAuthenticationData(), consentId, authorisationId);
+            xs2AAuthorisationRequest = new SCARequestFactory().create(getXS2AStandard().getRequestClassProvider().scaAuthoriseTransaction(), xs2AFactoryInput);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
-            IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-            ioInputContainerAIS.setXs2ARequest(xs2AAuthorisationRequest);
-            IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-            xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
+            ioProcessor.modifyRequest(xs2AAuthorisationRequest, xs2AFactoryInput);
             consentSCA = getXS2AStandard().getCs().authoriseTransaction(xs2AAuthorisationRequest);
         } else {
-            xs2AAuthorisationRequest = new UpdatePSUIdentificationRequest(getPsu(), consentId, authorisationId);
+            xs2AAuthorisationRequest = new SCARequestFactory().create(getXS2AStandard().getRequestClassProvider().scaUpdateIdentification(), xs2AFactoryInput);
             xs2AAuthorisationRequest.getHeaders().putAll(getAdditionalHeaders());
-            IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-            ioInputContainerAIS.setXs2ARequest(xs2AAuthorisationRequest);
-            IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-            xs2AAuthorisationRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
+            ioProcessor.modifyRequest(xs2AAuthorisationRequest, xs2AFactoryInput);
             consentSCA = getXS2AStandard().getCs().updatePSUIdentification(xs2AAuthorisationRequest);
         }
 
@@ -153,17 +150,22 @@ public class ConsentAuthorisationResource extends RestResource {
     public Response getScaStatus(
             @NotEmpty @NotBlank @PathParam("consentId") String consentId,
             @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId) throws BankRequestFailedException {
-        XS2AAuthorisationRequest getAuthorisationStatusRequest = new GetSCAStatusRequest(consentId, authorisationId);
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setConsentId(consentId);
+        xs2AFactoryInput.setAuthorisationId(authorisationId);
+
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
+
+        SCARequest getAuthorisationStatusRequest = new SCARequestFactory().create(getXS2AStandard().getRequestClassProvider().scaStatus(), xs2AFactoryInput);
         getAuthorisationStatusRequest.getHeaders().putAll(getAdditionalHeaders());
-        IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setXs2ARequest(getAuthorisationStatusRequest);
-        IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-        getAuthorisationStatusRequest = (XS2AAuthorisationRequest) ioProcessor.applyOptions();
+
+        ioProcessor.modifyRequest(getAuthorisationStatusRequest, xs2AFactoryInput);
+
         SCA.Status authorisationStatus = getXS2AStandard().getCs().getSCAStatus(getAuthorisationStatusRequest);
         AuthorisationStatusResponse response = new AuthorisationStatusResponse();
         response.setScaStatus(authorisationStatus.getValue());
-
-        LOG.info("Consent Status requested for consentId={} authorisationId={} scaStatus={}", consentId, authorisationId, authorisationStatus.getValue());
+        LOG.info("Consent Authorisation Status requested for consentId={} authorisationId={} scaStatus={}", consentId, authorisationId, authorisationStatus.getValue());
         return Response.status(ResponseConstant.OK).entity(response).build();
     }
 }

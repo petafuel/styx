@@ -7,12 +7,13 @@ import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.filter.RequiresPSU;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.io.IOProcessor;
-import net.petafuel.styx.api.util.io.contracts.IOInputContainerPIS;
 import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
 import net.petafuel.styx.core.persistence.models.AccessToken;
+import net.petafuel.styx.core.xs2a.contracts.PISRequest;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentRequest;
+import net.petafuel.styx.core.xs2a.factory.PISRequestFactory;
+import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,16 +53,21 @@ public class FetchPaymentResource extends RestResource {
     @Path("/{paymentService}/{paymentProduct}/{paymentId}")
     public Response fetchPayment(@BeanParam PaymentTypeBean paymentTypeBean,
                                  @NotEmpty @NotBlank @PathParam("paymentId") String paymentId) throws BankRequestFailedException {
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setPaymentService(paymentTypeBean.getPaymentService());
+        xs2AFactoryInput.setPaymentProduct(paymentTypeBean.getPaymentProduct());
+        xs2AFactoryInput.setPsu(getPsu());
+        xs2AFactoryInput.setPaymentId(paymentId);
 
-        ReadPaymentRequest aspspRequest = new ReadPaymentRequest(paymentTypeBean.getPaymentService(), paymentTypeBean.getPaymentProduct(), paymentId, getPsu());
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
+
+        PISRequest aspspRequest = new PISRequestFactory().create(getXS2AStandard().getRequestClassProvider().paymentRetrieval(), xs2AFactoryInput);
         aspspRequest.getHeaders().putAll(getAdditionalHeaders());
-        IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(getXS2AStandard(), getPsu(), paymentId, paymentTypeBean.getPaymentService(), paymentTypeBean.getPaymentProduct(), aspspRequest);
-        ioInputContainerPIS.setAdditionalHeaders(getAdditionalHeaders());
-        IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
-        ioProcessor.applyOptions();
+
+        ioProcessor.modifyRequest(aspspRequest, xs2AFactoryInput);
 
         InitializablePayment fetchedPayment = getXS2AStandard().getPis().getPayment(aspspRequest);
-
         LOG.info("Successfully fetched payment entity for bic={}, paymentId={}", getXS2AStandard().getAspsp().getBic(), paymentId);
         return Response.status(ResponseConstant.OK).entity(fetchedPayment).build();
     }

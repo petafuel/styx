@@ -18,26 +18,26 @@ public interface CSInterface extends SCAInterface {
      * @return
      * @throws BankRequestFailedException
      */
-    Consent createConsent(XS2ARequest xs2ARequest) throws BankRequestFailedException;
+    Consent createConsent(AISRequest xs2ARequest) throws BankRequestFailedException;
 
     /**
      * @param xs2ARequest
      * @return
      * @throws BankRequestFailedException
      */
-    Consent getConsent(XS2ARequest xs2ARequest) throws BankRequestFailedException;
+    Consent getConsent(AISRequest xs2ARequest) throws BankRequestFailedException;
 
     /**
      * @param xs2ARequest
      * @return
      * @throws BankRequestFailedException
      */
-    Consent.State getStatus(XS2ARequest xs2ARequest) throws BankRequestFailedException;
+    Consent.State getStatus(AISRequest xs2ARequest) throws BankRequestFailedException;
 
     /**
      * @param xs2ARequest
      * @return
      * @throws BankRequestFailedException
      */
-    Consent deleteConsent(XS2ARequest xs2ARequest) throws BankRequestFailedException;
+    Consent deleteConsent(AISRequest xs2ARequest) throws BankRequestFailedException;
 }

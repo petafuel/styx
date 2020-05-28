@@ -1,31 +1,30 @@
 package net.petafuel.styx.api.util.io.entities;
 
+import net.petafuel.styx.api.util.IOParser;
 import net.petafuel.styx.api.util.io.IOHelper;
 import net.petafuel.styx.api.util.io.contracts.ApplicableImplementerOption;
-import net.petafuel.styx.api.util.io.contracts.IOInputContainer;
-import net.petafuel.styx.api.util.io.contracts.IOInputContainerPIS;
 import net.petafuel.styx.api.util.io.contracts.IOOrder;
-import net.petafuel.styx.core.xs2a.contracts.XS2APaymentRequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
+import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 
 /**
  * modify payment product for payment service bulk-payments
  */
-public class IO3 implements ApplicableImplementerOption {
+public class IO3 extends ApplicableImplementerOption {
     private static final String IO = "IO3";
 
+    public IO3(IOParser ioParser) {
+        super(ioParser);
+    }
+
     @Override
-    public IOInputContainer apply(IOInputContainer ioInput) throws ImplementerOptionException {
-        IOInputContainerPIS ioInputContainer = (IOInputContainerPIS) ioInput;
-        if (ioInputContainer.getPaymentService() != PaymentService.BULK_PAYMENTS) {
-            return ioInputContainer;
+    public void apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest) throws ImplementerOptionException {
+        if (ioInput.getPaymentService() != PaymentService.BULK_PAYMENTS) {
+            return;
         }
 
-        IOHelper.processPaymentProduct(IO, ioInputContainer);
-        if (ioInputContainer.getXs2ARequest() != null) {
-            ((XS2APaymentRequest) ioInputContainer.getXs2ARequest()).setPaymentProduct(ioInputContainer.getPaymentProduct());
-        }
-        return ioInputContainer;
+        IOHelper.processPaymentProduct(ioParser, IO, ioInput);
     }
 
     @Override

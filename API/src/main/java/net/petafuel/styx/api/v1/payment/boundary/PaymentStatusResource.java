@@ -7,13 +7,14 @@ import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.filter.RequiresPSU;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.io.IOProcessor;
-import net.petafuel.styx.api.util.io.contracts.IOInputContainerPIS;
 import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.persistence.models.AccessToken;
+import net.petafuel.styx.core.xs2a.contracts.PISRequest;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
+import net.petafuel.styx.core.xs2a.factory.PISRequestFactory;
+import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,13 +53,19 @@ public class PaymentStatusResource extends RestResource {
     public Response getSinglePaymentStatus(@BeanParam PaymentTypeBean paymentTypeBean,
                                            @PathParam("paymentId") @NotEmpty @NotBlank String paymentId
     ) throws BankRequestFailedException {
-        ReadPaymentStatusRequest readPaymentStatusRequest = new ReadPaymentStatusRequest(paymentTypeBean.getPaymentService(), paymentTypeBean.getPaymentProduct(), paymentId);
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setPaymentService(paymentTypeBean.getPaymentService());
+        xs2AFactoryInput.setPaymentProduct(paymentTypeBean.getPaymentProduct());
+        xs2AFactoryInput.setPaymentId(paymentId);
+        xs2AFactoryInput.setPsu(getPsu());
+
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
+
+        PISRequest readPaymentStatusRequest = new PISRequestFactory().create(getXS2AStandard().getRequestClassProvider().paymentStatus(), xs2AFactoryInput);
         readPaymentStatusRequest.getHeaders().putAll(getAdditionalHeaders());
 
-        IOInputContainerPIS ioInputContainerPIS = new IOInputContainerPIS(getXS2AStandard(), getPsu(), paymentId, paymentTypeBean.getPaymentService(), paymentTypeBean.getPaymentProduct(), readPaymentStatusRequest);
-        IOProcessor ioProcessor = new IOProcessor(ioInputContainerPIS);
-        readPaymentStatusRequest = (ReadPaymentStatusRequest) ioProcessor.applyOptions();
-
+        ioProcessor.modifyRequest(readPaymentStatusRequest, xs2AFactoryInput);
         PaymentStatus status = getXS2AStandard().getPis().getPaymentStatus(readPaymentStatusRequest);
         if (PersistentPayment.get(paymentId) == null) {
             PersistentPayment.create(paymentId, (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), status.getTransactionStatus());

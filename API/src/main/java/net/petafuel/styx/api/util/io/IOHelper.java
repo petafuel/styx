@@ -5,9 +5,10 @@ import net.petafuel.styx.api.exception.ResponseConstant;
 import net.petafuel.styx.api.exception.ResponseEntity;
 import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxException;
-import net.petafuel.styx.api.util.io.contracts.IOInputContainerPIS;
+import net.petafuel.styx.api.util.IOParser;
 import net.petafuel.styx.api.util.io.entities.ImplementerOptionException;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
+import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 
 public class IOHelper {
     private IOHelper() {
@@ -20,10 +21,10 @@ public class IOHelper {
      * @param ioInputContainer this reference will be updated with the new Payment Product
      * @throws StyxException if the payment product is neither supported for xml nor for json
      */
-    public static void processPaymentProduct(String io, IOInputContainerPIS ioInputContainer) throws ImplementerOptionException {
-        if (ioInputContainer.getIoParser().getOption(io, IOInputContainerPIS.XML_PAYMENT_PRODUCT_PREFIX + ioInputContainer.getPaymentProduct().getValue()).getAsBoolean()) {
-            ioInputContainer.setPaymentProduct(PaymentProduct.byValue(IOInputContainerPIS.XML_PAYMENT_PRODUCT_PREFIX + ioInputContainer.getPaymentProduct().getValue()));
-        } else if (!ioInputContainer.getIoParser().getOption(io, ioInputContainer.getPaymentProduct().getValue()).getAsBoolean()) {
+    public static void processPaymentProduct(IOParser ioParser, String io, XS2AFactoryInput ioInputContainer) throws ImplementerOptionException {
+        if (ioParser.getOption(io, IOProcessor.XML_PAYMENT_PRODUCT_PREFIX + ioInputContainer.getPaymentProduct().getValue()).getAsBoolean()) {
+            ioInputContainer.setPaymentProduct(PaymentProduct.byValue(IOProcessor.XML_PAYMENT_PRODUCT_PREFIX + ioInputContainer.getPaymentProduct().getValue()));
+        } else if (!ioParser.getOption(io, ioInputContainer.getPaymentProduct().getValue()).getAsBoolean()) {
             throw new StyxException(new ResponseEntity("The requested ASPSP does not support " + ioInputContainer.getPaymentService().getValue() + " with payment-product " + ioInputContainer.getPaymentProduct().getValue(), ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.ASPSP));
         }
     }

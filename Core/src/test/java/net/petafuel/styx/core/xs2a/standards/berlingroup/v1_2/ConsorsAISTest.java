@@ -7,18 +7,17 @@ import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
+import net.petafuel.styx.core.xs2a.contracts.AISRequest;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import net.petafuel.styx.core.xs2a.entities.Currency;
+import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
 import net.petafuel.styx.core.xs2a.entities.TransactionDeprecated;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
+import net.petafuel.styx.core.xs2a.factory.AISRequestFactory;
+import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.TransactionsSerializer;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -56,9 +55,12 @@ public class ConsorsAISTest {
     @Order(1)
     public void testAccountList() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
-        ReadAccountListRequest r1 = new ReadAccountListRequest(CONSENT);
-        r1.setWithBalance(true);
-        List<AccountDetails> list = standard.getAis().getAccountList(r1);
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setConsentId(CONSENT);
+        AISRequest aisRequest = new AISRequestFactory().create(standard.getRequestClassProvider().accountList(), xs2AFactoryInput);
+        aisRequest.setWithBalance(true);
+
+        List<AccountDetails> list = standard.getAis().getAccountList(aisRequest);
         Assertions.assertTrue(list.size() >= 1);
     }
 
@@ -66,10 +68,13 @@ public class ConsorsAISTest {
     @Order(2)
     public void testAccountDetails() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
-        ReadAccountDetailsRequest r1 = new ReadAccountDetailsRequest(ACCOUNT_ID, CONSENT);
-        r1.setWithBalance(true);
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setAccountId(ACCOUNT_ID);
+        xs2AFactoryInput.setConsentId(CONSENT);
+        xs2AFactoryInput.setWithBalance(true);
+        AISRequest aisRequest = new AISRequestFactory().create(standard.getRequestClassProvider().accountDetails(), xs2AFactoryInput);
 
-        AccountDetails result = standard.getAis().getAccount(r1);
+        AccountDetails result = standard.getAis().getAccount(aisRequest);
         Assertions.assertNotNull(result);
         Assertions.assertNotNull(result.getIban());
     }
@@ -79,9 +84,12 @@ public class ConsorsAISTest {
     public void testBalances() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
 
-        ReadBalancesRequest r1 = new ReadBalancesRequest(ACCOUNT_ID, CONSENT);
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setAccountId(ACCOUNT_ID);
+        xs2AFactoryInput.setConsentId(CONSENT);
+        AISRequest aisRequest = new AISRequestFactory().create(standard.getRequestClassProvider().accountBalances(), xs2AFactoryInput);
 
-        BalanceContainer result = standard.getAis().getBalancesByAccount(r1);
+        BalanceContainer result = standard.getAis().getBalancesByAccount(aisRequest);
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.getBalances().size() >= 1);
     }
@@ -95,8 +103,16 @@ public class ConsorsAISTest {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Date from = format.parse("2019-03-03");
         Date to = new Date();
-        ReadTransactionsRequest r1 = new ReadTransactionsRequest(ACCOUNT_ID, CONSENT, "booked", from, to);
-        TransactionContainer result = standard.getAis().getTransactionsByAccount(r1);
+
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setAccountId(ACCOUNT_ID);
+        xs2AFactoryInput.setConsentId(CONSENT);
+        xs2AFactoryInput.setBookingStatus("booked");
+        xs2AFactoryInput.setDateFrom(from);
+        xs2AFactoryInput.setDateTo(to);
+        AISRequest aisRequest = new AISRequestFactory().create(standard.getRequestClassProvider().accountTransactionList(), xs2AFactoryInput);
+
+        TransactionContainer result = standard.getAis().getTransactionsByAccount(aisRequest);
         Assertions.assertNotNull(result);
         Assertions.assertNotNull(result.getTransactions());
     }
@@ -105,10 +121,15 @@ public class ConsorsAISTest {
     @Order(5)
     public void testTransactionDetails() throws BankRequestFailedException, BankLookupFailedException, BankNotFoundException {
         XS2AStandard standard = (new SAD()).getBankByBIC(BIC, true);
-        ReadTransactionDetailsRequest r1 = new ReadTransactionDetailsRequest(ACCOUNT_ID, TRANSACTION_ID, CONSENT);
-        TransactionDeprecated result = standard.getAis().getTransaction(r1);
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setAccountId(ACCOUNT_ID);
+        xs2AFactoryInput.setTransactionId(TRANSACTION_ID);
+        xs2AFactoryInput.setConsentId(CONSENT);
+        AISRequest aisRequest = new AISRequestFactory().create(standard.getRequestClassProvider().accountTransactionDetails(), xs2AFactoryInput);
+
+        Transaction result = standard.getAis().getTransaction(aisRequest);
         Assertions.assertNotNull(result);
-        Assertions.assertNotNull(result.getAccount());
+        Assertions.assertNotNull(result.getDebtorAccount());
     }
 
     @Test

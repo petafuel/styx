@@ -11,37 +11,31 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
+/**
+ * This defines the uber class for all xs2arequests
+ */
 public abstract class XS2ARequest {
-
+    /**
+     * Common Request Attributes
+     */
+    protected String authroisationId;
     /**
      * Header fields
      */
     @XS2AHeader(nested = true)
     private PSU psu;
-
     @XS2AHeader(XS2AHeader.X_REQUEST_ID)
     private String xrequestId;
-
     @XS2AHeader(XS2AHeader.DATE)
     private String date;
-
     @XS2AHeader(XS2AHeader.TPP_REDIRECT_PREFERRED)
     private boolean tppRedirectPreferred;
-
     @XS2AHeader(XS2AHeader.TPP_REDIRECT_URL)
     private String tppRedirectUri;
-
     @XS2AHeader(XS2AHeader.TPP_NOK_REDIRECT_URI)
     private String tppNokRedirectUri;
-    /*
-     * Query Parameter
-     * */
-    @XS2AHeader(XS2AHeader.CONSENT_ID)
-    private String consentId;
-
     @XS2AHeader(XS2AHeader.AUTHORIZATION)
     private String authorization;
-
     @XS2AHeader(XS2AHeader.ACCEPT)
     private String accept;
     /**
@@ -58,6 +52,14 @@ public abstract class XS2ARequest {
         date = simpleDateFormat.format(new Date());
         headers = new LinkedHashMap<>();
         queryParameters = new LinkedHashMap<>();
+    }
+
+    public String getAuthroisationId() {
+        return authroisationId;
+    }
+
+    public void setAuthroisationId(String authroisationId) {
+        this.authroisationId = authroisationId;
     }
 
     public abstract Optional<String> getRawBody();
@@ -172,11 +174,5 @@ public abstract class XS2ARequest {
         this.date = date;
     }
 
-    public String getConsentId() {
-        return consentId;
-    }
-
-    public void setConsentId(String consentId) {
-        this.consentId = consentId;
-    }
+    public abstract String getServicePath();
 }

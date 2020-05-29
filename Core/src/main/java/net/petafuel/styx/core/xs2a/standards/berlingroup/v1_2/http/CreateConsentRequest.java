@@ -1,6 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http;
 
-import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import net.petafuel.styx.core.xs2a.contracts.AISRequest;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.utils.Config;
 
@@ -9,12 +9,10 @@ import javax.json.bind.JsonbBuilder;
 import java.util.Optional;
 import java.util.UUID;
 
-public class CreateConsentRequest extends XS2ARequest {
+public class CreateConsentRequest extends AISRequest {
+    public CreateConsentRequest(Consent consent, String consentId, String accountId, String transactionId) {
+        super(consent, consentId, accountId, transactionId);
 
-    Consent consent;
-
-    public CreateConsentRequest(Consent consent) {
-        this.consent = consent;
         if (consent.getxRequestId() == null) {
             UUID uuid = UUID.randomUUID();
             this.setXrequestId(uuid.toString());
@@ -25,22 +23,20 @@ public class CreateConsentRequest extends XS2ARequest {
         this.setPsu(consent.getPsu());
         this.setTppRedirectUri(Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.getXrequestId());
         this.setTppNokRedirectUri(Config.getInstance().getProperties().getProperty("styx.redirect.baseurl") + this.getXrequestId());
+
     }
 
     @Override
     public Optional<String> getRawBody() {
         try (Jsonb jsonb = JsonbBuilder.create()) {
-            return Optional.of(jsonb.toJson(consent));
+            return Optional.of(jsonb.toJson(getConsent()));
         } catch (Exception e) {
             return Optional.empty();
         }
     }
 
-    public Consent getConsent() {
-        return consent;
-    }
-
-    public void setConsent(Consent consent) {
-        this.consent = consent;
+    @Override
+    public String getServicePath() {
+        return "/v1/consents";
     }
 }

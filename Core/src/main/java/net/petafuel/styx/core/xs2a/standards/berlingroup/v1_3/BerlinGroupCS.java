@@ -1,15 +1,14 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
+import net.petafuel.styx.core.xs2a.contracts.AISRequest;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
-import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
-import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import net.petafuel.styx.core.xs2a.contracts.SCARequest;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
@@ -30,20 +29,14 @@ import java.util.List;
 import java.util.UUID;
 
 public class BerlinGroupCS extends BasicAuthorisationService implements CSInterface {
-
     private static final Logger LOG = LogManager.getLogger(BerlinGroupCS.class);
-
-    private static final String POST_CONSENT = "/v1/consents";
-    private static final String GET_CONSENT = "/v1/consents/%s";
-    private static final String GET_CONSENT_STATUS = "/v1/consents/%s/status";
-    private static final String DELETE_CONSENT = "/v1/consents/%s";
 
     public BerlinGroupCS(String url, IXS2AHttpSigner signer) {
         super(LOG, url, signer);
     }
 
-    public Consent createConsent(XS2ARequest consentRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + POST_CONSENT);
+    public Consent createConsent(AISRequest consentRequest) throws BankRequestFailedException {
+        this.setUrl(this.url + consentRequest.getServicePath());
         this.createBody(RequestType.POST, JSON, consentRequest);
         this.createHeaders(consentRequest);
 
@@ -58,7 +51,7 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
             consent.setPsu(consentRequest.getPsu());
             //if the sca method was not set by previously parsing the body, use the bank supplied header
             consent.getSca().setApproach(SCAUtils.parseSCAApproach(consent.getLinks(), response));
-            consent.setAccess(((CreateConsentRequest) consentRequest).getConsent().getAccess());
+            consent.setAccess(consentRequest.getConsent().getAccess());
             new PersistentConsent().create(consent);
             return consent;
         } catch (BankRequestFailedException e) {
@@ -69,8 +62,8 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
     }
 
     @Override
-    public Consent getConsent(XS2ARequest consentGetRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(GET_CONSENT, consentGetRequest.getConsentId()));
+    public Consent getConsent(AISRequest consentGetRequest) throws BankRequestFailedException {
+        this.setUrl(this.url + consentGetRequest.getServicePath());
         this.createBody(RequestType.GET);
         this.createHeaders(consentGetRequest);
 
@@ -95,8 +88,8 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
     }
 
     @Override
-    public Consent.State getStatus(XS2ARequest consentStatusRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(GET_CONSENT_STATUS, consentStatusRequest.getConsentId()));
+    public Consent.State getStatus(AISRequest consentStatusRequest) throws BankRequestFailedException {
+        this.setUrl(this.url + consentStatusRequest.getServicePath());
         this.createBody(RequestType.GET);
         this.createHeaders(consentStatusRequest);
 
@@ -114,8 +107,8 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
     }
 
     @Override
-    public Consent deleteConsent(XS2ARequest consentDeleteRequest) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(DELETE_CONSENT, consentDeleteRequest.getConsentId()));
+    public Consent deleteConsent(AISRequest consentDeleteRequest) throws BankRequestFailedException {
+        this.setUrl(this.url + consentDeleteRequest.getServicePath());
         this.createBody(RequestType.DELETE);
         this.createHeaders(consentDeleteRequest);
 
@@ -132,37 +125,37 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
 
 
     @Override
-    public SCA startAuthorisation(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+    public SCA startAuthorisation(SCARequest xs2ARequest) throws BankRequestFailedException {
         return super.startAuthorisation((StartAuthorisationRequest) xs2ARequest);
     }
 
     @Override
-    public List<String> getAuthorisations(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+    public List<String> getAuthorisations(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException {
         return super.getAuthorisations((GetAuthorisationsRequest) xs2AAuthorisationRequest);
     }
 
     @Override
-    public SCA.Status getSCAStatus(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+    public SCA.Status getSCAStatus(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException {
         return super.getSCAStatus((GetSCAStatusRequest) xs2AAuthorisationRequest);
     }
 
     @Override
-    public SCA updatePSUIdentification(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+    public SCA updatePSUIdentification(SCARequest xs2ARequest) throws BankRequestFailedException {
         return super.updatePSUIdentification((UpdatePSUIdentificationRequest) xs2ARequest);
     }
 
     @Override
-    public SCA updatePSUAuthentication(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+    public SCA updatePSUAuthentication(SCARequest xs2ARequest) throws BankRequestFailedException {
         return super.updatePSUAuthentication((UpdatePSUAuthenticationRequest) xs2ARequest);
     }
 
     @Override
-    public SCA selectAuthenticationMethod(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+    public SCA selectAuthenticationMethod(SCARequest xs2ARequest) throws BankRequestFailedException {
         return super.selectAuthenticationMethod((SelectAuthenticationMethodRequest) xs2ARequest);
     }
 
     @Override
-    public SCA authoriseTransaction(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+    public SCA authoriseTransaction(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException {
         return super.authoriseTransaction((AuthoriseTransactionRequest) xs2AAuthorisationRequest);
     }
 }

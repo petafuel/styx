@@ -60,8 +60,7 @@ public final class ConsentPoll extends WorkableTask {
             throw new TaskFinalFailureException("Consent with id " + currentConsent.getId() + " is already on state valid, no polling required", TaskFinalFailureCode.POLL_ON_ALREADY_VALID_CONSENT);
         }
         //TODO make the request type as a parameter
-        StatusConsentRequest statusConsentRequest = new StatusConsentRequest();
-        statusConsentRequest.setConsentId(consent.getId());
+        StatusConsentRequest statusConsentRequest = new StatusConsentRequest(null, consent.getId(), null, null);
         statusConsentRequest.setPsu(consent.getPsu());
 
         Iterator<Integer> retryIterator = IntStream.range(0, maxRequestRetries).iterator();
@@ -95,8 +94,7 @@ public final class ConsentPoll extends WorkableTask {
         }
 
         //TODO make GetConsentRequest class as a parameter
-        GetConsentRequest getConsentRequest = new GetConsentRequest();
-        getConsentRequest.setConsentId(consent.getId());
+        GetConsentRequest getConsentRequest = new GetConsentRequest(null, consent.getId(), null, null);
         try {
             Consent aspspConsent = csInterface.getConsent(getConsentRequest);
             if (!aspspConsent.getState().equals(Consent.State.VALID)) {

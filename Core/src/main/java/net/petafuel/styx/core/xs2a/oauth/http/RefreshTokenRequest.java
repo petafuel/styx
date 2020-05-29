@@ -43,4 +43,9 @@ public class RefreshTokenRequest extends OAuthTokenRequest {
         }
         return Optional.ofNullable(rawBody);
     }
+
+    @Override
+    public String getServicePath() {
+        return null;
+    }
 }

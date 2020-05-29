@@ -18,7 +18,7 @@ public interface PISInterface extends SCAInterface {
      * @return Returns data that contains further information on how to proceed with the payment
      * @throws BankRequestFailedException in case anything request related(HTTP, De-/Serialisation) happens
      */
-    InitiatedPayment initiatePayment(XS2APaymentRequest xs2ARequest) throws BankRequestFailedException;
+    InitiatedPayment initiatePayment(PISRequest xs2ARequest) throws BankRequestFailedException;
 
     /**
      * This will retrieve the payment status on the current payment
@@ -28,7 +28,7 @@ public interface PISInterface extends SCAInterface {
      * @throws BankRequestFailedException in case anything request related(HTTP, De-/Serialisation) happens
      * @see PaymentStatus
      */
-    PaymentStatus getPaymentStatus(XS2APaymentRequest request) throws BankRequestFailedException;
+    PaymentStatus getPaymentStatus(PISRequest request) throws BankRequestFailedException;
 
     /**
      * GetPayment will retrieve the actual initialised payment from the ASPSP, either as json or pain.001
@@ -40,5 +40,5 @@ public interface PISInterface extends SCAInterface {
      * @return returns a previously initiated payment
      * @throws BankRequestFailedException in case anything request related(HTTP, De-/Serialisation) happens
      */
-    InitializablePayment getPayment(XS2APaymentRequest request) throws BankRequestFailedException;
+    InitializablePayment getPayment(PISRequest request) throws BankRequestFailedException;
 }

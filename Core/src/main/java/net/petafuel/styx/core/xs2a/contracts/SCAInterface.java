@@ -18,7 +18,7 @@ public interface SCAInterface {
      * @return returns an SCA Container
      * @throws BankRequestFailedException in case anything request related(HTTP, De-/Serialisation) happens
      */
-    SCA startAuthorisation(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException;
+    SCA startAuthorisation(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException;
 
     /**
      * In case there are multiple Authorisation Resources for one Payment or Consent Resource we can retrieve the list
@@ -28,7 +28,7 @@ public interface SCAInterface {
      * @return a list of authorisation ids as Strings
      * @throws BankRequestFailedException in case anything request related(HTTP, De-/Serialisation) happens
      */
-    List<String> getAuthorisations(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException;
+    List<String> getAuthorisations(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException;
 
     /**
      * This retrieves the current status of an SCA
@@ -37,7 +37,7 @@ public interface SCAInterface {
      * @return returns the SCA status constant
      * @throws BankRequestFailedException in case anything request related(HTTP, De-/Serialisation) happens
      */
-    SCA.Status getSCAStatus(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException;
+    SCA.Status getSCAStatus(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException;
 
     /**
      * This will update PSU information for the aspsp if they are missing for the current transaction
@@ -46,7 +46,7 @@ public interface SCAInterface {
      * @return returns an SCA Container with further information
      * @throws BankRequestFailedException in case anything request related(HTTP, De-/Serialisation) happens
      */
-    SCA updatePSUIdentification(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException;
+    SCA updatePSUIdentification(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException;
 
     /**
      * This updates the PSU authentication, basically this is a login call for a PSU
@@ -55,7 +55,7 @@ public interface SCAInterface {
      * @return returns an SCA Container with further information
      * @throws BankRequestFailedException in case anything request related(HTTP, De-/Serialisation) happens
      */
-    SCA updatePSUAuthentication(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException;
+    SCA updatePSUAuthentication(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException;
 
     /**
      * Updates the chosen SCAMethod for the PSU on the ASPSP interface
@@ -64,7 +64,7 @@ public interface SCAInterface {
      * @return returns an SCA Container with further information
      * @throws BankRequestFailedException in case anything request related(HTTP, De-/Serialisation) happens
      */
-    SCA selectAuthenticationMethod(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException;
+    SCA selectAuthenticationMethod(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException;
 
     /**
      * This will finalize a Transaction by completing the SCA with a TAN
@@ -73,5 +73,5 @@ public interface SCAInterface {
      * @return returns an SCA Container. The SCA Status should be finalized if everything went correctly
      * @throws BankRequestFailedException in case anything request related(HTTP, De-/Serialisation) happens
      */
-    SCA authoriseTransaction(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException;
+    SCA authoriseTransaction(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException;
 }

@@ -1,43 +1,27 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import net.petafuel.styx.core.xs2a.contracts.AISInterface;
+import net.petafuel.styx.core.xs2a.contracts.AISRequest;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
-import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
+import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
-import net.petafuel.styx.core.xs2a.entities.TransactionDeprecated;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsResponse;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListResponse;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.TransactionsSerializer;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsResponse;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BerlinGroupAIS extends BasicService implements AISInterface {
-
-    private static final String GET_ACCOUNT_LIST = "/v1/accounts";
-    private static final String GET_ACCOUNT_DETAILS = "/v1/accounts/%s";
-    private static final String GET_BALANCES = "/v1/accounts/%s/balances";
-    private static final String GET_TRANSACTIONS = "/v1/accounts/%s/transactions";
-    private static final String GET_TRANSACTION_DETAILS = "/v1/accounts/%s/transactions/%s";
-
     private static final Logger LOG = LogManager.getLogger(BerlinGroupAIS.class);
 
     public BerlinGroupAIS(String url, IXS2AHttpSigner signer) {
@@ -45,8 +29,8 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public List<AccountDetails> getAccountList(XS2ARequest request) throws BankRequestFailedException {
-        this.setUrl(this.url + GET_ACCOUNT_LIST + this.getHttpQueryString(request));
+    public List<AccountDetails> getAccountList(AISRequest request) throws BankRequestFailedException {
+        this.setUrl(this.url + request.getServicePath() + this.getHttpQueryString(request));
         this.createBody(RequestType.GET);
         this.createHeaders(request);
 
@@ -59,12 +43,12 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public AccountDetails getAccount(XS2ARequest request) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(GET_ACCOUNT_DETAILS, ((ReadAccountDetailsRequest) request).getAccountId()) + this.getHttpQueryString(request));
+    public AccountDetails getAccount(AISRequest request) throws BankRequestFailedException {
+        this.setUrl(this.url + request.getServicePath());
 
         this.createBody(RequestType.GET);
         this.createHeaders(request);
-        AccountDetails accountDetails = null;
+        AccountDetails accountDetails;
         try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String responseBody = extractResponseBody(response, 200);
             accountDetails = jsonb.fromJson(responseBody, ReadAccountDetailsResponse.class).getAccount();
@@ -80,8 +64,8 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public BalanceContainer getBalancesByAccount(XS2ARequest request) throws BankRequestFailedException {
-        this.setUrl(this.url + String.format(GET_BALANCES, ((ReadBalancesRequest) request).getAccountId()) + this.getHttpQueryString(request));
+    public BalanceContainer getBalancesByAccount(AISRequest request) throws BankRequestFailedException {
+        this.setUrl(this.url + request.getServicePath() + this.getHttpQueryString(request));
         this.createBody(RequestType.GET);
         this.createHeaders(request);
 
@@ -94,9 +78,8 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public TransactionContainer getTransactionsByAccount(XS2ARequest request) throws BankRequestFailedException {
-        ReadTransactionsRequest r1 = (ReadTransactionsRequest) request;
-        this.setUrl(this.url + String.format(GET_TRANSACTIONS, r1.getAccountId()) + this.getHttpQueryString(request));
+    public TransactionContainer getTransactionsByAccount(AISRequest request) throws BankRequestFailedException {
+        this.setUrl(this.url + request.getServicePath() + this.getHttpQueryString(request));
         this.createBody(RequestType.GET);
         this.createHeaders(request);
 
@@ -109,24 +92,15 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     }
 
     @Override
-    public TransactionDeprecated getTransaction(XS2ARequest request) throws BankRequestFailedException {
-
-        ReadTransactionDetailsRequest r1 = (ReadTransactionDetailsRequest) request;
-        this.setUrl(this.url + String.format(GET_TRANSACTION_DETAILS, r1.getAccountId(), r1.getTransactionId()));
+    public Transaction getTransaction(AISRequest request) throws BankRequestFailedException {
+        this.setUrl(this.url + request.getServicePath());
         this.createBody(RequestType.GET);
         this.createHeaders(request);
 
-        try (Response response = this.execute()) {
-
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String responseBody = extractResponseBody(response, 200);
-            Type type = new TypeToken<ArrayList<TransactionDeprecated>>() {
-            }.getType();
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(type, new TransactionsSerializer())
-                    .create();
 
-            List<TransactionDeprecated> transactions = gson.fromJson(responseBody, type);
-            return transactions.get(0);
+            return jsonb.fromJson(responseBody, ReadTransactionDetailsResponse.class).getTransactionsDetails();
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }

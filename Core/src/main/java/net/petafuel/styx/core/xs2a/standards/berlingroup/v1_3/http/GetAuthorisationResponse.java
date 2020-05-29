@@ -5,14 +5,6 @@ import java.util.List;
 public class GetAuthorisationResponse {
     List<String> authorisationIds;
 
-    /**
-     * @deprecated //Default constructor for Jsonb
-     */
-    @Deprecated
-    public GetAuthorisationResponse() {
-        //Default constructor for Jsonb
-    }
-
     public List<String> getAuthorisationIds() {
         return authorisationIds;
     }

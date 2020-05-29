@@ -6,21 +6,18 @@ import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.util.io.IOProcessor;
-import net.petafuel.styx.api.util.io.contracts.IOInputContainerAIS;
 import net.petafuel.styx.api.v1.account.control.AccountListResponseAdapter;
 import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
 import net.petafuel.styx.api.v1.account.entity.TransactionListRequestBean;
 import net.petafuel.styx.core.persistence.models.AccessToken;
+import net.petafuel.styx.core.xs2a.contracts.AISRequest;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
-import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadBalancesRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
+import net.petafuel.styx.core.xs2a.factory.AISRequestFactory;
+import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +42,7 @@ import java.util.List;
 @CheckAccessToken(allowedServices = {AccessToken.ServiceType.AISPIS, AccessToken.ServiceType.AIS})
 public class AccountResource extends RestResource {
     private static final Logger LOG = LogManager.getLogger(AccountResource.class);
-
+    private final XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
 
     /**
      * Returns a List of Accounts
@@ -59,14 +56,16 @@ public class AccountResource extends RestResource {
     @GET
     @Path("/accounts")
     public Response processAccountList(@NotNull @NotBlank @HeaderParam("consentId") String consentId) throws BankRequestFailedException {
-        ReadAccountListRequest accountListRequest = new ReadAccountListRequest(consentId);
-        accountListRequest.getHeaders().putAll(getAdditionalHeaders());
-        IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setXs2ARequest(accountListRequest);
-        IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-        accountListRequest = (ReadAccountListRequest) ioProcessor.applyOptions();
-        List<AccountDetails> accountList = getXS2AStandard().getAis().getAccountList(accountListRequest);
+        xs2AFactoryInput.setConsentId(consentId);
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
 
+        AISRequest accountListRequest = new AISRequestFactory().create(getXS2AStandard().getRequestClassProvider().accountList(), xs2AFactoryInput);
+        accountListRequest.getHeaders().putAll(getAdditionalHeaders());
+
+        ioProcessor.modifyRequest(accountListRequest, xs2AFactoryInput);
+
+        List<AccountDetails> accountList = getXS2AStandard().getAis().getAccountList(accountListRequest);
         LOG.info("Successfully fetched account list for bic={}", getXS2AStandard().getAspsp().getBic());
         return Response.status(200).entity(new AccountListResponseAdapter(accountList)).build();
     }
@@ -84,17 +83,20 @@ public class AccountResource extends RestResource {
     @GET
     @Path("/accounts/{resourceId}")
     public Response getAccountDetails(@NotNull @NotBlank @HeaderParam("consentId") String consentId, @NotNull @NotBlank @PathParam("resourceId") String accountId) throws BankRequestFailedException {
-        ReadAccountDetailsRequest accountDetailsRequest = new ReadAccountDetailsRequest(accountId, consentId);
+        xs2AFactoryInput.setConsentId(consentId);
+        xs2AFactoryInput.setAccountId(accountId);
+
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
+
+        AISRequest accountDetailsRequest = new AISRequestFactory().create(getXS2AStandard().getRequestClassProvider().accountDetails(), xs2AFactoryInput);
         accountDetailsRequest.getHeaders().putAll(getAdditionalHeaders());
-        IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setXs2ARequest(accountDetailsRequest);
-        IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-        accountDetailsRequest = (ReadAccountDetailsRequest) ioProcessor.applyOptions();
+
+        ioProcessor.modifyRequest(accountDetailsRequest, xs2AFactoryInput);
+
         AccountDetails account = getXS2AStandard().getAis().getAccount(accountDetailsRequest);
         account.setLinks(new AspspUrlMapper(account.getResourceId()).map(account.getLinks()));
-
         LOG.info("Successfully fetched account details bic={}", getXS2AStandard().getAspsp().getBic());
-
         return Response.status(200).entity(new AccountDetailResponse(account)).build();
     }
 
@@ -110,15 +112,19 @@ public class AccountResource extends RestResource {
     @GET
     @Path("/accounts/{resourceId}/balances")
     public Response fetchBalances(@NotNull @NotBlank @HeaderParam("consentId") String consentId, @NotNull @NotBlank @PathParam("resourceId") String accountId) throws BankRequestFailedException {
-        ReadBalancesRequest readBalancesRequest = new ReadBalancesRequest(accountId, consentId);
+        xs2AFactoryInput.setConsentId(consentId);
+        xs2AFactoryInput.setAccountId(accountId);
+
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
+
+        AISRequest readBalancesRequest = new AISRequestFactory().create(getXS2AStandard().getRequestClassProvider().accountBalances(), xs2AFactoryInput);
         readBalancesRequest.getHeaders().putAll(getAdditionalHeaders());
-        IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setXs2ARequest(readBalancesRequest);
-        IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-        readBalancesRequest = (ReadBalancesRequest) ioProcessor.applyOptions();
+
+        ioProcessor.modifyRequest(readBalancesRequest, xs2AFactoryInput);
+
         BalanceContainer balances = getXS2AStandard().getAis().getBalancesByAccount(readBalancesRequest);
         LOG.info("Successfully fetched balances bic={}", getXS2AStandard().getAspsp().getBic());
-
         return Response.status(200).entity(balances).build();
     }
 
@@ -138,18 +144,19 @@ public class AccountResource extends RestResource {
     public Response fetchTransactions(@NotNull @NotBlank @HeaderParam("consentId") String consentId,
                                       @NotNull @NotBlank @PathParam("resourceId") String accountId,
                                       @BeanParam @Valid TransactionListRequestBean transactionListRequestBean) throws BankRequestFailedException {
-        ReadTransactionsRequest readTransactionsRequest = new ReadTransactionsRequest(
-                accountId,
-                consentId,
-                transactionListRequestBean.getBookingStatus(),
-                transactionListRequestBean.getDateFrom(),
-                transactionListRequestBean.getDateTo());
+        xs2AFactoryInput.setConsentId(consentId);
+        xs2AFactoryInput.setAccountId(accountId);
+        xs2AFactoryInput.setBookingStatus(transactionListRequestBean.getBookingStatus());
+        xs2AFactoryInput.setDateFrom(transactionListRequestBean.getDateFrom());
+        xs2AFactoryInput.setDateTo(transactionListRequestBean.getDateTo());
 
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
+
+        AISRequest readTransactionsRequest = new AISRequestFactory().create(getXS2AStandard().getRequestClassProvider().accountTransactionList(), xs2AFactoryInput);
         readTransactionsRequest.getHeaders().putAll(getAdditionalHeaders());
-        IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setXs2ARequest(readTransactionsRequest);
-        IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-        readTransactionsRequest = (ReadTransactionsRequest) ioProcessor.applyOptions();
+
+        ioProcessor.modifyRequest(readTransactionsRequest, xs2AFactoryInput);
 
         TransactionContainer transactionContainer = getXS2AStandard().getAis().getTransactionsByAccount(readTransactionsRequest);
         LOG.info("Successfully fetched transactions bic={}", getXS2AStandard().getAspsp().getBic());

@@ -10,9 +10,9 @@ import net.petafuel.jsepa.facades.ReportConverter;
 import net.petafuel.jsepa.model.pain002.TransactionReport;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
-import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
+import net.petafuel.styx.core.xs2a.contracts.PISRequest;
+import net.petafuel.styx.core.xs2a.contracts.SCARequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
-import net.petafuel.styx.core.xs2a.contracts.XS2APaymentRequest;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.Payment;
@@ -27,9 +27,6 @@ import net.petafuel.styx.core.xs2a.sca.SCAUtils;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationsRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetSCAStatusRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.PeriodicPaymentInitiationXMLRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.ReadPaymentStatusRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.SelectAuthenticationMethodRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthorisationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUAuthenticationRequest;
@@ -56,28 +53,21 @@ import java.util.List;
 import java.util.UUID;
 
 public class BerlinGroupPIS extends BasicAuthorisationService implements PISInterface {
-
     private static final Logger LOG = LogManager.getLogger(BerlinGroupPIS.class);
-
-    // PIS Endpoints
-    private static final String INITIATE_PAYMENT = "/v1/%s/%s";
-    private static final String GET_PAYMENT_STATUS = "/v1/%s/%s/%s/status";
-    private static final String GET_PAYMENT = "/v1/%s/%s/%s";
 
     public BerlinGroupPIS(String url, IXS2AHttpSigner signer) {
         super(LOG, url, signer);
     }
 
     @Override
-    public InitiatedPayment initiatePayment(XS2APaymentRequest xs2ARequest) throws BankRequestFailedException {
-
+    public InitiatedPayment initiatePayment(PISRequest xs2ARequest) throws BankRequestFailedException {
         PaymentProduct product = xs2ARequest.getPaymentProduct();
-        PaymentService service = xs2ARequest.getPaymentService();
 
         if (product.isXml()) {
-            if (xs2ARequest instanceof PeriodicPaymentInitiationXMLRequest) {
-                //in case of multipart http message requestBody already created in request object
-                this.createBody(RequestType.POST, ((PeriodicPaymentInitiationXMLRequest) xs2ARequest).getBody());
+            if (xs2ARequest.getPaymentService().equals(PaymentService.PERIODIC_PAYMENTS)) {
+                //in case of multipart http message get boundary from request
+                okhttp3.MediaType mt = okhttp3.MediaType.get("multipart/form-data; boundary=" + xs2ARequest.getMultipartBoundary());
+                this.createBody(RequestType.POST, mt, xs2ARequest);
             } else {
                 this.createBody(RequestType.POST, XML, xs2ARequest);
             }
@@ -85,7 +75,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
             this.createBody(RequestType.POST, JSON, xs2ARequest);
         }
 
-        this.setUrl(this.url + String.format(INITIATE_PAYMENT, service.getValue(), product.getValue()));
+        this.setUrl(this.url + xs2ARequest.getServicePath());
         this.createHeaders(xs2ARequest);
 
         try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
@@ -102,21 +92,15 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
     }
 
     @Override
-    public PaymentStatus getPaymentStatus(XS2APaymentRequest xs2AGetRequest) throws BankRequestFailedException {
-
-        ReadPaymentStatusRequest request = (ReadPaymentStatusRequest) xs2AGetRequest;
-
-        this.setUrl(this.url + String.format(GET_PAYMENT_STATUS,
-                request.getPaymentService().getValue(),
-                request.getPaymentProduct().getValue(),
-                request.getPaymentId()));
+    public PaymentStatus getPaymentStatus(PISRequest xs2AGetRequest) throws BankRequestFailedException {
+        this.setUrl(this.url + xs2AGetRequest.getServicePath());
         this.createBody(RequestType.GET);
-        if (request.getPaymentProduct().isXml()) {
-            request.addHeader(XS2AHeader.ACCEPT, XML.toString());
+        if (xs2AGetRequest.getPaymentProduct().isXml()) {
+            xs2AGetRequest.addHeader(XS2AHeader.ACCEPT, XML.toString());
         } else {
-            request.addHeader(XS2AHeader.ACCEPT, JSON.toString());
+            xs2AGetRequest.addHeader(XS2AHeader.ACCEPT, JSON.toString());
         }
-        this.createHeaders(request);
+        this.createHeaders(xs2AGetRequest);
         try (Response response = this.execute()) {
             String contentType;
             if ((contentType = response.headers().get("content-type")) == null) {
@@ -142,22 +126,15 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
     //not possible to avoid code complexity at this point
     @SuppressWarnings("squid:S3776")
     @Override
-    public InitializablePayment getPayment(XS2APaymentRequest xs2AGetRequest) throws BankRequestFailedException {
-
-        ReadPaymentRequest request = (ReadPaymentRequest) xs2AGetRequest;
-
-        this.setUrl(this.url + String.format(GET_PAYMENT,
-                request.getPaymentService().getValue(),
-                request.getPaymentProduct().getValue(),
-                request.getPaymentId())
-        );
+    public InitializablePayment getPayment(PISRequest xs2AGetRequest) throws BankRequestFailedException {
+        this.setUrl(this.url + xs2AGetRequest.getServicePath());
         this.createBody(RequestType.GET);
-        if (request.getPaymentProduct().isXml()) {
-            request.addHeader(XS2AHeader.ACCEPT, XML.toString());
+        if (xs2AGetRequest.getPaymentProduct().isXml()) {
+            xs2AGetRequest.addHeader(XS2AHeader.ACCEPT, XML.toString());
         } else {
-            request.addHeader(XS2AHeader.ACCEPT, JSON.toString());
+            xs2AGetRequest.addHeader(XS2AHeader.ACCEPT, JSON.toString());
         }
-        this.createHeaders(request);
+        this.createHeaders(xs2AGetRequest);
         try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String contentType;
             if ((contentType = response.headers().get("content-type")) == null) {
@@ -165,20 +142,20 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
             }
             String responseBody = extractResponseBody(response, 200);
             if (contentType.contains(MediaType.APPLICATION_JSON)) {
-                if (request.getPaymentService().equals(PaymentService.PERIODIC_PAYMENTS)) {
+                if (xs2AGetRequest.getPaymentService().equals(PaymentService.PERIODIC_PAYMENTS)) {
                     Gson periodicPaymentGson = new GsonBuilder()
                             .registerTypeAdapter(PeriodicPayment.class, new PeriodicPaymentSerializer())
                             .create();
                     return periodicPaymentGson.fromJson(responseBody, PeriodicPayment.class);
-                } else if (request.getPaymentService().equals(PaymentService.PAYMENTS)) {
+                } else if (xs2AGetRequest.getPaymentService().equals(PaymentService.PAYMENTS)) {
                     return jsonb.fromJson(responseBody, Payment.class);
                 }
                 Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(InitializablePayment.class, new PaymentSerializer(request.getPaymentService()))
+                        .registerTypeAdapter(InitializablePayment.class, new PaymentSerializer(xs2AGetRequest.getPaymentService()))
                         .create();
                 return gson.fromJson(responseBody, InitializablePayment.class);
             } else {
-                if (request.getPaymentService().equals(PaymentService.PERIODIC_PAYMENTS)) {
+                if (xs2AGetRequest.getPaymentService().equals(PaymentService.PERIODIC_PAYMENTS)) {
                     ByteArrayDataSource datasource = new ByteArrayDataSource(responseBody, "multipart/form-data");
                     MimeMultipart multipart = new MimeMultipart(datasource);
 
@@ -208,7 +185,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
                             .getSepaDocument(), jsonObject);
                 } else {
                     SEPAParser sepaParser = new SEPAParser(responseBody);
-                    return PaymentSerializer.xmlDeserialize(sepaParser.parseSEPA().getSepaDocument(), request.getPaymentService());
+                    return PaymentSerializer.xmlDeserialize(sepaParser.parseSEPA().getSepaDocument(), xs2AGetRequest.getPaymentService());
                 }
             }
         } catch (Exception e) {
@@ -218,37 +195,37 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
 
 
     @Override
-    public SCA startAuthorisation(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+    public SCA startAuthorisation(SCARequest xs2ARequest) throws BankRequestFailedException {
         return super.startAuthorisation((StartAuthorisationRequest) xs2ARequest);
     }
 
     @Override
-    public List<String> getAuthorisations(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+    public List<String> getAuthorisations(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException {
         return super.getAuthorisations((GetAuthorisationsRequest) xs2AAuthorisationRequest);
     }
 
     @Override
-    public SCA.Status getSCAStatus(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+    public SCA.Status getSCAStatus(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException {
         return super.getSCAStatus((GetSCAStatusRequest) xs2AAuthorisationRequest);
     }
 
     @Override
-    public SCA updatePSUIdentification(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+    public SCA updatePSUIdentification(SCARequest xs2ARequest) throws BankRequestFailedException {
         return super.updatePSUIdentification((UpdatePSUIdentificationRequest) xs2ARequest);
     }
 
     @Override
-    public SCA updatePSUAuthentication(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+    public SCA updatePSUAuthentication(SCARequest xs2ARequest) throws BankRequestFailedException {
         return super.updatePSUAuthentication((UpdatePSUAuthenticationRequest) xs2ARequest);
     }
 
     @Override
-    public SCA selectAuthenticationMethod(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
+    public SCA selectAuthenticationMethod(SCARequest xs2ARequest) throws BankRequestFailedException {
         return super.selectAuthenticationMethod((SelectAuthenticationMethodRequest) xs2ARequest);
     }
 
     @Override
-    public SCA authoriseTransaction(XS2AAuthorisationRequest xs2AAuthorisationRequest) throws BankRequestFailedException {
+    public SCA authoriseTransaction(SCARequest xs2AAuthorisationRequest) throws BankRequestFailedException {
         return super.authoriseTransaction((AuthoriseTransactionRequest) xs2AAuthorisationRequest);
     }
 }

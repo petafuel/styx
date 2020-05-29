@@ -1,7 +1,7 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2;
 
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
-import net.petafuel.styx.core.xs2a.contracts.XS2AAuthorisationRequest;
+import net.petafuel.styx.core.xs2a.contracts.SCARequest;
 import net.petafuel.styx.core.xs2a.entities.LinkType;
 import net.petafuel.styx.core.xs2a.entities.Links;
 import net.petafuel.styx.core.xs2a.entities.SCA;
@@ -27,8 +27,8 @@ public class BerlinGroupPIS extends net.petafuel.styx.core.xs2a.standards.berlin
      * BerlinGroup 1.2: the authorisationId of an Authorisation Resource is not a json key in the start SCA Request
      * Therefore we take it out of an authorisation link that contains this id
      */
-    public SCA startAuthorisation(XS2AAuthorisationRequest xs2ARequest) throws BankRequestFailedException {
-        this.setUrl(this.url + xs2ARequest.getServiceURL());
+    public SCA startAuthorisation(SCARequest xs2ARequest) throws BankRequestFailedException {
+        this.setUrl(this.url + xs2ARequest.getServicePath());
 
         this.createBody(RequestType.POST, JSON, xs2ARequest);
         this.createHeaders(xs2ARequest);

@@ -6,16 +6,14 @@ import net.petafuel.styx.api.filter.CheckAccessToken;
 import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.io.IOProcessor;
-import net.petafuel.styx.api.util.io.contracts.IOInputContainerAIS;
-import net.petafuel.styx.api.v1.consent.control.ConsentProvider;
 import net.petafuel.styx.api.v1.consent.entity.GetConsentResponse;
 import net.petafuel.styx.api.v1.consent.entity.GetConsentStatusResponse;
 import net.petafuel.styx.core.persistence.models.AccessToken;
+import net.petafuel.styx.core.xs2a.contracts.AISRequest;
 import net.petafuel.styx.core.xs2a.entities.Consent;
-import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
+import net.petafuel.styx.core.xs2a.factory.AISRequestFactory;
+import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,17 +49,19 @@ public class GetConsentResource extends RestResource {
     @GET
     @Path("/consents/{consentId}")
     public Response fetchConsent(@NotEmpty @NotBlank @PathParam("consentId") String consentId) throws BankRequestFailedException {
-        ConsentProvider provider = new ConsentProvider(getXS2AStandard(), getPsu());
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setConsentId(consentId);
 
-        GetConsentRequest request = (GetConsentRequest) provider.buildFetchConsentRequest(consentId);
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
+
+        AISRequest request = new AISRequestFactory().create(getXS2AStandard().getRequestClassProvider().consentRetrieval(), xs2AFactoryInput);
         request.getHeaders().putAll(getAdditionalHeaders());
-        IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setXs2ARequest(request);
-        IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-        request = (GetConsentRequest) ioProcessor.applyOptions();
+
+        ioProcessor.modifyRequest(request, xs2AFactoryInput);
+
         Consent consent = getXS2AStandard().getCs().getConsent(request);
         GetConsentResponse response = new GetConsentResponse(consent);
-
         LOG.info("Successfully fetched consent entity for bic={}, consentId={}", getXS2AStandard().getAspsp().getBic(), consentId);
         return Response.status(ResponseConstant.OK).entity(response).build();
     }
@@ -77,14 +77,16 @@ public class GetConsentResource extends RestResource {
     @GET
     @Path("/consents/{consentId}/status")
     public Response getConsentStatus(@NotEmpty @NotBlank @PathParam("consentId") String consentId) throws BankRequestFailedException {
-        ConsentProvider provider = new ConsentProvider(getXS2AStandard(), getPsu());
+        XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
+        xs2AFactoryInput.setConsentId(consentId);
 
-        StatusConsentRequest request = (StatusConsentRequest) provider.getConsentStatusRequest(consentId);
+        IOProcessor ioProcessor = new IOProcessor(getXS2AStandard());
+        ioProcessor.modifyInput(xs2AFactoryInput);
+
+        AISRequest request = new AISRequestFactory().create(getXS2AStandard().getRequestClassProvider().consentStatus(), xs2AFactoryInput);
         request.getHeaders().putAll(getAdditionalHeaders());
-        IOInputContainerAIS ioInputContainerAIS = new IOInputContainerAIS(getXS2AStandard(), new PSU());
-        ioInputContainerAIS.setXs2ARequest(request);
-        IOProcessor ioProcessor = new IOProcessor(ioInputContainerAIS);
-        request = (StatusConsentRequest) ioProcessor.applyOptions();
+
+        ioProcessor.modifyRequest(request, xs2AFactoryInput);
         Consent.State state = getXS2AStandard().getCs().getStatus(request);
         GetConsentStatusResponse response = new GetConsentStatusResponse(state);
 

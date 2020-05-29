@@ -3,6 +3,7 @@ package net.petafuel.styx.core.xs2a.contracts;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
+import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
 import net.petafuel.styx.core.xs2a.entities.TransactionDeprecated;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -28,7 +29,7 @@ public interface AISInterface {
      * @return Returns a list of the possible accounts
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    List<AccountDetails> getAccountList(XS2ARequest request) throws BankRequestFailedException;
+    List<AccountDetails> getAccountList(AISRequest request) throws BankRequestFailedException;
 
     /**
      * Returns the Account found by the given Account ID (path parameter resourceId)
@@ -37,7 +38,7 @@ public interface AISInterface {
      * @return Returns a full Account object
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    AccountDetails getAccount(XS2ARequest request) throws BankRequestFailedException;
+    AccountDetails getAccount(AISRequest request) throws BankRequestFailedException;
 
     /**
      * Returns a List of type Balance which belong to the given Account ID (path parameter account-id)
@@ -46,7 +47,7 @@ public interface AISInterface {
      * @return returns balances with their linked account(optional)
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    BalanceContainer getBalancesByAccount(XS2ARequest request) throws BankRequestFailedException;
+    BalanceContainer getBalancesByAccount(AISRequest request) throws BankRequestFailedException;
 
     /**
      * Returns a List of type Transaction which belong to the given Account ID (path parameter account-id)
@@ -54,9 +55,9 @@ public interface AISInterface {
      * @param request XS2AGetRequest which should contain the account id
      * @return Returns a TransactionContainer which holds all the requested transactions
      * @throws BankRequestFailedException If the request towards the bank fails
-     * @see AISInterface#getBalancesByAccount(XS2ARequest)
+     * @see AISInterface#getBalancesByAccount(AISRequest)
      */
-    TransactionContainer getTransactionsByAccount(XS2ARequest request) throws BankRequestFailedException;
+    TransactionContainer getTransactionsByAccount(AISRequest request) throws BankRequestFailedException;
 
     /**
      * Returns the Transaction which belongs to the given Account ID and Transaction ID (path parameters account-id and transactionId)
@@ -65,5 +66,5 @@ public interface AISInterface {
      * @return Returns a single Transaction object associated with the account id and transaction id
      * @throws BankRequestFailedException If the request towards the bank fails
      */
-    TransactionDeprecated getTransaction(XS2ARequest request) throws BankRequestFailedException;
+    Transaction getTransaction(AISRequest request) throws BankRequestFailedException;
 }

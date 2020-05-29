@@ -109,7 +109,6 @@ public class PaymentInitiationResourceTest extends StyxRESTTest {
         invocationBuilder.header("PSU-BIC", "CSDBDE71");
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
         invocationBuilder.header("redirectPreferred", true);
-        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
         Invocation invocation = invocationBuilder.buildPost(Entity.entity(periodicPaymentInitiation, MediaType.APPLICATION_JSON));
         Response response = invocation.invoke(Response.class);

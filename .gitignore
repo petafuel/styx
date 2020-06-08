@@ -8,4 +8,5 @@ keepalive/target/*
 log/*
 connectionpool.properties
 api/src/main/resources/api.properties
+api/src/test/resources/api.properties
 core/src/main/resources/core.properties

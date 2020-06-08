@@ -1,7 +1,7 @@
-package net.petafuel.styx.core.keepalive.tasks;
+package net.petafuel.styx.keepalive;
 
-import com.google.gson.JsonObject;
-import net.petafuel.styx.core.keepalive.contracts.WorkableTask;
+
+import net.petafuel.styx.keepalive.contracts.WorkableTask;
 
 import javax.json.Json;
 import javax.json.JsonObject;

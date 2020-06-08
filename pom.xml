@@ -14,7 +14,6 @@
         <module>core</module>
         <module>keepalive</module>
         <module>spi</module>
-        <module>testplugin</module>
     </modules>
 
     <repositories>

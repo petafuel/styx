@@ -8,7 +8,7 @@ import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
-import net.petafuel.styx.core.xs2a.utils.Config;
+import net.petafuel.styx.keepalive.contracts.Properties;
 import net.petafuel.styx.keepalive.contracts.WorkableTask;
 import net.petafuel.styx.keepalive.entities.TaskFinalFailureCode;
 import net.petafuel.styx.keepalive.entities.TaskFinalFailureException;
@@ -22,8 +22,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.stream.IntStream;
 
-import static net.petafuel.styx.keepalive.entities.KeepAliveProperties.TASKS_CONSENTPOLL_AMOUNT_RETRIES;
-import static net.petafuel.styx.keepalive.entities.KeepAliveProperties.TASKS_CONSENTPOLL_TIMEOUT_BETWEEN_RETRIES;
 
 /**
  * Task to poll for a consent
@@ -46,8 +44,8 @@ public final class ConsentPoll extends WorkableTask {
         this.consent = consent;
         this.csInterface = csInterface;
         signature = getId() + "-" + consent.getId();
-        maxRequestRetries = Integer.parseInt(Config.getInstance().getProperties().getProperty(TASKS_CONSENTPOLL_AMOUNT_RETRIES.getPropertyPath(), "12"));
-        timeoutBetweenRetries = Integer.parseInt(Config.getInstance().getProperties().getProperty(TASKS_CONSENTPOLL_TIMEOUT_BETWEEN_RETRIES.getPropertyPath(), "5000"));
+        maxRequestRetries = Integer.parseInt(System.getProperty(Properties.TASKS_CONSENTPOLL_AMOUNT_RETRIES, "12"));
+        timeoutBetweenRetries = Integer.parseInt(System.getProperty(Properties.TASKS_CONSENTPOLL_TIMEOUT_BETWEEN_RETRIES, "5000"));
         persistentConsent = new PersistentConsent();
     }
 

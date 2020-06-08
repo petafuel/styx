@@ -1,9 +1,8 @@
 package net.petafuel.styx.keepalive.workers;
 
-import net.petafuel.styx.core.xs2a.utils.Config;
+import net.petafuel.styx.keepalive.contracts.Properties;
 import net.petafuel.styx.keepalive.contracts.RunnableWorker;
 import net.petafuel.styx.keepalive.contracts.WorkableTask;
-import net.petafuel.styx.keepalive.entities.KeepAliveProperties;
 import net.petafuel.styx.keepalive.entities.TaskFinalFailureCode;
 import net.petafuel.styx.keepalive.entities.TaskFinalFailureException;
 import net.petafuel.styx.keepalive.entities.TaskRetryFailureException;
@@ -37,7 +36,7 @@ public final class RetryFailureWorker extends RunnableWorker {
         this.running = new AtomicBoolean(false);
         this.currentTaskStartTime = new AtomicLong();
         this.currentTask = new AtomicReference<>();
-        this.maxRetriesPerTask = Integer.parseInt(Config.getInstance().getProperties().getProperty(KeepAliveProperties.THREADS_RETRYFAILUREWORKER_MAX_EXEC_RETRIES.getPropertyPath(), "3"));
+        this.maxRetriesPerTask = Integer.parseInt(System.getProperty(Properties.THREADS_RETRYFAILUREWORKER_MAX_EXEC_RETRIES, "3"));
     }
 
     @Override

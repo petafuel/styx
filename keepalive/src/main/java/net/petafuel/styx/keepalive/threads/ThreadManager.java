@@ -1,6 +1,6 @@
 package net.petafuel.styx.keepalive.threads;
 
-import net.petafuel.styx.core.xs2a.utils.Config;
+import net.petafuel.styx.keepalive.contracts.Properties;
 import net.petafuel.styx.keepalive.contracts.WorkableTask;
 import net.petafuel.styx.keepalive.entities.TaskState;
 import net.petafuel.styx.keepalive.entities.WorkerType;
@@ -22,14 +22,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
-
-import static net.petafuel.styx.keepalive.entities.KeepAliveProperties.MANAGER_PROBE_FREQUENCY;
-import static net.petafuel.styx.keepalive.entities.KeepAliveProperties.MANAGER_PROBE_INITIAL_DELAY;
-import static net.petafuel.styx.keepalive.entities.KeepAliveProperties.MANAGER_USE_RECOVERY;
-import static net.petafuel.styx.keepalive.entities.KeepAliveProperties.THREADS_COREWORKER_MAX_AMOUNT;
-import static net.petafuel.styx.keepalive.entities.KeepAliveProperties.THREADS_COREWORKER_MIN_AMOUNT;
-import static net.petafuel.styx.keepalive.entities.KeepAliveProperties.THREADS_COREWORKER_SPAWN_THRESHOLD;
-import static net.petafuel.styx.keepalive.entities.KeepAliveProperties.THREADS_RETRYFAILUREWORKER_MAX_AMOUNT;
 
 /**
  * Manages the task queues and worker threads
@@ -57,17 +49,17 @@ public final class ThreadManager {
         this.initialized = false;
         this.coreWorkers = new ArrayList<>();
         this.coreQueue = new ConcurrentLinkedQueue<>();
-        this.minCoreWorkers = Integer.parseInt(Config.getInstance().getProperties().getProperty(THREADS_COREWORKER_MIN_AMOUNT.getPropertyPath(), "4"));
-        this.maxCoreWorkers = Integer.parseInt(Config.getInstance().getProperties().getProperty(THREADS_COREWORKER_MAX_AMOUNT.getPropertyPath(), "12"));
-        this.coreWorkerSpawnThreshold = Integer.parseInt(Config.getInstance().getProperties().getProperty(THREADS_COREWORKER_SPAWN_THRESHOLD.getPropertyPath(), "10"));
+        this.minCoreWorkers = Integer.parseInt(System.getProperty(Properties.THREADS_COREWORKER_MIN_AMOUNT, "4"));
+        this.maxCoreWorkers = Integer.parseInt(System.getProperty(Properties.THREADS_COREWORKER_MAX_AMOUNT, "12"));
+        this.coreWorkerSpawnThreshold = Integer.parseInt(System.getProperty(Properties.THREADS_COREWORKER_SPAWN_THRESHOLD, "10"));
 
-        this.maxRetryFailureWorkers = Integer.parseInt(Config.getInstance().getProperties().getProperty(THREADS_RETRYFAILUREWORKER_MAX_AMOUNT.getPropertyPath(), "20"));
+        this.maxRetryFailureWorkers = Integer.parseInt(System.getProperty(Properties.THREADS_RETRYFAILUREWORKER_MAX_AMOUNT, "20"));
         this.retryFailureWorkers = new ArrayList<>();
         this.retryFailureQueue = new ConcurrentLinkedQueue<>();
 
-        this.probeFrequency = Integer.parseInt(Config.getInstance().getProperties().getProperty(MANAGER_PROBE_FREQUENCY.getPropertyPath(), "3000"));
-        this.probeInitialDelay = Integer.parseInt(Config.getInstance().getProperties().getProperty(MANAGER_PROBE_INITIAL_DELAY.getPropertyPath(), "0"));
-        this.useRecovery = Boolean.parseBoolean(Config.getInstance().getProperties().getProperty(MANAGER_USE_RECOVERY.getPropertyPath(), "true"));
+        this.probeFrequency = Integer.parseInt(System.getProperty(Properties.MANAGER_PROBE_FREQUENCY, "3000"));
+        this.probeInitialDelay = Integer.parseInt(System.getProperty(Properties.MANAGER_PROBE_INITIAL_DELAY, "0"));
+        this.useRecovery = Boolean.parseBoolean(System.getProperty(Properties.MANAGER_USE_RECOVERY, "true"));
 
         if (this.minCoreWorkers <= 0 || maxCoreWorkers < 1) {
             throw new IllegalArgumentException("ThreadManager cannot be initialized with zero workers, see config.properties");

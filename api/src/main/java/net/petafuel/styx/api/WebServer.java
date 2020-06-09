@@ -49,7 +49,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.TimeZone;
 
 
 public class WebServer {
@@ -69,9 +68,6 @@ public class WebServer {
     }
 
     public void startHttpServer() throws Exception {
-        //Set Default Timezone for correct Date <-> String conversions
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         InetSocketAddress inetSocketAddress = new InetSocketAddress(InetAddress.getByName(ip), Integer.parseInt(port));

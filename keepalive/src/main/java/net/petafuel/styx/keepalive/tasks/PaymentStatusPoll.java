@@ -50,6 +50,7 @@ public class PaymentStatusPoll extends WorkableTask {
     private long maxExecutionTime;
     private long timeoutBetweenRetries;
     private ScheduledFuture<?> future;
+    private InitializablePayment payment = null;
 
     /**
      * empty constructor for recovery
@@ -76,6 +77,15 @@ public class PaymentStatusPoll extends WorkableTask {
         paymentStatusRequest = new PISRequestFactory().create(xs2AStandard.getRequestClassProvider().paymentStatus(), xs2AFactoryInput);
         paymentStatusRequest.setAuthorization(authorisationHeader);
         paymentStatusRequest.setPsu(xs2AFactoryInput.getPsu());
+
+        //Fetch payment once on Task startup - some ASPSP do not allow payment retrieval after successful SCA
+        PISRequest paymentRetrievalRequest = new PISRequestFactory().create(xs2AStandard.getRequestClassProvider().paymentRetrieval(), xs2AFactoryInput);
+        paymentRetrievalRequest.setAuthorization(authorisationHeader);
+        try {
+            payment = xs2AStandard.getPis().getPayment(paymentRetrievalRequest);
+        } catch (BankRequestFailedException e) {
+            LOG.error("Failed to retrive payment on task startup BankRequestFailedException, error={}", e.getMessage());
+        }
     }
 
     @Override
@@ -126,24 +136,10 @@ public class PaymentStatusPoll extends WorkableTask {
         }
         if (hookStatus == HookStatus.SUCCESS) {
             LOG.info("PaymentStatus Hook was successful, calling Service Provider onSuccess and cancel task execution");
-            PISRequest paymentRetrievalRequest = new PISRequestFactory().create(xs2AStandard.getRequestClassProvider().paymentRetrieval(), xs2AFactoryInput);
-            InitializablePayment payment = null;
-            try {
-                payment = xs2AStandard.getPis().getPayment(paymentRetrievalRequest);
-            } catch (BankRequestFailedException e) {
-                LOG.error("Failed to retrive payment on task success with BankRequestFailedException, error={}", e.getMessage());
-            }
             hookImpl.onSuccess(payment);
             future.cancel(true);
         } else if (hookStatus == HookStatus.FAILURE) {
             LOG.info("PaymentStatus Hook failed, calling Service Provider onFailure and cancel task execution");
-            PISRequest paymentRetrievalRequest = new PISRequestFactory().create(xs2AStandard.getRequestClassProvider().paymentRetrieval(), xs2AFactoryInput);
-            InitializablePayment payment = null;
-            try {
-                payment = xs2AStandard.getPis().getPayment(paymentRetrievalRequest);
-            } catch (BankRequestFailedException e) {
-                LOG.error("Failed to retrive payment on task failure with BankRequestFailedException, error={}", e.getMessage());
-            }
             hookImpl.onFailure(payment);
             future.cancel(true);
         }

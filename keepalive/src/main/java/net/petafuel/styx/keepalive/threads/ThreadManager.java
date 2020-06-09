@@ -103,7 +103,7 @@ public final class ThreadManager {
 
     public void queueTask(WorkableTask task, WorkerType workerType) {
         if (!initialized) {
-            LOG.error("Cannot queue Task, ThreadManager is not initialized yet ThreadManager.start() was not called");
+            LOG.warn("Cannot queue Task, ThreadManager is not initialized yet -> ThreadManager.start() was not called");
             return;
         }
         switch (workerType) {

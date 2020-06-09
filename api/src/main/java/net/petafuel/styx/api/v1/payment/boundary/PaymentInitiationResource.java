@@ -21,6 +21,7 @@ import net.petafuel.styx.api.v1.payment.entity.PeriodicPaymentInitiation;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
+import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
@@ -113,7 +114,11 @@ public class PaymentInitiationResource extends RestResource {
         PersistentPayment.create(paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
 
         xs2AFactoryInput.setPaymentId(paymentResponse.getPaymentId());
-        ThreadManager.getInstance().queueTask(new PaymentStatusPoll(xs2AFactoryInput, getXS2AStandard().getAspsp().getBic(), paymentInitiationRequest.getAuthorization()));
+        String authHeader = paymentInitiationRequest.getAuthorization();
+        if (authHeader == null) {
+            authHeader = paymentInitiationRequest.getHeaders().get(XS2AHeader.AUTHORIZATION);
+        }
+        ThreadManager.getInstance().queueTask(new PaymentStatusPoll(xs2AFactoryInput, getXS2AStandard().getAspsp().getBic(), authHeader));
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 

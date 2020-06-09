@@ -53,10 +53,13 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
 
                 if (oAuthSession.getAccessToken() == null || oAuthSession.getAccessTokenExpiresAt() == null) {
                     throw new PersistenceEmptyResultSetException("The access_token data should be set");
-                } else if (oAuthSession.getAccessTokenExpiresAt().before(new Date()) && oAuthSession.getRefreshTokenExpiresAt().after(new Date())) {
-                    oAuthSession = refreshToken(oAuthSession);
-                } else {
-                    throw new OAuthTokenExpiredException(OAuthTokenExpiredException.MESSAGE);
+                }
+                if (oAuthSession.getAccessTokenExpiresAt().before(new Date())) {
+                    if (oAuthSession.getRefreshTokenExpiresAt().after(new Date())) {
+                        oAuthSession = refreshToken(oAuthSession);
+                    } else {
+                        throw new OAuthTokenExpiredException(OAuthTokenExpiredException.MESSAGE);
+                    }
                 }
 
                 //Add the Authorization: <type> <credentials> header to the request context so we can use it later on demand

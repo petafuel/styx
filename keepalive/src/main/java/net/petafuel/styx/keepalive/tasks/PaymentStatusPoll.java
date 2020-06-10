@@ -60,7 +60,7 @@ public class PaymentStatusPoll extends WorkableTask {
 
     public PaymentStatusPoll(XS2AFactoryInput xs2AFactoryInput, String bic, String authorisationHeader) {
         this.xs2AFactoryInput = xs2AFactoryInput;
-        hookImpl = new PaymentStatusHookService().provider(System.getProperty(Properties.PAYMENT_STATUS_HOOK_SERVICE));
+        hookImpl = new PaymentStatusHookService().provider(System.getProperty(Properties.PAYMENT_STATUS_HOOK_SERVICE, "net.petafuel.styx.spi.paymentstatushook.impl.PaymentStatusHookImpl"));
         hookImpl.initialize(xs2AFactoryInput.getPaymentService(), xs2AFactoryInput.getPaymentProduct(), xs2AFactoryInput.getPaymentId(), bic);
         signature = getId() + "-" + xs2AFactoryInput.getPaymentId();
         maxExecutionTime = Long.parseLong(System.getProperty(Properties.PAYMENT_STATUS_POLL_MAX_EXECUTION_TIME, "60000"));
@@ -126,8 +126,9 @@ public class PaymentStatusPoll extends WorkableTask {
         }
 
         HookStatus hookStatus;
+        PaymentStatus paymentStatus;
         try {
-            PaymentStatus paymentStatus = xs2AStandard.getPis().getPaymentStatus(paymentStatusRequest);
+            paymentStatus = xs2AStandard.getPis().getPaymentStatus(paymentStatusRequest);
             hookStatus = hookImpl.onStatusUpdate(paymentStatus);
         } catch (BankRequestFailedException e) {
             currentRequestFailures += 1;

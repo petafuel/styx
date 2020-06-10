@@ -10,8 +10,10 @@
     <version>1.0-SNAPSHOT</version>
 
     <modules>
-        <module>API</module>
-        <module>Core</module>
+        <module>api</module>
+        <module>core</module>
+        <module>keepalive</module>
+        <module>spi</module>
     </modules>
 
     <repositories>

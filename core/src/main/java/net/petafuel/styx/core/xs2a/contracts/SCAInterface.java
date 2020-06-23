@@ -7,8 +7,6 @@ import java.util.List;
 
 /**
  * These methods are used to go through an SCA
- *
- * @documented https://confluence.petafuel.intern/display/TOOL/Styx+SCA+Interface
  */
 public interface SCAInterface {
     /**

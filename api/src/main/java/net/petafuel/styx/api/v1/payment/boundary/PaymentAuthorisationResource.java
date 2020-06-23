@@ -53,7 +53,6 @@ public class PaymentAuthorisationResource extends RestResource {
      * @param authorisationRequest the request resource might contain an empty body or PSUData authentication
      * @return returns an SCA container with further information on the Authorisation
      * @throws BankRequestFailedException in case the communication between styx and aspsp was not successful
-     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-RedPOST/v1/{payment-service}/{payment-product}/{paymentId}/authorisations
      */
     @AcceptsPreStepAuth
     @POST
@@ -104,7 +103,6 @@ public class PaymentAuthorisationResource extends RestResource {
      * @param authorisationRequest
      * @return
      * @throws BankRequestFailedException
-     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-GreenPUT/v1/{payment-service}/{payment-product}/{paymentId}/authorisations/{authorisationId}
      */
     @AcceptsPreStepAuth
     @PUT
@@ -163,7 +161,7 @@ public class PaymentAuthorisationResource extends RestResource {
     }
 
     /**
-     * https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-FetchmultipleSCAsforapayment
+     * PIS - Fetch multiple SCAs for a payment
      *
      * @param paymentTypeBean
      * @param paymentId
@@ -197,7 +195,7 @@ public class PaymentAuthorisationResource extends RestResource {
     }
 
     /**
-     * https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-GetAuthorisationSCAStatus
+     * PIS - Get authorisation SCA status
      *
      * @param paymentTypeBean
      * @param paymentId

@@ -5,11 +5,8 @@ import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 
 /**
  * Consent Service Interface
- * <p>
- * <br>Handels communication between Styx and the consent related ASPSP interface functions
- * </p>
  *
- * @documented https://confluence.petafuel.intern/display/TOOL/Styx+Consent+Service+Interface
+ * Handles communication between Styx and the consent related ASPSP interface functions.
  */
 public interface CSInterface extends SCAInterface {
 

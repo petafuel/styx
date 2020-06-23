@@ -48,7 +48,6 @@ public class CreateConsentResource extends RestResource {
      * @param postConsentRequest must contain recurringIndicator and the AccountAccess
      * @return returns SCA related data for the consent authorisation
      * @throws BankRequestFailedException in case something goes wrong while communicating to the ASPSP interface
-     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+Consent+Manager+-+Interface+Definition#StyxConsentManagerInterfaceDefinition-CreateConsent
      */
     @RequiresMandatoryHeader
     @AcceptsPreStepAuth

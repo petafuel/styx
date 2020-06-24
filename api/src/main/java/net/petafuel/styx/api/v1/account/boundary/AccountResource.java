@@ -49,7 +49,6 @@ public class AccountResource extends RestResource {
      *
      * @param consentId consentId with access to the requested account list
      * @return returns an account list
-     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+AIS+-+Interface+Definition#StyxAISInterfaceDefinition-YellowGET/v1/accounts
      * @see AccountListResponseAdapter
      */
     @AcceptsPreStepAuth
@@ -76,7 +75,6 @@ public class AccountResource extends RestResource {
      *
      * @param accountId the xs2a account id
      * @return returns an account object
-     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+AIS+-+Interface+Definition#StyxAISInterfaceDefinition-YellowGET/v1/accounts/{resourceId}
      * @see AccountDetails
      */
     @AcceptsPreStepAuth
@@ -106,7 +104,6 @@ public class AccountResource extends RestResource {
      * @param accountId the xs2a account id
      * @param consentId a consent with status VALID
      * @return returns a list of balances, optionally a linked account
-     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+AIS+-+Interface+Definition#StyxAISInterfaceDefinition-YellowGET/v1/accounts/{resourceId}/balances
      */
     @AcceptsPreStepAuth
     @GET
@@ -136,7 +133,6 @@ public class AccountResource extends RestResource {
      * @param transactionListRequestBean QueryParams bookingStatus, dateFrom and dateTo
      * @return TransactionContainer which holds the transactions/revenues grouped by booking status
      * @throws BankRequestFailedException in case the Request to the Bank failed
-     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+AIS+-+Interface+Definition#StyxAISInterfaceDefinition-YellowGET/v1/accounts/{resourceId}/transactions
      */
     @AcceptsPreStepAuth
     @GET

@@ -7,8 +7,6 @@ import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 
 /**
  * This interface exposes payment related functionality
- *
- * @documented https://confluence.petafuel.intern/display/TOOL/Styx+Payment+Initiation+Interface
  */
 public interface PISInterface extends SCAInterface {
     /**

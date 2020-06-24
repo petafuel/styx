@@ -53,7 +53,7 @@ import java.util.Date;
 import java.util.Optional;
 
 /**
- * @documented https://confluence.petafuel.intern/display/TOOL/Styx+PIS+-+Interface+Definition#StyxPISInterfaceDefinition-PaymentInitiationRequest
+ * PIS - Payment initiation request
  */
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})

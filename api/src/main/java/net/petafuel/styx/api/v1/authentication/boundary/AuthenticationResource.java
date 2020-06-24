@@ -32,7 +32,6 @@ public class AuthenticationResource extends RestResource {
      *
      * @param clientTokenInfo mastertoken and service is required for access token creation, expiresIn is optional(default 300)
      * @return returns an access token without metadata
-     * @documented https://confluence.petafuel.intern/display/TOOL/Styx+Client+Authentication+-+Interface+Definition
      */
     @POST
     @Path("/auth")

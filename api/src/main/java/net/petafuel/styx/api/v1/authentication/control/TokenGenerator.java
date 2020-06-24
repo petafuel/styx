@@ -6,7 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 /**
- * @documented https://confluence.petafuel.intern/display/RIS/API+Conventions
+ * Token generator
  */
 public class TokenGenerator {
     private TokenGenerator() {

@@ -2,15 +2,16 @@ package net.petafuel.styx.api.v1.preauth.boundary;
 
 import net.petafuel.styx.api.WebServer;
 import net.petafuel.styx.api.exception.ResponseConstant;
+import net.petafuel.styx.api.filter.CheckAccessToken;
 import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.v1.preauth.entity.PreAuthResponse;
 import net.petafuel.styx.core.banklookup.sad.entities.Url;
 import net.petafuel.styx.core.xs2a.entities.LinkType;
 import net.petafuel.styx.core.xs2a.entities.Links;
-import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
+import net.petafuel.styx.spi.tokentypemapper.api.XS2ATokenType;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -32,12 +33,12 @@ public class PreAuthResource extends RestResource {
      * Relevant only for ASPSPs which support/require a preauth in order to access their XS2A interface
      *
      * @return 200 if successful
-     * @throws BankRequestFailedException in case the communication between styx and aspsp was not successful
      */
     @RequiresBIC
+    @CheckAccessToken(allowedServices = {XS2ATokenType.AIS, XS2ATokenType.PIS, XS2ATokenType.AISPIS, XS2ATokenType.PIIS})
     @POST
     @Path("/preauth")
-    public Response preAuthenticate(@NotEmpty @NotBlank @HeaderParam("scope") String scope) throws BankRequestFailedException {
+    public Response preAuthenticate(@NotEmpty @NotBlank @HeaderParam("scope") String scope) {
 
         Url url;
         if (Boolean.TRUE.equals(WebServer.isSandbox())) {

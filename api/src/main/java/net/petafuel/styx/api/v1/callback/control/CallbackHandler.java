@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -72,13 +72,17 @@ public class CallbackHandler {
     }
 
     private Response returnHTMLPage() {
-        try (InputStream input = new FileInputStream("API/src/main/resources/index.html")) {
+        try (InputStream input = CallbackHandler.class.getClassLoader().getResourceAsStream("index.html")) {
+            if (input == null) {
+                LOG.warn("index.html for callback display cannot be located in the jar, returning plain/text");
+                throw new FileNotFoundException();
+            }
             Optional<String> o1 = Optional.of(IOUtils.toString(input, StandardCharsets.UTF_8.toString()));
             String linkToRedirect = this.getTppLink();
             String htmlContent = o1.get().replace("scaLink", linkToRedirect);
             return Response.status(Response.Status.TEMPORARY_REDIRECT).entity(htmlContent).build();
         } catch (Exception e) {
-            return Response.status(200).entity("hello world").build();
+            return Response.status(200).entity("Thank you for using styx. In order to proceed, please use this link: " + this.getTppLink()).build();
         }
     }
 }

@@ -116,13 +116,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.6.0</version>
+            <version>5.6.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.6.0</version>
+            <version>5.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -134,12 +134,12 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.13.0</version>
+            <version>2.13.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.13.0</version>
+            <version>2.13.3</version>
         </dependency>
         <!-- rest interface dependencies -->
         <dependency>
@@ -150,7 +150,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.9</version>
+            <version>3.10</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

@@ -1,10 +1,10 @@
 alter table configs
-    add styx_config json;
+    add if not exists styx_config json;
 
 alter table public.standards
-    add styx_config_template json;
+    add if not exists styx_config_template json;
 
-drop function get_bank_by_bic(varchar);
+drop function if exists get_bank_by_bic(varchar);
 
 create function get_bank_by_bic(input_bic character varying)
     returns TABLE

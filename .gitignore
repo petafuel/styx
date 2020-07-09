@@ -1,9 +1,12 @@
 styx*.iml
 .idea/*
-API/target/*
-API/log/*
-Core/target/*
+api/target/*
+api/log/*
+core/target/*
+spi/target/*
+keepalive/target/*
 log/*
 connectionpool.properties
-API/src/main/resources/api.properties
-Core/src/main/resources/core.properties
+api/src/main/resources/api.properties
+api/src/test/resources/api.properties
+core/src/main/resources/core.properties

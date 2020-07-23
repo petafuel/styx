@@ -11,7 +11,7 @@ import java.util.List;
  * @see Account
  * @see AccountReference
  */
-public class AccountDetails {
+public class AccountDetails implements XS2AResponse{
     private String resourceId;
     private String iban;
     private String bban;

@@ -48,6 +48,11 @@ public class OAuthService extends BasicService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(code);
     }
 
+    public static String getCodeChallengeFromState(String state) {
+        OAuthSession session = PersistentOAuthSession.get(state);
+        return generateCodeChallenge(session.getCodeVerifier());
+    }
+
     //SHA-256 is predefined for key exchange on oAuth 2.0 @see https://tools.ietf.org/html/rfc7636#section-4.2
     @SuppressWarnings("squid:S4790")
     private static String generateCodeChallenge(String codeVerifier) {

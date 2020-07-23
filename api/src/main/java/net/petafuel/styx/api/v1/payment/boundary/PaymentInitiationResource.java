@@ -25,9 +25,12 @@ import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.LinkType;
+import net.petafuel.styx.core.xs2a.entities.Links;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
+import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.factory.PISRequestFactory;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
@@ -100,6 +103,9 @@ public class PaymentInitiationResource extends RestResource {
         ioProcessor.modifyRequest(paymentInitiationRequest, xs2AFactoryInput);
 
         InitiatedPayment initiatedPayment = getXS2AStandard().getPis().initiatePayment(paymentInitiationRequest);
+
+        ioProcessor.modifyResponse(initiatedPayment);
+
         PaymentResponse paymentResponse = new PaymentResponse(initiatedPayment);
         SCAApproach approach = SCAHandler.decision(initiatedPayment);
         if (approach instanceof OAuth2) {
@@ -118,6 +124,7 @@ public class PaymentInitiationResource extends RestResource {
         if (authHeader == null) {
             authHeader = paymentInitiationRequest.getHeaders().get(XS2AHeader.AUTHORIZATION);
         }
+
         ThreadManager.getInstance().queueTask(new PaymentStatusPoll(xs2AFactoryInput, getXS2AStandard().getAspsp().getBic(), authHeader));
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }

@@ -3,7 +3,7 @@ package net.petafuel.styx.core.xs2a.entities;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
 
-public abstract class StrongAuthenticatableResource {
+public abstract class StrongAuthenticatableResource implements XS2AResponse{
     @JsonbTransient
     protected SCA sca;
 

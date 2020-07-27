@@ -2,7 +2,7 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import javax.json.bind.annotation.JsonbProperty;
 
-public class PaymentStatus {
+public class PaymentStatus implements XS2AResponse{
 
     @JsonbProperty(value = "transactionStatus", nillable = true)
     private TransactionStatus transactionStatus;

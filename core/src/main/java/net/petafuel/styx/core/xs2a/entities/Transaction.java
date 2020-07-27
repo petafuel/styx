@@ -8,7 +8,7 @@ import javax.json.bind.annotation.JsonbTypeDeserializer;
 import java.util.Date;
 import java.util.List;
 
-public class Transaction {
+public class Transaction implements XS2AResponse {
     private String transactionId;
     private String entryReference;
     private String endToEndId;

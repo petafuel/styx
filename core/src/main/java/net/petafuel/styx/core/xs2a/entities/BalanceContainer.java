@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Holds account with connected balances
  */
-public class BalanceContainer {
+public class BalanceContainer implements XS2AResponse {
     private AccountReference account;
     private List<Balance> balances;
 

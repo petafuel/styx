@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Container to hold relevant transaction data returned from ASPSP Interface
  */
-public class TransactionContainer {
+public class TransactionContainer implements XS2AResponse {
     private AccountReference account;
     private AccountReport transactions;
     private List<Balance> balances;

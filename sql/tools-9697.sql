@@ -415,6 +415,12 @@ $$
               "required": true
             },
             "description": "PSU-ID needs to be extracted from the oauth pre-step access token"
+          },
+          "STYX03": {
+            "options": {
+              "required": true
+            },
+            "description": "The scaRedirect URL contains the code_challenge placeholder, which needs to be replaced with value"
           }
         }')
         RETURNING id INTO spardaConfigId;

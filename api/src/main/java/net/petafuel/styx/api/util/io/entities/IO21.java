@@ -11,6 +11,7 @@ import net.petafuel.styx.api.util.io.contracts.IOOrder;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
+import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 
 /**
@@ -24,7 +25,7 @@ public class IO21 extends ApplicableImplementerOption {
     }
 
     @Override
-    public void apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest) throws ImplementerOptionException {
+    public void apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
 
         //Only apply if a single payment and if payment initiation is the target request
         if (ioInput.getPaymentService() != PaymentService.PAYMENTS || ioInput.getPayment() == null) {

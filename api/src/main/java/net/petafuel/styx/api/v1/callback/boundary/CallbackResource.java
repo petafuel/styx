@@ -22,11 +22,12 @@ public class CallbackResource {
     private final CallbackHandler handler = new CallbackHandler();
 
     @GET
-    @Path("/callbacks/{param}")
+    @Path("/callbacks/{param}{requestuuid : (/.*)?}")
     @Produces(MediaType.TEXT_HTML)
     public Response processCallback(
             @Context HttpHeaders httpHeaders,
             @PathParam("param") String param,
+            @PathParam("requestuuid") String requestUUID,
             @QueryParam("code") String code,
             @QueryParam("state") String state,
             @QueryParam("error") String error,
@@ -35,6 +36,6 @@ public class CallbackResource {
         if (state == null) {
             return handler.handleRedirect(param, httpHeaders);
         }
-        return handler.handleOAuth2(code, state, error, errorMessage, param);
+        return handler.handleOAuth2(code, state, error, errorMessage, param, requestUUID);
     }
 }

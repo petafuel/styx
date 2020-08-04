@@ -48,7 +48,7 @@ public class CallbackHandler {
                 request.setJsonBody(false);
                 request.setRedirectUri(request.getRedirectUri() + OAuthService.PREAUTH);
             }
-            stored.setTokenEndpoint("https://duden-materna.de");
+
             OAuthSession authorized = service.tokenRequest(stored.getTokenEndpoint(), request);
             authorized.setState(state);
             PersistentOAuthSession.update(authorized);

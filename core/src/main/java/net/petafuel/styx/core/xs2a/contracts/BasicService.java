@@ -28,7 +28,7 @@ import java.util.StringJoiner;
 
 
 public abstract class BasicService {
-    protected static final MediaType JSON = MediaType.get("application/json;charset=utf-8");
+    protected static final MediaType JSON = MediaType.get("application/json");
     protected static final MediaType XML = MediaType.get("application/xml;charset=utf-8");
     protected static final MediaType FORM_URLENCODED = MediaType.get("application/x-www-form-urlencoded");
     private final Logger logger;

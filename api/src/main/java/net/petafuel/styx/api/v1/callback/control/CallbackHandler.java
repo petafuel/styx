@@ -41,8 +41,8 @@ public class CallbackHandler {
 
     private boolean handleSuccessfulOAuth2(String code, String state, String param) {
         OAuthService service = new OAuthService();
-        OAuthSession stored = PersistentOAuthSession.get(state);
         try {
+            OAuthSession stored = PersistentOAuthSession.get(state);
             AuthorizationCodeRequest request = new AuthorizationCodeRequest(code, stored.getCodeVerifier());
             if (param.equals(OAuthService.PREAUTH)) {
                 request.setJsonBody(false);

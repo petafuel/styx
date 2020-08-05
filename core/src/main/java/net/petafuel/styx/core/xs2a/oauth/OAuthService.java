@@ -16,6 +16,7 @@ import net.petafuel.styx.core.xs2a.utils.Config;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -86,7 +87,7 @@ public class OAuthService extends BasicService {
         queryParams.put("bic", bic);
         Properties properties = Config.getInstance().getProperties();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
-        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + PREAUTH);
+        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl")+ PREAUTH + "/" + ThreadContext.get("requestUUID"));
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 

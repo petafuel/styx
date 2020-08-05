@@ -31,7 +31,7 @@ public class CallbackHandler {
     }
 
     public Response handleOAuth2(String code, String state, String error, String errorMessage, String param, String requestUUID) {
-        if (error == null && handleSuccessfulOAuth2(code, state, param)) {
+        if (error == null && handleSuccessfulOAuth2(code, state, param, requestUUID)) {
             return this.returnHTMLPage();
         } else {
             LOG.error("failed oauth2 callback error={}, errorMessage={}, requestUUID={}", error, errorMessage, requestUUID);
@@ -39,14 +39,14 @@ public class CallbackHandler {
         }
     }
 
-    private boolean handleSuccessfulOAuth2(String code, String state, String param) {
+    private boolean handleSuccessfulOAuth2(String code, String state, String param, String requestUUID) {
         OAuthService service = new OAuthService();
         try {
             OAuthSession stored = PersistentOAuthSession.get(state);
             AuthorizationCodeRequest request = new AuthorizationCodeRequest(code, stored.getCodeVerifier());
             if (param.equals(OAuthService.PREAUTH)) {
                 request.setJsonBody(false);
-                request.setRedirectUri(request.getRedirectUri() + OAuthService.PREAUTH);
+                request.setRedirectUri(request.getRedirectUri() + OAuthService.PREAUTH + requestUUID);
             }
 
             OAuthSession authorized = service.tokenRequest(stored.getTokenEndpoint(), request);

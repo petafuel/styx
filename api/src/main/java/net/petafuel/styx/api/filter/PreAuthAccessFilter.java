@@ -7,6 +7,7 @@ import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxException;
 import net.petafuel.styx.api.rest.StyxFilterPriorites;
 import net.petafuel.styx.api.util.IOParser;
+import net.petafuel.styx.api.util.io.entities.STYX03;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;
 import net.petafuel.styx.core.persistence.PersistenceEmptyResultSetException;
@@ -50,6 +51,7 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
 
             try {
                 OAuthSession oAuthSession = PersistentOAuthSession.get(preAuthId);
+                STYX03.preauthId = preAuthId;
 
                 if (oAuthSession.getAccessToken() == null || oAuthSession.getAccessTokenExpiresAt() == null) {
                     throw new PersistenceEmptyResultSetException("The access_token data should be set");

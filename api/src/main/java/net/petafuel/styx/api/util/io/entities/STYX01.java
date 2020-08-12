@@ -7,6 +7,7 @@ import net.petafuel.styx.api.util.io.contracts.IOOrder;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
+import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 
 /**
@@ -20,7 +21,7 @@ public class STYX01 extends ApplicableImplementerOption {
     }
 
     @Override
-    public void apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest) throws ImplementerOptionException {
+    public void apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
         //Only apply if service is periodic payment and if target request is a payment initiation
         if (ioInput.getPaymentService() != PaymentService.PERIODIC_PAYMENTS || ioInput.getPayment() == null) {
             return;

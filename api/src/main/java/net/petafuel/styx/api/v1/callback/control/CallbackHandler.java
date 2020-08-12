@@ -13,8 +13,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -32,26 +30,25 @@ public class CallbackHandler {
         return this.returnHTMLPage();
     }
 
-    public Response handleOAuth2(String code, String state, String error, String errorMessage, String param) throws URISyntaxException {
-        String linkToRedirect;
-        if (error == null && handleSuccessfulOAuth2(code, state, param)) {
+    public Response handleOAuth2(String code, String state, String error, String errorMessage, String param, String requestUUID) {
+        if (error == null && handleSuccessfulOAuth2(code, state, param, requestUUID)) {
             return this.returnHTMLPage();
         } else {
-            linkToRedirect = handleFailedOAuth2(state);
-            LOG.error("failed oauth2 callback error={}, errorMessage={}", error, errorMessage);
-            return Response.temporaryRedirect(new URI(linkToRedirect)).build();
+            LOG.error("failed oauth2 callback error={}, errorMessage={}, requestUUID={}", error, errorMessage, requestUUID);
+            return this.returnHTMLErrorPage();
         }
     }
 
-    private boolean handleSuccessfulOAuth2(String code, String state, String param) {
+    private boolean handleSuccessfulOAuth2(String code, String state, String param, String requestUUID) {
         OAuthService service = new OAuthService();
-        OAuthSession stored = PersistentOAuthSession.get(state);
         try {
+            OAuthSession stored = PersistentOAuthSession.get(state);
             AuthorizationCodeRequest request = new AuthorizationCodeRequest(code, stored.getCodeVerifier());
             if (param.equals(OAuthService.PREAUTH)) {
                 request.setJsonBody(false);
-                request.setRedirectUri(request.getRedirectUri() + OAuthService.PREAUTH);
+                request.setRedirectUri(request.getRedirectUri() + OAuthService.PREAUTH + requestUUID);
             }
+
             OAuthSession authorized = service.tokenRequest(stored.getTokenEndpoint(), request);
             authorized.setState(state);
             PersistentOAuthSession.update(authorized);
@@ -61,10 +58,6 @@ public class CallbackHandler {
             LOG.error(e);
             return false;
         }
-    }
-
-    private String handleFailedOAuth2(String state) {
-        return OAuthService.buildLink(state);
     }
 
     private String getTppLink() {
@@ -83,6 +76,22 @@ public class CallbackHandler {
             return Response.status(Response.Status.TEMPORARY_REDIRECT).entity(htmlContent).build();
         } catch (Exception e) {
             return Response.status(200).entity("Thank you for using styx. In order to proceed, please use this link: " + this.getTppLink()).build();
+        }
+    }
+
+    private Response returnHTMLErrorPage() {
+        try (InputStream input = CallbackHandler.class.getClassLoader().getResourceAsStream("sca-error.html")) {
+            if (input == null) {
+                LOG.warn("sca-error.html for callback display cannot be located in the jar, returning plain/text");
+                throw new FileNotFoundException();
+            }
+            String htmlContent = IOUtils.toString(input, StandardCharsets.UTF_8.toString());
+            return Response.status(200).entity(htmlContent).build();
+        } catch (Exception e) {
+            return Response.status(200).entity(
+                    "Bei der Authorisierung ist ein Fehler aufgetreten. Bitte versuchen Sie " +
+                    "es zu einem späteren Zeitpunkt noch einmal."
+            ).build();
         }
     }
 }

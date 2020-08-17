@@ -52,7 +52,7 @@ public class CallbackHandler {
             OAuthSession authorized = service.tokenRequest(stored.getTokenEndpoint(), request);
             authorized.setState(state);
             PersistentOAuthSession.update(authorized);
-
+            LOG.info("Successfully received callback from ASPSP for OAuthSession id={}", stored.getId());
             return true;
         } catch (Exception e) {
             LOG.error(e);

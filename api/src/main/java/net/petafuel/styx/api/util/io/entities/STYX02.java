@@ -50,7 +50,7 @@ public class STYX02 extends ApplicableImplementerOption {
         xs2ARequest.getPsu().setId(psuId);
     }
 
-    private String extractPsuId(String authroisationHeader) throws ImplementerOptionException {
+    public String extractPsuId(String authroisationHeader) throws ImplementerOptionException {
         String[] jwtParts = authroisationHeader != null ? authroisationHeader.split("\\.") : null;
         if (jwtParts == null || jwtParts.length < 2) {
             throw new ImplementerOptionException("Error parsing pre-auth access token to JWT");

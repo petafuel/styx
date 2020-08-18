@@ -39,7 +39,15 @@ public class PersistentOAuthSession {
         return model;
     }
 
-
+    /**
+     *
+     * Retrieve an existing oauth session from the database
+     *
+     * @param state state or preauth id, depends on the context
+     * @return found oauth session
+     * @throws PersistenceEmptyResultSetException in case there was no match within the database
+     * @throws PersistenceException if an unexpected SQL Error occurred
+     */
     public static OAuthSession get(String state) {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call get_oauth_session(?)}")) {

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="liquibase" id="12312314">
+        <sql endDelimiter="\n">
+            CREATE OR REPLACE FUNCTION public.create_consent(IN id text,IN state integer,IN access text,IN recurring_indicator boolean,IN last_action timestamp without time zone,IN valid_until timestamp without time zone,IN frequency_per_day integer,IN combined_service_indicator integer,IN chosen_sca_method boolean,IN psu_id character varying,IN psu_id_type character varying,IN psu_ip_address integer,IN psu_ip_port text,IN psu_user_agent text,IN psu_geo_location character varying,IN psu_corporate_id character varying,IN psu_corporate_id_type character varying,IN x_request_id uuid)
+            RETURNS TABLE(id text, state character varying, access text, recurring_indicator boolean, last_action timestamp without time zone, valid_until timestamp without time zone, last_updated timestamp without time zone, frequency_per_day integer, combined_service_indicator boolean, chosen_sca_method character varying, psu_id character varying, psu_id_type character varying, psu_ip_address character varying, psu_ip_port integer, psu_user_agent text, psu_geo_location text, psu_corporate_id character varying, psu_corporate_id_type character varying, x_request_id uuid, created_at timestamp without time zone)
+            LANGUAGE 'sql'
+            VOLATILE SECURITY DEFINER
+            PARALLEL UNSAFE
+            COST 100    ROWS 1000
+
+            AS $BODY$
+            INSERT INTO consents (id, state, access, recurring_indicator, last_action, valid_until, frequency_per_day, chosen_sca_method,
+            combined_service_indicator, psu_id, psu_ip_address, psu_ip_port, psu_user_agent, psu_geo_location,
+            psu_id_type, psu_corporate_id, psu_corporate_id_type, x_request_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+
+            RETURNING id,
+            (SELECT name FROM consent_states WHERE consent_states.id = state) as state,
+            access,
+            recurring_indicator,
+            last_action,
+            valid_until,
+            last_updated,
+            frequency_per_day,
+            combined_service_indicator,
+            (SELECT name FROM sca_methods WHERE sca_methods.id = chosen_sca_method) as chosen_sca_method,
+            psu_id,
+            psu_id_type,
+            psu_ip_address,
+            psu_ip_port,
+            psu_user_agent,
+            psu_geo_location,
+            psu_corporate_id,
+            psu_corporate_id_type,
+            x_request_id,
+            created_at;
+            $BODY$;
+        </sql>
+    </changeSet>
+
+
+</databaseChangeLog>

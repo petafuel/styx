@@ -1,9 +1,9 @@
 #please change the name of this file in liquibase.properties an fill it with db connection data
-driver: org.postgresql.Driver
-url:
-username:
-password:
+driver= org.postgresql.Driver
+url=
+username=
+password=
 #writes author="admin" in the generated xml file
 changeSetAuthor=admin
 #user confirm question while execution about remouted execution
-promptOnNonLocalDatabase: true
+promptOnNonLocalDatabase= true

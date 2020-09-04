@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="liquibase" id="88888">
+        <insert tableName="consent_states">
+            <column name="id" value="1"/>
+            <column name="name" value="received"/>
+        </insert>
+        <insert tableName="consent_states">
+            <column name="id" value="2"/>
+            <column name="name" value="rejected"/>
+        </insert>
+        <insert tableName="consent_states">
+            <column name="id" value="3"/>
+            <column name="name" value="partiallyAuthorised"/>
+        </insert>
+        <insert tableName="consent_states">
+            <column name="id" value="4"/>
+            <column name="name" value="valid"/>
+        </insert>
+        <insert tableName="consent_states">
+            <column name="id" value="5"/>
+            <column name="name" value="revokedByPsu"/>
+        </insert>
+        <insert tableName="consent_states">
+            <column name="id" value="6"/>
+            <column name="name" value="expired"/>
+        </insert>
+        <insert tableName="consent_states">
+            <column name="id" value="7"/>
+            <column name="name" value="terminatedByTpp"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

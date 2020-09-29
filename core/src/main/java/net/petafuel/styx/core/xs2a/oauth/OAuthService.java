@@ -37,11 +37,7 @@ public class OAuthService extends BasicService {
         super(LOG, null, new BerlinGroupSigner());
     }
 
-    private static String generateState() {
-        return UUID.randomUUID().toString();
-    }
-
-    private static String generateCodeVerifier() {
+    public static String generateCodeVerifier() {
 
         SecureRandom sr = new SecureRandom();
         byte[] code = new byte[32];
@@ -50,7 +46,7 @@ public class OAuthService extends BasicService {
     }
 
     public static String getCodeChallengeFromState(String state) {
-        OAuthSession session = PersistentOAuthSession.get(state);
+        OAuthSession session = PersistentOAuthSession.getByState(state);
         return generateCodeChallenge(session.getCodeVerifier());
     }
 
@@ -73,21 +69,21 @@ public class OAuthService extends BasicService {
     }
 
     public static String buildLink(String state) {
-        OAuthSession stored = PersistentOAuthSession.get(state);
+        OAuthSession stored = PersistentOAuthSession.getByState(state);
         HashMap<String, String> queryParams = getQueryParameters(stored);
         Properties properties = Config.getInstance().getProperties();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
-        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + SCA);
+        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + "oauth/"+ SCA);
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 
     public static String buildLink(String state, String bic) {
-        OAuthSession stored = PersistentOAuthSession.get(state);
+        OAuthSession stored = PersistentOAuthSession.getByState(state);
         HashMap<String, String> queryParams = getQueryParameters(stored);
         queryParams.put("bic", bic);
         Properties properties = Config.getInstance().getProperties();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
-        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl")+ PREAUTH + "/" + ThreadContext.get("requestUUID"));
+        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + "oauth/" + PREAUTH + "/" + stored.getState());
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 
@@ -107,28 +103,19 @@ public class OAuthService extends BasicService {
 
         OAuthService service = new OAuthService();
         Map<String, String> endpoints = service.getEndpoints(strongAuthenticatableResource.getLinks().getScaOAuth().getUrl());
-        String state = OAuthService.generateState();
-        String codeVerifier = OAuthService.generateCodeVerifier();
-        OAuthSession session = new OAuthSession();
-        session.setCodeVerifier(codeVerifier);
+        OAuthSession session = OAuthSession.start();
         session.setScope(scope);
         session.setAuthorizationEndpoint(endpoints.get("authorization_endpoint"));
         session.setTokenEndpoint(endpoints.get("token_endpoint"));
-        session.setState(state);
 
         return PersistentOAuthSession.create(session);
     }
 
     public static OAuthSession startPreAuthSession(Url url, String scope) {
-
-        String state = OAuthService.generateState();
-        String codeVerifier = OAuthService.generateCodeVerifier();
-        OAuthSession session = new OAuthSession();
-        session.setCodeVerifier(codeVerifier);
+        OAuthSession session = OAuthSession.start();
         session.setScope(scope);
         session.setAuthorizationEndpoint(url.getPreauthAuthorizationEndpoint());
         session.setTokenEndpoint(url.getPreauthTokenEndpoint());
-        session.setState(state);
 
         return PersistentOAuthSession.create(session);
     }
@@ -154,7 +141,7 @@ public class OAuthService extends BasicService {
         }
     }
 
-    public Map<String, String> getEndpoints(String url) {
+    private Map<String, String> getEndpoints(String url) {
         this.setUrl(url);
         this.createBody(RequestType.GET);
 

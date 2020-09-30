@@ -53,7 +53,7 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
             try {
                 UUID preAuthId = UUID.fromString(preAuthIdString);
                 OAuthSession oAuthSession = PersistentOAuthSession.getById(preAuthId);
-                STYX03.preauthId = preAuthId;
+                STYX03.setPreauthId(preAuthId);
 
                 if (oAuthSession.getAccessToken() == null || oAuthSession.getAccessTokenExpiresAt() == null) {
                     throw new PersistenceEmptyResultSetException("The access_token data should be set");

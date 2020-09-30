@@ -43,7 +43,14 @@ public class CallbackHandler {
 
     public Response handlePreStepOAuth2(String code, String state, String error, String errorMessage) {
 
-        String baseUrl = "http://" + System.getProperty(ApiProperties.STYX_API_IP) + ":" + System.getProperty(ApiProperties.STYX_API_PORT);
+        String baseUrl;
+        if (!Boolean.parseBoolean(System.getProperty(ApiProperties.STYX_PROXY_ENABLED))) {
+            baseUrl = System.getProperty(ApiProperties.STYX_PROXY_SCHEMA) + "//" +
+                    System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME + ":" +
+                            System.getProperty(ApiProperties.STYX_PROXY_PORT));
+        } else {
+            baseUrl = "http://" + System.getProperty(ApiProperties.STYX_API_IP) + ":" + System.getProperty(ApiProperties.STYX_API_PORT);
+        }
 
         OAuthSession oAuthSession = PersistentOAuthSession.getByState(state);
         if (error == null && handleSuccessfulOAuth2(code, state, OAuthService.PREAUTH)) {

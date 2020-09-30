@@ -23,10 +23,18 @@ public class STYX03 extends ApplicableImplementerOption {
 
     private static final String IO = "STYX03";
 
-    public static UUID preauthId;
+    private static UUID preauthId;
 
     public STYX03(IOParser ioParser) {
         super(ioParser);
+    }
+
+    public static UUID getPreauthId() {
+        return preauthId;
+    }
+
+    public static void setPreauthId(UUID preauthId) {
+        STYX03.preauthId = preauthId;
     }
 
     @Override
@@ -37,7 +45,7 @@ public class STYX03 extends ApplicableImplementerOption {
             if (optionRequired != null && optionRequired.getAsBoolean()) {
                 StrongAuthenticatableResource response = (StrongAuthenticatableResource) xs2AResponse;
                 String redirectLink = response.getLinks().getScaRedirect().getUrl();
-                OAuthSession oAuthSession = PersistentOAuthSession.getById(STYX03.preauthId);
+                OAuthSession oAuthSession = PersistentOAuthSession.getById(STYX03.getPreauthId());
                 String codeChallenge = OAuthService.getCodeChallengeFromState(oAuthSession.getState());
                 redirectLink = redirectLink.replace("{code_challenge}", codeChallenge);
                 response.getLinks().setScaRedirect(new Links.Href(redirectLink, LinkType.SCA_REDIRECT));

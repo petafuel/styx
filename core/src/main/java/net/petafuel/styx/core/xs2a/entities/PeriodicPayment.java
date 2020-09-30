@@ -1,16 +1,17 @@
 package net.petafuel.styx.core.xs2a.entities;
 
 import net.petafuel.styx.core.xs2a.entities.serializers.ExecutionRuleAdapter;
-import net.petafuel.styx.core.xs2a.entities.serializers.FrequencyTypeAdapter;
+import net.petafuel.styx.core.xs2a.entities.serializers.ISODateDeserializer;
 
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTypeAdapter;
-import java.util.Arrays;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 import java.util.Date;
 
-public class PeriodicPayment extends Payment {
+public class PeriodicPayment extends SinglePayment {
 
+    @JsonbTypeDeserializer(ISODateDeserializer.class)
     @JsonbDateFormat("yyyy-MM-dd")
     @JsonbProperty("startDate")
     private Date startDate;
@@ -19,6 +20,7 @@ public class PeriodicPayment extends Payment {
     @JsonbTypeAdapter(ExecutionRuleAdapter.class)
     private ExecutionRule executionRule;
 
+    @JsonbTypeDeserializer(ISODateDeserializer.class)
     @JsonbDateFormat("yyyy-MM-dd")
     @JsonbProperty("endDate")
     private Date endDate;
@@ -93,6 +95,7 @@ public class PeriodicPayment extends Payment {
         this.dayOfExecution = dayOfExecution;
     }
 
+    @JsonbTypeAdapter(ExecutionRuleAdapter.class)
     public enum ExecutionRule {
         FOLLOWING("following"),
         PRECEDING("preceding");
@@ -108,35 +111,4 @@ public class PeriodicPayment extends Payment {
         }
     }
 
-    @JsonbTypeAdapter(FrequencyTypeAdapter.class)
-    public enum Frequency {
-        YEAR("Annual"),
-        SEMI("SemiAnnual"),
-        QUTR("Quarterly"),
-        TOMN("EveryTwoMonths"),
-        MNTH("Monthly"),
-        TWMW("TwiceAMonth"),
-        TOWK("EveryTwoWeeks"),
-        WEEK("Weekly"),
-        DAIL("Daily"),
-        ADHO("Adhoc"),
-        INDA("IntraDay"),
-        OVNG("Overnight"),
-        ONDE("OnDemand");
-
-        private final String value;
-
-        Frequency(String fullName) {
-            this.value = fullName;
-        }
-
-        public static Frequency getValue(String s) {
-            return Arrays.asList(values()).parallelStream().filter(bookingStatus -> bookingStatus.value.equals(s)).findFirst().orElse(null);
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-    }
 }

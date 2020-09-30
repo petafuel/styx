@@ -29,7 +29,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class PaymentStatusResourceTest extends StyxRESTTest {
+public class SinglePaymentStatusResourceTest extends StyxRESTTest {
     public static final String CONSORS_BIC = "CSDBDE71";
     public static final String SPARKASSE_BIC = "BYLADEM1FSI";
 

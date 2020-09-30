@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("integration")
-public class SimpleBankLookUpTest {
+class SimpleBankLookUpTest {
 
     @Test
-    public void simpleBankLookUp () {
+    void simpleBankLookUp() {
         SimpleBankLookUp simpleBankLookUp = new SimpleBankLookUp();
         Assert.assertTrue(simpleBankLookUp instanceof BankLookUpInterface);
     }

@@ -1,7 +1,5 @@
 package net.petafuel.styx.core.xs2a.oauth;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.banklookup.sad.entities.Url;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
@@ -10,13 +8,15 @@ import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.OAuthTokenRequest;
 import net.petafuel.styx.core.xs2a.oauth.serializers.EndpointsSerializer;
-import net.petafuel.styx.core.xs2a.oauth.serializers.TokenSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.Config;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -127,29 +127,28 @@ public class OAuthService extends BasicService {
             this.createBody(RequestType.POST, FORM_URLENCODED, request);
         }
 
-        try (Response response = this.execute()) {
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String body = extractResponseBody(response, 200);
-
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(OAuthSession.class, new TokenSerializer())
-                    .create();
-            return gson.fromJson(body, OAuthSession.class);
+            return jsonb.fromJson(body, OAuthSession.class);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
+    /**
+     *
+     * @param url
+     * @return HashMap<String, String>
+     */
     private Map<String, String> getEndpoints(String url) {
         this.setUrl(url);
         this.createBody(RequestType.GET);
 
-        try (Response response = this.execute()) {
-            String body = response.body().string();
-
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(HashMap.class, new EndpointsSerializer())
-                    .create();
-            return gson.fromJson(body, HashMap.class);
+        JsonbConfig jsonbConfig = new JsonbConfig();
+        jsonbConfig.withDeserializers(new EndpointsSerializer());
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create(jsonbConfig)) {
+            String body = extractResponseBody(response, 200);
+            return jsonb.fromJson(body, HashMap.class);
         } catch (Exception e) {
             return new HashMap<>();
         }

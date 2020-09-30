@@ -17,7 +17,7 @@ public class StandingOrderDetail {
 
     private String executionRule;
     private Boolean withinAMonthFlag;
-    private PeriodicPayment.Frequency frequency;
+    private Frequency frequency;
     private String[] monthsOfExecution;
     private Float multiplicator;
     private String dayOfExecution;
@@ -55,11 +55,11 @@ public class StandingOrderDetail {
         this.withinAMonthFlag = withinAMonthFlag;
     }
 
-    public PeriodicPayment.Frequency getFrequency() {
+    public Frequency getFrequency() {
         return frequency;
     }
 
-    public void setFrequency(PeriodicPayment.Frequency frequency) {
+    public void setFrequency(Frequency frequency) {
         this.frequency = frequency;
     }
 

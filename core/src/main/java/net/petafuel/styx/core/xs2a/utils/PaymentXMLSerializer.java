@@ -6,7 +6,7 @@ import net.petafuel.jsepa.model.GroupHeader;
 import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
-import net.petafuel.styx.core.xs2a.entities.Payment;
+import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 import net.petafuel.styx.core.xs2a.utils.jsepa.PmtInf;
 
 import java.text.SimpleDateFormat;
@@ -37,14 +37,14 @@ public class PaymentXMLSerializer {
         creationTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     }
 
-    public PAIN00100303Document serialize(String messageId, Payment payment) {
+    public PAIN00100303Document serialize(String messageId, SinglePayment payment) {
 
         // Necessary variables for creating a PAIN00100303Document
         Date creationTime = new Date();
         double controlSum = 0d;
 
         String paymentMethod = "TRF";
-        String debtorName = payment.getDebtor().getName();
+        String debtorName = payment.getDebtorAccount().getName();
         String chargeBearer = "SLEV";
 
         // Setting values for each instance
@@ -60,7 +60,7 @@ public class PaymentXMLSerializer {
         cdtTrfTxInf.setEndToEndID(payment.getEndToEndIdentification() != null ? payment.getEndToEndIdentification() : UUID.randomUUID().toString());
         cdtTrfTxInf.setAmount(Double.parseDouble(payment.getInstructedAmount().getAmount()));
         cdtTrfTxInf.setCreditorName(payment.getCreditorName());
-        cdtTrfTxInf.setCreditorIBAN(payment.getCreditor().getIban());
+        cdtTrfTxInf.setCreditorIBAN(payment.getCreditorAccount().getIban());
         cdtTrfTxInf.setVwz(payment.getRemittanceInformationUnstructured());
         list.add(cdtTrfTxInf);
 
@@ -71,7 +71,7 @@ public class PaymentXMLSerializer {
         pii.setNoTxns(1);
         pii.setCtrlSum(controlSum);
         pii.setDebtorName(debtorName);
-        pii.setDebtorAccountIBAN(payment.getDebtor().getIban());
+        pii.setDebtorAccountIBAN(payment.getDebtorAccount().getIban());
         pii.setChargeBearer(chargeBearer);
         pii.setCreditTransferTransactionInformationVector(list);
 
@@ -105,13 +105,13 @@ public class PaymentXMLSerializer {
         groupHeader.setInitiatingPartyName(NOT_PROVIDED);
 
         ArrayList<CreditTransferTransactionInformation> list = new ArrayList<>();
-        for (Payment payment : bulkPayment.getPayments()) {
+        for (SinglePayment payment : bulkPayment.getPayments()) {
             CreditTransferTransactionInformation cdtTrfTxInf = new CreditTransferTransactionInformation();
             controlSum += Double.parseDouble(payment.getInstructedAmount().getAmount());
             cdtTrfTxInf.setEndToEndID(payment.getEndToEndIdentification() != null ? payment.getEndToEndIdentification() : UUID.randomUUID().toString());
             cdtTrfTxInf.setAmount(Double.parseDouble(payment.getInstructedAmount().getAmount()));
             cdtTrfTxInf.setCreditorName(payment.getCreditorName());
-            cdtTrfTxInf.setCreditorIBAN(payment.getCreditor().getIban());
+            cdtTrfTxInf.setCreditorIBAN(payment.getCreditorAccount().getIban());
             cdtTrfTxInf.setVwz(payment.getRemittanceInformationUnstructured());
             cdtTrfTxInf.setCreditorAgent(payment.getCreditorName());
             list.add(cdtTrfTxInf);

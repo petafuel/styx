@@ -22,7 +22,7 @@ public class CallbackHandler {
     private static final Logger LOG = LogManager.getLogger(CallbackHandler.class);
 
     public Response handleRedirect(String xRequestId, HttpHeaders httpHeaders) {
-        LOG.info("Handling callback request xrequsetid={}", xRequestId);
+        LOG.info("Handling callback request xrequestid={}", xRequestId);
         StringBuilder output = new StringBuilder();
         for (String field : httpHeaders.getRequestHeaders().keySet()) {
             output.append(" ").append(field).append(": ").append(httpHeaders.getRequestHeader(field)).append("\n");

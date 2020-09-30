@@ -3,6 +3,7 @@ package net.petafuel.styx.core.persistence;
 import net.petafuel.styx.core.persistence.layers.PersistentConsent;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Consent;
+import net.petafuel.styx.core.xs2a.entities.ConsentStatus;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import org.junit.Assert;
@@ -22,7 +23,7 @@ import java.util.UUID;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Tag("integration")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class PersistentConsentIntegrationTest {
+class PersistentConsentIntegrationTest {
     private Consent consent;
 
     @BeforeAll
@@ -37,7 +38,7 @@ public class PersistentConsentIntegrationTest {
 
         consent = new Consent();
         consent.setId(String.valueOf(UUID.randomUUID()));
-        consent.setState(Consent.State.RECEIVED);
+        consent.setState(ConsentStatus.RECEIVED);
         consent.getAccess().setTransactions(Arrays.asList(KlaraFall, JohannesBeer));
         consent.getAccess().setBalances(Arrays.asList(IngoZebadich, MiaDochegal));
         consent.setRecurringIndicator(false);
@@ -60,18 +61,18 @@ public class PersistentConsentIntegrationTest {
 
     @Test
     @Order(1)
-    public void testDatabaseConnection() throws SQLException {
+    void testDatabaseConnection() throws SQLException {
         Connection connection = Persistence.getInstance().getConnection();
         Assert.assertTrue(connection.isValid(1));
     }
 
     @Test
     @Order(2)
-    public void saveConsents() {
+    void saveConsents() {
         Consent fromDatabase = new PersistentConsent().create(consent);
         Assert.assertNotNull(fromDatabase.getId());
         Assert.assertEquals(consent.getId(), fromDatabase.getId());
-        Assert.assertEquals(Consent.State.RECEIVED, fromDatabase.getState());
+        Assert.assertEquals(ConsentStatus.RECEIVED, fromDatabase.getState());
         Assert.assertEquals(SCA.Approach.REDIRECT, fromDatabase.getSca().getApproach());
         Assert.assertFalse(fromDatabase.isRecurringIndicator());
         Assert.assertEquals(4, fromDatabase.getFrequencyPerDay());
@@ -89,26 +90,26 @@ public class PersistentConsentIntegrationTest {
 
     @Test
     @Order(3)
-    public void getConsent() {
+    void getConsent() {
         Consent fromDatabase = new PersistentConsent().get(consent);
         Assert.assertNotNull(fromDatabase.getId());
-        Assert.assertEquals(Consent.State.RECEIVED, fromDatabase.getState());
+        Assert.assertEquals(ConsentStatus.RECEIVED, fromDatabase.getState());
         Assert.assertEquals(SCA.Approach.REDIRECT, fromDatabase.getSca().getApproach());
         Assert.assertEquals("PSU-ID-33241", fromDatabase.getPsu().getId());
     }
 
     @Test
     @Order(4)
-    public void updateConsent() {
+    void updateConsent() {
         consent.setCombinedServiceIndicator(true);
         consent.setFrequencyPerDay(1);
         consent.getSca().setApproach(SCA.Approach.DECOUPLED);
-        consent.setState(Consent.State.VALID);
+        consent.setState(ConsentStatus.VALID);
 
         Consent updatedConsent = new PersistentConsent().update(consent);
         Assert.assertNotNull(updatedConsent.getId());
         Assert.assertEquals(consent.getId(), updatedConsent.getId());
-        Assert.assertEquals(Consent.State.VALID, updatedConsent.getState());
+        Assert.assertEquals(ConsentStatus.VALID, updatedConsent.getState());
         Assert.assertEquals(SCA.Approach.DECOUPLED, updatedConsent.getSca().getApproach());
         Assert.assertFalse(updatedConsent.isRecurringIndicator());
         Assert.assertEquals(1, updatedConsent.getFrequencyPerDay());
@@ -125,15 +126,15 @@ public class PersistentConsentIntegrationTest {
 
     @Test
     @Order(5)
-    public void updateConsentState() {
-        Consent updatedConsent = new PersistentConsent().updateState(consent, Consent.State.TERMINATED_BY_TPP);
+    void updateConsentState() {
+        Consent updatedConsent = new PersistentConsent().updateState(consent, ConsentStatus.TERMINATED_BY_TPP);
         Assert.assertEquals(consent.getId(), updatedConsent.getId());
-        Assert.assertEquals(Consent.State.TERMINATED_BY_TPP, updatedConsent.getState());
+        Assert.assertEquals(ConsentStatus.TERMINATED_BY_TPP, updatedConsent.getState());
     }
 
     @Test
     @Order(6)
-    public void deleteConsent() {
+    void deleteConsent() {
         Consent fromDatabase = new PersistentConsent().delete(consent);
         Assert.assertEquals(consent.getId(), fromDatabase.getId());
     }

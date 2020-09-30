@@ -1,6 +1,6 @@
 package net.petafuel.styx.api.validator;
 
-import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
+import net.petafuel.styx.core.xs2a.entities.Frequency;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -9,7 +9,7 @@ public class FrequencyValidator implements ConstraintValidator<ValidateFrequency
     @Override
     public boolean isValid(String frequency, ConstraintValidatorContext constraintValidatorContext) {
         try {
-            PeriodicPayment.Frequency.valueOf(frequency);
+            Frequency.valueOf(frequency);
             return true;
         } catch (IllegalArgumentException invalidEnumName) {
             return false;

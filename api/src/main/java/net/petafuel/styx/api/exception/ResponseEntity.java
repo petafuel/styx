@@ -22,9 +22,8 @@ public class ResponseEntity implements Serializable {
     private Map<String, String> links;
 
     /**
-     * @deprecated only for default constructor in json binding
+     * only for default constructor in json binding
      */
-    @Deprecated
     public ResponseEntity() {
         //ctor for json binding
     }

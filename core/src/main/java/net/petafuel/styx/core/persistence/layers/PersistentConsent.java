@@ -5,6 +5,7 @@ import net.petafuel.styx.core.persistence.PersistenceException;
 import net.petafuel.styx.core.persistence.PersistentDatabaseInterface;
 import net.petafuel.styx.core.xs2a.entities.AccountAccess;
 import net.petafuel.styx.core.xs2a.entities.Consent;
+import net.petafuel.styx.core.xs2a.entities.ConsentStatus;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
@@ -86,7 +87,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
      * @param state   New state of the consent
      * @return Returns the consent with an updated state
      */
-    public Consent updateState(Consent consent, Consent.State state) {
+    public Consent updateState(Consent consent, ConsentStatus state) {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call update_consent_state(?,?)}")) {
             query.setString(1, consent.getId()); // consent id
@@ -142,7 +143,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         consent.setLastUpdated(getDateFromTimestamp(resultSet.getTimestamp("last_updated")));
         consent.setCreatedAt(getDateFromTimestamp(resultSet.getTimestamp("created_at")));
         consent.setFrequencyPerDay(resultSet.getInt("frequency_per_day"));
-        consent.setState(Consent.State.getByString(resultSet.getString("state")));
+        consent.setState(ConsentStatus.getByString(resultSet.getString("state")));
         consent.getSca().setApproach(SCA.Approach.valueOf(resultSet.getString("chosen_sca_method")));
         consent.setCombinedServiceIndicator(resultSet.getBoolean("combined_service_indicator"));
         consent.setxRequestId(UUID.fromString(resultSet.getString("x_request_id")));

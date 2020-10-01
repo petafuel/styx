@@ -44,20 +44,22 @@ public class CallbackHandler {
     public Response handlePreStepOAuth2(String code, String state, String error, String errorMessage) {
 
         String baseUrl;
-        if (!Boolean.parseBoolean(System.getProperty(ApiProperties.STYX_PROXY_ENABLED))) {
-            baseUrl = System.getProperty(ApiProperties.STYX_PROXY_SCHEMA) + "//" +
-                    System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME + ":" +
-                            System.getProperty(ApiProperties.STYX_PROXY_PORT));
+        if (Boolean.parseBoolean(System.getProperty(ApiProperties.STYX_PROXY_ENABLED))) {
+            baseUrl = System.getProperty(ApiProperties.STYX_PROXY_SCHEMA) + "://" +
+                    System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME);
+            if (System.getProperty(ApiProperties.STYX_PROXY_PORT) != null) {
+                baseUrl += ":" + System.getProperty(ApiProperties.STYX_PROXY_PORT);
+            }
         } else {
             baseUrl = "http://" + System.getProperty(ApiProperties.STYX_API_IP) + ":" + System.getProperty(ApiProperties.STYX_API_PORT);
         }
 
         OAuthSession oAuthSession = PersistentOAuthSession.getByState(state);
         if (error == null && handleSuccessfulOAuth2(code, state, OAuthService.PREAUTH)) {
-            return Response.temporaryRedirect(URI.create(baseUrl + "/v1/preauth/success/" + oAuthSession.getId().toString())).build();
+            return Response.temporaryRedirect(URI.create(baseUrl + "/v1/preauth/success/" + oAuthSession.getState())).build();
         } else {
             LOG.error("failed oauth2 callback error={}, errorMessage={}, state={}", error, errorMessage, state);
-            return Response.temporaryRedirect(URI.create(baseUrl + "/v1/preauth/error/" + oAuthSession.getId().toString())).build();
+            return Response.temporaryRedirect(URI.create(baseUrl + "/v1/preauth/error/" + oAuthSession.getState())).build();
         }
     }
 

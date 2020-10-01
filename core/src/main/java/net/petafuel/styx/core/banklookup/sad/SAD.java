@@ -14,6 +14,7 @@ import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PIISInterface;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.exceptions.SADException;
+import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.factory.XS2ARequestClassProvider;
 import net.petafuel.styx.core.xs2a.utils.Version;
 import org.apache.logging.log4j.LogManager;
@@ -164,7 +165,7 @@ public class SAD implements BankLookUpInterface {
         try(Jsonb jsonb = JsonbBuilder.create()){
             defaultConfig = jsonb.fromJson(rawDefaultConfig, JsonObject.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new SerializerException("unable to deserialize implementer-options json on SAD Service usage", e);
         }
 
         //Check if there is a styx config on aspsp level
@@ -179,7 +180,7 @@ public class SAD implements BankLookUpInterface {
         try(Jsonb jsonb = JsonbBuilder.create()){
             styxConfig = jsonb.fromJson(rawStyxConfig, JsonObject.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new SerializerException("unable to deserialize styx-options json on SAD Service usage", e);
         }
         JsonObjectBuilder defaultConfigJsonBuilder = Json.createObjectBuilder(defaultConfig);
         defaultConfigJsonBuilder.addAll(Json.createObjectBuilder(styxConfig));

@@ -28,7 +28,7 @@ import java.util.Date;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class PaymentAuthorisationResourceSparkasseTest extends StyxRESTTest {
+public class SinglePaymentAuthorisationResourceSparkasseTest extends StyxRESTTest {
     private static final String PSU_ID = "smsTAN_multiMed";
     private static final String PSU_PIN = "okok1";
     private static final String PSU_OTP = "111111";

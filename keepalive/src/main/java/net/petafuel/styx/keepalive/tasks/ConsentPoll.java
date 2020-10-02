@@ -5,6 +5,7 @@ import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.entities.Consent;
+import net.petafuel.styx.core.xs2a.entities.ConsentStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.GetConsentRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.StatusConsentRequest;
@@ -55,7 +56,7 @@ public final class ConsentPoll extends WorkableTask {
         Consent currentConsent = persistentConsent.get(consent);
         if (currentConsent == null) {
             throw new TaskFinalFailureException("Consent queued for polling does not exist in the styx database, cannot poll", TaskFinalFailureCode.POLL_ON_NOT_EXISTING_CONSENT);
-        } else if (currentConsent.getState() == Consent.State.VALID) {
+        } else if (currentConsent.getState() == ConsentStatus.VALID) {
             throw new TaskFinalFailureException("Consent with id " + currentConsent.getId() + " is already on state valid, no polling required", TaskFinalFailureCode.POLL_ON_ALREADY_VALID_CONSENT);
         }
         //TODO make the request type as a parameter
@@ -68,11 +69,11 @@ public final class ConsentPoll extends WorkableTask {
                 throw new TaskFinalFailureException("Task Thread was interrupted");
             }
             try {
-                Consent.State currentStatus = this.csInterface.getStatus(statusConsentRequest);
-                if (currentStatus == Consent.State.VALID) {
+                ConsentStatus currentStatus = this.csInterface.getStatus(statusConsentRequest);
+                if (currentStatus == ConsentStatus.VALID) {
                     LOG.debug("Consent is valid, SCA was successful");
                     break;
-                } else if (!(currentStatus.equals(Consent.State.RECEIVED) || currentStatus.equals(Consent.State.PARTIALLY_AUTHORISED))) {
+                } else if (!(currentStatus.equals(ConsentStatus.RECEIVED) || currentStatus.equals(ConsentStatus.PARTIALLY_AUTHORISED))) {
                     currentConsent.setState(currentStatus);
                     persistentConsent.update(currentConsent);
                     throw new TaskFinalFailureException("Consent cannot be polled anymore due to unrecoverable status: " + currentStatus.toString(), TaskFinalFailureCode.UNRECOVERABLE_STATUS);
@@ -96,7 +97,7 @@ public final class ConsentPoll extends WorkableTask {
         GetConsentRequest getConsentRequest = new GetConsentRequest(null, consent.getId(), null, null);
         try {
             Consent aspspConsent = csInterface.getConsent(getConsentRequest);
-            if (!aspspConsent.getState().equals(Consent.State.VALID)) {
+            if (!aspspConsent.getState().equals(ConsentStatus.VALID)) {
                 throw new TaskRetryFailureException("Upon Consent Poll completion, consent is still not authorized by PSU");
             }
             currentConsent.setFrequencyPerDay(aspspConsent.getFrequencyPerDay());

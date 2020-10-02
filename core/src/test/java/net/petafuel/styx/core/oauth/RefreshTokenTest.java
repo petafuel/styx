@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class RefreshTokenTest {
 
@@ -19,14 +20,14 @@ public class RefreshTokenTest {
 
         String preAuthId = "cfa0cfd3-d4db-47c6-ad45-addececcfb02";
 
-        OAuthSession session = PersistentOAuthSession.get(preAuthId);
+        OAuthSession session = PersistentOAuthSession.getById(UUID.fromString(preAuthId));
 
         if (session.getAccessTokenExpiresAt().before(new Date()) && session.getRefreshTokenExpiresAt().after(new Date())) {
             System.out.println("Token has expired");
             RefreshTokenRequest request = new RefreshTokenRequest(session.getRefreshToken());
             OAuthService service = new OAuthService();
             OAuthSession refreshed = service.tokenRequest(session.getTokenEndpoint(), request);
-            refreshed.setState(preAuthId);
+            refreshed.setState(session.getState());
             PersistentOAuthSession.update(refreshed);
 
             Assert.assertNotEquals(session.getAccessToken(), refreshed.getAccessToken());

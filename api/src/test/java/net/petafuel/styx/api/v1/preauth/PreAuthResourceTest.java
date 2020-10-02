@@ -40,4 +40,28 @@ public class PreAuthResourceTest extends StyxRESTTest {
         Assertions.assertEquals(ResponseOrigin.CLIENT, responseEntity.getOrigin());
         Assertions.assertEquals(ResponseCategory.ERROR, responseEntity.getCategory());
     }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void testPreStepSuccessRoute() {
+        Invocation.Builder invocationBuilder = target("/v1/preauth/success/" + UUID.randomUUID().toString()).request();
+
+        Invocation invocation = invocationBuilder.buildGet();
+        Response response = invocation.invoke(Response.class);
+        Assertions.assertEquals(200, response.getStatus());
+        String HtmlString = response.readEntity(String.class);
+        Assertions.assertEquals("PreStep Done. Status:success", HtmlString);
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void testPreStepFailureRoute() {
+        Invocation.Builder invocationBuilder = target("/v1/preauth/error/" + UUID.randomUUID().toString()).request();
+
+        Invocation invocation = invocationBuilder.buildGet();
+        Response response = invocation.invoke(Response.class);
+        Assertions.assertEquals(200, response.getStatus());
+        String HtmlString = response.readEntity(String.class);
+        Assertions.assertEquals("PreStep Done. Status:error", HtmlString);
+    }
 }

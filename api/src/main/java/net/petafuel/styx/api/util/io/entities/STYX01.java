@@ -1,10 +1,10 @@
 package net.petafuel.styx.api.util.io.entities;
 
-import com.google.gson.JsonElement;
 import net.petafuel.styx.api.util.IOParser;
 import net.petafuel.styx.api.util.io.contracts.ApplicableImplementerOption;
 import net.petafuel.styx.api.util.io.contracts.IOOrder;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import net.petafuel.styx.core.xs2a.entities.Frequency;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
@@ -26,11 +26,11 @@ public class STYX01 extends ApplicableImplementerOption {
         if (ioInput.getPaymentService() != PaymentService.PERIODIC_PAYMENTS || ioInput.getPayment() == null) {
             return;
         }
-        JsonElement aspspUsesFrequencyName = ioParser.getOption(IO, IOParser.Option.REQUIRED);
-        if (aspspUsesFrequencyName != null && aspspUsesFrequencyName.getAsBoolean()) {
+        Boolean aspspUsesFrequencyName = ioParser.getOption(IO, IOParser.Option.REQUIRED);
+        if (aspspUsesFrequencyName != null && aspspUsesFrequencyName) {
             String frequency = ((PeriodicPayment) ioInput.getPayment()).getFrequency();
             if (frequency.length() == 4) {
-                ((PeriodicPayment) ioInput.getPayment()).setFrequency(PeriodicPayment.Frequency.valueOf(frequency).getValue());
+                ((PeriodicPayment) ioInput.getPayment()).setFrequency(Frequency.valueOf(frequency).getValue());
             }
         }
     }

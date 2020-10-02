@@ -8,9 +8,8 @@ public class PreAuthResponse {
     private Links links;
 
     /**
-     * @deprecated default ctor for json binding
+     * default ctor for json binding
      */
-    @Deprecated
     public PreAuthResponse() {
         //default ctor for json binding
     }

@@ -6,6 +6,7 @@ import net.petafuel.styx.core.xs2a.contracts.CSInterface;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.SCARequest;
 import net.petafuel.styx.core.xs2a.entities.Consent;
+import net.petafuel.styx.core.xs2a.entities.ConsentStatus;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
@@ -88,7 +89,7 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
     }
 
     @Override
-    public Consent.State getStatus(AISRequest consentStatusRequest) throws BankRequestFailedException {
+    public ConsentStatus getStatus(AISRequest consentStatusRequest) throws BankRequestFailedException {
         this.setUrl(this.url + consentStatusRequest.getServicePath());
         this.createBody(RequestType.GET);
         this.createHeaders(consentStatusRequest);
@@ -117,7 +118,7 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
 
             Consent consent = new Consent();
             consent.setId(consentDeleteRequest.getConsentId());
-            return new PersistentConsent().updateState(consent, Consent.State.TERMINATED_BY_TPP);
+            return new PersistentConsent().updateState(consent, ConsentStatus.TERMINATED_BY_TPP);
         } catch (IOException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }

@@ -1,6 +1,5 @@
 package net.petafuel.styx.api.util;
 
-import com.google.gson.JsonElement;
 import net.petafuel.styx.api.util.io.entities.ImplementerOptionException;
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;
@@ -21,7 +20,7 @@ public final class IOParser {
         return implementerOptions.get(io);
     }
 
-    public JsonElement getOption(String io, String key) throws ImplementerOptionException {
+    public Boolean getOption(String io, String key) throws ImplementerOptionException {
         ImplementerOption option = implementerOptions.get(io);
         if (option == null) {
             throw new ImplementerOptionException(String.format("ImplementerOption list does not contain option=%s for key=%s", io, key));

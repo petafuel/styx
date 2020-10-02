@@ -20,7 +20,7 @@ import java.util.UUID;
 @Tag("integration")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class PersistentPaymentIntegrationTest {
+class PersistentSinglePaymentIntegrationTest {
     private PaymentEntry paymentEntry;
     private String paymentId;
     private String clientToken;
@@ -40,7 +40,7 @@ public class PersistentPaymentIntegrationTest {
 
     @Test
     @Order(1)
-    public void createPayment() {
+    void createPayment() {
 
         paymentEntry = PersistentPayment.create(paymentId,
                 clientToken,
@@ -56,7 +56,7 @@ public class PersistentPaymentIntegrationTest {
 
     @Test
     @Order(2)
-    public void getPayment() {
+    void getPayment() {
         PaymentEntry paymentEntryFromDatabase = PersistentPayment.get(paymentEntry.getId());
         Assert.assertEquals(paymentEntry.getStatus(), paymentEntryFromDatabase.getStatus());
         Assert.assertEquals(paymentEntry.getBic(), paymentEntryFromDatabase.getBic());
@@ -66,7 +66,7 @@ public class PersistentPaymentIntegrationTest {
 
     @Test
     @Order(3)
-    public void updatePayment() {
+    void updatePayment() {
         paymentEntry.setId(paymentId);
         paymentEntry.setStatus(TransactionStatus.ACCC);
         paymentEntry.setBic("DDDEEE123");
@@ -79,7 +79,7 @@ public class PersistentPaymentIntegrationTest {
 
     @Test
     @Order(4)
-    public void updatePaymentStatus() {
+    void updatePaymentStatus() {
         paymentEntry.setStatus(TransactionStatus.ACWP);
         PaymentEntry paymentEntryFromDatabase = PersistentPayment.updateStatus(paymentEntry.getId(), paymentEntry.getStatus());
         Assert.assertEquals(paymentEntry.getStatus(), paymentEntryFromDatabase.getStatus());
@@ -88,7 +88,7 @@ public class PersistentPaymentIntegrationTest {
 
     @Test
     @Order(5)
-    public void deletePayment() {
+    void deletePayment() {
         PersistentPayment.delete(paymentEntry.getId());
         PaymentEntry paymentEntryFromDatabase = PersistentPayment.get(paymentEntry.getId());
         Assert.assertNull(paymentEntryFromDatabase.getId());

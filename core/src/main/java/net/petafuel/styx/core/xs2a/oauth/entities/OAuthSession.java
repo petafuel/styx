@@ -1,18 +1,35 @@
 package net.petafuel.styx.core.xs2a.oauth.entities;
 
+import net.petafuel.styx.core.xs2a.oauth.OAuthService;
+
+import net.petafuel.styx.core.xs2a.oauth.serializers.SecondsToDateDeserializer;
+
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 import java.util.Date;
+import java.util.UUID;
 
 public class OAuthSession {
-    private int id;
+
+    /**
+     * also used as "preauthId" during the pre-step
+     */
+    private UUID id;
     private String authorizationEndpoint;
     private String tokenEndpoint;
+    @JsonbProperty("code_verifier")
     private String codeVerifier;
     private String state;
     private Date authorizedAt;
     private Date createdAt;
+    @JsonbProperty("access_token")
     private String accessToken;
+    @JsonbProperty("token_type")
     private String tokenType;
+    @JsonbProperty("refresh_token")
     private String refreshToken;
+    @JsonbTypeDeserializer(SecondsToDateDeserializer.class)
+    @JsonbProperty("expires_in")
     private Date accessTokenExpiresAt;
     private Date refreshTokenExpiresAt;
     private String scope;
@@ -22,7 +39,16 @@ public class OAuthSession {
         this.tokenType = tokenType;
     }
 
-    public OAuthSession(){ }
+    public OAuthSession() {
+    }
+
+    public static OAuthSession start() {
+        OAuthSession oAuthSession = new OAuthSession();
+        oAuthSession.setId(UUID.randomUUID());
+        oAuthSession.setState(UUID.randomUUID().toString());
+        oAuthSession.setCodeVerifier(OAuthService.generateCodeVerifier());
+        return  oAuthSession;
+    }
 
     public String getAccessToken() {
         return accessToken;
@@ -112,11 +138,11 @@ public class OAuthSession {
         this.authorizedAt = authorizedAt;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

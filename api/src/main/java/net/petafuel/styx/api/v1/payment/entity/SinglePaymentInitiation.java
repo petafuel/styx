@@ -1,6 +1,6 @@
 package net.petafuel.styx.api.v1.payment.entity;
 
-import net.petafuel.styx.core.xs2a.entities.Payment;
+import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 
 import javax.json.bind.annotation.JsonbProperty;
 import javax.validation.Valid;
@@ -11,13 +11,13 @@ public class SinglePaymentInitiation {
     @NotEmpty(message = "Cannot initiate payment without payment objects")
     @JsonbProperty("payments")
     @Valid
-    private List<Payment> payments;
+    private List<SinglePayment> payments;
 
-    public List<Payment> getPayments() {
+    public List<SinglePayment> getPayments() {
         return payments;
     }
 
-    public void setPayments(List<Payment> payments) {
+    public void setPayments(List<SinglePayment> payments) {
         this.payments = payments;
     }
 }

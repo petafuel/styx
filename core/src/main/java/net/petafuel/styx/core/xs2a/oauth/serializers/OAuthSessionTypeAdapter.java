@@ -16,12 +16,14 @@ public class OAuthSessionTypeAdapter implements JsonbAdapter<OAuthSession, OAuth
     }
 
     /**
-     * set refresh token expire date to 90 days by default
+     * set refresh token expire date to 90 days by default if it was not already set from some other source
      */
     @Override
     public OAuthSession adaptFromJson(OAuthSession oAuthSession) throws Exception {
-        Date copy = oAuthSession.getAccessTokenExpiresAt();
-        oAuthSession.setRefreshTokenExpiresAt(Date.from(copy.toInstant().plus(90, ChronoUnit.DAYS)));
+        if (oAuthSession.getRefreshTokenExpiresAt() == null) {
+            Date copy = oAuthSession.getAccessTokenExpiresAt();
+            oAuthSession.setRefreshTokenExpiresAt(Date.from(copy.toInstant().plus(90, ChronoUnit.DAYS)));
+        }
         return oAuthSession;
     }
 }

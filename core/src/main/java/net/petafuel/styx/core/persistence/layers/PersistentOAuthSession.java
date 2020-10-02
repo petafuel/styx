@@ -7,8 +7,8 @@ import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -22,7 +22,7 @@ public class PersistentOAuthSession {
 
     public static OAuthSession create(OAuthSession model) {
         Connection connection = Persistence.getInstance().getConnection();
-        try (CallableStatement query = connection.prepareCall("{call create_oauth_session(?, ?, ?, ?, ?, ?)}")) {
+        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM create_oauth_session(?, ?, ?, ?, ?, ?)")) {
             query.setString(1, model.getAuthorizationEndpoint());
             query.setString(2, model.getTokenEndpoint());
             query.setString(3, model.getCodeVerifier());
@@ -47,11 +47,11 @@ public class PersistentOAuthSession {
      * @param state state
      * @return found oauth session
      * @throws PersistenceEmptyResultSetException in case there was no match within the database
-     * @throws PersistenceException if an unexpected SQL Error occurred
+     * @throws PersistenceException               if an unexpected SQL Error occurred
      */
     public static OAuthSession getByState(String state) {
         Connection connection = Persistence.getInstance().getConnection();
-        try (CallableStatement query = connection.prepareCall("{call get_oauth_session_by_state(?)}")) {
+        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM get_oauth_session_by_state(?)")) {
             query.setString(1, state);
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
@@ -68,14 +68,14 @@ public class PersistentOAuthSession {
     /**
      * Retrieve an existing oauth session from the database using the id
      *
-     * @param  uuid (used as a preauthId during the pre-step)
+     * @param uuid (used as a preauthId during the pre-step)
      * @return found oauth session
      * @throws PersistenceEmptyResultSetException in case there was no match within the database
-     * @throws PersistenceException if an unexpected SQL Error occurred
+     * @throws PersistenceException               if an unexpected SQL Error occurred
      */
     public static OAuthSession getById(UUID uuid) {
         Connection connection = Persistence.getInstance().getConnection();
-        try (CallableStatement query = connection.prepareCall("{call get_oauth_session_by_id(?)}")) {
+        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM get_oauth_session_by_id(?)")) {
             query.setObject(1, uuid);
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
@@ -91,7 +91,7 @@ public class PersistentOAuthSession {
 
     public static OAuthSession update(OAuthSession model) {
         Connection connection = Persistence.getInstance().getConnection();
-        try (CallableStatement query = connection.prepareCall("{call update_oauth_session(?, ?, ?, ?, ?, ?)}")) {
+        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM update_oauth_session(?, ?, ?, ?, ?, ?)")) {
             query.setString(1, model.getAccessToken());
             query.setString(2, model.getTokenType());
             query.setString(3, model.getRefreshToken());

@@ -24,7 +24,7 @@ public class GetPreStepResponse {
      * @param oAuthSession OAuthSession object from which a new GetPreStepResponse will ne created
      */
     public GetPreStepResponse(OAuthSession oAuthSession){
-        preAuthId = oAuthSession.getState();
+        preAuthId = oAuthSession.getId().toString();
         scope = oAuthSession.getScope();
         String accessToken = oAuthSession.getAccessToken();
         if(accessToken != null) {

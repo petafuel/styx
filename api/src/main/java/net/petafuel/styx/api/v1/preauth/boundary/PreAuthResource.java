@@ -33,6 +33,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.UUID;
 
 
 @ApplicationPath("/")
@@ -66,9 +67,9 @@ public class PreAuthResource extends RestResource {
         String link = OAuthService.buildLink(state, getXS2AStandard().getAspsp().getBic());
         Links links = new Links();
         links.setAuthorizationEndpoint(new Links.Href(link, LinkType.AUTHORIZATION_ENDPOINT));
-        PreAuthResponse response = new PreAuthResponse(state, links);
+        PreAuthResponse response = new PreAuthResponse(oAuthSession.getId().toString(), links);
 
-        LOG.info("Successfully started pre-step Authentication within OAuthSession id={}", oAuthSession.getId());
+        LOG.info("Successfully started pre-step Authentication within OAuthSession state={}", state);
         return Response.status(ResponseConstant.OK).entity(response).build();
     }
 
@@ -82,11 +83,26 @@ public class PreAuthResource extends RestResource {
     public Response getPreStepAuthentication(@NotBlank @PathParam("preauthId") String preauthId) {
         OAuthSession oAuthSession;
         try {
-            oAuthSession = PersistentOAuthSession.get(preauthId);
+            oAuthSession = PersistentOAuthSession.getById(UUID.fromString(preauthId));
         } catch (PersistenceEmptyResultSetException unknownPreauth) {
             throw new StyxException(new ResponseEntity(ResponseConstant.STYX_PREAUTH_NOT_FOUND, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
         }
-        LOG.info("Successfully retrieved preauth from oauth_session id={}", oAuthSession.getId());
+        LOG.info("Successfully retrieved preauth from oauth_session state={}", oAuthSession.getState());
         return Response.status(ResponseConstant.OK).entity(new GetPreStepResponse(oAuthSession)).build();
+    }
+
+    /**
+     * The Callback Endpoint redirects here after handling a PreStep.
+     * The response is here irrelevant since the client is supposed to read the uri only, resp
+     *
+     * @param status
+     * @param preauthId
+     * @return Response contains a plain String.
+     */
+    @GET
+    @Path("/preauth/{status}/{preauthId}")
+    public Response preauthLandingPage(@NotBlank @PathParam("status") String status, @NotBlank @PathParam("preauthId") String preauthId) {
+
+        return Response.status(ResponseConstant.OK).entity("PreStep Done. Status:" + status).build();
     }
 }

@@ -12,7 +12,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.net.URISyntaxException;
 
 @ApplicationPath("/")
 @Path("/v1")
@@ -24,18 +23,34 @@ public class CallbackResource {
     @GET
     @Path("/callbacks/{param}{requestuuid : (/.*)?}")
     @Produces(MediaType.TEXT_HTML)
-    public Response processCallback(
+    public Response processCallback(@Context HttpHeaders httpHeaders, @PathParam("requestuuid") String requestUUID) {
+        return handler.handleRedirect(requestUUID, httpHeaders);
+    }
+
+    @GET
+    @Path("/callbacks/oauth/sca")
+    @Produces(MediaType.TEXT_HTML)
+    public Response processOAuthCallback(
             @Context HttpHeaders httpHeaders,
-            @PathParam("param") String param,
-            @PathParam("requestuuid") String requestUUID,
             @QueryParam("code") String code,
             @QueryParam("state") String state,
             @QueryParam("error") String error,
-            @QueryParam("error_description") String errorMessage) throws URISyntaxException {
+            @QueryParam("error_description") String errorMessage)
+    {
+        return handler.handleOAuth2(code, state, error, errorMessage);
+    }
 
-        if (state == null) {
-            return handler.handleRedirect(param, httpHeaders);
-        }
-        return handler.handleOAuth2(code, state, error, errorMessage, param, requestUUID);
+    @GET
+    @Path("/callbacks/oauth/preauth/{statePath}")
+    @Produces(MediaType.TEXT_HTML)
+    public Response processPreStepCallback(
+            @Context HttpHeaders httpHeaders,
+            @PathParam("statePath") String statePath,
+            @QueryParam("code") String code,
+            @QueryParam("state") String stateQuery,
+            @QueryParam("error") String error,
+            @QueryParam("error_description") String errorMessage)
+    {
+        return handler.handlePreStepOAuth2(code, statePath, error, errorMessage);
     }
 }

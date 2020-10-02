@@ -1,5 +1,6 @@
 package net.petafuel.styx.api.v1.callback.control;
 
+import net.petafuel.styx.api.util.ApiProperties;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
@@ -13,6 +14,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -30,29 +32,53 @@ public class CallbackHandler {
         return this.returnHTMLPage();
     }
 
-    public Response handleOAuth2(String code, String state, String error, String errorMessage, String param, String requestUUID) {
-        if (error == null && handleSuccessfulOAuth2(code, state, param, requestUUID)) {
+    public Response handleOAuth2(String code, String state, String error, String errorMessage) {
+        if (error == null && handleSuccessfulOAuth2(code, state, OAuthService.SCA)) {
             return this.returnHTMLPage();
         } else {
-            LOG.error("failed oauth2 callback error={}, errorMessage={}, requestUUID={}", error, errorMessage, requestUUID);
+            LOG.error("failed oauth2 callback error={}, errorMessage={}, state={}", error, errorMessage, state);
             return this.returnHTMLErrorPage();
         }
     }
 
-    private boolean handleSuccessfulOAuth2(String code, String state, String param, String requestUUID) {
+    public Response handlePreStepOAuth2(String code, String state, String error, String errorMessage) {
+
+        String baseUrl;
+        if (Boolean.parseBoolean(System.getProperty(ApiProperties.STYX_PROXY_ENABLED))) {
+            baseUrl = System.getProperty(ApiProperties.STYX_PROXY_SCHEMA) + "://" +
+                    System.getProperty(ApiProperties.STYX_PROXY_HOSTNAME);
+            if (System.getProperty(ApiProperties.STYX_PROXY_PORT) != null) {
+                baseUrl += ":" + System.getProperty(ApiProperties.STYX_PROXY_PORT);
+            }
+        } else {
+            baseUrl = "http://" + System.getProperty(ApiProperties.STYX_API_IP) + ":" + System.getProperty(ApiProperties.STYX_API_PORT);
+        }
+
+        OAuthSession oAuthSession = PersistentOAuthSession.getByState(state);
+        if (error == null && handleSuccessfulOAuth2(code, state, OAuthService.PREAUTH)) {
+            return Response.temporaryRedirect(URI.create(baseUrl + "/v1/preauth/success/" + oAuthSession.getState())).build();
+        } else {
+            LOG.error("failed oauth2 callback error={}, errorMessage={}, state={}", error, errorMessage, state);
+            return Response.temporaryRedirect(URI.create(baseUrl + "/v1/preauth/error/" + oAuthSession.getState())).build();
+        }
+    }
+
+    private boolean handleSuccessfulOAuth2(String code, String state, String oauthType) {
         OAuthService service = new OAuthService();
         try {
-            OAuthSession stored = PersistentOAuthSession.get(state);
+            OAuthSession stored = PersistentOAuthSession.getByState(state);
             AuthorizationCodeRequest request = new AuthorizationCodeRequest(code, stored.getCodeVerifier());
-            if (param.equals(OAuthService.PREAUTH)) {
+            if (oauthType.equals(OAuthService.PREAUTH)) {
                 request.setJsonBody(false);
-                request.setRedirectUri(request.getRedirectUri() + OAuthService.PREAUTH + requestUUID);
+                request.setRedirectUri(request.getRedirectUri() + "oauth/" + OAuthService.PREAUTH + '/' + state);
+            } else {
+                request.setRedirectUri(request.getRedirectUri() + "oauth/" + OAuthService.SCA);
             }
 
             OAuthSession authorized = service.tokenRequest(stored.getTokenEndpoint(), request);
             authorized.setState(state);
             PersistentOAuthSession.update(authorized);
-            LOG.info("Successfully received callback from ASPSP for OAuthSession id={}", stored.getId());
+            LOG.info("Successfully received callback from ASPSP for OAuthSession state={}", stored.getState());
             return true;
         } catch (Exception e) {
             LOG.error(e);

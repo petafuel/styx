@@ -1,14 +1,16 @@
 package net.petafuel.styx.core.xs2a.oauth.entities;
 
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
-
+import net.petafuel.styx.core.xs2a.oauth.serializers.OAuthSessionTypeAdapter;
 import net.petafuel.styx.core.xs2a.oauth.serializers.SecondsToDateDeserializer;
 
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTypeAdapter;
 import javax.json.bind.annotation.JsonbTypeDeserializer;
 import java.util.Date;
 import java.util.UUID;
 
+@JsonbTypeAdapter(OAuthSessionTypeAdapter.class)
 public class OAuthSession {
 
     /**
@@ -31,6 +33,11 @@ public class OAuthSession {
     @JsonbTypeDeserializer(SecondsToDateDeserializer.class)
     @JsonbProperty("expires_in")
     private Date accessTokenExpiresAt;
+    /**
+     * This is normally set via OAuthSessionTypeAdapter
+     *
+     * @see net.petafuel.styx.core.xs2a.oauth.serializers.OAuthSessionTypeAdapter
+     */
     private Date refreshTokenExpiresAt;
     private String scope;
 
@@ -47,7 +54,7 @@ public class OAuthSession {
         oAuthSession.setId(UUID.randomUUID());
         oAuthSession.setState(UUID.randomUUID().toString());
         oAuthSession.setCodeVerifier(OAuthService.generateCodeVerifier());
-        return  oAuthSession;
+        return oAuthSession;
     }
 
     public String getAccessToken() {

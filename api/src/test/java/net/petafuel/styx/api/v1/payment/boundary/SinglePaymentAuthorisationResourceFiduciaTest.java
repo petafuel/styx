@@ -2,12 +2,9 @@ package net.petafuel.styx.api.v1.payment.boundary;
 
 import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
-import net.petafuel.styx.api.v1.payment.entity.AuthorisationIdsResponse;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
-import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.api.v1.payment.entity.PaymentResponse;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
-import net.petafuel.styx.core.xs2a.entities.AuthenticationObject;
 import net.petafuel.styx.core.xs2a.entities.PSUData;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.entities.XS2AJsonKeys;
@@ -28,16 +25,15 @@ import javax.ws.rs.core.MediaType;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Optional;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
-    private static final String PSU_ID = "PSD2TEST2";
-    private static final String PSU_PIN = "123456";
-    private static final String PSU_OTP = "222222";
-    private static final String BIC = "CMCIDEDD";
-    private static String scaMethodId;
+public class SinglePaymentAuthorisationResourceFiduciaTest extends StyxRESTTest {
+    private static final String PSU_ID = "VRK1234567890ALL";
+    private static final String PSU_PIN = "password";
+    private static final String PSU_OTP = "123456";
+    private static final String BIC = "GENODEF1M03";
+    private static final String SCA_METHOD_ID = "942";
     private static String paymentId;
     private static String authorisationId;
     private String currentDate;
@@ -65,10 +61,9 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
         invocationBuilder.header("redirectPreferred", true);
-        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
         Jsonb jsonb = JsonbBuilder.create();
-        SinglePaymentInitiation singlePaymentInitiation = jsonb.fromJson("{\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE70300209005320320678\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE70300209005320320678\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", SinglePaymentInitiation.class);
+        SinglePaymentInitiation singlePaymentInitiation = jsonb.fromJson("{\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE39499999600000005111\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE18499999600000005101\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", SinglePaymentInitiation.class);
 
         Invocation invocation = invocationBuilder.buildPost(Entity.entity(singlePaymentInitiation, MediaType.APPLICATION_JSON));
         PaymentResponse response = invocation.invoke(PaymentResponse.class);
@@ -85,7 +80,6 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
         invocationBuilder.header("redirectPreferred", true);
-        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
         PSUData psuData = new PSUData();
         psuData.setPassword(PSU_PIN);
@@ -96,9 +90,6 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
         Assertions.assertEquals(SCA.Status.PSUAUTHENTICATED, response.getScaStatus());
         Assertions.assertEquals(SCA.Approach.EMBEDDED, response.getApproach());
         authorisationId = response.getAuthorisationId();
-
-        Optional<AuthenticationObject> selectableScaMethod = response.getScaMethods().stream().filter(scaMethod -> scaMethod.getAuthenticationMethodId() != null).findFirst();
-        scaMethodId = selectableScaMethod.get().getAuthenticationMethodId();
     }
 
     @Test
@@ -110,13 +101,12 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
         invocationBuilder.header("redirectPreferred", true);
-        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
         AuthorisationRequest authorisationRequest = new AuthorisationRequest();
-        authorisationRequest.setAuthenticationMethodId(scaMethodId);
+        authorisationRequest.setAuthenticationMethodId(SCA_METHOD_ID);
         Invocation invocation = invocationBuilder.buildPut(Entity.entity(authorisationRequest, MediaType.APPLICATION_JSON));
         SCA response = invocation.invoke(SCA.class);
-        Assertions.assertEquals(SCA.Status.SCAMETHODSELECTED, response.getScaStatus());
+        Assertions.assertEquals(SCA.Status.STARTED, response.getScaStatus());
     }
 
     @Test
@@ -128,47 +118,11 @@ public class PaymentAuthorisationResourceTargoTest extends StyxRESTTest {
         invocationBuilder.header("PSU-BIC", BIC);
         invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
         invocationBuilder.header("redirectPreferred", true);
-        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
 
         AuthorisationRequest authorisationRequest = new AuthorisationRequest();
         authorisationRequest.setScaAuthenticationData(PSU_OTP);
         Invocation invocation = invocationBuilder.buildPut(Entity.entity(authorisationRequest, MediaType.APPLICATION_JSON));
         SCA response = invocation.invoke(SCA.class);
         Assertions.assertEquals(SCA.Status.FINALISED, response.getScaStatus());
-    }
-
-    @Test
-    @Category(IntegrationTest.class)
-    public void E_getAuthorisationIds_Targo() {
-        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations").request();
-        invocationBuilder.header("token", pisAccessToken);
-        invocationBuilder.header("PSU-ID", "PSD2TEST2");
-        invocationBuilder.header("PSU-BIC", "CMCIDEDD");
-        invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
-        invocationBuilder.header("redirectPreferred", true);
-        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
-
-        Invocation invocation = invocationBuilder.buildGet();
-        AuthorisationIdsResponse response = invocation.invoke(AuthorisationIdsResponse.class);
-        Assertions.assertNotNull(response.getAuthorisationIds());
-        Assertions.assertTrue(response.getAuthorisationIds().size() > 0);
-        authorisationId = response.getAuthorisationIds().get(0);
-    }
-
-    @Test
-    @Category(IntegrationTest.class)
-    public void F_getAuthorisationStatus_Targo() {
-        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers/" + paymentId + "/authorisations/" + authorisationId).request();
-        invocationBuilder.header("token", pisAccessToken);
-        invocationBuilder.header("PSU-ID", "PSD2TEST2");
-        invocationBuilder.header("PSU-BIC", "CMCIDEDD");
-        invocationBuilder.header("PSU-IP-Address", "192.168.8.78");
-        invocationBuilder.header("redirectPreferred", true);
-        invocationBuilder.header("X-STYX-X-bvpsd2-test-apikey", "tUfZ5KOHRTFrikZUsmSMUabKw09UIzGE");
-
-        Invocation invocation = invocationBuilder.buildGet();
-        AuthorisationStatusResponse response = invocation.invoke(AuthorisationStatusResponse.class);
-        Assertions.assertNotNull(response.getScaStatus());
-        Assertions.assertEquals(SCA.Status.FINALISED.getValue(), response.getScaStatus());
     }
 }

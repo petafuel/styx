@@ -22,9 +22,9 @@ public class IOHelper {
      * @throws StyxException if the payment product is neither supported for xml nor for json
      */
     public static void processPaymentProduct(IOParser ioParser, String io, XS2AFactoryInput ioInputContainer) throws ImplementerOptionException {
-        if (ioParser.getOption(io, IOProcessor.XML_PAYMENT_PRODUCT_PREFIX + ioInputContainer.getPaymentProduct().getValue()).getAsBoolean()) {
+        if (Boolean.TRUE.equals(ioParser.getOption(io, IOProcessor.XML_PAYMENT_PRODUCT_PREFIX + ioInputContainer.getPaymentProduct().getValue()))) {
             ioInputContainer.setPaymentProduct(PaymentProduct.byValue(IOProcessor.XML_PAYMENT_PRODUCT_PREFIX + ioInputContainer.getPaymentProduct().getValue()));
-        } else if (!ioParser.getOption(io, ioInputContainer.getPaymentProduct().getValue()).getAsBoolean()) {
+        } else if (Boolean.FALSE.equals(ioParser.getOption(io, ioInputContainer.getPaymentProduct().getValue()))) {
             throw new StyxException(new ResponseEntity("The requested ASPSP does not support " + ioInputContainer.getPaymentService().getValue() + " with payment-product " + ioInputContainer.getPaymentProduct().getValue(), ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.ASPSP));
         }
     }

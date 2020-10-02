@@ -16,9 +16,8 @@ public class Amount implements Serializable {
     String amount;
 
     /**
-     * @deprecated default constructor for json binding
+     * default constructor for json binding
      */
-    @Deprecated
     public Amount() {
         //Default constructor for json bind
     }

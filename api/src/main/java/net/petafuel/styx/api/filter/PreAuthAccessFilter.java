@@ -36,13 +36,19 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
     private static final Logger LOG = LogManager.getLogger(PreAuthAccessFilter.class);
     private static final String PRE_AUTH_ID = "preAuthId";
 
+    /**
+     * Supressing java:S3776 -> need to rework logic to reduce code complexity
+     * @param containerRequestContext
+     * @throws IOException
+     */
     @Override
+    @SuppressWarnings("java:S3776")
     public void filter(ContainerRequestContext containerRequestContext) throws IOException {
         XS2AStandard xs2AStandard = (XS2AStandard) containerRequestContext.getProperty(XS2AStandard.class.getName());
         IOParser ioParser = new IOParser(xs2AStandard.getAspsp());
         ImplementerOption ioPreAuthRequired = ioParser.get("IO6");
 
-        if (ioPreAuthRequired != null && ioPreAuthRequired.getOptions().get(IOParser.Option.REQUIRED).getAsBoolean()) {
+        if (ioPreAuthRequired != null && ioPreAuthRequired.getOptions().get(IOParser.Option.REQUIRED)) {
             LOG.info("ASPSP bic={} requires pre-step", xs2AStandard.getAspsp().getBic());
             //preauth is available and required for this bank -> check if preauth id is present
             String preAuthIdString = containerRequestContext.getHeaderString(PRE_AUTH_ID);

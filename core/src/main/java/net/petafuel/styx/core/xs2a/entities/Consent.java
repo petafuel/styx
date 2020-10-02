@@ -7,7 +7,6 @@ import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbTypeDeserializer;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -44,7 +43,7 @@ public class Consent extends StrongAuthenticatableResource {
     @JsonbTransient
     private PSU psu;
     @JsonbTransient
-    private State state;
+    private ConsentStatus state;
 
     public Consent() {
         this.sca = new SCA();
@@ -58,7 +57,7 @@ public class Consent extends StrongAuthenticatableResource {
     @JsonbCreator
     public Consent(@JsonbProperty("consentStatus") String consentStatus) {
         this();
-        this.state = State.getByString(consentStatus);
+        this.state = ConsentStatus.getByString(consentStatus);
     }
 
     public String getId() {
@@ -82,11 +81,11 @@ public class Consent extends StrongAuthenticatableResource {
         return state != null ? state.getJsonKey() : null;
     }
 
-    public State getState() {
+    public ConsentStatus getState() {
         return state;
     }
 
-    public void setState(State state) {
+    public void setState(ConsentStatus state) {
         this.state = state;
     }
 
@@ -162,48 +161,4 @@ public class Consent extends StrongAuthenticatableResource {
         this.psu = psu;
     }
 
-    public enum State {
-        //consent received, not authorised yet
-        RECEIVED(1, "received"),
-        //consent rejected, authorisation was not successful
-        REJECTED(2, "rejected"),
-        //consent "in progress", not all required authrisation steps have been completed
-        PARTIALLY_AUTHORISED(3, "partiallyAuthorised"),
-        //consent is ready to be used
-        VALID(4, "valid"),
-        //the psu has revoked the consent towards the aspsp
-        REVOKED_BY_PSU(5, "revokedByPsu"),
-        //consent validity has expired
-        EXPIRED(6, "expired"),
-        //consent was terminated due to DELETE /consents/{consentid} call
-        TERMINATED_BY_TPP(7, "terminatedByTpp");
-
-        private String jsonKey;
-        private int index;
-
-        State(int index, String jsonKey) {
-            this.index = index;
-            this.jsonKey = jsonKey;
-        }
-
-        /**
-         * @deprecated jsonb default constructor
-         */
-        @Deprecated
-        State(){
-            //jsonb default constructor
-        }
-
-        public static Consent.State getByString(String search) {
-            return Arrays.stream(Consent.State.values()).filter(linkType -> linkType.getJsonKey().equals(search)).findFirst().orElse(null);
-        }
-
-        public String getJsonKey() {
-            return jsonKey;
-        }
-
-        public int getIndex() {
-            return index;
-        }
-    }
 }

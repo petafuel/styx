@@ -3,30 +3,18 @@ package net.petafuel.styx.core.xs2a.entities;
 import javax.json.bind.annotation.JsonbProperty;
 import java.util.List;
 
-/**
- * This contains all account details
- * opposite to the AccountReference, which only contains the identifier for an account
- * This class together with the AccountReference replaces the non-compliant Account model
- *
- * @see AccountReference
- */
-public class AccountDetails implements XS2AResponse {
+public class CardAccountDetail {
     private String resourceId;
-    private String iban;
-    private String bban;
-    private String msisdn;
+    private String maskedPan;
     private Currency currency;
     private String ownerName;
     private String name;
     private String displayName;
     private String product;
-    @JsonbProperty("cashAccountType")
-    private CashAccountType cashAccountType;
     private String status;
-    private String bic;
-    private String linkedAccounts;
     private String usage;
     private String details;
+    private Amount creditLimit;
     private List<Balance> balances;
     private Links links;
 
@@ -38,28 +26,12 @@ public class AccountDetails implements XS2AResponse {
         this.resourceId = resourceId;
     }
 
-    public String getIban() {
-        return iban;
+    public String getMaskedPan() {
+        return maskedPan;
     }
 
-    public void setIban(String iban) {
-        this.iban = iban;
-    }
-
-    public String getBban() {
-        return bban;
-    }
-
-    public void setBban(String bban) {
-        this.bban = bban;
-    }
-
-    public String getMsisdn() {
-        return msisdn;
-    }
-
-    public void setMsisdn(String msisdn) {
-        this.msisdn = msisdn;
+    public void setMaskedPan(String maskedPan) {
+        this.maskedPan = maskedPan;
     }
 
     public Currency getCurrency() {
@@ -102,36 +74,12 @@ public class AccountDetails implements XS2AResponse {
         this.product = product;
     }
 
-    public CashAccountType getCashAccountType() {
-        return cashAccountType;
-    }
-
-    public void setCashAccountType(CashAccountType cashAccountType) {
-        this.cashAccountType = cashAccountType;
-    }
-
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getBic() {
-        return bic;
-    }
-
-    public void setBic(String bic) {
-        this.bic = bic;
-    }
-
-    public String getLinkedAccounts() {
-        return linkedAccounts;
-    }
-
-    public void setLinkedAccounts(String linkedAccounts) {
-        this.linkedAccounts = linkedAccounts;
     }
 
     public String getUsage() {
@@ -148,6 +96,14 @@ public class AccountDetails implements XS2AResponse {
 
     public void setDetails(String details) {
         this.details = details;
+    }
+
+    public Amount getCreditLimit() {
+        return creditLimit;
+    }
+
+    public void setCreditLimit(Amount creditLimit) {
+        this.creditLimit = creditLimit;
     }
 
     public List<Balance> getBalances() {

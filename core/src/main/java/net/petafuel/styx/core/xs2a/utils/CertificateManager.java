@@ -78,6 +78,7 @@ public class CertificateManager {
 
     /**
      * Get the current static CertificateManager object
+     *
      * @return CertificateManager
      */
     public static CertificateManager getInstance() {
@@ -104,6 +105,7 @@ public class CertificateManager {
 
     /**
      * Returns the sslcontext with initialized client certificate from our keystore
+     *
      * @return SSLContext
      */
     public SSLContext getSSLContext() {
@@ -125,6 +127,7 @@ public class CertificateManager {
 
     /**
      * Extracts the key from our keystore, also dependend on the alias chosen for the crt within the keystore
+     *
      * @return PrivateKey
      */
     public PrivateKey getPrivateKey() {

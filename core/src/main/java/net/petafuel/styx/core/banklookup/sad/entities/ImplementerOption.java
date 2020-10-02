@@ -1,6 +1,5 @@
 package net.petafuel.styx.core.banklookup.sad.entities;
 
-import com.google.gson.JsonElement;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +10,7 @@ import java.util.Map;
 public class ImplementerOption {
     private String id;
     private String description;
-    private Map<String, JsonElement> options;
+    private Map<String, Boolean> options;
 
     public ImplementerOption() {
         options = new HashMap<>();
@@ -33,15 +32,15 @@ public class ImplementerOption {
         this.description = description;
     }
 
-    public Map<String, JsonElement> getOptions() {
+    public Map<String, Boolean> getOptions() {
         return options;
     }
 
-    public void setOptions(Map<String, JsonElement> options) {
+    public void setOptions(Map<String, Boolean> options) {
         this.options = options;
     }
 
-    public void addOption(String key, JsonElement value) {
+    public void addOption(String key, Boolean value) {
         this.options.put(key, value);
     }
 }

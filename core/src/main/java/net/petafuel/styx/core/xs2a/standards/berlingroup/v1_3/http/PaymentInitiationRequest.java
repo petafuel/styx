@@ -9,7 +9,7 @@ import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.BulkPaymentAdapter;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
-import net.petafuel.styx.core.xs2a.entities.Payment;
+import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
@@ -70,9 +70,12 @@ public class PaymentInitiationRequest extends PISRequest {
         return String.format("/v1/%s/%s", getPaymentService().getValue(), getPaymentProduct().getValue());
     }
 
+    /*
+     * @return payment request body for sepa-single-payments in xml or json as String
+     */
     private Optional<String> createSinglePayment() {
         if (getPaymentProduct().isXml()) {
-            PAIN00100303Document document = (new PaymentXMLSerializer()).serialize(UUID.randomUUID().toString(), (Payment) payment);
+            PAIN00100303Document document = (new PaymentXMLSerializer()).serialize(UUID.randomUUID().toString(), (SinglePayment) payment);
             PaymentInstructionInformation xmlPayment = document.getCctInitiation().getPmtInfos().get(0);
 
             if (this.getPaymentProduct().equals(PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS) && (xmlPayment.getRequestedExecutionDate() == null || "".equals(xmlPayment.getRequestedExecutionDate()))) {

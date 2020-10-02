@@ -17,6 +17,10 @@ public class AccountReference {
     @JsonbTransient
     private Type type;
 
+    /**
+     * Noncompliant optional field for compatibility reasons
+     */
+    private String name;
 
     public AccountReference(String identifier, Type type) {
         this.currency = Currency.EUR;
@@ -41,9 +45,8 @@ public class AccountReference {
     }
 
     /**
-     * @deprecated default ctor for json binding
+     * default ctor for json binding
      */
-    @Deprecated
     public AccountReference() {
         // default ctor for json binding
     }
@@ -119,12 +122,12 @@ public class AccountReference {
         }
     }
 
-    public enum Type {
-        IBAN,
-        BBAN,
-        PAN,
-        MASKED_PAN,
-        MSISDN
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -138,5 +141,13 @@ public class AccountReference {
     @Override
     public int hashCode() {
         return this.getIdentifier(this.getType()).hashCode();
+    }
+
+    public enum Type {
+        IBAN,
+        BBAN,
+        PAN,
+        MASKED_PAN,
+        MSISDN
     }
 }

@@ -9,7 +9,7 @@ import net.petafuel.styx.api.util.IOParser;
 import net.petafuel.styx.api.util.io.contracts.ApplicableImplementerOption;
 import net.petafuel.styx.api.util.io.contracts.IOOrder;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
-import net.petafuel.styx.core.xs2a.entities.Payment;
+import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
@@ -31,8 +31,8 @@ public class IO21 extends ApplicableImplementerOption {
         if (ioInput.getPaymentService() != PaymentService.PAYMENTS || ioInput.getPayment() == null) {
             return;
         }
-        Payment payment = (Payment) ioInput.getPayment();
-        if (payment.getRequestedExecutionDate() != null && !ioParser.getOption(IO, IOParser.Option.AVAILABLE).getAsBoolean()) {
+        SinglePayment payment = (SinglePayment) ioInput.getPayment();
+        if (payment.getRequestedExecutionDate() != null && Boolean.FALSE.equals(ioParser.getOption(IO, IOParser.Option.AVAILABLE))) {
             throw new StyxException(new ResponseEntity("ASPSP does not support future-dated payments but requestedExecutionDate was set", ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.ASPSP));
         }
     }

@@ -1,6 +1,5 @@
 package net.petafuel.styx.api.util.io.entities;
 
-import com.google.gson.JsonElement;
 import net.petafuel.styx.api.util.IOParser;
 import net.petafuel.styx.api.util.io.contracts.ApplicableImplementerOption;
 import net.petafuel.styx.api.util.io.contracts.IOOrder;
@@ -41,8 +40,8 @@ public class STYX03 extends ApplicableImplementerOption {
     public void apply(XS2AFactoryInput xs2AFactoryInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
         if (xs2AResponse instanceof StrongAuthenticatableResource) {
 
-            JsonElement optionRequired = ioParser.getOption(IO, IOParser.Option.REQUIRED);
-            if (optionRequired != null && optionRequired.getAsBoolean()) {
+            Boolean optionRequired = ioParser.getOption(IO, IOParser.Option.REQUIRED);
+            if (optionRequired != null && optionRequired) {
                 StrongAuthenticatableResource response = (StrongAuthenticatableResource) xs2AResponse;
                 String redirectLink = response.getLinks().getScaRedirect().getUrl();
                 OAuthSession oAuthSession = PersistentOAuthSession.getById(STYX03.getPreauthId());

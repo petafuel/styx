@@ -19,7 +19,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class PaymentWithPreAuthSparda extends StyxRESTTest {
+public class SinglePaymentWithPreAuthSparda extends StyxRESTTest {
     private static final String BIC = "GENODEF1S04";
 
     private String currentDate;

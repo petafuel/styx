@@ -8,9 +8,8 @@ public class GetSCAStatusResponse {
     private SCA.Status scaStatus;
 
     /**
-     * @deprecated Default constructor for Jsonb
+     * Default constructor for Jsonb
      */
-    @Deprecated
     public GetSCAStatusResponse() {
         //Default constructor for Jsonb
     }

@@ -1,19 +1,22 @@
 package net.petafuel.styx.core.xs2a.oauth.http;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
-import net.petafuel.styx.core.xs2a.oauth.serializers.TokenSerializer;
+import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.utils.Config;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.annotation.JsonbProperty;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class AuthorizationCodeRequest extends OAuthTokenRequest {
-
+    @JsonbProperty("code")
     private String code;
+    @JsonbProperty("code_verifier")
     private String codeVerifier;
+    @JsonbProperty("redirect_uri")
     private String redirectUri = Config.getInstance().getProperties().getProperty("styx.redirect.baseurl");
 
     public AuthorizationCodeRequest(String code, String codeVerifier) {
@@ -50,8 +53,11 @@ public class AuthorizationCodeRequest extends OAuthTokenRequest {
     public Optional<String> getRawBody() {
         String rawBody;
         if (isJsonBody()) {
-            Gson gson = new GsonBuilder().registerTypeAdapter(AuthorizationCodeRequest.class, new TokenSerializer()).create();
-            rawBody = gson.toJson(this);
+            try (Jsonb jsonb = JsonbBuilder.create()) {
+                rawBody = jsonb.toJson(this);
+            } catch (Exception e) {
+                throw new SerializerException("Unable to create request body for AuthorizationCodeRequest", e);
+            }
         } else {
             Map<String, String> params = new HashMap<>();
             params.put("grant_type", getGrantType());

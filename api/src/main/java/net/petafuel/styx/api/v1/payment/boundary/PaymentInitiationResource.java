@@ -22,15 +22,12 @@ import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
-import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
-import net.petafuel.styx.core.xs2a.entities.LinkType;
-import net.petafuel.styx.core.xs2a.entities.Links;
-import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
-import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
+import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.factory.PISRequestFactory;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
@@ -82,11 +79,11 @@ public class PaymentInitiationResource extends RestResource {
     public Response initiateSinglePayment(@BeanParam PaymentTypeBean paymentTypeBean,
                                           @Valid SinglePaymentInitiation singlePaymentBody) throws BankRequestFailedException {
 
-        Optional<Payment> singlePayment = singlePaymentBody.getPayments().stream().findFirst();
+        Optional<SinglePayment> singlePayment = singlePaymentBody.getPayments().stream().findFirst();
         if (!singlePayment.isPresent()) {
             throw new StyxException(new ResponseEntity("No valid single payment object was found within the payments array", ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
         }
-        Payment payment = singlePayment.get();
+        SinglePayment payment = singlePayment.get();
 
         XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
         xs2AFactoryInput.setPayment(payment);
@@ -145,11 +142,11 @@ public class PaymentInitiationResource extends RestResource {
             @BeanParam PaymentTypeBean paymentTypeBean,
             @Valid BulkPaymentInitiation bulkPaymentBody) throws BankRequestFailedException {
         //Debtors should all be the same within the payments, we take one of them
-        Optional<Payment> singlePayment = bulkPaymentBody.getPayments().stream().findAny();
+        Optional<SinglePayment> singlePayment = bulkPaymentBody.getPayments().stream().findAny();
         if (!singlePayment.isPresent()) {
             throw new StyxException(new ResponseEntity("No valid payment object was found within the bulk payments array", ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
         }
-        Account debtor = bulkPaymentBody.getDebtorAccount();
+        AccountReference debtor = bulkPaymentBody.getDebtorAccount();
         BulkPayment bulkPayment = new BulkPayment();
         bulkPayment.setBatchBookingPreferred(bulkPaymentBody.getBatchBookingPreferred());
         bulkPayment.setDebtorAccount(debtor);
@@ -201,16 +198,16 @@ public class PaymentInitiationResource extends RestResource {
     @AcceptsPreStepAuth
     public Response initiatePeriodicPayment(@BeanParam PaymentTypeBean paymentTypeBean,
                                             @Valid PeriodicPaymentInitiation periodicPaymentBody) throws BankRequestFailedException {
-        Optional<Payment> singlePayment = periodicPaymentBody.getPayments().stream().findFirst();
+        Optional<SinglePayment> singlePayment = periodicPaymentBody.getPayments().stream().findFirst();
         if (!singlePayment.isPresent()) {
             throw new StyxException(new ResponseEntity("No valid payment object was found", ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
         }
-        Payment payment = singlePayment.get();
+        SinglePayment payment = singlePayment.get();
 
         PeriodicPayment periodicPayment = new PeriodicPayment();
-        periodicPayment.setCreditor(payment.getCreditor());
+        periodicPayment.setCreditorAccount(payment.getCreditorAccount());
         periodicPayment.setCreditorName(payment.getCreditorName());
-        periodicPayment.setDebtor(payment.getDebtor());
+        periodicPayment.setDebtorAccount(payment.getDebtorAccount());
         periodicPayment.setEndToEndIdentification(payment.getEndToEndIdentification());
         periodicPayment.setInstructedAmount(payment.getInstructedAmount());
         periodicPayment.setRemittanceInformationUnstructured(payment.getRemittanceInformationUnstructured());

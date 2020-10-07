@@ -8,10 +8,9 @@ import java.util.List;
  * opposite to the AccountReference, which only contains the identifier for an account
  * This class together with the AccountReference replaces the non-compliant Account model
  *
- * @see Account
  * @see AccountReference
  */
-public class AccountDetails implements XS2AResponse{
+public class AccountDetails implements XS2AResponse {
     private String resourceId;
     private String iban;
     private String bban;

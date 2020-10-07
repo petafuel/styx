@@ -1,17 +1,18 @@
 package net.petafuel.styx.core.xs2a.oauth.http;
 
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
-import net.petafuel.styx.core.xs2a.oauth.serializers.TokenSerializer;
+import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.annotation.JsonbProperty;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class RefreshTokenRequest extends OAuthTokenRequest {
-
+    @JsonbProperty("refresh_token")
     private String refreshToken;
 
     public RefreshTokenRequest(String refreshToken) {
@@ -32,8 +33,11 @@ public class RefreshTokenRequest extends OAuthTokenRequest {
     public Optional<String> getRawBody() {
         String rawBody;
         if (isJsonBody()) {
-            Gson gson = new GsonBuilder().registerTypeAdapter(RefreshTokenRequest.class, new TokenSerializer()).create();
-            rawBody = gson.toJson(this);
+            try (Jsonb jsonb = JsonbBuilder.create()) {
+                rawBody = jsonb.toJson(this);
+            } catch (Exception e) {
+                throw new SerializerException("Unable to create request body for RefreshTokenRequest");
+            }
         } else {
             Map<String, String> params = new HashMap<>();
             params.put("grant_type", getGrantType());

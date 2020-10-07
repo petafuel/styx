@@ -1,11 +1,9 @@
 package net.petafuel.styx.core.xs2a.contracts;
 
-import net.petafuel.styx.core.xs2a.entities.Account;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
 import net.petafuel.styx.core.xs2a.entities.TransactionContainer;
-import net.petafuel.styx.core.xs2a.entities.TransactionDeprecated;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 
 import java.util.List;
@@ -13,11 +11,10 @@ import java.util.List;
 /**
  * Account Information Service Interface
  *
- * @see Account
  * @see XS2ARequest
  * @see BalanceContainer
- * @see TransactionDeprecated
  * @see TransactionContainer
+ * @see AccountDetails
  */
 public interface AISInterface {
 

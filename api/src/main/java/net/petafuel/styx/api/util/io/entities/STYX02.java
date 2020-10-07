@@ -27,7 +27,7 @@ public class STYX02 extends ApplicableImplementerOption {
 
     @Override
     public void apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
-        if (!ioParser.getOption("IO6", IOParser.Option.REQUIRED).getAsBoolean() || !ioParser.getOption(IO, IOParser.Option.REQUIRED).getAsBoolean()) {
+        if (Boolean.FALSE.equals(ioParser.getOption("IO6", IOParser.Option.REQUIRED)) || Boolean.FALSE.equals(ioParser.getOption(IO, IOParser.Option.REQUIRED))) {
             //do not apply if not required
             return;
         }

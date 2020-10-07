@@ -2,28 +2,22 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import net.petafuel.styx.core.xs2a.entities.serializers.ISODateDeserializer;
 
-import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTypeDeserializer;
 import java.util.Date;
 import java.util.List;
 
-public class Transaction implements XS2AResponse {
+public class Transaction {
     private String transactionId;
     private String entryReference;
     private String endToEndId;
     private String mandateId;
     private String checkId;
     private String creditorId;
-
-    @JsonbDateFormat("yyyy-MM-dd")
     @JsonbTypeDeserializer(ISODateDeserializer.class)
     private Date bookingDate;
-
-    @JsonbDateFormat("yyyy-MM-dd")
     @JsonbTypeDeserializer(ISODateDeserializer.class)
     private Date valueDate;
-
     private Amount transactionAmount;
     private List<ReportExchangeRate> currencyExchange;
     private String creditorName;
@@ -39,7 +33,7 @@ public class Transaction implements XS2AResponse {
     private String remittanceInformationStructured;
     private List<Remittance> remittanceInformationStructuredArray;
     private String additionalInformation;
-    private StructuredAdditionalInformation additionalInformationStructured;
+    private String additionalInformationStructured;
     private PurposeCode purposeCode;
     //This consists of domainCode-familyCode-subFamilyCode and is concatenated
     private String bankTransactionCode;
@@ -231,11 +225,11 @@ public class Transaction implements XS2AResponse {
         this.additionalInformation = additionalInformation;
     }
 
-    public StructuredAdditionalInformation getAdditionalInformationStructured() {
+    public String getAdditionalInformationStructured() {
         return additionalInformationStructured;
     }
 
-    public void setAdditionalInformationStructured(StructuredAdditionalInformation additionalInformationStructured) {
+    public void setAdditionalInformationStructured(String additionalInformationStructured) {
         this.additionalInformationStructured = additionalInformationStructured;
     }
 

@@ -2,6 +2,7 @@ package net.petafuel.styx.api.v1.payment.entity;
 
 import net.petafuel.styx.api.validator.ValidateExecutionRule;
 import net.petafuel.styx.api.validator.ValidateFrequency;
+import net.petafuel.styx.core.xs2a.entities.Frequency;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 
 import javax.json.bind.annotation.JsonbDateFormat;
@@ -17,7 +18,10 @@ public class PeriodicPaymentInitiation extends SinglePaymentInitiation {
     @NotNull(message = "startDate cannot be null for periodic payments")
     private LocalDate startDate;
 
-    @NotNull(message = "executionRule cannot be null for periodic payments")
+    /**
+     * optional
+     */
+    //@NotNull(message = "executionRule cannot be null for periodic payments")
     @JsonbProperty("executionRule")
     @ValidateExecutionRule(message = "requires valid ExecutionRule")
     private String executionRule;
@@ -42,15 +46,15 @@ public class PeriodicPaymentInitiation extends SinglePaymentInitiation {
     }
 
     public PeriodicPayment.ExecutionRule getExecutionRule() {
-        return PeriodicPayment.ExecutionRule.valueOf(executionRule);
+        return executionRule != null ? PeriodicPayment.ExecutionRule.valueOf(executionRule) : null;
     }
 
     public void setExecutionRule(String executionRule) {
         this.executionRule = executionRule.toUpperCase();
     }
 
-    public PeriodicPayment.Frequency getFrequency() {
-        return PeriodicPayment.Frequency.valueOf(frequency);
+    public Frequency getFrequency() {
+        return Frequency.valueOf(frequency);
     }
 
     public void setFrequency(String frequency) {

@@ -1,6 +1,8 @@
 package net.petafuel.styx.api.v1.callback.boundary;
 
 import net.petafuel.styx.api.v1.callback.control.CallbackHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.GET;
@@ -17,13 +19,14 @@ import javax.ws.rs.core.Response;
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 public class CallbackResource {
-
+    private static final Logger LOG = LogManager.getLogger(CallbackResource.class);
     private final CallbackHandler handler = new CallbackHandler();
 
     @GET
     @Path("/callbacks/{param}{requestuuid : (/.*)?}")
     @Produces(MediaType.TEXT_HTML)
-    public Response processCallback(@Context HttpHeaders httpHeaders, @PathParam("requestuuid") String requestUUID) {
+    public Response processCallback(@Context HttpHeaders httpHeaders, @PathParam("param") String param, @PathParam("requestuuid") String requestUUID) {
+        LOG.info("Received generic callback on param={}, originRequestUUID={}", param, requestUUID);
         return handler.handleRedirect(requestUUID, httpHeaders);
     }
 
@@ -35,8 +38,7 @@ public class CallbackResource {
             @QueryParam("code") String code,
             @QueryParam("state") String state,
             @QueryParam("error") String error,
-            @QueryParam("error_description") String errorMessage)
-    {
+            @QueryParam("error_description") String errorMessage) {
         return handler.handleOAuth2(code, state, error, errorMessage);
     }
 
@@ -49,8 +51,7 @@ public class CallbackResource {
             @QueryParam("code") String code,
             @QueryParam("state") String stateQuery,
             @QueryParam("error") String error,
-            @QueryParam("error_description") String errorMessage)
-    {
+            @QueryParam("error_description") String errorMessage) {
         return handler.handlePreStepOAuth2(code, statePath, error, errorMessage);
     }
 }

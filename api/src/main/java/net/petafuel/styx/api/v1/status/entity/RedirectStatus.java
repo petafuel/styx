@@ -16,7 +16,7 @@ public class RedirectStatus {
 
     public RedirectStatus(StatusType statusType, String identification, RedirectStep redirectStep) {
         this.statusType = statusType;
-        if(identification == null){
+        if(identification == null || "".equals(identification)){
             identification = NOT_PROVIDED;
         }
         this.identification = identification;

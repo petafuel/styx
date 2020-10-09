@@ -21,11 +21,15 @@ public class CallbackHandler {
         LOG.info("Handling callback request xrequestid={}", xRequestId);
         StringBuilder output = new StringBuilder();
         for (String field : httpHeaders.getRequestHeaders().keySet()) {
-            output.append(" ").append(field).append(": ").append(httpHeaders.getRequestHeader(field)).append("\n");
+            output.append(" ").append(field).append(": ").append(httpHeaders.getRequestHeader(field)).append("");
         }
         LOG.info("requestHeader={}", output);
         //substring to remove leading forward slash
-        RedirectStatus redirectStatus = new RedirectStatus(StatusType.SUCCESS, xRequestId.substring(1));
+        //check if possible as otherwise routes do not match on the callback later
+        if(xRequestId != null && !"".equals(xRequestId)){
+            xRequestId = xRequestId.substring(1);
+        }
+        RedirectStatus redirectStatus = new RedirectStatus(StatusType.SUCCESS, xRequestId);
         return StatusHelper.createStatusRedirection(redirectStatus);
     }
 

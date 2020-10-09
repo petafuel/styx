@@ -90,19 +90,4 @@ public class PreAuthResource extends RestResource {
         LOG.info("Successfully retrieved preauth from oauth_session state={}", oAuthSession.getState());
         return Response.status(ResponseConstant.OK).entity(new GetPreStepResponse(oAuthSession)).build();
     }
-
-    /**
-     * The Callback Endpoint redirects here after handling a PreStep.
-     * The response is here irrelevant since the client is supposed to read the uri only, resp
-     *
-     * @param status
-     * @param preauthId
-     * @return Response contains a plain String.
-     */
-    @GET
-    @Path("/preauth/{status}/{preauthId}")
-    public Response preauthLandingPage(@NotBlank @PathParam("status") String status, @NotBlank @PathParam("preauthId") String preauthId) {
-
-        return Response.status(ResponseConstant.OK).entity("PreStep Done. Status:" + status).build();
-    }
 }

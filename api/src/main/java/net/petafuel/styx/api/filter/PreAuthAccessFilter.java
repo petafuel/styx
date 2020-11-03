@@ -58,6 +58,7 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
             try {
                 UUID preAuthId = UUID.fromString(preAuthIdString);
                 OAuthSession oAuthSession = PersistentOAuthSession.getById(preAuthId);
+                LOG.info("Loaded state={} oauth_session", oAuthSession.getState());
                 STYX03.setPreauthId(preAuthId);
 
                 if (oAuthSession.getAccessToken() == null || oAuthSession.getAccessTokenExpiresAt() == null) {

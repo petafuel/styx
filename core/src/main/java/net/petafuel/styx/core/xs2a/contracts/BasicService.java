@@ -142,13 +142,15 @@ public abstract class BasicService {
     protected String extractResponseBody(Response response, int expectedResponseCode, boolean expectBody) throws BankRequestFailedException, IOException {
         String responseBody = response.body() != null ? response.body().string() : null;
 
+        String responseContentLength = response.header("Content-Length");
+        String originalRequestURL = response.request().url().toString();
+
         if ((expectBody && responseBody == null) || response.code() != expectedResponseCode) {
-            String msg = "Request failed with ResponseCode {} -> {}";
-            if (responseBody == null) {
-                logger.error(msg, response.code(), "empty response body");
+            if (responseBody == null || responseBody.trim().isEmpty()) {
+                logger.error("Bank request failed with empty body contentLength={}, httpcode={}, requestUrl={}", responseContentLength, response.code(), originalRequestURL);
                 throw new BankRequestFailedException("empty response body", response.code());
             } else {
-                logger.error(msg, response.code(), responseBody);
+                logger.error("Bank request failed with contentLength={}, code={}, body={}, requestUrl={}", responseContentLength, response.code(), responseBody, originalRequestURL);
                 throw new BankRequestFailedException(responseBody, response.code());
             }
         }

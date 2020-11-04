@@ -39,6 +39,7 @@ import net.petafuel.styx.keepalive.threads.ThreadManager;
 import net.petafuel.styx.spi.tokentypemapper.api.XS2ATokenType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
@@ -97,6 +98,7 @@ public class PaymentInitiationResource extends RestResource {
         PISRequest paymentInitiationRequest = new PISRequestFactory().create(getXS2AStandard().getRequestClassProvider().paymentInitiation(), xs2AFactoryInput);
         paymentInitiationRequest.getHeaders().putAll(getAdditionalHeaders());
         paymentInitiationRequest.setTppRedirectPreferred(getRedirectPreferred());
+        paymentInitiationRequest.setXrequestId(ThreadContext.get("requestUUID"));
         ioProcessor.modifyRequest(paymentInitiationRequest, xs2AFactoryInput);
 
         InitiatedPayment initiatedPayment = getXS2AStandard().getPis().initiatePayment(paymentInitiationRequest);

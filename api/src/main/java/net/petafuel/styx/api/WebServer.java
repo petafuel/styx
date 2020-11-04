@@ -1,5 +1,6 @@
 package net.petafuel.styx.api;
 
+import net.petafuel.styx.api.event.AccessTraceAdapter;
 import net.petafuel.styx.api.event.RequestUUIDAdapter;
 import net.petafuel.styx.api.exception.BankRequestFailedExceptionHandler;
 import net.petafuel.styx.api.exception.ClientExceptionHandler;
@@ -118,6 +119,7 @@ public class WebServer {
         ServletHolder styxRoutes = new ServletHolder(new ServletContainer(config));
         context.addServlet(styxRoutes, "/*");
         context.addEventListener(new RequestUUIDAdapter());             // add uuid to every log entry served for one single request
+        context.addEventListener(new AccessTraceAdapter());             // Log incoming request and outgoing response meta data(no http body) on the Styx REST interface
 
         try {
             server.start();

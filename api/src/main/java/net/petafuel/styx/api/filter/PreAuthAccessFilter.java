@@ -24,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,18 +37,18 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
 
     /**
      * Supressing java:S3776 -> need to rework logic to reduce code complexity
+     *
      * @param containerRequestContext
-     * @throws IOException
      */
     @Override
     @SuppressWarnings("java:S3776")
-    public void filter(ContainerRequestContext containerRequestContext) throws IOException {
+    public void filter(ContainerRequestContext containerRequestContext) {
         XS2AStandard xs2AStandard = (XS2AStandard) containerRequestContext.getProperty(XS2AStandard.class.getName());
         IOParser ioParser = new IOParser(xs2AStandard.getAspsp());
         ImplementerOption ioPreAuthRequired = ioParser.get("IO6");
 
         if (ioPreAuthRequired != null && ioPreAuthRequired.getOptions().get(IOParser.Option.REQUIRED)) {
-            LOG.info("ASPSP bic={} requires pre-step", xs2AStandard.getAspsp().getBic());
+            LOG.info("ASPSP bic={} requires pre-auth", xs2AStandard.getAspsp().getBic());
             //preauth is available and required for this bank -> check if preauth id is present
             String preAuthIdString = containerRequestContext.getHeaderString(PRE_AUTH_ID);
             if (preAuthIdString == null || "".equals(preAuthIdString)) {
@@ -59,6 +58,7 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
             try {
                 UUID preAuthId = UUID.fromString(preAuthIdString);
                 OAuthSession oAuthSession = PersistentOAuthSession.getById(preAuthId);
+                LOG.info("Loaded state={} oauth_session", oAuthSession.getState());
                 STYX03.setPreauthId(preAuthId);
 
                 if (oAuthSession.getAccessToken() == null || oAuthSession.getAccessTokenExpiresAt() == null) {
@@ -77,7 +77,7 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
                 Map<String, String> additionalHeaders = new HashMap<>();
                 additionalHeaders.put(XS2AHeader.AUTHORIZATION, oAuthSession.getTokenType() + " " + oAuthSession.getAccessToken());
                 containerRequestContext.setProperty(PreAuthAccessFilter.class.getName(), additionalHeaders);
-
+                LOG.info("Successfully attached pre-auth from oAuthSessionState={}", oAuthSession.getState());
             } catch (PersistenceEmptyResultSetException noOauthSessionFound) {
                 throw new StyxException(new ResponseEntity("There was no valid pre-step authorisation found for the specified preAuthId", ResponseConstant.STYX_PREAUTH_NOT_AVAILABLE, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
             } catch (OAuthTokenExpiredException tokenExpired) {

@@ -28,6 +28,11 @@ public final class IOParser {
         return option.getOptions().get(key);
     }
 
+
+    public Map<String, ImplementerOption> getImplementerOptions() {
+        return implementerOptions;
+    }
+
     public final class Option {
         public static final String REQUIRED = "required";
         public static final String AVAILABLE = "available";

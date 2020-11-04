@@ -39,6 +39,8 @@ public final class RetryFailureWorker extends RunnableWorker {
         this.maxRetriesPerTask = Integer.parseInt(System.getProperty(Properties.THREADS_RETRYFAILUREWORKER_MAX_EXEC_RETRIES, "3"));
     }
 
+    //try-catch required for error handling
+    @SuppressWarnings("java:S3776")
     @Override
     public void run() {
         Thread.currentThread().setName("KeepAlive-Worker-" + getType().toString() + "-" + getId().toString());
@@ -84,7 +86,9 @@ public final class RetryFailureWorker extends RunnableWorker {
                 LOG.error("Task id: {} signature: {} finally failed with code:{} -> {}", task.getId(), task.getSignature(), finalFailure.getCode(), finalFailure.getMessage());
                 TaskRecoveryDB.setFinallyFailed(task.getId(), finalFailure.getMessage(), finalFailure.getCode());
             } catch (Throwable throwable) {
-                LOG.error("Task id: {} signature: {} encountered an unexpected error: {} -> {}", task.getId(), task.getSignature(), throwable.getClass().getSimpleName(), throwable.getMessage());
+                Throwable cause = throwable.getCause();
+                String causeMessage = cause != null ? cause.getMessage() : "";
+                LOG.error("Task id: {} signature: {} encountered an unexpected error exception={}, message={}, cause={}, causeMessage={}", task.getId(), task.getSignature(), throwable.getClass().getSimpleName(), throwable.getMessage(), cause, causeMessage);
                 TaskRecoveryDB.setFinallyFailed(task.getId(), throwable.getMessage(), TaskFinalFailureCode.UNKNOWN);
             }
         }

@@ -123,7 +123,9 @@ public abstract class XS2ARequest {
     }
 
     public void setXrequestId(String xrequestId) {
-        this.xrequestId = xrequestId;
+        if (xrequestId != null) {
+            this.xrequestId = xrequestId;
+        }
     }
 
     public String getTppRedirectUri() {

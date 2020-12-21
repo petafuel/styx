@@ -91,8 +91,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call update_consent_state(?,?)}")) {
             query.setString(1, consent.getId()); // consent id
-            query.setInt(2, state.getIndex()); // consent status
-
+            query.setString(2, state.getJsonKey()); // consent status
             consent = fetchModel(query);
         } catch (SQLException e) {
             logSQLError(e);
@@ -138,6 +137,12 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         }
 
         consent.setRecurringIndicator(resultSet.getBoolean("recurring_indicator"));
+        System.out.println("OKIDOKI");
+        try {
+            System.out.println(resultSet.getTimestamp("last_action"));
+        } catch (SQLException e){
+            System.out.println("Result for last_action was NULL.");
+        }
         consent.setLastAction(getDateFromTimestamp(resultSet.getTimestamp("last_action")));
         consent.setValidUntil(getDateFromTimestamp(resultSet.getTimestamp("valid_until")));
         consent.setLastUpdated(getDateFromTimestamp(resultSet.getTimestamp("last_updated")));
@@ -169,7 +174,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
      */
     private void setQueryValues(CallableStatement query, Consent consent) throws SQLException {
         query.setString(1, consent.getId()); // consent id
-        query.setInt(2, consent.getState().getIndex()); // consent status
+        query.setString(2, consent.getState().getJsonKey().toLowerCase()); // consent status
 
         try (Jsonb jsonb = JsonbBuilder.create()) {
             query.setString(3, jsonb.toJson(consent.getAccess())); // access string

@@ -1,1 +1,0 @@
-DROP TABLE consent_states;

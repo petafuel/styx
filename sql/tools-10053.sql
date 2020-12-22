@@ -10,7 +10,7 @@ Old consent_states tabel
 6	"expired"
 7	"terminatedByTpp"
 */
---Changing state Column from integer foreign key to consent_status
+
 ALTER TABLE consents
 DROP CONSTRAINT consents_consent_states_id_fk,
 ALTER COLUMN state DROP DEFAULT,
@@ -26,7 +26,10 @@ ELSE 'rejected'::consent_status
 END),
 ALTER COLUMN state SET DEFAULT 'received'::consent_status;
 
---FINISHED AND TESTED
+DROP FUNCTION create_consent(text, integer, text, boolean, timestamp without time zone, timestamp without time zone, 
+							 integer, integer, boolean, character varying, character varying, integer, text, text, 
+							 character varying, character varying, character varying, uuid);
+
 create or replace function create_consent(id text, state character varying, access text, recurring_indicator boolean,
                                           last_action timestamp without time zone,
                                           valid_until timestamp without time zone, frequency_per_day integer,
@@ -92,7 +95,6 @@ $$;
 
 DROP FUNCTION delete_consent(text);
 
--- FINISHED
 create or replace function delete_consent(id text)
     returns TABLE
             (
@@ -147,10 +149,8 @@ RETURNING id,
 
 $$;
 
-
 DROP FUNCTION get_consent(text);
 
--- FINISHED
 create or replace function get_consent(id text)
     returns TABLE
             (
@@ -206,7 +206,6 @@ $$;
 
 DROP FUNCTION get_consent_by_x_request_id(uuid);
 
--- FINISHED
 create or replace function get_consent_by_x_request_id(x_request_id uuid)
     returns TABLE
             (
@@ -260,7 +259,10 @@ FROM consents
 WHERE consents.x_request_id = $1;
 $$;
 
--- FINISHED
+DROP FUNCTION update_consent(text, integer, text, boolean, timestamp without time zone, timestamp without time zone, 
+							 integer, integer, boolean, character varying, character varying, integer, text, text, 
+							 character varying, character varying, character varying, uuid);
+
 create or replace function update_consent(id text, state character varying, access text, recurring_indicator boolean,
                                           last_action timestamp without time zone,
                                           valid_until timestamp without time zone, frequency_per_day integer,
@@ -338,7 +340,8 @@ WHERE consents.id = $1 RETURNING id,
     created_at;
 $$;
 
--- FINISHED AND TESTED
+DROP FUNCTION update_consent_state(text, integer);
+
 create or replace function update_consent_state(id text, state character varying)
     returns TABLE
             (
@@ -393,4 +396,4 @@ RETURNING id,
     created_at;
 $$;
 
-DROP TABLE consent_states;
+DROP TABLE consent_states

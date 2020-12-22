@@ -1,6 +1,10 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import net.petafuel.styx.core.xs2a.entities.serializers.OTPFormatAdapter;
+
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTypeAdapter;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -96,6 +100,7 @@ public class Challenge {
         this.additionalInformation = additionalInformation;
     }
 
+    @JsonbTypeAdapter(OTPFormatAdapter.class)
     public enum OTP_FORMAT {
         CHARACTERS("characters"),
         INTEGER("integer");
@@ -108,6 +113,10 @@ public class Challenge {
 
         public String value() {
             return jsonValue;
+        }
+
+        public static OTP_FORMAT getValue(String s) {
+            return Arrays.asList(values()).parallelStream().filter(otpFormat -> otpFormat.name().equals(s)).findFirst().orElse(null);
         }
     }
 }

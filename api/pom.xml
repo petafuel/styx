@@ -34,31 +34,31 @@
         <dependency>
             <groupId>org.glassfish.jersey.ext</groupId>
             <artifactId>jersey-bean-validation</artifactId>
-            <version>2.32</version>
+            <version>2.33</version>
         </dependency>
         <!-- rest interface dependencies -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet-core</artifactId>
-            <version>2.32</version>
+            <version>2.33</version>
         </dependency>
         <!-- rest interface dependencies -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-jetty-http</artifactId>
-            <version>2.32</version>
+            <version>2.33</version>
         </dependency>
         <!-- rest interface dependencies -->
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-binding</artifactId>
-            <version>2.32</version>
+            <version>2.33</version>
         </dependency>
         <!-- rest interface dependencies -->
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
-            <version>2.32</version>
+            <version>2.33</version>
         </dependency>
         <!-- Styx core functionality, Services, Database, SAD and Utils -->
         <dependency>

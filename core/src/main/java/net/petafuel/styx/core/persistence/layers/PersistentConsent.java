@@ -168,7 +168,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
      */
     private void setQueryValues(CallableStatement query, Consent consent) throws SQLException {
         query.setString(1, consent.getId()); // consent id
-        query.setString(2, consent.getState().getJsonKey().toLowerCase()); // consent status
+        query.setString(2, consent.getState().getJsonKey()); // consent status
 
         try (Jsonb jsonb = JsonbBuilder.create()) {
             query.setString(3, jsonb.toJson(consent.getAccess())); // access string

@@ -384,5 +384,3 @@ RETURNING id,
     x_request_id,
     created_at;
 $$;
-
-DROP TABLE consent_states;

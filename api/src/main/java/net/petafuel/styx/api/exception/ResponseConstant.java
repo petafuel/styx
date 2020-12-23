@@ -54,7 +54,8 @@ public enum ResponseConstant implements Response.StatusType, Serializable {
     STYX_TOKEN_EXPIRED_OR_REVOKED(401, "Styx API Token is expired or revoked"),
     STYX_TOKEN_ACCESS_VIOLATION(403, "Styx API Token is not authorized to invoke the request"),
     SAD_ASPSP_NOT_FOUND(404, "The requested ASPSP was not found within SAD"),
-    STYX_PREAUTH_NOT_FOUND(404, "preAuthId not found");
+    STYX_PREAUTH_NOT_FOUND(404, "preAuthId not found"),
+    SAD_ASPSP_INACTIVE(409, "Requested ASPSP is flagged inactive by styx");
 
     private final int code;
     private final String reason;

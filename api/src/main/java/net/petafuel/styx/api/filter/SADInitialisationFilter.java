@@ -33,6 +33,9 @@ public class SADInitialisationFilter implements ContainerRequestFilter {
         XS2AStandard xs2AStandard;
         try {
             xs2AStandard = new SAD().getBankByBIC(bic, WebServer.isSandbox());
+            if (Boolean.FALSE.equals(xs2AStandard.getAspsp().isActive())) {
+                throw new StyxException(new ResponseEntity("ASPSP with bic=" + xs2AStandard.getAspsp().getBic() + " is inactive", ResponseConstant.SAD_ASPSP_INACTIVE, ResponseCategory.ERROR, ResponseOrigin.STYX));
+            }
             LOG.info("XS2AStandard successfully initialized. bic={}, aspspName={}, aspspId={}, aspspGroup={}, aspspGroupId={}, standard={}, standardVersion={}, ais={}, cs={}, pis={}, piis={}, availableOptions={}",
                     xs2AStandard.getAspsp().getBic(),
                     xs2AStandard.getAspsp().getName(),

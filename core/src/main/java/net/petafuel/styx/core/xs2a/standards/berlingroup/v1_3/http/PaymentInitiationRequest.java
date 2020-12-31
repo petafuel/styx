@@ -97,7 +97,9 @@ public class PaymentInitiationRequest extends PISRequest {
             jsonbConfig.withLocale(Locale.GERMANY);
             jsonbConfig.withDateFormat("yyyy-MM-dd", Locale.GERMANY);
             try (Jsonb jsonb = JsonbBuilder.create(jsonbConfig)) {
-                return Optional.ofNullable(jsonb.toJson(payment));
+                String paymentBodyJson = jsonb.toJson(payment);
+                LOG.debug("Outgoing Single Payment Body={}", paymentBodyJson);
+                return Optional.ofNullable(paymentBodyJson);
             } catch (Exception e) {
                 return Optional.empty();
             }

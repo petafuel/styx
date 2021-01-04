@@ -91,8 +91,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
         Connection connection = Persistence.getInstance().getConnection();
         try (CallableStatement query = connection.prepareCall("{call update_consent_state(?,?)}")) {
             query.setString(1, consent.getId()); // consent id
-            query.setInt(2, state.getIndex()); // consent status
-
+            query.setString(2, state.getJsonKey()); // consent status
             consent = fetchModel(query);
         } catch (SQLException e) {
             logSQLError(e);
@@ -169,7 +168,7 @@ public class PersistentConsent implements PersistentDatabaseInterface<Consent> {
      */
     private void setQueryValues(CallableStatement query, Consent consent) throws SQLException {
         query.setString(1, consent.getId()); // consent id
-        query.setInt(2, consent.getState().getIndex()); // consent status
+        query.setString(2, consent.getState().getJsonKey()); // consent status
 
         try (Jsonb jsonb = JsonbBuilder.create()) {
             query.setString(3, jsonb.toJson(consent.getAccess())); // access string

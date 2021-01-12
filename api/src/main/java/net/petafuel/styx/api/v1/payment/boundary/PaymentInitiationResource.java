@@ -111,7 +111,7 @@ public class PaymentInitiationResource extends RestResource {
             paymentResponse.getLinks().getScaOAuth().setUrl(((OAuth2) approach).getAuthoriseLink());
         }
 
-        LOG.info("Initiate single payment bic={} aspsp_name={} aspsp_id={} paymentId={}", getXS2AStandard().getAspsp().getBic(), getXS2AStandard().getAspsp().getName(), getXS2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
+        LOG.info("Initiate single payment bic={} aspsp_name={} aspsp_id={} paymentId={} xrequestid={}", getXS2AStandard().getAspsp().getBic(), getXS2AStandard().getAspsp().getName(), getXS2AStandard().getAspsp().getId(), paymentResponse.getPaymentId(), paymentInitiationRequest.getXrequestId());
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));

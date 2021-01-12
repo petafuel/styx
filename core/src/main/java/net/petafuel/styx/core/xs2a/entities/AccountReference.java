@@ -56,6 +56,9 @@ public class AccountReference {
     }
 
     public void setIban(String iban) {
+        if (iban == null) {
+            return;
+        }
         this.iban = iban;
         this.type = Type.IBAN;
     }
@@ -65,6 +68,9 @@ public class AccountReference {
     }
 
     public void setBban(String bban) {
+        if (bban == null) {
+            return;
+        }
         this.bban = bban;
         this.type = Type.BBAN;
     }
@@ -74,6 +80,9 @@ public class AccountReference {
     }
 
     public void setPan(String pan) {
+        if (pan == null) {
+            return;
+        }
         this.pan = pan;
         this.type = Type.PAN;
     }
@@ -83,6 +92,9 @@ public class AccountReference {
     }
 
     public void setMaskedPan(String maskedPan) {
+        if (maskedPan == null) {
+            return;
+        }
         this.maskedPan = maskedPan;
         this.type = Type.MASKED_PAN;
     }
@@ -92,6 +104,9 @@ public class AccountReference {
     }
 
     public void setMsisdn(String msisdn) {
+        if (msisdn == null) {
+            return;
+        }
         this.msisdn = msisdn;
         this.type = Type.MSISDN;
     }

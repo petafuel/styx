@@ -5,11 +5,13 @@ import net.petafuel.styx.core.xs2a.entities.serializers.ISODateTimeDeserializer;
 
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbTypeDeserializer;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -66,9 +68,6 @@ public class SinglePayment implements InitializablePayment {
 
 
     //Only in case of future dated payments, not supported by all aspsps
-    @JsonbDateFormat(value = "yyyy-MM-dd")
-    @JsonbProperty("requestedExecutionDate")
-    @JsonbTypeDeserializer(ISODateDeserializer.class)
     private Date requestedExecutionDate;
 
     @JsonbTypeDeserializer(ISODateTimeDeserializer.class)
@@ -266,10 +265,20 @@ public class SinglePayment implements InitializablePayment {
         this.remittanceInformationStructuredArray = remittanceInformationStructuredArray;
     }
 
+    @JsonbProperty("requestedExecutionDate")
+    public String getRequestedExecutionDateString() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return requestedExecutionDate != null ? simpleDateFormat.format(requestedExecutionDate) : null;
+    }
+
+    @JsonbTransient
     public Date getRequestedExecutionDate() {
         return requestedExecutionDate;
     }
 
+    @JsonbProperty("requestedExecutionDate")
+    @JsonbDateFormat(value = "yyyy-MM-dd")
+    @JsonbTypeDeserializer(ISODateDeserializer.class)
     public void setRequestedExecutionDate(Date requestedExecutionDate) {
         this.requestedExecutionDate = requestedExecutionDate;
     }

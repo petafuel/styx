@@ -8,6 +8,7 @@ import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTypeDeserializer;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class BulkPaymentInitiation {
     @JsonbTypeDeserializer(ISODateDeserializer.class)
     private Date requestedExecutionDate;
 
+    @NotNull(message = "debtorAccount cannot be null and needs to be outside of the payment object")
     private AccountReference debtorAccount;
 
     @NotEmpty(message = "Cannot initiate payment without payment objects")

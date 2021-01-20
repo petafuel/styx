@@ -54,11 +54,11 @@ public class PeriodicPaymentInitiation extends SinglePaymentInitiation {
     }
 
     public Frequency getFrequency() {
-        return Frequency.valueOf(frequency);
+        return Frequency.getValue(frequency);
     }
 
     public void setFrequency(String frequency) {
-        this.frequency = frequency.toUpperCase();
+        this.frequency = frequency;
     }
 
     public Integer getDayOfExecution() {

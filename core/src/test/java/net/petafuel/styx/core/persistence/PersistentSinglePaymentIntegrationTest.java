@@ -42,14 +42,14 @@ class PersistentSinglePaymentIntegrationTest {
     @Order(1)
     void createPayment() {
 
-        paymentEntry = PersistentPayment.create(paymentId,
+        paymentEntry = PersistentPayment.create(UUID.randomUUID().toString(), paymentId,
                 clientToken,
                 bic,
                 TransactionStatus.RCVD);
         Assert.assertEquals(TransactionStatus.RCVD, paymentEntry.getStatus());
         Assert.assertEquals(bic, paymentEntry.getBic());
         Assert.assertEquals(clientToken, paymentEntry.getClientToken().getId());
-        Assert.assertEquals(paymentId, paymentEntry.getId());
+        Assert.assertEquals(paymentId, paymentEntry.getPaymentId());
 
 
     }
@@ -57,41 +57,41 @@ class PersistentSinglePaymentIntegrationTest {
     @Test
     @Order(2)
     void getPayment() {
-        PaymentEntry paymentEntryFromDatabase = PersistentPayment.get(paymentEntry.getId());
+        PaymentEntry paymentEntryFromDatabase = PersistentPayment.getByPaymentId(paymentEntry.getPaymentId());
         Assert.assertEquals(paymentEntry.getStatus(), paymentEntryFromDatabase.getStatus());
         Assert.assertEquals(paymentEntry.getBic(), paymentEntryFromDatabase.getBic());
         Assert.assertEquals(paymentEntry.getClientToken().getId(), paymentEntryFromDatabase.getClientToken().getId());
-        Assert.assertEquals(paymentEntry.getId(), paymentEntryFromDatabase.getId());
+        Assert.assertEquals(paymentEntry.getPaymentId(), paymentEntryFromDatabase.getPaymentId());
     }
 
     @Test
     @Order(3)
     void updatePayment() {
-        paymentEntry.setId(paymentId);
+        paymentEntry.setPaymentId(paymentId);
         paymentEntry.setStatus(TransactionStatus.ACCC);
         paymentEntry.setBic("DDDEEE123");
-        PaymentEntry paymentEntryFromDatabase = PersistentPayment.update(paymentEntry.getId(), paymentEntry.getClientToken().getId(), paymentEntry.getBic(), paymentEntry.getStatus());
+        PaymentEntry paymentEntryFromDatabase = PersistentPayment.updateByPaymentId(paymentEntry.getPaymentId(), paymentEntry.getClientToken().getId(), paymentEntry.getBic(), paymentEntry.getStatus());
         Assert.assertEquals(paymentEntry.getStatus(), paymentEntryFromDatabase.getStatus());
         Assert.assertEquals(paymentEntry.getBic(), paymentEntryFromDatabase.getBic());
         Assert.assertEquals(paymentEntry.getClientToken().getId(), paymentEntryFromDatabase.getClientToken().getId());
-        Assert.assertEquals(paymentEntry.getId(), paymentEntryFromDatabase.getId());
+        Assert.assertEquals(paymentEntry.getPaymentId(), paymentEntryFromDatabase.getPaymentId());
     }
 
     @Test
     @Order(4)
     void updatePaymentStatus() {
         paymentEntry.setStatus(TransactionStatus.ACWP);
-        PaymentEntry paymentEntryFromDatabase = PersistentPayment.updateStatus(paymentEntry.getId(), paymentEntry.getStatus());
+        PaymentEntry paymentEntryFromDatabase = PersistentPayment.updateStatusByPaymentId(paymentEntry.getPaymentId(), paymentEntry.getStatus());
         Assert.assertEquals(paymentEntry.getStatus(), paymentEntryFromDatabase.getStatus());
-        Assert.assertEquals(paymentEntry.getId(), paymentEntryFromDatabase.getId());
+        Assert.assertEquals(paymentEntry.getPaymentId(), paymentEntryFromDatabase.getPaymentId());
     }
 
     @Test
     @Order(5)
     void deletePayment() {
-        PersistentPayment.delete(paymentEntry.getId());
-        PaymentEntry paymentEntryFromDatabase = PersistentPayment.get(paymentEntry.getId());
-        Assert.assertNull(paymentEntryFromDatabase.getId());
+        PersistentPayment.deleteByPaymentId(paymentEntry.getPaymentId());
+        PaymentEntry paymentEntryFromDatabase = PersistentPayment.getByPaymentId(paymentEntry.getPaymentId());
+        Assert.assertNull(paymentEntryFromDatabase.getPaymentId());
         Assert.assertNull(paymentEntryFromDatabase.getBic());
         Assert.assertNull(paymentEntryFromDatabase.getClientToken());
         Assert.assertNull(paymentEntryFromDatabase.getStatus());

@@ -8,6 +8,8 @@ import java.util.Date;
 public class PaymentEntry {
     @DatabaseColumn("id")
     private String id;
+    @DatabaseColumn("payment_id")
+    private String paymentId;
     private AccessToken clientToken;
     @DatabaseColumn("bic")
     private String bic;
@@ -17,12 +19,12 @@ public class PaymentEntry {
     @DatabaseColumn("updated_at")
     private Date updatedAt;
 
-    public String getId() {
-        return id;
+    public String getPaymentId() {
+        return paymentId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
     }
 
     public AccessToken getClientToken() {
@@ -63,5 +65,13 @@ public class PaymentEntry {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

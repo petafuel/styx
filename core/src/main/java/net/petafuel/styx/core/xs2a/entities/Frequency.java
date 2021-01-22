@@ -28,7 +28,11 @@ public enum Frequency {
     }
 
     public static Frequency getValue(String s) {
-        return Arrays.asList(values()).parallelStream().filter(bookingStatus -> bookingStatus.value.equals(s)).findFirst().orElse(null);
+        return Arrays.asList(values())
+                .parallelStream()
+                .filter(bookingStatus -> bookingStatus.value.equals(s) || bookingStatus.name().equals((s)))
+                .findFirst()
+                .orElse(null);
     }
 
     public String getValue() {

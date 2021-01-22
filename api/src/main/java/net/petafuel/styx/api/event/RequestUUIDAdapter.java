@@ -7,9 +7,10 @@ import javax.servlet.ServletRequestListener;
 import java.util.UUID;
 
 public class RequestUUIDAdapter implements ServletRequestListener {
+    public static final String REQUEST_UUID = "requestUUID";
 
     public void requestInitialized(ServletRequestEvent arg0) {
-        ThreadContext.put("requestUUID", UUID.randomUUID().toString());
+        ThreadContext.put(REQUEST_UUID, UUID.randomUUID().toString());
     }
 
     public void requestDestroyed(ServletRequestEvent arg0) {

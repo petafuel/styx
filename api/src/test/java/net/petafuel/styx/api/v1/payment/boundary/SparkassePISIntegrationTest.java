@@ -3,6 +3,7 @@ package net.petafuel.styx.api.v1.payment.boundary;
 
 import io.restassured.http.ContentType;
 import net.petafuel.styx.api.AcceptanceTest;
+import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Amount;
@@ -10,6 +11,7 @@ import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.spi.tokentypemapper.api.XS2ATokenType;
 import org.hamcrest.Matchers;
+import org.junit.experimental.categories.Category;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -24,6 +26,7 @@ import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 
+@Category(IntegrationTest.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SparkassePISIntegrationTest implements AcceptanceTest {
     private static String PIS_TOKEN;

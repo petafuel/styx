@@ -26,13 +26,12 @@ import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 
-
+@Category(IntegrationTest.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SparkassePISIntegrationTest implements AcceptanceTest {
     private static String PIS_TOKEN;
 
     @BeforeClass
-    @Category(IntegrationTest.class)
     public static void styxTokenSetup() {
         System.out.println("SparkassePISIntegrationTest ChildClass @BeforeAll");
         PIS_TOKEN = given()

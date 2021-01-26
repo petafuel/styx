@@ -26,7 +26,8 @@ public class PaymentSerializer {
     public static InitializablePayment xmlDeserialize(Document sepaDocument, PaymentService paymentService) throws ParseException {
         ArrayList<SinglePayment> payments = new ArrayList<>();
         AccountReference debtorAccount = new AccountReference();
-        debtorAccount.setName(sepaDocument.getCctInitiation().getPmtInfos().get(0).getDebitor().getName());
+        debtorAccount.setName(sepaDocument.getCctInitiation().getPmtInfos().get(0).getDebtorName());
+        debtorAccount.setIban(sepaDocument.getCctInitiation().getPmtInfos().get(0).getDebtorAccountIBAN());
         debtorAccount.setCurrency(Currency.EUR);
 
         Date requestedExecutionDate = new SimpleDateFormat(XS2AJsonKeys.DATE_FORMAT.value()).parse(sepaDocument

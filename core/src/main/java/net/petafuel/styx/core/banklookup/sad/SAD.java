@@ -124,13 +124,13 @@ public class SAD implements BankLookUpInterface {
 
 
         } catch (InstantiationException | IllegalAccessException e) {
-            LOG.error("Error initialising service class through SAD: {}", e.getMessage());
+            LOG.error("Error initialising service class through SAD: {}", e.getMessage(), e);
             throw new BankLookupFailedException(e.getMessage(), e);
         } catch (InvocationTargetException e) {
-            LOG.error("Error calling service class constructor through SAD: {}", e.getMessage());
+            LOG.error("Error calling service class constructor through SAD: {}", e.getMessage(), e);
             throw new BankLookupFailedException(e.getMessage(), e);
         } catch (NoSuchMethodException e) {
-            LOG.error("The service class has no matching constructor for initialisation through SAD: {}", e.getMessage());
+            LOG.error("The service class has no matching constructor for initialisation through SAD: {}", e.getMessage(), e);
             throw new BankLookupFailedException(e.getMessage(), e);
         }
         return xs2AStandard;

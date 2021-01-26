@@ -56,7 +56,7 @@ public class CertificateManager {
                     StandardCharsets.UTF_8)
                     .toCharArray();
         } catch (IOException e) {
-            LOG.error(e.getMessage());
+            LOG.error(e);
             throw new CertificateException("Unable to load password for keystore: " + e.getMessage(), e);
         }
 
@@ -64,13 +64,13 @@ public class CertificateManager {
             this.clientKeyStore = KeyStore.getInstance("PKCS12");
             this.clientKeyStore.load(new FileInputStream(keyStorePath), password);
         } catch (KeyStoreException | NoSuchAlgorithmException | java.security.cert.CertificateException e) {
-            LOG.error(String.format("Something went wrong while loading keystore file: %s", e.getMessage()));
+            LOG.error("Something went wrong while loading keystore file: {}", e.getMessage(), e);
             throw new CertificateException("Something went wrong while loading keystore file: " + e.getMessage(), e);
         } catch (FileNotFoundException e) {
-            LOG.error(String.format("Unable to find keystore file: %s", e.getMessage()));
+            LOG.error("Unable to find keystore file: {}", e.getMessage(), e);
             throw new CertificateException("Unable to find keystore file: " + e.getMessage(), e);
         } catch (IOException e) {
-            LOG.error(e.getMessage());
+            LOG.error(e.getMessage(), e);
             throw new CertificateException("Password or format error in keystore: " + e.getMessage(), e);
         }
 
@@ -98,7 +98,7 @@ public class CertificateManager {
         try {
             return (X509Certificate) this.clientKeyStore.getCertificate(this.keyStoreStyxAlias);
         } catch (KeyStoreException e) {
-            LOG.error(String.format("Unable to get styx certificate from keystore via alias %s : %s", this.keyStoreStyxAlias, e.getMessage()));
+            LOG.error("Unable to get styx certificate from keystore via alias {} : {}", this.keyStoreStyxAlias, e.getMessage(), e);
             throw new CertificateException("Unable to get styx certificate from keystore: " + e.getMessage(), e);
         }
     }
@@ -118,7 +118,7 @@ public class CertificateManager {
             sslContext = SSLContext.getInstance("TLSv1.2");
             sslContext.init(keyManagers, null, new SecureRandom());
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyManagementException e) {
-            LOG.error(e.getMessage());
+            LOG.error(e.getMessage(), e);
             throw new CertificateException("Unable to get sslcontext: " + e.getMessage(), e);
         }
         return sslContext;
@@ -134,7 +134,7 @@ public class CertificateManager {
         try {
             return (PrivateKey) this.clientKeyStore.getKey(this.keyStoreStyxAlias, this.password);
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-            LOG.error(String.format("Unable to get styx private key from keystore via alias %s : %s", this.keyStoreStyxAlias, e.getMessage()));
+            LOG.error("Unable to get styx private key from keystore via alias {} : {}", this.keyStoreStyxAlias, e.getMessage(), e);
             throw new CertificateException("Unable to get styx private key from keystore: " + e.getMessage(), e);
         }
     }

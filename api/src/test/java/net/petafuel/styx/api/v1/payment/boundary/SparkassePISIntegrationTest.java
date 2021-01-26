@@ -3,6 +3,7 @@ package net.petafuel.styx.api.v1.payment.boundary;
 
 import io.restassured.http.ContentType;
 import net.petafuel.styx.api.AcceptanceTest;
+import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.Amount;
@@ -10,7 +11,9 @@ import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.spi.tokentypemapper.api.XS2ATokenType;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.experimental.categories.Category;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,11 +27,12 @@ import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 
+@Category(IntegrationTest.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SparkassePISIntegrationTest implements AcceptanceTest {
     private static String PIS_TOKEN;
 
-    @BeforeAll
+    @BeforeClass
     public static void styxTokenSetup() {
         System.out.println("SparkassePISIntegrationTest ChildClass @BeforeAll");
         PIS_TOKEN = given()
@@ -43,11 +47,14 @@ class SparkassePISIntegrationTest implements AcceptanceTest {
                 .body("token", Matchers.notNullValue())
                 .extract()
                 .path("token");
+        PIS_TOKEN = null;
     }
 
+    @Category(IntegrationTest.class)
     @ParameterizedTest
     @ArgumentsSource(SparkassePSUProvider.class)
     void test_INIT_SCTSinglePayment_SCA_OAUTH(String psuBic, String psuId, String crediorIban, String debtorIban) {
+        Assume.assumeNotNull(PIS_TOKEN);
         SinglePayment singlePayment = new SinglePayment();
         singlePayment.setDebtorAccount(new AccountReference(debtorIban, AccountReference.Type.IBAN));
         singlePayment.setCreditorAccount(new AccountReference(crediorIban, AccountReference.Type.IBAN));
@@ -75,9 +82,11 @@ class SparkassePISIntegrationTest implements AcceptanceTest {
                 .body("links.scaOAuth.href", Matchers.notNullValue());
     }
 
+    @Category(IntegrationTest.class)
     @ParameterizedTest
     @ArgumentsSource(SparkassePSUProvider.class)
     void test_INIT_SCTSinglePayment_SCA_EMBEDDED(String psuBic, String psuId, String crediorIban, String debtorIban) {
+        Assume.assumeNotNull(PIS_TOKEN);
         SinglePayment singlePayment = new SinglePayment();
         singlePayment.setDebtorAccount(new AccountReference(debtorIban, AccountReference.Type.IBAN));
         singlePayment.setCreditorAccount(new AccountReference(crediorIban, AccountReference.Type.IBAN));

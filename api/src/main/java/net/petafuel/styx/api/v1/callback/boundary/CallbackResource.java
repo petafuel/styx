@@ -23,11 +23,19 @@ public class CallbackResource {
     private final CallbackHandler handler = new CallbackHandler();
 
     @GET
-    @Path("/callbacks/{param}{requestuuid : (/.*)?}")
+    @Path("/callbacks/{realm}/{param}/{requestuuid}")
     @Produces(MediaType.TEXT_HTML)
-    public Response processCallback(@Context HttpHeaders httpHeaders, @PathParam("param") String param, @PathParam("requestuuid") String requestUUID) {
-        LOG.info("Received generic callback on param={}, originRequestUUID={}", param, requestUUID);
-        return handler.handleRedirect(requestUUID, httpHeaders);
+    public Response processCallback(@Context HttpHeaders httpHeaders, @PathParam("realm") String realm, @PathParam("param") String param, @PathParam("requestuuid") String requestUUID) {
+        LOG.info("Received callback for resource realm={}, param={}, originRequestUUID={}, xForwardedFor={}", realm, param, requestUUID, httpHeaders.getHeaderString("x-forwarded-for"));
+        return handler.handleRedirect(realm, param, requestUUID);
+    }
+
+    @GET
+    @Path("/callbacks/{realm}/{param}")
+    @Produces(MediaType.TEXT_HTML)
+    public Response processCallback(@PathParam("realm") String realm, @PathParam("param") String param) {
+        LOG.info("Received callback for resource realm={}, param={}, resource id missing", realm, param);
+        return handler.handleRedirect(realm, param, null);
     }
 
     @GET

@@ -8,13 +8,7 @@ import javax.validation.ConstraintValidatorContext;
 public class FrequencyValidator implements ConstraintValidator<ValidateFrequency, String> {
     @Override
     public boolean isValid(String frequency, ConstraintValidatorContext constraintValidatorContext) {
-        try {
-            Frequency.valueOf(frequency);
-            return true;
-        } catch (IllegalArgumentException invalidEnumName) {
-            return false;
-        }
+        return (Frequency.getValue(frequency) != null);
     }
-
 }
 

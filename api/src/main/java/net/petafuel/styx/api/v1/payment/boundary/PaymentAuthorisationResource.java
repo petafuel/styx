@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -59,7 +60,7 @@ public class PaymentAuthorisationResource extends RestResource {
     @Path("/{paymentService}/{paymentProduct}/{paymentId}/authorisations")
     public Response startPaymentAuthorisation(@BeanParam PaymentTypeBean paymentTypeBean,
                                               @NotEmpty @NotBlank @PathParam("paymentId") String paymentId,
-                                              @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
+                                              @Valid @NotNull AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
         XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
         xs2AFactoryInput.setPaymentService(paymentTypeBean.getPaymentService());
         xs2AFactoryInput.setPaymentProduct(paymentTypeBean.getPaymentProduct());

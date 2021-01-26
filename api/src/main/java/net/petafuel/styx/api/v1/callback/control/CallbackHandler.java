@@ -11,25 +11,22 @@ import net.petafuel.styx.core.xs2a.oauth.http.AuthorizationCodeRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 public class CallbackHandler {
     private static final Logger LOG = LogManager.getLogger(CallbackHandler.class);
 
-    public Response handleRedirect(String xRequestId, HttpHeaders httpHeaders) {
-        LOG.info("Handling callback request xrequestid={}", xRequestId);
-        StringBuilder output = new StringBuilder();
-        for (String field : httpHeaders.getRequestHeaders().keySet()) {
-            output.append(" ").append(field).append(": ").append(httpHeaders.getRequestHeader(field)).append("");
+    public Response handleRedirect(String realm, String param, String xRequestId) {
+        RedirectCallbackProcessor.REALM requestedRealm;
+
+        try {
+            requestedRealm = RedirectCallbackProcessor.REALM.valueOf(realm.toUpperCase());
+        } catch (IllegalArgumentException unknownRealmException) {
+            LOG.warn("Callback was received with an unknown resource realm={}", realm);
+            requestedRealm = RedirectCallbackProcessor.REALM.UNKNOWN;
         }
-        LOG.info("requestHeader={}", output);
-        //substring to remove leading forward slash
-        //check if possible as otherwise routes do not match on the callback later
-        if(xRequestId != null && !"".equals(xRequestId)){
-            xRequestId = xRequestId.substring(1);
-        }
-        RedirectStatus redirectStatus = new RedirectStatus(StatusType.SUCCESS, xRequestId);
+        RedirectStatus redirectStatus = RedirectCallbackProcessor.processCallback(requestedRealm, param, xRequestId);
+
         return StatusHelper.createStatusRedirection(redirectStatus);
     }
 

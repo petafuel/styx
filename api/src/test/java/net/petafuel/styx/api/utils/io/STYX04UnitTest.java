@@ -1,6 +1,7 @@
 package net.petafuel.styx.api.utils.io;
 
 import net.petafuel.styx.api.util.IOParser;
+import net.petafuel.styx.api.util.io.contracts.IOOrder;
 import net.petafuel.styx.api.util.io.entities.ImplementerOptionException;
 import net.petafuel.styx.api.util.io.entities.STYX04;
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
@@ -41,6 +42,9 @@ class STYX04UnitTest {
         IOParser ioParser = new IOParser(sparda);
 
         STYX04 styx04 = new STYX04(ioParser);
+
+        Assertions.assertEquals(IOOrder.POST_CREATION, styx04.order());
+
         XS2ARequest anonymouseRequest = new XS2ARequest() {
             @Override
             public Optional<String> getRawBody() {
@@ -67,6 +71,9 @@ class STYX04UnitTest {
         IOParser ioParser = new IOParser(sparda);
 
         STYX04 styx04 = new STYX04(ioParser);
+
+        Assertions.assertEquals(IOOrder.POST_CREATION, styx04.order());
+
         XS2ARequest anonymouseRequest = new XS2ARequest() {
             @Override
             public Optional<String> getRawBody() {

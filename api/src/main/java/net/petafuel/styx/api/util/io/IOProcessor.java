@@ -11,13 +11,13 @@ import net.petafuel.styx.api.util.io.entities.ImplementerOptionException;
 import net.petafuel.styx.api.util.io.entities.STYX01;
 import net.petafuel.styx.api.util.io.entities.STYX02;
 import net.petafuel.styx.api.util.io.entities.STYX03;
+import net.petafuel.styx.api.util.io.entities.STYX04;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jetty.util.IO;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -73,6 +73,7 @@ public class IOProcessor {
         addOption(new STYX01(ioParser));
         addOption(new STYX02(ioParser));
         addOption(new STYX03(ioParser));
+        addOption(new STYX04(ioParser));
     }
 
     private void addOption(ApplicableImplementerOption applicableImplementerOption) {

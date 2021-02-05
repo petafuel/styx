@@ -9,9 +9,6 @@ public class OAuthCallback {
     private String error;
     private String errorDescription;
 
-    public OAuthCallback() {
-    }
-
     public String getCode() {
         return code;
     }

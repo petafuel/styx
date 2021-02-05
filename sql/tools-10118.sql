@@ -23,7 +23,6 @@ WHERE url = 'https://api-mock.sparda.de/mock';
         }'::jsonb)::jsonb)
         WHERE id = sparda_config_id;
 
-
         UPDATE configs SET styx_config = jsonb_set(styx_config::jsonb,'{STYX02,options,required}'::text[], 'false'::jsonb) WHERE id = sparda_config_id;
         UPDATE configs SET styx_config = jsonb_set(styx_config::jsonb,'{STYX03,options,required}'::text[], 'false'::jsonb) WHERE id = sparda_config_id;
     END

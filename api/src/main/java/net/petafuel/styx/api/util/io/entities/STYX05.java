@@ -46,7 +46,6 @@ public class STYX05 extends ApplicableImplementerOption {
                     oAuthSession.setTokenEndpoint(aspsp.getProductionUrl().getPreauthTokenEndpoint());
                 }
 
-                // TODO add column in oauth_sessions UUID xRequestIdeqId = response.getxRequestId();
                 PersistentOAuthSession.create(oAuthSession);
                 String generatedCodeChallenge = OAuthService.getCodeChallengeFromState(oAuthSession.getState());
                 String codeChallengePlaceholder = SCAHandler.getQueryParameterValue(authorizationLink, "code_challenge");

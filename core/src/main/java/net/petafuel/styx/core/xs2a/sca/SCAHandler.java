@@ -73,12 +73,14 @@ public class SCAHandler {
             String searchURL = url.substring(url.indexOf('?') + 1);
             String[] params = searchURL.split("&");
 
-            try {
-                for (String param : params) {
-                    String[] temp = param.split("=");
+            for (String param : params) {
+                String[] temp = param.split("=");
+                try {
                     paramsMap.put(temp[0], URLDecoder.decode(temp[1], "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    paramsMap.put(temp[0], null);
                 }
-            } catch (UnsupportedEncodingException ignored) {}
+            }
         }
 
         return paramsMap.get(key);

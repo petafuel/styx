@@ -1,5 +1,6 @@
 package net.petafuel.styx.api.v1.callback.control;
 
+import net.petafuel.styx.api.v1.callback.entity.OAuthCallback;
 import net.petafuel.styx.api.v1.status.control.StatusHelper;
 import net.petafuel.styx.api.v1.status.entity.RedirectStatus;
 import net.petafuel.styx.api.v1.status.entity.RedirectStep;
@@ -16,7 +17,7 @@ import javax.ws.rs.core.Response;
 public class CallbackHandler {
     private static final Logger LOG = LogManager.getLogger(CallbackHandler.class);
 
-    public Response handleRedirect(String realm, String param, String xRequestId) {
+    public Response handleCallback(String realm, String param, String xRequestId, OAuthCallback oAuthCallback) {
         RedirectCallbackProcessor.REALM requestedRealm;
 
         try {
@@ -25,25 +26,29 @@ public class CallbackHandler {
             LOG.warn("Callback was received with an unknown resource realm={}", realm);
             requestedRealm = RedirectCallbackProcessor.REALM.UNKNOWN;
         }
+        if (oAuthCallback != null && oAuthCallback.getCode() != null) {
+            String path = String.format("%s/%s/%s", realm, param, xRequestId);
+            return  handleOAuth2(oAuthCallback, path);
+        }
         RedirectStatus redirectStatus = RedirectCallbackProcessor.processCallback(requestedRealm, param, xRequestId);
 
         return StatusHelper.createStatusRedirection(redirectStatus);
     }
 
-    public Response handleOAuth2(String code, String state, String error, String errorMessage) {
-        if (error == null && handleSuccessfulOAuth2(code, state, OAuthService.SCA)) {
-            RedirectStatus redirectStatus = new RedirectStatus(StatusType.SUCCESS, state, RedirectStep.PREAUTH);
+    public Response handleOAuth2(OAuthCallback oAuthCallback, String path) {
+        if (oAuthCallback.getError() == null && handleSuccessfulOAuth2(oAuthCallback.getCode(), oAuthCallback.getState(), OAuthService.SCA, path)) {
+            RedirectStatus redirectStatus = new RedirectStatus(StatusType.SUCCESS,  oAuthCallback.getState());
             return StatusHelper.createStatusRedirection(redirectStatus);
         } else {
-            LOG.error("failed oauth2 callback error={}, errorMessage={}, state={}", error, errorMessage, state);
-            RedirectStatus redirectStatus = new RedirectStatus(StatusType.ERROR, state);
+            LOG.error("failed oauth2 callback error={}, errorMessage={}, state={}",  oAuthCallback.getError(),  oAuthCallback.getErrorDescription(),  oAuthCallback.getState());
+            RedirectStatus redirectStatus = new RedirectStatus(StatusType.ERROR,  oAuthCallback.getState());
             return StatusHelper.createStatusRedirection(redirectStatus);
         }
     }
 
-    public Response handlePreStepOAuth2(String code, String state, String error, String errorMessage) {
+    public Response handlePreStepOAuth2(String code, String state, String error, String errorMessage, String path) {
         OAuthSession oAuthSession = PersistentOAuthSession.getByState(state);
-        if (error == null && handleSuccessfulOAuth2(code, state, OAuthService.PREAUTH)) {
+        if (error == null && handleSuccessfulOAuth2(code, state, OAuthService.PREAUTH, path)) {
             RedirectStatus redirectStatus = new RedirectStatus(StatusType.SUCCESS, oAuthSession.getState(), RedirectStep.PREAUTH);
             return StatusHelper.createStatusRedirection(redirectStatus);
         } else {
@@ -53,16 +58,14 @@ public class CallbackHandler {
         }
     }
 
-    private boolean handleSuccessfulOAuth2(String code, String state, String oauthType) {
+    private boolean handleSuccessfulOAuth2(String code, String state, String oauthType, String path) {
         OAuthService service = new OAuthService();
         try {
             OAuthSession stored = PersistentOAuthSession.getByState(state);
             AuthorizationCodeRequest request = new AuthorizationCodeRequest(code, stored.getCodeVerifier());
-            if (oauthType.equals(OAuthService.PREAUTH)) {
+            request.setRedirectUri(request.getRedirectUri() + path);
+            if (stored.getScope().contains("tx") || oauthType.equals(OAuthService.PREAUTH)) {
                 request.setJsonBody(false);
-                request.setRedirectUri(request.getRedirectUri() + "oauth/" + OAuthService.PREAUTH + '/' + state);
-            } else {
-                request.setRedirectUri(request.getRedirectUri() + "oauth/" + OAuthService.SCA);
             }
 
             OAuthSession authorized = service.tokenRequest(stored.getTokenEndpoint(), request);

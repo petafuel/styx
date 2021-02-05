@@ -2,11 +2,17 @@ package net.petafuel.styx.core.xs2a.sca;
 
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
+import net.petafuel.styx.core.xs2a.entities.Links;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.entities.StrongAuthenticatableResource;
 import net.petafuel.styx.core.xs2a.exceptions.InvalidSCAMethodException;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SCAHandler {
 
@@ -35,8 +41,13 @@ public class SCAHandler {
             case EMBEDDED:
                 break;
             case OAUTH2:
-                OAuthSession session = OAuthService.startSession(strongAuthenticatableResource, scope);
-                String link = OAuthService.buildLink(session.getState());
+                String link;
+                if (isLinkBuilt(strongAuthenticatableResource.getLinks().getScaOAuth())) {
+                    link = strongAuthenticatableResource.getLinks().getScaOAuth().getUrl();
+                } else {
+                    OAuthSession session = OAuthService.startSession(strongAuthenticatableResource, scope);
+                    link = OAuthService.buildLink(session.getState());
+                }
                 scaMethod = new OAuth2(link);
                 break;
             case REDIRECT:
@@ -49,5 +60,27 @@ public class SCAHandler {
                 throw new InvalidSCAMethodException("Found SCA Method is unsupported");
         }
         return scaMethod;
+    }
+
+    private static boolean isLinkBuilt(Links.Href scaOauthLink) {
+        return scaOauthLink != null && getQueryParameterValue(scaOauthLink.getUrl(), "state") != null;
+    }
+
+    public static String getQueryParameterValue(String url, String key) {
+        int i = url.indexOf('?');
+        Map<String, String> paramsMap = new HashMap<>();
+        if (i > -1) {
+            String searchURL = url.substring(url.indexOf('?') + 1);
+            String[] params = searchURL.split("&");
+
+            try {
+                for (String param : params) {
+                    String[] temp = param.split("=");
+                    paramsMap.put(temp[0], URLDecoder.decode(temp[1], "UTF-8"));
+                }
+            } catch (UnsupportedEncodingException ignored) {}
+        }
+
+        return paramsMap.get(key);
     }
 }

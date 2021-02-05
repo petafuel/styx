@@ -26,6 +26,7 @@ public class STYX04 extends ApplicableImplementerOption {
             return;
         }
         xs2ARequest.addHeader(HEADER_X_BIC, ioParser.getAspsp().getBic());
+        xs2ARequest.getPsu().setId(null);
     }
 
     @Override

@@ -12,6 +12,7 @@ import net.petafuel.styx.api.util.io.entities.STYX01;
 import net.petafuel.styx.api.util.io.entities.STYX02;
 import net.petafuel.styx.api.util.io.entities.STYX03;
 import net.petafuel.styx.api.util.io.entities.STYX04;
+import net.petafuel.styx.api.util.io.entities.STYX05;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
@@ -74,6 +75,7 @@ public class IOProcessor {
         addOption(new STYX02(ioParser));
         addOption(new STYX03(ioParser));
         addOption(new STYX04(ioParser));
+        addOption(new STYX05(ioParser));
     }
 
     private void addOption(ApplicableImplementerOption applicableImplementerOption) {

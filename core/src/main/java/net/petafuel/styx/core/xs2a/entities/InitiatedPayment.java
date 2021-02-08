@@ -2,14 +2,12 @@ package net.petafuel.styx.core.xs2a.entities;
 
 import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
-import java.util.UUID;
 
 public class InitiatedPayment extends StrongAuthenticatableResource implements Serializable {
 
     private String paymentId;
     @JsonbProperty("transactionStatus")
     private TransactionStatus status;
-    private UUID xRequestId;
     private PSU psu;
 
     public InitiatedPayment() {
@@ -36,14 +34,6 @@ public class InitiatedPayment extends StrongAuthenticatableResource implements S
 
     public void setStatus(TransactionStatus status) {
         this.status = status;
-    }
-
-    public UUID getxRequestId() {
-        return xRequestId;
-    }
-
-    public void setxRequestId(UUID xRequestId) {
-        this.xRequestId = xRequestId;
     }
 
     public PSU getPsu() {

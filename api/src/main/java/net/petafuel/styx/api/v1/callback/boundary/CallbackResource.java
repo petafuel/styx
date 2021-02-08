@@ -1,10 +1,12 @@
 package net.petafuel.styx.api.v1.callback.boundary;
 
 import net.petafuel.styx.api.v1.callback.control.CallbackHandler;
+import net.petafuel.styx.api.v1.callback.entity.OAuthCallback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,9 +27,10 @@ public class CallbackResource {
     @GET
     @Path("/callbacks/{realm}/{param}/{requestuuid}")
     @Produces(MediaType.TEXT_HTML)
-    public Response processCallback(@Context HttpHeaders httpHeaders, @PathParam("realm") String realm, @PathParam("param") String param, @PathParam("requestuuid") String requestUUID) {
+    public Response processCallback(@Context HttpHeaders httpHeaders, @PathParam("realm") String realm, @PathParam("param") String param, @PathParam("requestuuid") String requestUUID, @QueryParam("code") String code,
+                                    @BeanParam OAuthCallback oAuthCallback) {
         LOG.info("Received callback for resource realm={}, param={}, originRequestUUID={}, xForwardedFor={}", realm, param, requestUUID, httpHeaders.getHeaderString("x-forwarded-for"));
-        return handler.handleRedirect(realm, param, requestUUID);
+        return handler.handleCallback(realm, param, requestUUID, oAuthCallback);
     }
 
     @GET
@@ -35,7 +38,7 @@ public class CallbackResource {
     @Produces(MediaType.TEXT_HTML)
     public Response processCallback(@PathParam("realm") String realm, @PathParam("param") String param) {
         LOG.info("Received callback for resource realm={}, param={}, resource id missing", realm, param);
-        return handler.handleRedirect(realm, param, null);
+        return handler.handleCallback(realm, param, null, null);
     }
 
     @GET
@@ -43,11 +46,8 @@ public class CallbackResource {
     @Produces(MediaType.TEXT_HTML)
     public Response processOAuthCallback(
             @Context HttpHeaders httpHeaders,
-            @QueryParam("code") String code,
-            @QueryParam("state") String state,
-            @QueryParam("error") String error,
-            @QueryParam("error_description") String errorMessage) {
-        return handler.handleOAuth2(code, state, error, errorMessage);
+            @BeanParam OAuthCallback oAuthCallback) {
+        return handler.handleOAuth2(oAuthCallback, "oauth/sca");
     }
 
     @GET
@@ -60,6 +60,6 @@ public class CallbackResource {
             @QueryParam("state") String stateQuery,
             @QueryParam("error") String error,
             @QueryParam("error_description") String errorMessage) {
-        return handler.handlePreStepOAuth2(code, statePath, error, errorMessage);
+        return handler.handlePreStepOAuth2(code, statePath, error, errorMessage, "oauth/preauth/" + statePath);
     }
 }

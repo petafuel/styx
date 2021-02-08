@@ -7,6 +7,7 @@ import net.petafuel.styx.core.xs2a.utils.Config;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +50,7 @@ public class AuthorizationCodeRequest extends OAuthTokenRequest {
         this.redirectUri = redirectUri;
     }
 
+    @JsonbTransient
     @Override
     public Optional<String> getRawBody() {
         String rawBody;

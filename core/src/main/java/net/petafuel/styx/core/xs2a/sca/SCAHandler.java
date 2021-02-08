@@ -8,6 +8,8 @@ import net.petafuel.styx.core.xs2a.entities.StrongAuthenticatableResource;
 import net.petafuel.styx.core.xs2a.exceptions.InvalidSCAMethodException;
 import net.petafuel.styx.core.xs2a.oauth.OAuthService;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -16,6 +18,7 @@ import java.util.Map;
 
 public class SCAHandler {
 
+    private static final Logger LOG = LogManager.getLogger(SCAHandler.class);
     private SCAHandler() {
     }
 
@@ -78,7 +81,7 @@ public class SCAHandler {
                 try {
                     paramsMap.put(temp[0], URLDecoder.decode(temp[1], "UTF-8"));
                 } catch (UnsupportedEncodingException e) {
-                    paramsMap.put(temp[0], null);
+                    LOG.warn("Query param was unable to be retrieved from the given link. param: {} url: {} message: {}", key, url, e.getMessage());
                 }
             }
         }

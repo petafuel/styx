@@ -9,7 +9,6 @@ import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbTypeDeserializer;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * A basic consent model as created in AIS context or in combined service context with AIS and PIS
@@ -19,8 +18,6 @@ public class Consent extends StrongAuthenticatableResource {
     @JsonbProperty("consentId")
     private String id;
 
-    @JsonbTransient
-    private UUID xRequestId;
     private int frequencyPerDay;
     private boolean recurringIndicator;
     private boolean combinedServiceIndicator;
@@ -66,14 +63,6 @@ public class Consent extends StrongAuthenticatableResource {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public UUID getxRequestId() {
-        return xRequestId;
-    }
-
-    public void setxRequestId(UUID xRequestId) {
-        this.xRequestId = xRequestId;
     }
 
     @JsonbProperty("consentStatus")

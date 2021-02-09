@@ -19,14 +19,15 @@ public class STYX04 extends ApplicableImplementerOption {
     }
 
     @Override
-    public void apply(XS2AFactoryInput xs2AFactoryInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
+    public boolean apply(XS2AFactoryInput xs2AFactoryInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
         Boolean optionRequired = ioParser.getOption(IO, IOParser.Option.REQUIRED);
         //return immediately if this options is not required
         if (optionRequired == null || !optionRequired) {
-            return;
+            return false;
         }
         xs2ARequest.addHeader(HEADER_X_BIC, ioParser.getAspsp().getBic());
         xs2ARequest.getPsu().setId(null);
+        return true;
     }
 
     @Override

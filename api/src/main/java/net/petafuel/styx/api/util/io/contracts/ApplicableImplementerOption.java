@@ -13,7 +13,7 @@ import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 public abstract class ApplicableImplementerOption {
     protected IOParser ioParser;
 
-    public ApplicableImplementerOption(IOParser ioParser) {
+    protected ApplicableImplementerOption(IOParser ioParser) {
         this.ioParser = ioParser;
     }
 
@@ -22,9 +22,9 @@ public abstract class ApplicableImplementerOption {
      * applicable to the current request
      *
      * @param xs2AFactoryInput inputContainer for AIS or PIS data
-     * @return
+     * @return true or false whether this option was applied or not
      */
-    public abstract void apply(XS2AFactoryInput xs2AFactoryInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException;
+    public abstract boolean apply(XS2AFactoryInput xs2AFactoryInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException;
 
     /**
      * defines where this option should be applied

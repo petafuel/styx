@@ -27,9 +27,14 @@ public class CallbackHandler {
             requestedRealm = RedirectCallbackProcessor.REALM.UNKNOWN;
         }
         if (oAuthCallback != null && oAuthCallback.getCode() != null) {
-            String path = String.format("%s/%s/%s", realm, param, xRequestId);
-            return  handleOAuth2(oAuthCallback, path);
+            if (oAuthCallback.getState() != null) {
+                String path = String.format("%s/%s/%s", realm, param, xRequestId);
+                return handleOAuth2(oAuthCallback, path);
+            } else {
+                LOG.warn("Received callback seems to be oauth(code query param present) but state is missing. Continue as redirect");
+            }
         }
+
         RedirectStatus redirectStatus = RedirectCallbackProcessor.processCallback(requestedRealm, param, xRequestId);
 
         return StatusHelper.createStatusRedirection(redirectStatus);
@@ -37,11 +42,11 @@ public class CallbackHandler {
 
     public Response handleOAuth2(OAuthCallback oAuthCallback, String path) {
         if (oAuthCallback.getError() == null && handleSuccessfulOAuth2(oAuthCallback.getCode(), oAuthCallback.getState(), OAuthService.SCA, path)) {
-            RedirectStatus redirectStatus = new RedirectStatus(StatusType.SUCCESS,  oAuthCallback.getState());
+            RedirectStatus redirectStatus = new RedirectStatus(StatusType.SUCCESS, oAuthCallback.getState());
             return StatusHelper.createStatusRedirection(redirectStatus);
         } else {
-            LOG.error("failed oauth2 callback error={}, errorMessage={}, state={}",  oAuthCallback.getError(),  oAuthCallback.getErrorDescription(),  oAuthCallback.getState());
-            RedirectStatus redirectStatus = new RedirectStatus(StatusType.ERROR,  oAuthCallback.getState());
+            LOG.error("failed oauth2 callback error={}, errorMessage={}, state={}", oAuthCallback.getError(), oAuthCallback.getErrorDescription(), oAuthCallback.getState());
+            RedirectStatus redirectStatus = new RedirectStatus(StatusType.ERROR, oAuthCallback.getState());
             return StatusHelper.createStatusRedirection(redirectStatus);
         }
     }

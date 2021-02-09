@@ -38,6 +38,13 @@ public class IOProcessor {
         applicableImplementerOptions.put(IOOrder.PRE_RESPONSE, new ArrayList<>());
         ioParser = new IOParser(xs2AStandard.getAspsp());
         initIOs();
+        StringBuilder stringBuilder = new StringBuilder();
+        ioParser.getImplementerOptions().keySet().forEach(key -> {
+            stringBuilder.append(key);
+            stringBuilder.append(",");
+        });
+        String availableOptions = stringBuilder.toString();
+        LOG.info("IOProcessor initialized option-amount={}, availableOptions={}", ioParser.getImplementerOptions().size(), availableOptions);
     }
 
     public IOParser getIoParser() {
@@ -58,9 +65,10 @@ public class IOProcessor {
 
     private void applySafe(ApplicableImplementerOption applicableImplementerOption, XS2AFactoryInput xs2AFactoryInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) {
         try {
-            applicableImplementerOption.apply(xs2AFactoryInput, xs2ARequest, xs2AResponse);
+            boolean isExecuted = applicableImplementerOption.apply(xs2AFactoryInput, xs2ARequest, xs2AResponse);
+            LOG.info("Executed option={}, order={}, isExecuted={}", applicableImplementerOption.getClass().getSimpleName(), applicableImplementerOption.order(), isExecuted);
         } catch (ImplementerOptionException e) {
-            LOG.warn("error applying IOs option={} order={} message={}", applicableImplementerOption.getClass().getSimpleName(), applicableImplementerOption.order(), e.getMessage());
+            LOG.warn("error applying IOs option={} order={}", applicableImplementerOption.getClass().getSimpleName(), applicableImplementerOption.order(), e);
         }
     }
 

@@ -20,11 +20,12 @@ public class IO4 extends ApplicableImplementerOption {
     }
 
     @Override
-    public void apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
+    public boolean apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
         if (ioInput.getPaymentService() != PaymentService.PERIODIC_PAYMENTS) {
-            return;
+            return false;
         }
         IOHelper.processPaymentProduct(ioParser, IO, ioInput);
+        return true;
     }
 
     @Override

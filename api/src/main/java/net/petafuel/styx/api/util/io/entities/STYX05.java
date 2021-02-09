@@ -28,7 +28,7 @@ public class STYX05 extends ApplicableImplementerOption {
     }
 
     @Override
-    public void apply(XS2AFactoryInput xs2AFactoryInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
+    public boolean apply(XS2AFactoryInput xs2AFactoryInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
         if (xs2AResponse instanceof StrongAuthenticatableResource) {
 
             Boolean optionRequired = ioParser.getOption(IO, IOParser.Option.REQUIRED);
@@ -50,9 +50,11 @@ public class STYX05 extends ApplicableImplementerOption {
                 String generatedCodeChallenge = OAuthService.getCodeChallengeFromState(oAuthSession.getState());
                 String codeChallengePlaceholder = SCAHandler.getQueryParameterValue(authorizationLink, "code_challenge");
                 authorizationLink = authorizationLink.replace(codeChallengePlaceholder, generatedCodeChallenge) + "&state=" + oAuthSession.getState();
-                response.getLinks().setScaOAuth(new Links.Href(authorizationLink, LinkType.SCA_REDIRECT));
+                response.getLinks().setScaOAuth(new Links.Href(authorizationLink, LinkType.SCA_OAUTH));
+                return true;
             }
         }
+        return false;
     }
 
     @Override

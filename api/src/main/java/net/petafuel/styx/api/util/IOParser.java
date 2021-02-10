@@ -11,8 +11,10 @@ import java.util.Map;
  */
 public final class IOParser {
     private final Map<String, ImplementerOption> implementerOptions;
+    private final Aspsp aspsp;
 
     public IOParser(Aspsp aspsp) {
+        this.aspsp = aspsp;
         implementerOptions = aspsp.getConfig().getImplementerOptions();
     }
 
@@ -31,6 +33,10 @@ public final class IOParser {
 
     public Map<String, ImplementerOption> getImplementerOptions() {
         return implementerOptions;
+    }
+
+    public Aspsp getAspsp() {
+        return aspsp;
     }
 
     public final class Option {

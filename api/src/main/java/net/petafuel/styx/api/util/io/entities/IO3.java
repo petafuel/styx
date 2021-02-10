@@ -20,12 +20,13 @@ public class IO3 extends ApplicableImplementerOption {
     }
 
     @Override
-    public void apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
+    public boolean apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
         if (ioInput.getPaymentService() != PaymentService.BULK_PAYMENTS) {
-            return;
+            return false;
         }
 
         IOHelper.processPaymentProduct(ioParser, IO, ioInput);
+        return true;
     }
 
     @Override

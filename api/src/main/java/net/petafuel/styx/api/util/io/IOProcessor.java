@@ -11,13 +11,14 @@ import net.petafuel.styx.api.util.io.entities.ImplementerOptionException;
 import net.petafuel.styx.api.util.io.entities.STYX01;
 import net.petafuel.styx.api.util.io.entities.STYX02;
 import net.petafuel.styx.api.util.io.entities.STYX03;
+import net.petafuel.styx.api.util.io.entities.STYX04;
+import net.petafuel.styx.api.util.io.entities.STYX05;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jetty.util.IO;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -37,6 +38,13 @@ public class IOProcessor {
         applicableImplementerOptions.put(IOOrder.PRE_RESPONSE, new ArrayList<>());
         ioParser = new IOParser(xs2AStandard.getAspsp());
         initIOs();
+        StringBuilder stringBuilder = new StringBuilder();
+        ioParser.getImplementerOptions().keySet().forEach(key -> {
+            stringBuilder.append(key);
+            stringBuilder.append(",");
+        });
+        String availableOptions = stringBuilder.toString();
+        LOG.info("IOProcessor initialized option-amount={}, availableOptions={}", ioParser.getImplementerOptions().size(), availableOptions);
     }
 
     public IOParser getIoParser() {
@@ -57,9 +65,10 @@ public class IOProcessor {
 
     private void applySafe(ApplicableImplementerOption applicableImplementerOption, XS2AFactoryInput xs2AFactoryInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) {
         try {
-            applicableImplementerOption.apply(xs2AFactoryInput, xs2ARequest, xs2AResponse);
+            boolean isExecuted = applicableImplementerOption.apply(xs2AFactoryInput, xs2ARequest, xs2AResponse);
+            LOG.info("Executed option={}, order={}, isExecuted={}", applicableImplementerOption.getClass().getSimpleName(), applicableImplementerOption.order(), isExecuted);
         } catch (ImplementerOptionException e) {
-            LOG.warn("error applying IOs option={} order={} message={}", applicableImplementerOption.getClass().getSimpleName(), applicableImplementerOption.order(), e.getMessage());
+            LOG.warn("error applying IOs option={} order={}", applicableImplementerOption.getClass().getSimpleName(), applicableImplementerOption.order(), e);
         }
     }
 
@@ -73,6 +82,8 @@ public class IOProcessor {
         addOption(new STYX01(ioParser));
         addOption(new STYX02(ioParser));
         addOption(new STYX03(ioParser));
+        addOption(new STYX04(ioParser));
+        addOption(new STYX05(ioParser));
     }
 
     private void addOption(ApplicableImplementerOption applicableImplementerOption) {

@@ -21,10 +21,10 @@ public class STYX01 extends ApplicableImplementerOption {
     }
 
     @Override
-    public void apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
+    public boolean apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
         //Only apply if service is periodic payment and if target request is a payment initiation
         if (ioInput.getPaymentService() != PaymentService.PERIODIC_PAYMENTS || ioInput.getPayment() == null) {
-            return;
+            return false;
         }
         Boolean aspspUsesFrequencyName = ioParser.getOption(IO, IOParser.Option.REQUIRED);
         if (aspspUsesFrequencyName != null && aspspUsesFrequencyName) {
@@ -33,6 +33,7 @@ public class STYX01 extends ApplicableImplementerOption {
                 ((PeriodicPayment) ioInput.getPayment()).setFrequency(Frequency.valueOf(frequency).getValue());
             }
         }
+        return true;
     }
 
     @Override

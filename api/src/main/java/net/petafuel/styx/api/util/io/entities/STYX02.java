@@ -8,8 +8,6 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.json.JsonObject;
 import javax.json.bind.Jsonb;
@@ -22,25 +20,17 @@ import java.util.Base64;
  */
 public class STYX02 extends ApplicableImplementerOption {
     private static final String IO = "STYX02";
-    private static final Logger LOG = LogManager.getLogger(STYX02.class);
 
     public STYX02(IOParser ioParser) {
         super(ioParser);
     }
 
     @Override
-    public void apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
-        StringBuilder stringBuilder = new StringBuilder();
-        ioParser.getImplementerOptions().keySet().forEach(key -> {
-            stringBuilder.append(key);
-            stringBuilder.append(",");
-        });
-        String availableOptions = stringBuilder.toString();
-        //See TASKTOOLS-49
-        LOG.info("Styx02@apply IOParser option amount={}, availableOptions={}", ioParser.getImplementerOptions().size(), availableOptions);
+    public boolean apply(XS2AFactoryInput ioInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) throws ImplementerOptionException {
+
         if (Boolean.FALSE.equals(ioParser.getOption("IO6", IOParser.Option.REQUIRED)) || Boolean.FALSE.equals(ioParser.getOption(IO, IOParser.Option.REQUIRED))) {
             //do not apply if not required
-            return;
+            return false;
         }
 
         //check if ais or pis
@@ -59,6 +49,7 @@ public class STYX02 extends ApplicableImplementerOption {
             xs2ARequest.setPsu(new PSU());
         }
         xs2ARequest.getPsu().setId(psuId);
+        return true;
     }
 
     public String extractPsuId(String authroisationHeader) throws ImplementerOptionException {

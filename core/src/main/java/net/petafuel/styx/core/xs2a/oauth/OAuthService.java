@@ -110,7 +110,7 @@ public class OAuthService extends BasicService {
     }
 
     public static OAuthSession startPreAuthSession(Url url, String scope) {
-        OAuthSession session = OAuthSession.start(null); // The X-Request-Id is not relevant for the prestep, since the OAuthSession will relate to a consent or payment
+        OAuthSession session = OAuthSession.start(null); // The X-Request-Id is not relevant for the prestep, since the OAuthSession will not directly relate to a consent or payment
         session.setScope(scope);
         session.setAuthorizationEndpoint(url.getPreauthAuthorizationEndpoint());
         session.setTokenEndpoint(url.getPreauthTokenEndpoint());

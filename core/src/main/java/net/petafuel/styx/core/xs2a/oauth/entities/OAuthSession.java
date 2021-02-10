@@ -17,6 +17,10 @@ public class OAuthSession {
      * also used as "preauthId" during the pre-step
      */
     private UUID id;
+    /**
+     * the xRequestId which was used during the creation of the consent/payment
+     */
+    private UUID xRequestId;
     private String authorizationEndpoint;
     private String tokenEndpoint;
     @JsonbProperty("code_verifier")
@@ -49,12 +53,21 @@ public class OAuthSession {
     public OAuthSession() {
     }
 
-    public static OAuthSession start() {
+    public static OAuthSession start(UUID xRequestId) {
         OAuthSession oAuthSession = new OAuthSession();
         oAuthSession.setId(UUID.randomUUID());
         oAuthSession.setState(UUID.randomUUID().toString());
         oAuthSession.setCodeVerifier(OAuthService.generateCodeVerifier());
+        oAuthSession.setxRequestId(xRequestId);
         return oAuthSession;
+    }
+
+    public UUID getxRequestId() {
+        return xRequestId;
+    }
+
+    public void setxRequestId(UUID xRequestId) {
+        this.xRequestId = xRequestId;
     }
 
     public String getAccessToken() {

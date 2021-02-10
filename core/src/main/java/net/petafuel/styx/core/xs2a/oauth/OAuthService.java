@@ -101,7 +101,7 @@ public class OAuthService extends BasicService {
 
         OAuthService service = new OAuthService();
         Map<String, String> endpoints = service.getEndpoints(strongAuthenticatableResource.getLinks().getScaOAuth().getUrl());
-        OAuthSession session = OAuthSession.start();
+        OAuthSession session = OAuthSession.start(strongAuthenticatableResource.getxRequestId());
         session.setScope(scope);
         session.setAuthorizationEndpoint(endpoints.get("authorization_endpoint"));
         session.setTokenEndpoint(endpoints.get("token_endpoint"));
@@ -110,7 +110,7 @@ public class OAuthService extends BasicService {
     }
 
     public static OAuthSession startPreAuthSession(Url url, String scope) {
-        OAuthSession session = OAuthSession.start();
+        OAuthSession session = OAuthSession.start(null); // The X-Request-Id is not relevant for the prestep, since the OAuthSession will relate to a consent or payment
         session.setScope(scope);
         session.setAuthorizationEndpoint(url.getPreauthAuthorizationEndpoint());
         session.setTokenEndpoint(url.getPreauthTokenEndpoint());

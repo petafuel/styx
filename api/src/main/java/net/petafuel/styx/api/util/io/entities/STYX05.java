@@ -35,7 +35,7 @@ public class STYX05 extends ApplicableImplementerOption {
             if (optionRequired != null && optionRequired) {
                 StrongAuthenticatableResource response = (StrongAuthenticatableResource) xs2AResponse;
                 String authorizationLink = response.getLinks().getScaOAuth().getUrl();
-                OAuthSession oAuthSession = OAuthSession.start();
+                OAuthSession oAuthSession = OAuthSession.start(response.getxRequestId());
                 oAuthSession.setScope(SCAHandler.getQueryParameterValue(authorizationLink, "scope"));
                 oAuthSession.setAuthorizationEndpoint(getBaseUrl(authorizationLink));
                 boolean isSandbox = WebServer.isSandbox();

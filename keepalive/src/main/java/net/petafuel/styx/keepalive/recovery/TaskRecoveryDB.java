@@ -46,7 +46,7 @@ public final class TaskRecoveryDB {
         } catch (SQLException e) {
             LOG.error("Unable to set task as queued in recovery db: SQLState: {} Error: {}", e.getSQLState(), e.getMessage());
         } catch (Exception e) {
-            LOG.error("Unable to serialize task goal to json string", e);
+            LOG.error("Unable to create task in recovery. workerType={}, taskId={}", workerType, task.getId(), e);
         }
     }
 

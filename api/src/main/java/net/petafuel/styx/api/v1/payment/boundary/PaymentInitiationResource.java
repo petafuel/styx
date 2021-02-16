@@ -53,6 +53,7 @@ import javax.ws.rs.core.Response;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * PIS - Payment initiation request
@@ -117,6 +118,7 @@ public class PaymentInitiationResource extends RestResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
+        //TODO: add two new parameters (payment service and payment type)
         PersistentPayment.create(paymentInitiationRequest.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
 
         xs2AFactoryInput.setPaymentId(paymentResponse.getPaymentId());
@@ -125,7 +127,8 @@ public class PaymentInitiationResource extends RestResource {
             authHeader = paymentInitiationRequest.getHeaders().get(XS2AHeader.AUTHORIZATION);
         }
 
-        ThreadManager.getInstance().queueTask(new PaymentStatusPoll(xs2AFactoryInput, getXS2AStandard().getAspsp().getBic(), authHeader));
+        //TODO: remove task queue and move it into net.petafuel.styx.api.v1.callback.control.CallbackHandler.handleOAuth2
+        ThreadManager.getInstance().queueTask(new PaymentStatusPoll(xs2AFactoryInput, getXS2AStandard().getAspsp().getBic(), UUID.fromString(paymentInitiationRequest.getXrequestId())));
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 

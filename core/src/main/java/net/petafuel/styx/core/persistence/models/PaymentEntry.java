@@ -19,6 +19,8 @@ public class PaymentEntry {
     @DatabaseColumn("updated_at")
     private Date updatedAt;
 
+    //TODO: implement payment service and payment product
+
     public String getPaymentId() {
         return paymentId;
     }

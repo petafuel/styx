@@ -33,7 +33,6 @@ import org.apache.logging.log4j.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
@@ -188,14 +187,7 @@ public class PaymentStatusPoll extends WorkableTask {
     }
 
     @Override
-    public WorkableTask buildFromRecovery(JsonObject goal) throws
-            ClassNotFoundException,
-            NoSuchMethodException,
-            IllegalAccessException,
-            InvocationTargetException,
-            InstantiationException {
-
-
+    public WorkableTask buildFromRecovery(JsonObject goal) {
         XS2AFactoryInput input = new XS2AFactoryInput();
         input.setPaymentService(PaymentService.valueOf(goal.getString("paymentService")));
         input.setPaymentProduct(PaymentProduct.valueOf(goal.getString("paymentProduct")));
@@ -206,6 +198,7 @@ public class PaymentStatusPoll extends WorkableTask {
 
     /**
      * Method to check if a accessToken is available and still valid
+     *
      * @param xRequestId xRequestId
      * @return null|String
      */
@@ -216,6 +209,8 @@ public class PaymentStatusPoll extends WorkableTask {
                     oAuthSession.getAccessTokenExpiresAt().before(new Date()) &&
                     oAuthSession.getRefreshTokenExpiresAt().after(new Date())) {
                 return OAuthService.refreshToken(oAuthSession).getAccessToken();
+            } else {
+                return oAuthSession.getAccessToken();
             }
         } catch (PersistenceEmptyResultSetException e) {
             return null;
@@ -223,6 +218,5 @@ public class PaymentStatusPoll extends WorkableTask {
             LOG.error("Refresh token expired, cannot refresh access token for xRequestId={}", xRequestId);
             throw new TaskFinalFailureException("Refresh token expired");
         }
-        return null;
     }
 }

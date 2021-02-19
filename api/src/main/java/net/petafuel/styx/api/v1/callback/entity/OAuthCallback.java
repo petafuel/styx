@@ -53,7 +53,7 @@ public class OAuthCallback {
     @Override
     public String toString() {
         return "OAuthCallback{" +
-                "code='" + String.format("%1$" + 5 + "s", code).replace(' ', 'X') + '\'' +
+                "code='" + code + '\'' +
                 ", state='" + state + '\'' +
                 ", error='" + error + '\'' +
                 ", errorDescription='" + errorDescription + '\'' +

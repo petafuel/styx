@@ -5,6 +5,8 @@ import net.petafuel.styx.core.persistence.PersistenceException;
 import net.petafuel.styx.core.persistence.StyxifySQL;
 import net.petafuel.styx.core.persistence.models.AccessToken;
 import net.petafuel.styx.core.persistence.models.PaymentEntry;
+import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
+import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,21 +22,25 @@ public class PersistentPayment {
     private static final Logger LOG = LogManager.getLogger(PersistentPayment.class);
     private static final String COLUMN_CLIENT_TOKEN = "client_token";
     private static final String COLUMN_STATUS = "status";
+    private static final String COLUMN_SERVICE = "service";
+    private static final String COLUMN_PRODUCT = "product";
     private static final String ERROR_MODEL_MAPPING = "Error mapping resultset to PaymentEntry.class message={}";
 
     private PersistentPayment() {
     }
 
-    public static PaymentEntry create(String id, String paymentId, String clientToken, String bic, TransactionStatus status) {
+    public static PaymentEntry create(String id, String paymentId, String clientToken, String bic, TransactionStatus status, PaymentService service, PaymentProduct product) {
         Connection connection = Persistence.getInstance().getConnection();
         PaymentEntry paymentEntry = null;
-        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM create_payment(?,?,?,?,?)")) {
+        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM create_payment(?,?,?,?,?,?,?)")) {
 
             query.setString(1, id);
             query.setString(2, paymentId);
             query.setString(3, clientToken);
             query.setString(4, bic);
             query.setString(5, status.name());
+            query.setString(6, service.name());
+            query.setString(7, product.name());
 
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
@@ -42,6 +48,8 @@ public class PersistentPayment {
                     AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
+                    paymentEntry.setPaymentService(PaymentService.valueOf(resultSet.getString(COLUMN_SERVICE)));
+                    paymentEntry.setPaymentProduct(PaymentProduct.valueOf(resultSet.getString(COLUMN_PRODUCT)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
@@ -71,6 +79,8 @@ public class PersistentPayment {
                     if (resultSet.getString(COLUMN_STATUS) != null) {
                         paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                     }
+                    paymentEntry.setPaymentService(PaymentService.valueOf(resultSet.getString(COLUMN_SERVICE)));
+                    paymentEntry.setPaymentProduct(PaymentProduct.valueOf(resultSet.getString(COLUMN_PRODUCT)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
@@ -100,6 +110,8 @@ public class PersistentPayment {
                     if (resultSet.getString(COLUMN_STATUS) != null) {
                         paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
                     }
+                    paymentEntry.setPaymentService(PaymentService.valueOf(resultSet.getString(COLUMN_SERVICE)));
+                    paymentEntry.setPaymentProduct(PaymentProduct.valueOf(resultSet.getString(COLUMN_PRODUCT)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
@@ -128,6 +140,8 @@ public class PersistentPayment {
                     AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
+                    paymentEntry.setPaymentService(PaymentService.valueOf(resultSet.getString(COLUMN_SERVICE)));
+                    paymentEntry.setPaymentProduct(PaymentProduct.valueOf(resultSet.getString(COLUMN_PRODUCT)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
@@ -156,6 +170,8 @@ public class PersistentPayment {
                     AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
+                    paymentEntry.setPaymentService(PaymentService.valueOf(resultSet.getString(COLUMN_SERVICE)));
+                    paymentEntry.setPaymentProduct(PaymentProduct.valueOf(resultSet.getString(COLUMN_PRODUCT)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
@@ -182,6 +198,8 @@ public class PersistentPayment {
                     AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
+                    paymentEntry.setPaymentService(PaymentService.valueOf(resultSet.getString(COLUMN_SERVICE)));
+                    paymentEntry.setPaymentProduct(PaymentProduct.valueOf(resultSet.getString(COLUMN_PRODUCT)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
@@ -208,6 +226,8 @@ public class PersistentPayment {
                     AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
+                    paymentEntry.setPaymentService(PaymentService.valueOf(resultSet.getString(COLUMN_SERVICE)));
+                    paymentEntry.setPaymentProduct(PaymentProduct.valueOf(resultSet.getString(COLUMN_PRODUCT)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
@@ -233,6 +253,8 @@ public class PersistentPayment {
                     AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
+                    paymentEntry.setPaymentService(PaymentService.valueOf(resultSet.getString(COLUMN_SERVICE)));
+                    paymentEntry.setPaymentProduct(PaymentProduct.valueOf(resultSet.getString(COLUMN_PRODUCT)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {
@@ -258,6 +280,8 @@ public class PersistentPayment {
                     AccessToken accessToken = PersistentAccessToken.get(resultSet.getString(COLUMN_CLIENT_TOKEN));
                     paymentEntry.setClientToken(accessToken);
                     paymentEntry.setStatus(TransactionStatus.valueOf(resultSet.getString(COLUMN_STATUS)));
+                    paymentEntry.setPaymentService(PaymentService.valueOf(resultSet.getString(COLUMN_SERVICE)));
+                    paymentEntry.setPaymentProduct(PaymentProduct.valueOf(resultSet.getString(COLUMN_PRODUCT)));
                 }
             }
         } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | IntrospectionException e) {

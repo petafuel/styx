@@ -15,7 +15,7 @@ public class AISRequestFactory implements XS2ARequestFactory<AISRequest> {
             Constructor<? extends AISRequest> constructor = providedRequest.getConstructor(Consent.class, String.class, String.class, String.class);
             AISRequest aisRequest = constructor.newInstance(factoryInput.getConsent(), factoryInput.getConsentId(), factoryInput.getAccountId(), factoryInput.getTransactionId());
             if (factoryInput.getAuthorisationId() != null) {
-                aisRequest.setAuthroisationId(factoryInput.getAuthorisationId());
+                aisRequest.setAuthorisationId(factoryInput.getAuthorisationId());
             }
             aisRequest.setPsu(factoryInput.getPsu());
             aisRequest.setBookingStatus(factoryInput.getBookingStatus());

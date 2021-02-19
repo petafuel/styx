@@ -25,7 +25,7 @@ public class PISRequestFactory implements XS2ARequestFactory<PISRequest> {
             Constructor<? extends PISRequest> constructor = providedRequest.getConstructor(PaymentService.class, PaymentProduct.class, PSU.class, InitializablePayment.class);
             PISRequest pisRequest = constructor.newInstance(factoryInput.getPaymentService(), factoryInput.getPaymentProduct(), factoryInput.getPsu(), factoryInput.getPayment());
             if (factoryInput.getAuthorisationId() != null) {
-                pisRequest.setAuthroisationId(factoryInput.getAuthorisationId());
+                pisRequest.setAuthorisationId(factoryInput.getAuthorisationId());
             }
             pisRequest.setPaymentId(factoryInput.getPaymentId());
             pisRequest.setTppRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("payment/ok/" + ThreadContext.get("requestUUID")));

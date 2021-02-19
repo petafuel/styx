@@ -69,7 +69,7 @@ public class PaymentStatusResource extends RestResource {
         ioProcessor.modifyRequest(readPaymentStatusRequest, xs2AFactoryInput);
         PaymentStatus status = getXS2AStandard().getPis().getPaymentStatus(readPaymentStatusRequest);
         if (PersistentPayment.getByPaymentId(paymentId) == null) {
-            PersistentPayment.create(ThreadContext.get("requestUUID"), paymentId, (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), status.getTransactionStatus());
+            PersistentPayment.create(ThreadContext.get("requestUUID"), paymentId, (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), status.getTransactionStatus(), paymentTypeBean.getPaymentService(), paymentTypeBean.getPaymentProduct());
         } else {
             PersistentPayment.updateStatusByPaymentId(paymentId, status.getTransactionStatus());
         }

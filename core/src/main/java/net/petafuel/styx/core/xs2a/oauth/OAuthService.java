@@ -5,8 +5,10 @@ import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.entities.StrongAuthenticatableResource;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.exceptions.OAuthTokenExpiredException;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.OAuthTokenRequest;
+import net.petafuel.styx.core.xs2a.oauth.http.RefreshTokenRequest;
 import net.petafuel.styx.core.xs2a.oauth.serializers.EndpointsSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.Config;
@@ -114,6 +116,7 @@ public class OAuthService extends BasicService {
         session.setScope(scope);
         session.setAuthorizationEndpoint(url.getPreauthAuthorizationEndpoint());
         session.setTokenEndpoint(url.getPreauthTokenEndpoint());
+        session.setxRequestId(session.getId());
 
         return PersistentOAuthSession.create(session);
     }
@@ -151,6 +154,20 @@ public class OAuthService extends BasicService {
             return jsonb.fromJson(body, HashMap.class);
         } catch (Exception e) {
             return new HashMap<>();
+        }
+    }
+
+    public static OAuthSession refreshToken(OAuthSession oAuthSession) throws OAuthTokenExpiredException {
+        String state = oAuthSession.getState();
+        RefreshTokenRequest request = new RefreshTokenRequest(oAuthSession.getRefreshToken());
+        OAuthService service = new OAuthService();
+        try {
+            oAuthSession = service.tokenRequest(oAuthSession.getTokenEndpoint(), request);
+            oAuthSession.setState(state);
+            PersistentOAuthSession.update(oAuthSession);
+            return oAuthSession;
+        } catch (BankRequestFailedException expiredToken) {
+            throw new OAuthTokenExpiredException(OAuthTokenExpiredException.MESSAGE);
         }
     }
 }

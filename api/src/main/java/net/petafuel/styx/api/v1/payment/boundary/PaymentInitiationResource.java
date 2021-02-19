@@ -9,6 +9,7 @@ import net.petafuel.styx.api.exception.StyxException;
 import net.petafuel.styx.api.filter.AbstractTokenFilter;
 import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
 import net.petafuel.styx.api.filter.CheckAccessToken;
+import net.petafuel.styx.api.filter.PreAuthAccessFilter;
 import net.petafuel.styx.api.filter.RequiresBIC;
 import net.petafuel.styx.api.filter.RequiresMandatoryHeader;
 import net.petafuel.styx.api.filter.RequiresPSU;
@@ -22,7 +23,6 @@ import net.petafuel.styx.api.v1.payment.entity.PeriodicPaymentInitiation;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
-import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
@@ -48,11 +48,14 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * PIS - Payment initiation request
@@ -65,6 +68,9 @@ import java.util.Optional;
 @RequiresBIC
 public class PaymentInitiationResource extends RestResource {
     private static final Logger LOG = LogManager.getLogger(PaymentInitiationResource.class);
+
+    @Context
+    ContainerRequestContext containerRequestContext;
 
     /**
      * Initiate single or future dated payments
@@ -117,15 +123,17 @@ public class PaymentInitiationResource extends RestResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
-        PersistentPayment.create(paymentInitiationRequest.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(paymentInitiationRequest.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus(), PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct());
 
         xs2AFactoryInput.setPaymentId(paymentResponse.getPaymentId());
-        String authHeader = paymentInitiationRequest.getAuthorization();
-        if (authHeader == null) {
-            authHeader = paymentInitiationRequest.getHeaders().get(XS2AHeader.AUTHORIZATION);
-        }
 
-        ThreadManager.getInstance().queueTask(new PaymentStatusPoll(xs2AFactoryInput, getXS2AStandard().getAspsp().getBic(), authHeader));
+        if (!(approach instanceof OAuth2)) {
+            String xrequestId = paymentInitiationRequest.getXrequestId();
+            if (containerRequestContext.getProperty(PreAuthAccessFilter.class.getName()) != null) {
+                xrequestId = containerRequestContext.getHeaderString(PreAuthAccessFilter.PRE_AUTH_ID);
+            }
+            ThreadManager.getInstance().queueTask(new PaymentStatusPoll(xs2AFactoryInput, getXS2AStandard().getAspsp().getBic(), UUID.fromString(xrequestId)));
+        }
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 
@@ -184,7 +192,7 @@ public class PaymentInitiationResource extends RestResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.BULK_PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
-        PersistentPayment.create(bulkpaymentInitiationRequest.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(bulkpaymentInitiationRequest.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus(), PaymentService.BULK_PAYMENTS, paymentTypeBean.getPaymentProduct());
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 
@@ -248,7 +256,7 @@ public class PaymentInitiationResource extends RestResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PERIODIC_PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
-        PersistentPayment.create(periodicPaymentInitiation.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(periodicPaymentInitiation.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus(), PaymentService.PERIODIC_PAYMENTS, paymentTypeBean.getPaymentProduct());
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 }

@@ -105,7 +105,7 @@ public class PaymentStatusPoll extends WorkableTask {
         try {
             payment = xs2AStandard.getPis().getPayment(paymentRetrievalRequest);
         } catch (BankRequestFailedException e) {
-            LOG.error("Failed to retrive payment on task startup BankRequestFailedException, error={}", e.getMessage());
+            LOG.error("Failed to retrieve payment on task startup BankRequestFailedException, error={}", e.getMessage());
         }
     }
 

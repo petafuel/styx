@@ -24,7 +24,7 @@ public class CallbackResource {
      *
      * @param realm         should be a known REALM
      * @param param         generic string for usage in CallBackHandler&Processor
-     * @param requestUUID   should be the requestUUID/xrequest id of a previous styx session in payment initation or consent creation
+     * @param requestUUID   should be the requestUUID/xrequest id of a previous styx session in payment initiation or consent creation
      * @param oAuthCallback query parameters for success or error redirects from an aspsp
      * @return will redirect to styx status pages
      */
@@ -37,7 +37,7 @@ public class CallbackResource {
     }
 
     /**
-     * Legacy Callback if the aspsp is not correctly forwarding the redirect backt to styx
+     * Legacy Callback if the aspsp is not correctly forwarding the redirect back to styx
      *
      * @param realm should be a known REALM
      * @param param generic string for usage in CallBackHandler&Processor

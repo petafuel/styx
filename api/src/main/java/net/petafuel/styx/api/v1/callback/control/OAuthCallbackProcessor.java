@@ -66,7 +66,7 @@ public class OAuthCallbackProcessor {
                 LOG.error("OAuth Callback on realm={}, identifier={}, param={} failed due to SAD not being able to initialize the aspsp connected to the payment SCA", realm, identifier, param, e);
                 return new RedirectStatus(StatusType.ERROR, identifier);
             }
-            // In case of oauth we will not schedule the task during payment initation but here after we received a callback
+            // In case of oauth we will not schedule the task during payment initiation but here after we received a callback
             XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
             xs2AFactoryInput.setPaymentId(paymentEntry.getPaymentId());
             xs2AFactoryInput.setPaymentService(paymentEntry.getPaymentService());
@@ -121,7 +121,7 @@ public class OAuthCallbackProcessor {
      * @param state     oauth query param
      * @param oauthType allows for preauth for legacy reasons
      * @param path      redirect path
-     * @return whether we were able to retrive the access_token successfully
+     * @return whether we were able to retrieve the access_token successfully
      */
     private static boolean handleSuccessfulOAuth2(String code, String state, String oauthType, String path) {
         OAuthService service = new OAuthService();

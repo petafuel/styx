@@ -44,4 +44,19 @@ public class OAuthCallback {
     public void setErrorDescription(String errorDescription) {
         this.errorDescription = errorDescription;
     }
+
+    /**
+     * Human readable format of an OAuthCallback
+     *
+     * @return string for logging
+     */
+    @Override
+    public String toString() {
+        return "OAuthCallback{" +
+                "code='" + String.format("%1$" + 5 + "s", code).replace(' ', 'X') + '\'' +
+                ", state='" + state + '\'' +
+                ", error='" + error + '\'' +
+                ", errorDescription='" + errorDescription + '\'' +
+                '}';
+    }
 }

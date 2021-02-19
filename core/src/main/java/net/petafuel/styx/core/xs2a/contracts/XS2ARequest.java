@@ -157,6 +157,9 @@ public abstract class XS2ARequest {
     }
 
     public void setAuthorization(String authorization) {
+        if (authorization != null && !authorization.contains("Bearer")) {
+            authorization = "Bearer " + authorization;
+        }
         this.authorization = authorization;
     }
 

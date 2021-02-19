@@ -91,12 +91,15 @@ public class PaymentStatusPoll extends WorkableTask {
         PISRequest paymentRetrievalRequest = new PISRequestFactory().create(xs2AStandard.getRequestClassProvider().paymentRetrieval(), xs2AFactoryInput);
         paymentRetrievalRequest.setAuthorization(authorisationHeader);
 
+        //Technical Debt: Only for Sparda Bank
         ImplementerOption implementerOption = xs2AStandard.getAspsp().getConfig().getImplementerOptions().get("STYX04");
         if (implementerOption != null &&
                 implementerOption.getOptions().get("required") != null &&
                 Boolean.TRUE.equals(implementerOption.getOptions().get("required"))) {
             paymentStatusRequest.addHeader("X-BIC", xs2AStandard.getAspsp().getBic());
+            paymentStatusRequest.setPsu(null);
             paymentRetrievalRequest.addHeader("X-BIC", xs2AStandard.getAspsp().getBic());
+            paymentRetrievalRequest.setPsu(null);
         }
 
         try {

@@ -1,6 +1,8 @@
 package net.petafuel.styx.core.persistence.models;
 
 import net.petafuel.styx.core.persistence.DatabaseColumn;
+import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
+import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 
 import java.util.Date;
@@ -18,8 +20,10 @@ public class PaymentEntry {
     private Date createdAt;
     @DatabaseColumn("updated_at")
     private Date updatedAt;
-
-    //TODO: implement payment service and payment product
+    //will be set within PersistentPayment
+    private PaymentService paymentService;
+    //will be set within PersistentPayment
+    private PaymentProduct paymentProduct;
 
     public String getPaymentId() {
         return paymentId;
@@ -75,5 +79,21 @@ public class PaymentEntry {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public PaymentService getPaymentService() {
+        return paymentService;
+    }
+
+    public void setPaymentService(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+
+    public PaymentProduct getPaymentProduct() {
+        return paymentProduct;
+    }
+
+    public void setPaymentProduct(PaymentProduct paymentProduct) {
+        this.paymentProduct = paymentProduct;
     }
 }

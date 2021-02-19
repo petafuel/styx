@@ -33,7 +33,6 @@ import org.apache.logging.log4j.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
@@ -92,18 +91,21 @@ public class PaymentStatusPoll extends WorkableTask {
         PISRequest paymentRetrievalRequest = new PISRequestFactory().create(xs2AStandard.getRequestClassProvider().paymentRetrieval(), xs2AFactoryInput);
         paymentRetrievalRequest.setAuthorization(authorisationHeader);
 
+        //Technical Debt: Only for Sparda Bank
         ImplementerOption implementerOption = xs2AStandard.getAspsp().getConfig().getImplementerOptions().get("STYX04");
         if (implementerOption != null &&
                 implementerOption.getOptions().get("required") != null &&
                 Boolean.TRUE.equals(implementerOption.getOptions().get("required"))) {
             paymentStatusRequest.addHeader("X-BIC", xs2AStandard.getAspsp().getBic());
+            paymentStatusRequest.setPsu(null);
             paymentRetrievalRequest.addHeader("X-BIC", xs2AStandard.getAspsp().getBic());
+            paymentRetrievalRequest.setPsu(null);
         }
 
         try {
             payment = xs2AStandard.getPis().getPayment(paymentRetrievalRequest);
         } catch (BankRequestFailedException e) {
-            LOG.error("Failed to retrive payment on task startup BankRequestFailedException, error={}", e.getMessage());
+            LOG.error("Failed to retrieve payment on task startup BankRequestFailedException, error={}", e.getMessage());
         }
     }
 
@@ -188,14 +190,7 @@ public class PaymentStatusPoll extends WorkableTask {
     }
 
     @Override
-    public WorkableTask buildFromRecovery(JsonObject goal) throws
-            ClassNotFoundException,
-            NoSuchMethodException,
-            IllegalAccessException,
-            InvocationTargetException,
-            InstantiationException {
-
-
+    public WorkableTask buildFromRecovery(JsonObject goal) {
         XS2AFactoryInput input = new XS2AFactoryInput();
         input.setPaymentService(PaymentService.valueOf(goal.getString("paymentService")));
         input.setPaymentProduct(PaymentProduct.valueOf(goal.getString("paymentProduct")));
@@ -206,6 +201,7 @@ public class PaymentStatusPoll extends WorkableTask {
 
     /**
      * Method to check if a accessToken is available and still valid
+     *
      * @param xRequestId xRequestId
      * @return null|String
      */
@@ -216,6 +212,8 @@ public class PaymentStatusPoll extends WorkableTask {
                     oAuthSession.getAccessTokenExpiresAt().before(new Date()) &&
                     oAuthSession.getRefreshTokenExpiresAt().after(new Date())) {
                 return OAuthService.refreshToken(oAuthSession).getAccessToken();
+            } else {
+                return oAuthSession.getAccessToken();
             }
         } catch (PersistenceEmptyResultSetException e) {
             return null;
@@ -223,6 +221,5 @@ public class PaymentStatusPoll extends WorkableTask {
             LOG.error("Refresh token expired, cannot refresh access token for xRequestId={}", xRequestId);
             throw new TaskFinalFailureException("Refresh token expired");
         }
-        return null;
     }
 }

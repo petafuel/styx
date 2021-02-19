@@ -36,19 +36,19 @@ public class RedirectCallbackProcessor {
         } else if (REALM.PAYMENT.equals(realm)) {
             //handle callback received due to a payment initiation SCA
             if (TPP_SUCCESS_REDIRECT_PARAM.equalsIgnoreCase(callbackStatus)) {
-                LOG.info("Callback on realm={}, identifier={} received successful SCA completion callbackStatus={}", realm, identifier, callbackStatus);
+                LOG.info("Redirect Callback on realm={}, identifier={} received successful SCA completion callbackStatus={}", realm, identifier, callbackStatus);
                 return new RedirectStatus(StatusType.SUCCESS, identifier);
             } else {
-                LOG.warn("Callback on realm={}, identifier={} received failed SCA completion callbackStatus={}", realm, identifier, callbackStatus);
+                LOG.warn("Redirect Callback on realm={}, identifier={} received failed SCA completion callbackStatus={}", realm, identifier, callbackStatus);
                 return new RedirectStatus(StatusType.ERROR, identifier);
             }
         } else {
             //handle callback received due to a consent SCA
             if (TPP_SUCCESS_REDIRECT_PARAM.equalsIgnoreCase(callbackStatus)) {
-                LOG.info("Redirect on realm={}, identifier={} received successful SCA completion callbackStatus={}", realm, identifier, callbackStatus);
+                LOG.info("Redirect Callback on realm={}, identifier={} received successful SCA completion callbackStatus={}", realm, identifier, callbackStatus);
                 return new RedirectStatus(StatusType.SUCCESS, identifier);
             } else {
-                LOG.warn("Redirect on realm={}, identifier={} received successful SCA completion callbackStatus={}", realm, identifier, callbackStatus);
+                LOG.warn("Redirect Callback on realm={}, identifier={} received failed SCA completion callbackStatus={}", realm, identifier, callbackStatus);
                 return new RedirectStatus(StatusType.ERROR, identifier);
             }
         }
@@ -59,6 +59,7 @@ public class RedirectCallbackProcessor {
     public enum REALM {
         PAYMENT,
         CONSENT,
-        UNKNOWN
+        UNKNOWN,
+        OAUTH
     }
 }

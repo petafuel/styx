@@ -116,6 +116,7 @@ public class OAuthService extends BasicService {
         session.setScope(scope);
         session.setAuthorizationEndpoint(url.getPreauthAuthorizationEndpoint());
         session.setTokenEndpoint(url.getPreauthTokenEndpoint());
+        session.setxRequestId(session.getId());
 
         return PersistentOAuthSession.create(session);
     }

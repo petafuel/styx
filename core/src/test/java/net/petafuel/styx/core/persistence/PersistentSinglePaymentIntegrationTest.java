@@ -3,6 +3,8 @@ package net.petafuel.styx.core.persistence;
 
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.persistence.models.PaymentEntry;
+import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
+import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.utils.Config;
 import org.junit.Assert;
@@ -45,7 +47,7 @@ class PersistentSinglePaymentIntegrationTest {
         paymentEntry = PersistentPayment.create(UUID.randomUUID().toString(), paymentId,
                 clientToken,
                 bic,
-                TransactionStatus.RCVD);
+                TransactionStatus.RCVD, PaymentService.PAYMENTS, PaymentProduct.SEPA_CREDIT_TRANSFERS);
         Assert.assertEquals(TransactionStatus.RCVD, paymentEntry.getStatus());
         Assert.assertEquals(bic, paymentEntry.getBic());
         Assert.assertEquals(clientToken, paymentEntry.getClientToken().getId());

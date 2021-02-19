@@ -33,10 +33,10 @@ public class UpdatePSUIdentificationRequest extends SCARequest {
                     getPaymentService().getValue(),
                     getPaymentProduct().getValue(),
                     getPaymentId(),
-                    getAuthroisationId());
+                    getAuthorisationId());
 
         } else {
-            return String.format(CS_UPDATE_PSU_DATA, getConsentId(), getAuthroisationId());
+            return String.format(CS_UPDATE_PSU_DATA, getConsentId(), getAuthorisationId());
         }
     }
 }

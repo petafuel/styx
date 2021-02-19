@@ -24,7 +24,7 @@ public class SCARequestFactory implements XS2ARequestFactory<SCARequest> {
                 Constructor<? extends SCARequest> constructor = providedRequest.getConstructor(String.class);
                 scaRequest = constructor.newInstance(factoryInput.getConsentId());
             }
-            scaRequest.setAuthroisationId(factoryInput.getAuthorisationId());
+            scaRequest.setAuthorisationId(factoryInput.getAuthorisationId());
             scaRequest.setScaAuthenticationData(factoryInput.getScaAuthenticationData());
             scaRequest.setAuthorisationMethodId(factoryInput.getAuthorisationMethodId());
             scaRequest.setPsuData(factoryInput.getPsuData());

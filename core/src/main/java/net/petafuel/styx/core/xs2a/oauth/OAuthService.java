@@ -5,8 +5,10 @@ import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.entities.StrongAuthenticatableResource;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.exceptions.OAuthTokenExpiredException;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.OAuthTokenRequest;
+import net.petafuel.styx.core.xs2a.oauth.http.RefreshTokenRequest;
 import net.petafuel.styx.core.xs2a.oauth.serializers.EndpointsSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.Config;
@@ -101,7 +103,7 @@ public class OAuthService extends BasicService {
 
         OAuthService service = new OAuthService();
         Map<String, String> endpoints = service.getEndpoints(strongAuthenticatableResource.getLinks().getScaOAuth().getUrl());
-        OAuthSession session = OAuthSession.start();
+        OAuthSession session = OAuthSession.start(strongAuthenticatableResource.getxRequestId());
         session.setScope(scope);
         session.setAuthorizationEndpoint(endpoints.get("authorization_endpoint"));
         session.setTokenEndpoint(endpoints.get("token_endpoint"));
@@ -110,10 +112,11 @@ public class OAuthService extends BasicService {
     }
 
     public static OAuthSession startPreAuthSession(Url url, String scope) {
-        OAuthSession session = OAuthSession.start();
+        OAuthSession session = OAuthSession.start(null); // The X-Request-Id is not relevant for the prestep, since the OAuthSession will not directly relate to a consent or payment
         session.setScope(scope);
         session.setAuthorizationEndpoint(url.getPreauthAuthorizationEndpoint());
         session.setTokenEndpoint(url.getPreauthTokenEndpoint());
+        session.setxRequestId(session.getId());
 
         return PersistentOAuthSession.create(session);
     }
@@ -151,6 +154,20 @@ public class OAuthService extends BasicService {
             return jsonb.fromJson(body, HashMap.class);
         } catch (Exception e) {
             return new HashMap<>();
+        }
+    }
+
+    public static OAuthSession refreshToken(OAuthSession oAuthSession) throws OAuthTokenExpiredException {
+        String state = oAuthSession.getState();
+        RefreshTokenRequest request = new RefreshTokenRequest(oAuthSession.getRefreshToken());
+        OAuthService service = new OAuthService();
+        try {
+            oAuthSession = service.tokenRequest(oAuthSession.getTokenEndpoint(), request);
+            oAuthSession.setState(state);
+            PersistentOAuthSession.update(oAuthSession);
+            return oAuthSession;
+        } catch (BankRequestFailedException expiredToken) {
+            throw new OAuthTokenExpiredException(OAuthTokenExpiredException.MESSAGE);
         }
     }
 }

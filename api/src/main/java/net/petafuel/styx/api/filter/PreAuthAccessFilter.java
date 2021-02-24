@@ -33,7 +33,7 @@ import java.util.UUID;
 @AcceptsPreStepAuth
 public class PreAuthAccessFilter implements ContainerRequestFilter {
     private static final Logger LOG = LogManager.getLogger(PreAuthAccessFilter.class);
-    private static final String PRE_AUTH_ID = "preAuthId";
+    public static final String PRE_AUTH_ID = "preAuthId";
 
     /**
      * Supressing java:S3776 -> need to rework logic to reduce code complexity
@@ -77,6 +77,7 @@ public class PreAuthAccessFilter implements ContainerRequestFilter {
                 Map<String, String> additionalHeaders = new HashMap<>();
                 additionalHeaders.put(XS2AHeader.AUTHORIZATION, oAuthSession.getTokenType() + " " + oAuthSession.getAccessToken());
                 containerRequestContext.setProperty(PreAuthAccessFilter.class.getName(), additionalHeaders);
+
                 LOG.info("Successfully attached pre-auth from oAuthSessionState={}", oAuthSession.getState());
             } catch (PersistenceEmptyResultSetException noOauthSessionFound) {
                 throw new StyxException(new ResponseEntity("There was no valid pre-step authorisation found for the specified preAuthId", ResponseConstant.STYX_PREAUTH_NOT_AVAILABLE, ResponseCategory.ERROR, ResponseOrigin.CLIENT));

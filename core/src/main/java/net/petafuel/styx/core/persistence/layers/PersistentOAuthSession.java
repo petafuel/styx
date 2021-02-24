@@ -22,13 +22,14 @@ public class PersistentOAuthSession {
 
     public static OAuthSession create(OAuthSession model) {
         Connection connection = Persistence.getInstance().getConnection();
-        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM create_oauth_session(?, ?, ?, ?, ?, ?)")) {
+        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM create_oauth_session(?, ?, ?, ?, ?, ?, ?)")) {
             query.setString(1, model.getAuthorizationEndpoint());
             query.setString(2, model.getTokenEndpoint());
             query.setString(3, model.getCodeVerifier());
             query.setString(4, model.getState());
             query.setString(5, model.getScope());
             query.setObject(6, model.getId());
+            query.setObject(7, model.getxRequestId());
 
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
@@ -89,6 +90,30 @@ public class PersistentOAuthSession {
         }
     }
 
+    /**
+     * Retrieve an existing oauth session from the database using the x_request_id
+     *
+     * @param uuid (X-Request-id used during the creation of a consent or payment)
+     * @return found oauth session
+     * @throws PersistenceEmptyResultSetException in case there was no match within the database
+     * @throws PersistenceException               if an unexpected SQL Error occurred
+     */
+    public static OAuthSession getByXRequestId(UUID uuid) {
+        Connection connection = Persistence.getInstance().getConnection();
+        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM get_oauth_session_by_x_request_id(?)")) {
+            query.setObject(1, uuid);
+            try (ResultSet resultSet = query.executeQuery()) {
+                if (resultSet.next()) {
+                    return dbToModel(resultSet);
+                }
+            }
+            throw new PersistenceEmptyResultSetException("No OAuth session found for the given x_request_id");
+        } catch (SQLException e) {
+            logSQLError(e);
+            throw new PersistenceException(e.getMessage(), e);
+        }
+    }
+
     public static OAuthSession update(OAuthSession model) {
         Connection connection = Persistence.getInstance().getConnection();
         try (PreparedStatement query = connection.prepareStatement("SELECT * FROM update_oauth_session(?, ?, ?, ?, ?, ?)")) {
@@ -113,6 +138,9 @@ public class PersistentOAuthSession {
     private static OAuthSession dbToModel(ResultSet resultSet) throws SQLException {
         OAuthSession model = new OAuthSession();
         model.setId(UUID.fromString(resultSet.getString("id")));
+        if (resultSet.getString("x_request_id") != null) {
+            model.setxRequestId(UUID.fromString(resultSet.getString("x_request_id")));
+        }
         model.setAuthorizationEndpoint(resultSet.getString("authorization_endpoint"));
         model.setTokenEndpoint(resultSet.getString("token_endpoint"));
         model.setCodeVerifier(resultSet.getString("code_verifier"));

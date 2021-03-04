@@ -22,11 +22,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class PeriodicPaymentResourceSparkasseTest extends StyxRESTTest {
-    private static final String PSU_ID = "smsTAN_multiMed";
-    private static final String BIC = "BYLADEM1FSI";
-    private String currentDate;
+public class PeriodicPaymentResourceRaiffeisenMSTest extends StyxRESTTest {
+    private static final String PSU_ID = "EndToEndId";
+    private static final String BIC = "GENODEF1M03";
     private static String paymentId;
+    private static String debtorIBAN = "DE60760300800500123456";
+    private static String creditorName = "Hans Handbuch";
+    private static String creditorIBAN = "DE98701204008538752000";
+    private String currentDate;
 
     @Override
     protected Application configure() {
@@ -54,7 +57,7 @@ public class PeriodicPaymentResourceSparkasseTest extends StyxRESTTest {
         invocationBuilder.header("redirectPreferred", true);
 
         Jsonb jsonb = JsonbBuilder.create();
-        String requestBody = "{\"startDate\":\"" + currentDate + "\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE86999999990000001000\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"1.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE98999999990000009999\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Test\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}";
+        String requestBody = "{\"startDate\":\"" + currentDate + "\",\"dayOfExecution\":31,\"frequency\":\"MNTH\",\"executionRule\":\"following\",\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"" + debtorIBAN +"\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"1.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"" + creditorIBAN + "\"},\"creditorName\":\"" + creditorName + "\",\"remittanceInformationUnstructured\":\"Test\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}";
         PeriodicPaymentInitiation periodicPaymentInitiation = jsonb.fromJson(requestBody, PeriodicPaymentInitiation.class);
 
         Invocation invocation = invocationBuilder.buildPost(Entity.entity(periodicPaymentInitiation, MediaType.APPLICATION_JSON));
@@ -75,6 +78,7 @@ public class PeriodicPaymentResourceSparkasseTest extends StyxRESTTest {
 
         Invocation invocation = invocationBuilder.buildGet();
         InitializablePayment response = invocation.invoke(PeriodicPayment.class);
-        Assertions.assertNotNull(response);
+        Assertions.assertNotNull(response instanceof PeriodicPayment);
     }
+
 }

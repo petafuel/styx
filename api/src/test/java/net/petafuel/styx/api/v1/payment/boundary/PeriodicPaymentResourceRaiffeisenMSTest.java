@@ -78,7 +78,7 @@ public class PeriodicPaymentResourceRaiffeisenMSTest extends StyxRESTTest {
 
         Invocation invocation = invocationBuilder.buildGet();
         InitializablePayment response = invocation.invoke(PeriodicPayment.class);
-        Assertions.assertNotNull(response instanceof PeriodicPayment);
+        Assertions.assertNotNull(response);
     }
 
 }

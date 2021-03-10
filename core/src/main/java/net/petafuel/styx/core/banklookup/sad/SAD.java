@@ -185,7 +185,7 @@ public class SAD implements BankLookUpInterface {
         JsonObjectBuilder defaultConfigJsonBuilder = Json.createObjectBuilder(defaultConfig);
         defaultConfigJsonBuilder.addAll(Json.createObjectBuilder(styxConfig));
         defaultConfig = defaultConfigJsonBuilder.build();
-        defaultConfig.entrySet().parallelStream().forEach(entry -> {
+        defaultConfig.entrySet().stream().forEach(entry -> {
             JsonObject currentOption = entry.getValue().asJsonObject();
             ImplementerOption implementerOption = new ImplementerOption();
             implementerOption.setId(entry.getKey());
@@ -193,7 +193,7 @@ public class SAD implements BankLookUpInterface {
 
             currentOption.get("options").asJsonObject()
                     .entrySet()
-                    .parallelStream()
+                    .stream()
                     .forEach(option -> implementerOption.addOption(option.getKey(), Boolean.valueOf(option.getValue().toString())));
             aspsp.getConfig().getImplementerOptions().put(implementerOption.getId(), implementerOption);
         });

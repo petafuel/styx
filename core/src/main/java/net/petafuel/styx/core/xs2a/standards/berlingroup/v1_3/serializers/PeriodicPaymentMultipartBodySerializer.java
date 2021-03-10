@@ -19,6 +19,9 @@ public class PeriodicPaymentMultipartBodySerializer {
     }
 
     public static PeriodicPayment xmlDeserialize(Document sepaDocument, PeriodicPayment periodicPayment) throws ParseException {
+        if (periodicPayment.getDebtorAccount() == null) {
+            periodicPayment.setDebtorAccount(new AccountReference());
+        }
         AccountReference debtorAccount = periodicPayment.getDebtorAccount();
         periodicPayment.setDebtorName(sepaDocument.getCctInitiation().getPmtInfos().get(0).getDebitor().getName());
         debtorAccount.setIban(sepaDocument.getCctInitiation().getPmtInfos().get(0).getDebtorAccountIBAN());
@@ -31,7 +34,9 @@ public class PeriodicPaymentMultipartBodySerializer {
 
         String creditorAgent = sepaDocument.getCctInitiation().getPmtInfos().get(0)
                 .getCreditTransferTransactionInformationVector().get(0).getCreditorAgent();
-
+        if (periodicPayment.getCreditorAccount() == null) {
+            periodicPayment.setCreditorAccount(new AccountReference());
+        }
         AccountReference creditorAccount = periodicPayment.getCreditorAccount();
         periodicPayment.setCreditorName(creditorAccountName);
         creditorAccount.setIban(creditorAccountIdentifier);

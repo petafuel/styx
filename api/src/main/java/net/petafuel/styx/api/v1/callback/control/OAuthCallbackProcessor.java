@@ -40,7 +40,7 @@ public class OAuthCallbackProcessor {
         if (RedirectCallbackProcessor.REALM.PAYMENT.equals(realm) || RedirectCallbackProcessor.REALM.OAUTH.equals(realm)) {
             return handlePaymentRealm(realm, param, identifier, oAuthCallback);
         } else {
-            return handleConsentRealm(realm, param, identifier);
+            return handleConsentRealm(realm, param, identifier, oAuthCallback);
         }
     }
 
@@ -80,15 +80,14 @@ public class OAuthCallbackProcessor {
         }
     }
 
-
-    private static RedirectStatus handleConsentRealm(RedirectCallbackProcessor.REALM realm, String param, String identifier) {
-        //handle callback received due to a consent SCA
-        if (TPP_SUCCESS_REDIRECT_PARAM.equalsIgnoreCase(param)) {
+    private static RedirectStatus handleConsentRealm(RedirectCallbackProcessor.REALM realm, String param, String identifier, OAuthCallback oAuthCallback) {
+        String path = String.format("%s/%s/%s", realm.name().toLowerCase(), param, identifier);
+        if (oAuthCallback.getError() == null && handleSuccessfulOAuth2(oAuthCallback.getCode(), oAuthCallback.getState(), OAuthService.SCA, path)) {
             LOG.info("OAuth Callback on realm={}, identifier={} received successful SCA completion callbackStatus={}", realm, identifier, param);
-            return new RedirectStatus(StatusType.SUCCESS, identifier);
+            return new RedirectStatus(StatusType.SUCCESS, oAuthCallback.getState());
         } else {
-            LOG.warn("OAuth Callback on realm={}, identifier={} received successful SCA completion callbackStatus={}", realm, identifier, param);
-            return new RedirectStatus(StatusType.ERROR, identifier);
+            LOG.error("failed oauth2 callback error={}, errorMessage={}, state={}", oAuthCallback.getError(), oAuthCallback.getErrorDescription(), oAuthCallback.getState());
+            return new RedirectStatus(StatusType.ERROR, oAuthCallback.getState());
         }
     }
 
@@ -129,10 +128,7 @@ public class OAuthCallbackProcessor {
             OAuthSession stored = PersistentOAuthSession.getByState(state);
             AuthorizationCodeRequest request = new AuthorizationCodeRequest(code, stored.getCodeVerifier());
             request.setRedirectUri(request.getRedirectUri() + path);
-            if (stored.getScope().contains("tx") || oauthType.equals(OAuthService.PREAUTH)) {
-                request.setJsonBody(false);
-            }
-
+            request.setJsonBody(false);
             OAuthSession authorized = service.tokenRequest(stored.getTokenEndpoint(), request);
             authorized.setState(state);
             PersistentOAuthSession.update(authorized);

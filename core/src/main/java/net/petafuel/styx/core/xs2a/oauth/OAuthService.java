@@ -26,6 +26,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 public class OAuthService extends BasicService {
 
@@ -68,12 +69,17 @@ public class OAuthService extends BasicService {
         }
     }
 
-    public static String buildLink(String state) {
+    public static String getRedirectUri(UUID xRequestId, String realm) {
+        Properties properties = Config.getInstance().getProperties();
+        return properties.getProperty("styx.redirect.baseurl") + realm + "/ok/" + xRequestId.toString();
+    }
+
+    public static String buildLink(String state, UUID xRequestId, String realm) {
         OAuthSession stored = PersistentOAuthSession.getByState(state);
         HashMap<String, String> queryParams = getQueryParameters(stored);
         Properties properties = Config.getInstance().getProperties();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
-        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + "oauth/"+ SCA);
+        queryParams.put("redirect_uri", getRedirectUri(xRequestId, realm));
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 

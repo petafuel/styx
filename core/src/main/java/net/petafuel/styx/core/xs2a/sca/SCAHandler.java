@@ -27,14 +27,17 @@ public class SCAHandler {
         SCA sca;
         SCAApproach scaMethod = null;
         String scope;
+        String realm;
         if (strongAuthenticatableResource instanceof Consent) {
             Consent consent = (Consent) strongAuthenticatableResource;
             sca = consent.getSca();
             scope = "AIS: " + consent.getId();
+            realm = "consent";
         } else if (strongAuthenticatableResource instanceof InitiatedPayment) {
             InitiatedPayment payment = (InitiatedPayment) strongAuthenticatableResource;
             sca = payment.getSca();
             scope = "PIS: " + payment.getPaymentId();
+            realm = "payment";
         } else {
             return null;
         }
@@ -49,7 +52,7 @@ public class SCAHandler {
                     link = strongAuthenticatableResource.getLinks().getScaOAuth().getUrl();
                 } else {
                     OAuthSession session = OAuthService.startSession(strongAuthenticatableResource, scope);
-                    link = OAuthService.buildLink(session.getState());
+                    link = OAuthService.buildLink(session.getState(), strongAuthenticatableResource.getxRequestId(), realm);
                 }
                 scaMethod = new OAuth2(link);
                 break;

@@ -3,6 +3,8 @@ package net.petafuel.styx.core.xs2a.factory;
 import net.petafuel.styx.core.xs2a.contracts.AISRequest;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.exceptions.XS2AFactoryException;
+import net.petafuel.styx.core.xs2a.utils.TPPRedirectUtillity;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -24,6 +26,8 @@ public class AISRequestFactory implements XS2ARequestFactory<AISRequest> {
             aisRequest.setWithBalance(factoryInput.getWithBalance());
             aisRequest.setEntryReferenceFrom(factoryInput.getEntryReferenceFrom());
             aisRequest.setDeltaList(factoryInput.getDeltaList());
+            aisRequest.setTppRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("consent/ok/" + ThreadContext.get("requestUUID")));
+            aisRequest.setTppNokRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("consent/nok/" + ThreadContext.get("requestUUID")));
 
             return aisRequest;
         } catch (NoSuchMethodException e) {

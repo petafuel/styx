@@ -20,7 +20,7 @@ public class TPPRedirectUtillity {
      * @return
      */
     public static String getTPPRedirectFromConfig(String path) {
-        return generateRedirectURL(System.getProperty(CoreProperties.STYX_REDIRECT_URL), path);
+        return generateRedirectURL(Config.getInstance().getProperties().getProperty(CoreProperties.STYX_REDIRECT_URL), path);
     }
 
     /**

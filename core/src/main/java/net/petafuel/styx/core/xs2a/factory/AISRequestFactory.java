@@ -26,10 +26,8 @@ public class AISRequestFactory implements XS2ARequestFactory<AISRequest> {
             aisRequest.setWithBalance(factoryInput.getWithBalance());
             aisRequest.setEntryReferenceFrom(factoryInput.getEntryReferenceFrom());
             aisRequest.setDeltaList(factoryInput.getDeltaList());
-            String requestUuid = ThreadContext.get("requestUUID") != null ? "/" + ThreadContext.get("requestUUID") : "";
-            aisRequest.setTppRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("consent/ok" + requestUuid));
-            aisRequest.setTppNokRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("consent/nok" + requestUuid));
-
+            aisRequest.setTppRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("consent/ok/" + ThreadContext.get("requestUUID")));
+            aisRequest.setTppNokRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("consent/nok/" + ThreadContext.get("requestUUID")));
             return aisRequest;
         } catch (NoSuchMethodException e) {
             throw new XS2AFactoryException(MessageFormat.format("No viable constructor found for request={0} error={1}", providedRequest, e.getMessage()), e);

@@ -46,8 +46,8 @@ public class CallbackResource {
     @GET
     @Path("/callbacks/{realm}/{param}")
     @Produces(MediaType.TEXT_HTML)
-    public Response processCallback(@PathParam("realm") String realm, @PathParam("param") String param) {
-        return CallbackHandler.handleCallback(realm, param, null, null);
+    public Response processCallback(@PathParam("realm") String realm, @PathParam("param") String param, @BeanParam OAuthCallback oAuthCallback) {
+        return CallbackHandler.handleCallback(realm, param, null, oAuthCallback);
     }
 
     /**

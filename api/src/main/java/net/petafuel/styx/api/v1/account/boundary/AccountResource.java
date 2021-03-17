@@ -65,6 +65,7 @@ public class AccountResource extends RestResource {
         ioProcessor.modifyRequest(accountListRequest, xs2AFactoryInput);
 
         List<AccountDetails> accountList = getXS2AStandard().getAis().getAccountList(accountListRequest);
+        accountList.forEach(accountDetails -> accountDetails.setLinks(new AspspUrlMapper(accountDetails.getResourceId()).map(accountDetails.getLinks())));
         LOG.info("Successfully fetched account list for bic={}", getXS2AStandard().getAspsp().getBic());
         return Response.status(200).entity(new AccountListResponseAdapter(accountList)).build();
     }

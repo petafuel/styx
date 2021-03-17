@@ -10,7 +10,7 @@ public class SecondsToDateDeserializer implements JsonbDeserializer<Date> {
     @Override
     public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext, Type type) {
         Date date = new Date();
-        date.setTime(date.getTime() + (jsonParser.getLong() * 1000));
+        date.setTime(date.getTime() + (Integer.parseInt(jsonParser.getString()) * 1000));
         return date;
     }
 }

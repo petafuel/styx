@@ -28,6 +28,7 @@ import static net.petafuel.styx.api.v1.callback.control.RedirectCallbackProcesso
 
 public class OAuthCallbackProcessor {
     private static final Logger LOG = LogManager.getLogger(OAuthCallbackProcessor.class);
+    private static final String FAILED_OAUTH2 = "failed oauth2 callback error={}, errorMessage={}, state={}";
 
     private OAuthCallbackProcessor() {
     }
@@ -40,7 +41,7 @@ public class OAuthCallbackProcessor {
         if (RedirectCallbackProcessor.REALM.PAYMENT.equals(realm) || RedirectCallbackProcessor.REALM.OAUTH.equals(realm)) {
             return handlePaymentRealm(realm, param, identifier, oAuthCallback);
         } else {
-            return handleConsentRealm(realm, param, identifier);
+            return handleConsentRealm(realm, param, identifier, oAuthCallback);
         }
     }
 
@@ -57,7 +58,7 @@ public class OAuthCallbackProcessor {
 
     private static RedirectStatus handlePaymentRealm(RedirectCallbackProcessor.REALM realm, String param, String identifier, OAuthCallback oAuthCallback) {
         String path = String.format("%s/%s/%s", realm.name().toLowerCase(), param, identifier);
-        if (oAuthCallback.getError() == null && handleSuccessfulOAuth2(oAuthCallback.getCode(), oAuthCallback.getState(), OAuthService.SCA, path)) {
+        if (oAuthCallback.getError() == null && handleSuccessfulOAuth2(oAuthCallback.getCode(), oAuthCallback.getState(), path)) {
             PaymentEntry paymentEntry = PersistentPayment.getById(identifier);
             XS2AStandard xs2AStandard;
             try {
@@ -75,20 +76,19 @@ public class OAuthCallbackProcessor {
             return new RedirectStatus(StatusType.SUCCESS, oAuthCallback.getState());
 
         } else {
-            LOG.error("failed oauth2 callback error={}, errorMessage={}, state={}", oAuthCallback.getError(), oAuthCallback.getErrorDescription(), oAuthCallback.getState());
+            LOG.error(FAILED_OAUTH2, oAuthCallback.getError(), oAuthCallback.getErrorDescription(), oAuthCallback.getState());
             return new RedirectStatus(StatusType.ERROR, oAuthCallback.getState());
         }
     }
 
-
-    private static RedirectStatus handleConsentRealm(RedirectCallbackProcessor.REALM realm, String param, String identifier) {
-        //handle callback received due to a consent SCA
-        if (TPP_SUCCESS_REDIRECT_PARAM.equalsIgnoreCase(param)) {
+    private static RedirectStatus handleConsentRealm(RedirectCallbackProcessor.REALM realm, String param, String identifier, OAuthCallback oAuthCallback) {
+        String path = String.format("%s/%s/%s", realm.name().toLowerCase(), param, identifier);
+        if (oAuthCallback.getError() == null && handleSuccessfulOAuth2(oAuthCallback.getCode(), oAuthCallback.getState(), path)) {
             LOG.info("OAuth Callback on realm={}, identifier={} received successful SCA completion callbackStatus={}", realm, identifier, param);
-            return new RedirectStatus(StatusType.SUCCESS, identifier);
+            return new RedirectStatus(StatusType.SUCCESS, oAuthCallback.getState());
         } else {
-            LOG.warn("OAuth Callback on realm={}, identifier={} received successful SCA completion callbackStatus={}", realm, identifier, param);
-            return new RedirectStatus(StatusType.ERROR, identifier);
+            LOG.error(FAILED_OAUTH2, oAuthCallback.getError(), oAuthCallback.getErrorDescription(), oAuthCallback.getState());
+            return new RedirectStatus(StatusType.ERROR, oAuthCallback.getState());
         }
     }
 
@@ -104,11 +104,11 @@ public class OAuthCallbackProcessor {
      */
     public static Response handlePreStepOAuth2(String code, String state, String error, String errorMessage, String path) {
         OAuthSession oAuthSession = PersistentOAuthSession.getByState(state);
-        if (error == null && handleSuccessfulOAuth2(code, state, OAuthService.PREAUTH, path)) {
+        if (error == null && handleSuccessfulOAuth2(code, state, path)) {
             RedirectStatus redirectStatus = new RedirectStatus(StatusType.SUCCESS, oAuthSession.getState(), RedirectStep.PREAUTH);
             return StatusHelper.createStatusRedirection(redirectStatus);
         } else {
-            LOG.error("failed oauth2 callback error={}, errorMessage={}, state={}", error, errorMessage, state);
+            LOG.error(FAILED_OAUTH2, error, errorMessage, state);
             RedirectStatus redirectStatus = new RedirectStatus(StatusType.ERROR, oAuthSession.getState(), RedirectStep.PREAUTH);
             return StatusHelper.createStatusRedirection(redirectStatus);
         }
@@ -119,20 +119,16 @@ public class OAuthCallbackProcessor {
      *
      * @param code      oauth query param
      * @param state     oauth query param
-     * @param oauthType allows for preauth for legacy reasons
      * @param path      redirect path
      * @return whether we were able to retrieve the access_token successfully
      */
-    private static boolean handleSuccessfulOAuth2(String code, String state, String oauthType, String path) {
+    private static boolean handleSuccessfulOAuth2(String code, String state, String path) {
         OAuthService service = new OAuthService();
         try {
             OAuthSession stored = PersistentOAuthSession.getByState(state);
             AuthorizationCodeRequest request = new AuthorizationCodeRequest(code, stored.getCodeVerifier());
             request.setRedirectUri(request.getRedirectUri() + path);
-            if (stored.getScope().contains("tx") || oauthType.equals(OAuthService.PREAUTH)) {
-                request.setJsonBody(false);
-            }
-
+            request.setJsonBody(false);
             OAuthSession authorized = service.tokenRequest(stored.getTokenEndpoint(), request);
             authorized.setState(state);
             PersistentOAuthSession.update(authorized);

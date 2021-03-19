@@ -7,7 +7,7 @@ import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.SinglePayment;
-import net.petafuel.styx.core.xs2a.utils.jsepa.PmtInf;
+import net.petafuel.styx.core.xs2a.utils.sepa.PmtInf;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

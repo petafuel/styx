@@ -64,12 +64,15 @@
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>5.2.4</version>
+                    <version>6.1.2</version>
                     <configuration>
                         <skipProvidedScope>true</skipProvidedScope>
                         <skipSystemScope>true</skipSystemScope>
                         <skipTestScope>true</skipTestScope>
                         <skipArtifactType>com.typesafe.*</skipArtifactType>
+                        <suppressionFiles>
+                            <suppressionFile>styx_private.xml</suppressionFile>
+                        </suppressionFiles>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -111,12 +114,6 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
-            <properties>
-                <sonar.host.url>https://sonarqube.petafuel.intern</sonar.host.url>
-                <sonar.projectName>TeamTools.Integration.styx.Reporting</sonar.projectName>
-                <sonar.projectKey>ToolsGit_SonarqubeReporting_StyxPrivateReporting</sonar.projectKey>
-                <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
-            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -156,12 +153,6 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
-            <properties>
-                <sonar.host.url>https://sonarqube.petafuel.intern</sonar.host.url>
-                <sonar.projectName>TeamTools.ValidatePullRequest.styx.Validation</sonar.projectName>
-                <sonar.projectKey>TeamTools.ValidatePullRequest.styx.Validation</sonar.projectKey>
-                <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
-            </properties>
             <build>
                 <plugins>
                     <plugin>

@@ -16,6 +16,10 @@
         <module>spi</module>
     </modules>
 
+    <properties>
+        <sonar.projectKey>TeamTools.styx</sonar.projectKey>
+    </properties>
+
     <repositories>
         <repository>
             <id>styxgithub</id>

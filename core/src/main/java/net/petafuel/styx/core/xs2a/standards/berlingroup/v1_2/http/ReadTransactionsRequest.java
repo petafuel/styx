@@ -6,8 +6,20 @@ import net.petafuel.styx.core.xs2a.entities.Consent;
 import java.util.Optional;
 
 public class ReadTransactionsRequest extends AISRequest {
+
+    private boolean isXml;
+
     public ReadTransactionsRequest(Consent consent, String consentId, String accountId, String transactionId) {
         super(consent, consentId, accountId, transactionId);
+        isXml = false;
+    }
+
+    public boolean isXml() {
+        return isXml;
+    }
+
+    public void setXml(boolean xml) {
+        isXml = xml;
     }
 
     @Override

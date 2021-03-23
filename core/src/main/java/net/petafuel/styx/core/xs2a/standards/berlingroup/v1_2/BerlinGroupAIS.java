@@ -15,8 +15,7 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDe
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListResponse;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsResponse;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
-import net.petafuel.styx.core.xs2a.utils.sepa.camt052.facades.Camt052Converter;
-import net.petafuel.styx.core.xs2a.utils.sepa.camt052.model.TransactionReport;
+import net.petafuel.styx.core.xs2a.utils.sepa.camt052.control.Camt052Converter;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,8 +95,7 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
             String responseBody = extractResponseBody(response, 200);
             if (isXmlRequest) {
                 Camt052Converter converter = new Camt052Converter();
-                TransactionReport transactionReport = converter.processReport(responseBody);
-                return converter.getTransactionContainer(transactionReport);
+                return converter.processReport(responseBody);
             }
             return jsonb.fromJson(responseBody, TransactionContainer.class);
         } catch (Exception e) {

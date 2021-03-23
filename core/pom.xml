@@ -12,6 +12,8 @@
     <artifactId>core</artifactId>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <build>
         <plugins>
@@ -43,6 +45,24 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.14.0</version>
+                <executions>
+                    <execution>
+                        <id>camt052</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaIncludes>schema/camt.052.001.02.xsd</schemaIncludes>
+                            <generatePackage>net.petafuel.styx.core.xs2a.utils.sepa.camt052</generatePackage>
+                            <generateDirectory>${project.build.directory}/generated-sources/camt052</generateDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -54,7 +74,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.14</version>
+            <version>42.2.16</version>
         </dependency>
         <dependency>
             <groupId>com.carrotsearch.thirdparty</groupId>
@@ -91,7 +111,7 @@
         <dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>yasson</artifactId>
-            <version>1.0.7</version>
+            <version>2.0.1</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>

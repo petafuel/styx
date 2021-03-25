@@ -1,4 +1,4 @@
-package net.petafuel.styx.core.xs2a.utils.jsepa;
+package net.petafuel.styx.core.xs2a.utils.sepa;
 
 import net.petafuel.jsepa.model.PaymentInstructionInformation;
 import org.simpleframework.xml.Element;

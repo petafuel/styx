@@ -15,7 +15,6 @@ public class CallbackHandler {
     }
 
     public static Response handleCallback(String realm, String param, String xRequestId, OAuthCallback oAuthCallback) {
-        LOG.info("Received callback for resource realm={}, param={}, originRequestUUID={}, oAuthCallback={}", realm, param, xRequestId, oAuthCallback);
         RedirectCallbackProcessor.REALM requestedRealm;
         RedirectStatus redirectStatus = null;
         try {
@@ -24,10 +23,11 @@ public class CallbackHandler {
             LOG.warn("Callback was received with an unknown resource realm={}", realm);
             requestedRealm = RedirectCallbackProcessor.REALM.UNKNOWN;
         }
+        LOG.info("Received callback for resource realm={}, param={}, originRequestUUID={}, oAuthCallback={}", requestedRealm, param, xRequestId, oAuthCallback);
         //If we receive a callback that seems to be from a previous oauth sca(containing a code query parameter from the aspsp)
         //We also check for the state which we need to get the token, if the sate query parameter is not present we try to do
         //a normal redirect callback as the oauth approach is always going to fail without state
-        if (oAuthCallback != null && oAuthCallback.getCode() != null) {
+        if (oAuthCallback != null && (oAuthCallback.getCode() != null || oAuthCallback.getError() != null)) {
             if (oAuthCallback.getState() != null) {
                 redirectStatus = OAuthCallbackProcessor.processCallback(requestedRealm, param, xRequestId, oAuthCallback);
             } else {

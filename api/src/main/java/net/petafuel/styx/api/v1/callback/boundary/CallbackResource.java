@@ -1,5 +1,6 @@
 package net.petafuel.styx.api.v1.callback.boundary;
 
+import net.petafuel.styx.api.util.Sanitizer;
 import net.petafuel.styx.api.v1.callback.control.CallbackHandler;
 import net.petafuel.styx.api.v1.callback.control.OAuthCallbackProcessor;
 import net.petafuel.styx.api.v1.callback.entity.OAuthCallback;
@@ -33,6 +34,10 @@ public class CallbackResource {
     @Produces(MediaType.TEXT_HTML)
     public Response processCallback(@PathParam("realm") String realm, @PathParam("param") String param, @PathParam("requestuuid") String requestUUID,
                                     @BeanParam OAuthCallback oAuthCallback) {
+        realm = Sanitizer.replaceEscSeq(realm);
+        param = Sanitizer.replaceEscSeq(param);
+        requestUUID = Sanitizer.replaceEscSeq(requestUUID);
+
         return CallbackHandler.handleCallback(realm, param, requestUUID, oAuthCallback);
     }
 
@@ -47,6 +52,8 @@ public class CallbackResource {
     @Path("/callbacks/{realm}/{param}")
     @Produces(MediaType.TEXT_HTML)
     public Response processCallback(@PathParam("realm") String realm, @PathParam("param") String param) {
+        realm = Sanitizer.replaceEscSeq(realm);
+        param = Sanitizer.replaceEscSeq(param);
         return CallbackHandler.handleCallback(realm, param, null, null);
     }
 
@@ -83,6 +90,11 @@ public class CallbackResource {
             @QueryParam("state") String stateQuery,
             @QueryParam("error") String error,
             @QueryParam("error_description") String errorMessage) {
+        statePath = Sanitizer.replaceEscSeq(statePath);
+        code = Sanitizer.replaceEscSeq(code);
+        error = Sanitizer.replaceEscSeq(error);
+        errorMessage = Sanitizer.replaceEscSeq(errorMessage);
+
         return OAuthCallbackProcessor.handlePreStepOAuth2(code, statePath, error, errorMessage, "oauth/preauth/" + statePath);
     }
 }

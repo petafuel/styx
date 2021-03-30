@@ -59,6 +59,7 @@ public class ConsentAuthorisationResource extends RestResource {
     @Path("/consents/{consentId}/authorisations")
     public Response startConsentAuthorisation(@NotEmpty @NotBlank @PathParam("consentId") String consentId,
                                               @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
+        consentId = Sanitizer.replaceEscSeq(consentId);
         XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
         xs2AFactoryInput.setConsentId(consentId);
         xs2AFactoryInput.setPsuData(authorisationRequest.getPsuData());
@@ -77,7 +78,7 @@ public class ConsentAuthorisationResource extends RestResource {
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(consentId, consentSCA.getAuthorisationId());
         consentSCA.setLinks(aspspUrlMapper.map(consentSCA.getLinks()));
-        LOG.info("Consent Authorisation started for consentId={} scaStatus={} scaApproach={}", Sanitizer.replaceEscSeq(consentId), consentSCA.getScaStatus(), consentSCA.getApproach());
+        LOG.info("Consent Authorisation started for consentId={} scaStatus={} scaApproach={}", consentId, consentSCA.getScaStatus(), consentSCA.getApproach());
         return Response.status(ResponseConstant.CREATED).entity(consentSCA).build();
     }
 
@@ -101,6 +102,8 @@ public class ConsentAuthorisationResource extends RestResource {
             @NotEmpty @NotBlank @PathParam("consentId") String consentId,
             @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId,
             @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
+        consentId = Sanitizer.replaceEscSeq(consentId);
+        authorisationId = Sanitizer.replaceEscSeq(authorisationId);
         XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
         xs2AFactoryInput.setConsentId(consentId);
         xs2AFactoryInput.setPsu(getPsu());
@@ -141,7 +144,7 @@ public class ConsentAuthorisationResource extends RestResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(consentId, authorisationId);
         consentSCA.setLinks(aspspUrlMapper.map(consentSCA.getLinks()));
 
-        LOG.info("Consent Authorisation updated for consentId={} authorisationId={} scaStatus={} scaApproach={}", Sanitizer.replaceEscSeq(consentId), Sanitizer.replaceEscSeq(authorisationId), consentSCA.getScaStatus(), consentSCA.getApproach());
+        LOG.info("Consent Authorisation updated for consentId={} authorisationId={} scaStatus={} scaApproach={}", consentId, authorisationId, consentSCA.getScaStatus(), consentSCA.getApproach());
         return Response.status(ResponseConstant.OK).entity(consentSCA).build();
     }
 
@@ -151,6 +154,9 @@ public class ConsentAuthorisationResource extends RestResource {
     public Response getScaStatus(
             @NotEmpty @NotBlank @PathParam("consentId") String consentId,
             @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId) throws BankRequestFailedException {
+        consentId = Sanitizer.replaceEscSeq(consentId);
+        authorisationId = Sanitizer.replaceEscSeq(authorisationId);
+
         XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
         xs2AFactoryInput.setConsentId(consentId);
         xs2AFactoryInput.setAuthorisationId(authorisationId);
@@ -166,7 +172,7 @@ public class ConsentAuthorisationResource extends RestResource {
         SCA.Status authorisationStatus = getXS2AStandard().getCs().getSCAStatus(getAuthorisationStatusRequest);
         AuthorisationStatusResponse response = new AuthorisationStatusResponse();
         response.setScaStatus(authorisationStatus.getValue());
-        LOG.info("Consent Authorisation Status requested for consentId={} authorisationId={} scaStatus={}", Sanitizer.replaceEscSeq(consentId), Sanitizer.replaceEscSeq(authorisationId), authorisationStatus.getValue());
+        LOG.info("Consent Authorisation Status requested for consentId={} authorisationId={} scaStatus={}", consentId, authorisationId, authorisationStatus.getValue());
         return Response.status(ResponseConstant.OK).entity(response).build();
     }
 }

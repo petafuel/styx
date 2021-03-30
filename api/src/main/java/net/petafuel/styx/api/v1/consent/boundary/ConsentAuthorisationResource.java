@@ -1,14 +1,15 @@
 package net.petafuel.styx.api.v1.consent.boundary;
 
 import net.petafuel.styx.api.exception.ResponseConstant;
-import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
-import net.petafuel.styx.api.filter.CheckAccessToken;
-import net.petafuel.styx.api.filter.RequiresBIC;
-import net.petafuel.styx.api.filter.RequiresMandatoryHeader;
-import net.petafuel.styx.api.filter.RequiresPSU;
+import net.petafuel.styx.api.filter.authentication.boundary.AcceptsPreStepAuth;
+import net.petafuel.styx.api.filter.authentication.boundary.CheckAccessToken;
+import net.petafuel.styx.api.filter.input.boundary.RequiresBIC;
+import net.petafuel.styx.api.filter.input.boundary.RequiresMandatoryHeader;
+import net.petafuel.styx.api.filter.input.boundary.RequiresPSU;
+import net.petafuel.styx.api.ioprocessing.IOProcessor;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.AspspUrlMapper;
-import net.petafuel.styx.api.util.io.IOProcessor;
+import net.petafuel.styx.api.util.Sanitizer;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.core.xs2a.contracts.SCARequest;
@@ -76,7 +77,7 @@ public class ConsentAuthorisationResource extends RestResource {
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(consentId, consentSCA.getAuthorisationId());
         consentSCA.setLinks(aspspUrlMapper.map(consentSCA.getLinks()));
-        LOG.info("Consent Authorisation started for consentId={} scaStatus={} scaApproach={}", consentId, consentSCA.getScaStatus(), consentSCA.getApproach());
+        LOG.info("Consent Authorisation started for consentId={} scaStatus={} scaApproach={}", Sanitizer.replaceEscSeq(consentId), consentSCA.getScaStatus(), consentSCA.getApproach());
         return Response.status(ResponseConstant.CREATED).entity(consentSCA).build();
     }
 
@@ -140,7 +141,7 @@ public class ConsentAuthorisationResource extends RestResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(consentId, authorisationId);
         consentSCA.setLinks(aspspUrlMapper.map(consentSCA.getLinks()));
 
-        LOG.info("Consent Authorisation updated for consentId={} authorisationId={} scaStatus={} scaApproach={}", consentId, authorisationId, consentSCA.getScaStatus(), consentSCA.getApproach());
+        LOG.info("Consent Authorisation updated for consentId={} authorisationId={} scaStatus={} scaApproach={}", Sanitizer.replaceEscSeq(consentId), Sanitizer.replaceEscSeq(authorisationId), consentSCA.getScaStatus(), consentSCA.getApproach());
         return Response.status(ResponseConstant.OK).entity(consentSCA).build();
     }
 
@@ -165,7 +166,7 @@ public class ConsentAuthorisationResource extends RestResource {
         SCA.Status authorisationStatus = getXS2AStandard().getCs().getSCAStatus(getAuthorisationStatusRequest);
         AuthorisationStatusResponse response = new AuthorisationStatusResponse();
         response.setScaStatus(authorisationStatus.getValue());
-        LOG.info("Consent Authorisation Status requested for consentId={} authorisationId={} scaStatus={}", consentId, authorisationId, authorisationStatus.getValue());
+        LOG.info("Consent Authorisation Status requested for consentId={} authorisationId={} scaStatus={}", Sanitizer.replaceEscSeq(consentId), Sanitizer.replaceEscSeq(authorisationId), authorisationStatus.getValue());
         return Response.status(ResponseConstant.OK).entity(response).build();
     }
 }

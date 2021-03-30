@@ -112,8 +112,6 @@
                 <includes>
                     <include>**/log4j2.xml</include>
                     <include>**/api.properties</include>
-                    <include>**/index.html</include>
-                    <include>**/sca-error.html</include>
                     <include>**/dbutils.properties</include>
                 </includes>
             </resource>

@@ -1,9 +1,9 @@
 package net.petafuel.styx.api.utils.io;
 
-import net.petafuel.styx.api.util.IOParser;
-import net.petafuel.styx.api.util.io.contracts.IOOrder;
-import net.petafuel.styx.api.util.io.entities.ImplementerOptionException;
-import net.petafuel.styx.api.util.io.entities.STYX04;
+import net.petafuel.styx.api.ioprocessing.IOParser;
+import net.petafuel.styx.api.ioprocessing.contracts.IOOrder;
+import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
+import net.petafuel.styx.api.ioprocessing.options.STYX04;
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 import net.petafuel.styx.core.banklookup.sad.entities.Config;
 import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;

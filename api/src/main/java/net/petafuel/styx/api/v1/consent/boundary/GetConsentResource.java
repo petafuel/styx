@@ -1,11 +1,11 @@
 package net.petafuel.styx.api.v1.consent.boundary;
 
 import net.petafuel.styx.api.exception.ResponseConstant;
-import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
-import net.petafuel.styx.api.filter.CheckAccessToken;
-import net.petafuel.styx.api.filter.RequiresBIC;
+import net.petafuel.styx.api.filter.authentication.boundary.AcceptsPreStepAuth;
+import net.petafuel.styx.api.filter.authentication.boundary.CheckAccessToken;
+import net.petafuel.styx.api.filter.input.boundary.RequiresBIC;
+import net.petafuel.styx.api.ioprocessing.IOProcessor;
 import net.petafuel.styx.api.rest.RestResource;
-import net.petafuel.styx.api.util.io.IOProcessor;
 import net.petafuel.styx.api.v1.consent.entity.GetConsentResponse;
 import net.petafuel.styx.api.v1.consent.entity.GetConsentStatusResponse;
 import net.petafuel.styx.core.xs2a.contracts.AISRequest;

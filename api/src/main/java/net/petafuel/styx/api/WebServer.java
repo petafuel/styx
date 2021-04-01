@@ -19,6 +19,7 @@ import net.petafuel.styx.api.filter.input.control.MandatoryHeaderFilter;
 import net.petafuel.styx.api.filter.input.control.PSUFilter;
 import net.petafuel.styx.api.filter.input.control.SADInitialisationFilter;
 import net.petafuel.styx.api.filter.input.control.SandboxHeaderPassthroughs;
+import net.petafuel.styx.api.filter.output.control.ReferenceHeaderFilter;
 import net.petafuel.styx.api.injection.ServiceBinder;
 import net.petafuel.styx.api.util.ApiProperties;
 import net.petafuel.styx.api.v1.account.boundary.AccountResource;
@@ -101,7 +102,8 @@ public class WebServer {
                 .register(MandatoryHeaderFilter.class)                  // request requires certain header fields
                 .register(MasterTokenFilter.class)                      // request requires enabled master token
                 .register(SADInitialisationFilter.class)                // dynamically initialize Services from SAD
-                .register(PreAuthAccessFilter.class);                   // make preauth access token available in REST Endpoints
+                .register(PreAuthAccessFilter.class)                    // make preauth access token available in REST Endpoints
+                .register(ReferenceHeaderFilter.class);                 // add Reference header to all REST responses
 
         if (Boolean.TRUE.equals(WebServer.isSandbox())) {
             config.register(SandboxHeaderPassthroughs.class);            // makes all X-STYX-... headers available in the request context, if styx is running in sandbox mode

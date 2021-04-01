@@ -1,7 +1,7 @@
 package net.petafuel.styx.api.rest;
 
-import net.petafuel.styx.api.filter.PreAuthAccessFilter;
-import net.petafuel.styx.api.filter.SandboxHeaderPassthroughs;
+import net.petafuel.styx.api.filter.authentication.control.PreAuthAccessFilter;
+import net.petafuel.styx.api.filter.input.control.SandboxHeaderPassthroughs;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import org.apache.logging.log4j.LogManager;

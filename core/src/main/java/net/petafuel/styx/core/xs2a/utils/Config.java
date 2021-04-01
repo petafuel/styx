@@ -19,20 +19,31 @@ public class Config {
 
     private Config() {
         properties = new Properties();
-
-        InputStream stream;
-        try {
-            if (Paths.get(PROP_FILENAME).toFile().exists()) {
-                stream = new FileInputStream(PROP_FILENAME);
-            } else {
-                stream = Config.class.getClassLoader().getResourceAsStream(PROP_FILENAME);
+        if (Paths.get(PROP_FILENAME).toFile().exists()) {
+            try (InputStream stream = new FileInputStream(PROP_FILENAME)) {
+                properties.load(stream);
+            } catch (FileNotFoundException e) {
+                LOG.error(String.format("Properties file not found: %s", e.getMessage()));
+            } catch (IOException e) {
+                LOG.error(String.format("Exception in getting properties file: %s", e.getMessage()));
             }
-            properties.load(stream); // loads all properties of the config.properties - file
-        } catch (FileNotFoundException e) {
-            LOG.error(String.format("Properties file not found: %s", e.getMessage()));
-        } catch (IOException e) {
-            LOG.error(String.format("Exception in getting properties file: %s", e.getMessage()));
+        } else {
+            try {
+                InputStream stream = Config.class.getClassLoader().getResourceAsStream(PROP_FILENAME);
+
+                // loads all properties of the config.properties - file
+                if (stream != null) {
+                    properties.load(stream);
+                } else {
+                    throw new IOException("Unable to load " + PROP_FILENAME + " from file or resource stream");
+                }
+            } catch (FileNotFoundException e) {
+                LOG.error(String.format("Properties file not found: %s", e.getMessage()));
+            } catch (IOException e) {
+                LOG.error(String.format("Exception in getting properties file: %s", e.getMessage()));
+            }
         }
+
         System.getProperties().putAll(properties);
     }
 

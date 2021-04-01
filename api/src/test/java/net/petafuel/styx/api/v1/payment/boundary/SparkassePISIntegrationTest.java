@@ -53,11 +53,11 @@ class SparkassePISIntegrationTest implements AcceptanceTest {
     @Category(IntegrationTest.class)
     @ParameterizedTest
     @ArgumentsSource(SparkassePSUProvider.class)
-    void test_INIT_SCTSinglePayment_SCA_OAUTH(String psuBic, String psuId, String crediorIban, String debtorIban) {
+    void test_INIT_SCTSinglePayment_SCA_OAUTH(String psuBic, String psuId, String creditorIban, String debtorIban) {
         Assume.assumeNotNull(PIS_TOKEN);
         SinglePayment singlePayment = new SinglePayment();
         singlePayment.setDebtorAccount(new AccountReference(debtorIban, AccountReference.Type.IBAN));
-        singlePayment.setCreditorAccount(new AccountReference(crediorIban, AccountReference.Type.IBAN));
+        singlePayment.setCreditorAccount(new AccountReference(creditorIban, AccountReference.Type.IBAN));
         singlePayment.setInstructedAmount(new Amount("0.01"));
         singlePayment.setCreditorName(psuId);
         singlePayment.setRemittanceInformationUnstructured("Styx PIS Test unixstamp: " + new Date().getTime());
@@ -85,11 +85,11 @@ class SparkassePISIntegrationTest implements AcceptanceTest {
     @Category(IntegrationTest.class)
     @ParameterizedTest
     @ArgumentsSource(SparkassePSUProvider.class)
-    void test_INIT_SCTSinglePayment_SCA_EMBEDDED(String psuBic, String psuId, String crediorIban, String debtorIban) {
+    void test_INIT_SCTSinglePayment_SCA_EMBEDDED(String psuBic, String psuId, String creditorIban, String debtorIban) {
         Assume.assumeNotNull(PIS_TOKEN);
         SinglePayment singlePayment = new SinglePayment();
         singlePayment.setDebtorAccount(new AccountReference(debtorIban, AccountReference.Type.IBAN));
-        singlePayment.setCreditorAccount(new AccountReference(crediorIban, AccountReference.Type.IBAN));
+        singlePayment.setCreditorAccount(new AccountReference(creditorIban, AccountReference.Type.IBAN));
         singlePayment.setInstructedAmount(new Amount("0.01"));
         singlePayment.setCreditorName(psuId);
         singlePayment.setRemittanceInformationUnstructured("Styx PIS Test unixstamp: " + new Date().getTime());
@@ -118,8 +118,8 @@ class SparkassePISIntegrationTest implements AcceptanceTest {
         /**
          * returns in format of bic, psu-id, creditor iban, debtor iban
          *
-         * @param context
-         * @return
+         * @param context interfacedefinition
+         * @return multiple arrangements of sparkasse test data for sandbox environment
          */
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {

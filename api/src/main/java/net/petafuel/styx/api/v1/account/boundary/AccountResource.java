@@ -1,11 +1,11 @@
 package net.petafuel.styx.api.v1.account.boundary;
 
-import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
-import net.petafuel.styx.api.filter.CheckAccessToken;
-import net.petafuel.styx.api.filter.RequiresBIC;
+import net.petafuel.styx.api.filter.authentication.boundary.AcceptsPreStepAuth;
+import net.petafuel.styx.api.filter.authentication.boundary.CheckAccessToken;
+import net.petafuel.styx.api.filter.input.boundary.RequiresBIC;
+import net.petafuel.styx.api.ioprocessing.IOProcessor;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.AspspUrlMapper;
-import net.petafuel.styx.api.util.io.IOProcessor;
 import net.petafuel.styx.api.v1.account.control.AccountListResponseAdapter;
 import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;

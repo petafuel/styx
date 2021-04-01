@@ -1,4 +1,4 @@
-package net.petafuel.styx.api.v1.consent.entity;
+ package net.petafuel.styx.api.v1.consent.entity;
 
 import net.petafuel.styx.core.xs2a.entities.Consent;
 

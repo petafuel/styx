@@ -4,6 +4,7 @@ import net.petafuel.jsepa.SEPAParser;
 import net.petafuel.jsepa.exception.SEPAParsingException;
 import net.petafuel.jsepa.facades.ReportConverter;
 import net.petafuel.jsepa.model.pain002.TransactionReport;
+import net.petafuel.styx.core.xs2a.SinglePaymentWrapper;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
@@ -17,7 +18,6 @@ import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.SCA;
-import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
@@ -140,7 +140,8 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
                 if (xs2AGetRequest.getPaymentService().equals(PaymentService.PERIODIC_PAYMENTS)) {
                     return jsonb.fromJson(responseBody, PeriodicPayment.class);
                 } else if (xs2AGetRequest.getPaymentService().equals(PaymentService.PAYMENTS)) {
-                    return jsonb.fromJson(responseBody, SinglePayment.class);
+                    SinglePaymentWrapper singlePaymentWrapper = jsonb.fromJson(responseBody, SinglePaymentWrapper.class);
+                    return singlePaymentWrapper.getPayment() != null ? singlePaymentWrapper.getPayment() : singlePaymentWrapper;
                 } else {
                     return jsonb.fromJson(responseBody, BulkPayment.class);
                 }

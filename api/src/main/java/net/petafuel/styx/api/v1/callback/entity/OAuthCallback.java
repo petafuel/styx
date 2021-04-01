@@ -3,7 +3,6 @@ package net.petafuel.styx.api.v1.callback.entity;
 import javax.ws.rs.QueryParam;
 
 public class OAuthCallback {
-
     private String code;
     private String state;
     private String error;

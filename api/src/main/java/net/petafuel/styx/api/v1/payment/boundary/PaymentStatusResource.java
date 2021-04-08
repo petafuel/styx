@@ -1,12 +1,12 @@
 package net.petafuel.styx.api.v1.payment.boundary;
 
-import net.petafuel.styx.api.filter.AbstractTokenFilter;
-import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
-import net.petafuel.styx.api.filter.CheckAccessToken;
-import net.petafuel.styx.api.filter.RequiresBIC;
-import net.petafuel.styx.api.filter.RequiresPSU;
+import net.petafuel.styx.api.filter.authentication.boundary.AcceptsPreStepAuth;
+import net.petafuel.styx.api.filter.authentication.boundary.CheckAccessToken;
+import net.petafuel.styx.api.filter.authentication.control.AbstractTokenFilter;
+import net.petafuel.styx.api.filter.input.boundary.RequiresBIC;
+import net.petafuel.styx.api.filter.input.boundary.RequiresPSU;
+import net.petafuel.styx.api.ioprocessing.IOProcessor;
 import net.petafuel.styx.api.rest.RestResource;
-import net.petafuel.styx.api.util.io.IOProcessor;
 import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;

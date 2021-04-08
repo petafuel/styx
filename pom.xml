@@ -103,53 +103,81 @@
                         <configuration>
                             <excludedGroups>Integration,integration,net.petafuel.styx.api.IntegrationTest
                             </excludedGroups>
+                            <systemPropertyVariables>
+                                <!--styx core test configuration-->
+                                <keystore.path>${styx.keystore.path}</keystore.path>
+                                <keystore.password.path>${styx.keystore.password.path}</keystore.password.path>
+                                <keystore.client_id>${styx.keystore.client_id}</keystore.client_id>
+                                <keystore.styxalias>${styx.keystore.styxalias}</keystore.styxalias>
+                                <styx.redirect.baseurl>${styx.styx.redirect.baseurl}</styx.redirect.baseurl>
+                                <client.redirect.baseurl>${styx.client.redirect.baseurl}</client.redirect.baseurl>
+                                <persistence.dbname>${styx.persistence.dbname}</persistence.dbname>
+                                <!-- styx core test db configuration-->
+                                <db.jdbcurl.prep_styx>${styx.db.jdbcurl.prep_styx}</db.jdbcurl.prep_styx>
+                                <db.user.prep_styx>${styx.db.user.prep_styx}</db.user.prep_styx>
+                                <db.password.prep_styx>${styx.db.password.prep_styx}</db.password.prep_styx>
+                                <!--styx keepalive test configuration-->
+                                <keepalive.threads.coreWorker.minAmount>${styx.keepalive.threads.coreWorker.minAmount}
+                                </keepalive.threads.coreWorker.minAmount>
+                                <keepalive.threads.coreWorker.maxAmount>${styx.keepalive.threads.coreWorker.maxAmount}
+                                </keepalive.threads.coreWorker.maxAmount>
+                                <keepalive.threads.coreWorker.spawnThresholdTasksPerWorker>
+                                    ${styx.keepalive.threads.coreWorker.spawnThresholdTasksPerWorker}
+                                </keepalive.threads.coreWorker.spawnThresholdTasksPerWorker>
+                                <keepalive.threads.retryFailureWorker.maxExecutionRetries>
+                                    ${styx.keepalive.threads.retryFailureWorker.maxExecutionRetries}
+                                </keepalive.threads.retryFailureWorker.maxExecutionRetries>
+                                <keepalive.threads.retryFailureWorker.maxAmount>
+                                    ${styx.keepalive.threads.retryFailureWorker.maxAmount}
+                                </keepalive.threads.retryFailureWorker.maxAmount>
+                                <keepalive.manager.useRecovery>${styx.keepalive.manager.useRecovery}
+                                </keepalive.manager.useRecovery>
+                                <keepalive.manager.probeFrequencyMS>${styx.keepalive.manager.probeFrequencyMS}
+                                </keepalive.manager.probeFrequencyMS>
+                                <keepalive.manager.probeInitialDelay>${styx.keepalive.manager.probeInitialDelay}
+                                </keepalive.manager.probeInitialDelay>
+                                <keepalive.tasks.consentpoll.amountRetries>
+                                    ${styx.keepalive.tasks.consentpoll.amountRetries}
+                                </keepalive.tasks.consentpoll.amountRetries>
+                                <keepalive.tasks.consentpoll.timoutBetweenRetriesMS>
+                                    ${styx.keepalive.tasks.consentpoll.timoutBetweenRetriesMS}
+                                </keepalive.tasks.consentpoll.timoutBetweenRetriesMS>
+                                <keepalive.tasks.paymentstatuspoll.service>
+                                    ${styx.keepalive.tasks.paymentstatuspoll.service}
+                                </keepalive.tasks.paymentstatuspoll.service>
+                                <keepalive.tasks.paymentstatuspoll.maxExecutionTimeMS>
+                                    ${styx.keepalive.tasks.paymentstatuspoll.maxExecutionTimeMS}
+                                </keepalive.tasks.paymentstatuspoll.maxExecutionTimeMS>
+                                <keepalive.tasks.paymentstatuspoll.maxRequestFailures>
+                                    ${styx.keepalive.tasks.paymentstatuspoll.maxRequestFailures}
+                                </keepalive.tasks.paymentstatuspoll.maxRequestFailures>
+                                <keepalive.tasks.paymentstatuspoll.timoutBetweenRetriesMS>
+                                    ${styx.keepalive.tasks.paymentstatuspoll.timoutBetweenRetriesMS}
+                                </keepalive.tasks.paymentstatuspoll.timoutBetweenRetriesMS>
+                                <!--styx api test configuration-->
+                                <api.ip>${styx.api.ip}</api.ip>
+                                <api.port>${styx.api.port}</api.port>
+                                <api.sad.sandbox.enabled>${styx.api.sad.sandbox.enabled}</api.sad.sandbox.enabled>
+                                <proxy.enabled>${styx.proxy.enabled}</proxy.enabled>
+                                <proxy.hostname>${styx.proxy.hostname}</proxy.hostname>
+                                <proxy.port>${styx.proxy.port}</proxy.port>
+                                <proxy.schema>${styx.proxy.schema}</proxy.schema>
+                                <token.access.unusedlifetime>${styx.token.access.unusedlifetime}
+                                </token.access.unusedlifetime>
+                                <!--styx spi test configuration-->
+                                <spi.paymentstatushook.pfrest.baseurl>${styx.spi.paymentstatushook.pfrest.baseurl}
+                                </spi.paymentstatushook.pfrest.baseurl>
+                                <spi.paymentstatushook.pfrest.mastertoken>
+                                    ${styx.spi.paymentstatushook.pfrest.mastertoken}
+                                </spi.paymentstatushook.pfrest.mastertoken>
+                            </systemPropertyVariables>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
         <profile>
-            <!-- Fuer das Reporting in SonarQube -->
             <id>sonarqubeReporting</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.owasp</groupId>
-                        <artifactId>dependency-check-maven</artifactId>
-                        <inherited>false</inherited>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>aggregate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <formats>HTML,XML</formats>
-                            <name>OWASP Report</name>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.sonarsource.scanner.maven</groupId>
-                        <artifactId>sonar-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sonar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <!-- Fuer die Pull Request Validation in SonarQube -->
-            <id>sonarqubePullRequestValidation</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
@@ -232,7 +260,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.10</version>
+            <version>3.12.0</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

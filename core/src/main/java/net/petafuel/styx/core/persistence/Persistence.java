@@ -1,7 +1,6 @@
 package net.petafuel.styx.core.persistence;
 
 import net.petafuel.dbutils.DbHelper;
-import net.petafuel.styx.core.xs2a.utils.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,7 +32,7 @@ public class Persistence {
 
     private void connect() {
         try {
-            this.databaseConnection = new DbHelper().getConnection(Config.getInstance().getProperties().getProperty("persistence.dbname"));
+            this.databaseConnection = new DbHelper().getConnection(System.getProperty("persistence.dbname"));
         } catch (SQLException | NamingException e) {
             LOG.error("Error connecting to the database: message={}, cause={}", e.getMessage(), e.getCause());
             throw new PersistenceException(e.getMessage(), e);

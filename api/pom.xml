@@ -16,19 +16,24 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.38.v20210224</version>
+            <version>9.4.39.v20210325</version>
         </dependency>
         <!-- http server -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.4.38.v20210224</version>
+            <version>9.4.39.v20210325</version>
         </dependency>
         <!-- http server  -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-util</artifactId>
-            <version>9.4.38.v20210224</version>
+            <version>9.4.39.v20210325</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-continuation</artifactId>
+            <version>9.4.39.v20210325</version>
         </dependency>
         <!-- validation for models/request resources -->
         <dependency>
@@ -47,6 +52,13 @@
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-jetty-http</artifactId>
             <version>2.33</version>
+            <exclusions>
+                <!--omitted because of outdated dependency in jersey-container-jetty-http 2.33-->
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-continuation</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- rest interface dependencies -->
         <dependency>
@@ -74,13 +86,14 @@
         <dependency>
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-jetty</artifactId>
-            <version>2.32</version>
+            <version>2.33</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.test-framework</groupId>
             <artifactId>jersey-test-framework-core</artifactId>
-            <version>2.32</version>
+            <version>2.33</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
@@ -92,6 +105,18 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>json-path</artifactId>
             <version>4.3.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.6.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>3.6.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -112,8 +137,6 @@
                 <includes>
                     <include>**/log4j2.xml</include>
                     <include>**/api.properties</include>
-                    <include>**/index.html</include>
-                    <include>**/sca-error.html</include>
                     <include>**/dbutils.properties</include>
                 </includes>
             </resource>

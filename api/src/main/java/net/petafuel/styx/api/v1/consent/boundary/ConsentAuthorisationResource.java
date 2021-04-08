@@ -1,14 +1,15 @@
 package net.petafuel.styx.api.v1.consent.boundary;
 
 import net.petafuel.styx.api.exception.ResponseConstant;
-import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
-import net.petafuel.styx.api.filter.CheckAccessToken;
-import net.petafuel.styx.api.filter.RequiresBIC;
-import net.petafuel.styx.api.filter.RequiresMandatoryHeader;
-import net.petafuel.styx.api.filter.RequiresPSU;
+import net.petafuel.styx.api.filter.authentication.boundary.AcceptsPreStepAuth;
+import net.petafuel.styx.api.filter.authentication.boundary.CheckAccessToken;
+import net.petafuel.styx.api.filter.input.boundary.RequiresBIC;
+import net.petafuel.styx.api.filter.input.boundary.RequiresMandatoryHeader;
+import net.petafuel.styx.api.filter.input.boundary.RequiresPSU;
+import net.petafuel.styx.api.ioprocessing.IOProcessor;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.AspspUrlMapper;
-import net.petafuel.styx.api.util.io.IOProcessor;
+import net.petafuel.styx.api.util.Sanitizer;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.core.xs2a.contracts.SCARequest;
@@ -58,6 +59,7 @@ public class ConsentAuthorisationResource extends RestResource {
     @Path("/consents/{consentId}/authorisations")
     public Response startConsentAuthorisation(@NotEmpty @NotBlank @PathParam("consentId") String consentId,
                                               @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
+        consentId = Sanitizer.replaceEscSeq(consentId);
         XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
         xs2AFactoryInput.setConsentId(consentId);
         xs2AFactoryInput.setPsuData(authorisationRequest.getPsuData());
@@ -100,6 +102,8 @@ public class ConsentAuthorisationResource extends RestResource {
             @NotEmpty @NotBlank @PathParam("consentId") String consentId,
             @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId,
             @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
+        consentId = Sanitizer.replaceEscSeq(consentId);
+        authorisationId = Sanitizer.replaceEscSeq(authorisationId);
         XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
         xs2AFactoryInput.setConsentId(consentId);
         xs2AFactoryInput.setPsu(getPsu());
@@ -150,6 +154,9 @@ public class ConsentAuthorisationResource extends RestResource {
     public Response getScaStatus(
             @NotEmpty @NotBlank @PathParam("consentId") String consentId,
             @NotEmpty @NotBlank @PathParam("authorisationId") String authorisationId) throws BankRequestFailedException {
+        consentId = Sanitizer.replaceEscSeq(consentId);
+        authorisationId = Sanitizer.replaceEscSeq(authorisationId);
+
         XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
         xs2AFactoryInput.setConsentId(consentId);
         xs2AFactoryInput.setAuthorisationId(authorisationId);

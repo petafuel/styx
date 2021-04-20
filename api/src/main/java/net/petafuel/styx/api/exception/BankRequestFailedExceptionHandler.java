@@ -26,8 +26,7 @@ public class BankRequestFailedExceptionHandler implements ExceptionMapper<BankRe
             TPPMessagesWrapper tppMessagesWrapper = jsonb.fromJson(throwable.getMessage(), TPPMessagesWrapper.class);
 
             ResponseConstant responseConstant = ResponseConstant.getEnumByString(tppMessagesWrapper.getTppMessages().get(0).getCode());
-            assert responseConstant != null;
-            if (responseConstant.getStatusCode() == 406) {
+            if (responseConstant != null && responseConstant.getStatusCode() == 406) {
                 responseEntity.setMessage(tppMessagesWrapper.getTppMessages().get(0).getText());
                 responseEntity.setCode(responseConstant);
             }

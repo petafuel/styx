@@ -54,15 +54,15 @@ public enum ResponseConstant implements Response.StatusType, Serializable {
     Styx codes
     Whether Styx encountered a problem
     */
-    STYX_MISSING_CLIENT_TOKEN(400, "Styx API Token was not contained or empty in request"),
-    STYX_INVALID_TOKEN_FORMAT(400, "Styx API Token value has an invalid format"),
-    STYX_PREAUTH_HEADER_REQUIRED(400, "preAuthId Header missing, the requested ASPSP requires a pre-step authorisation"),
-    STYX_PREAUTH_NOT_AVAILABLE(400, "preAuthId has no linked Authorisation, the requested ASPSP requires a pre-step authorisation"),
-    STYX_PREAUTH_EXPIRED(400, "preAuthId is linked to an expired Authorisation, another pre-step is required"),
+    STYX_MISSING_CLIENT_TOKEN(401, "Styx API Token was not contained or empty in request"),
+    STYX_INVALID_TOKEN_FORMAT(401, "Styx API Token value has an invalid format"),
+    STYX_PREAUTH_HEADER_REQUIRED(409, "preAuthId Header missing, the requested ASPSP requires a pre-step authorisation"),
+    STYX_PREAUTH_NOT_AVAILABLE(409, "preAuthId has no linked Authorisation, the requested ASPSP requires a pre-step authorisation"),
+    STYX_PREAUTH_EXPIRED(409, "preAuthId is linked to an expired Authorisation, another pre-step is required"),
     STYX_TOKEN_EXPIRED_OR_REVOKED(401, "Styx API Token is expired or revoked"),
-    STYX_TOKEN_ACCESS_VIOLATION(403, "Styx API Token is not authorized to invoke the request"),
-    SAD_ASPSP_NOT_FOUND(404, "The requested ASPSP was not found within SAD"),
-    STYX_PREAUTH_NOT_FOUND(404, "preAuthId not found"),
+    STYX_TOKEN_ACCESS_VIOLATION(409, "Styx API Token is not authorized to invoke the request"),
+    SAD_ASPSP_NOT_FOUND(409, "The requested ASPSP was not found within SAD"),
+    STYX_PREAUTH_NOT_FOUND(409, "preAuthId not found"),
     SAD_ASPSP_INACTIVE(409, "Requested ASPSP is flagged inactive by styx"),
 
     /*

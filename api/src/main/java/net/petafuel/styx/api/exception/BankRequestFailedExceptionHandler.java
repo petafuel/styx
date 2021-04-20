@@ -15,27 +15,27 @@ public class BankRequestFailedExceptionHandler implements ExceptionMapper<BankRe
 
     @Override
     public Response toResponse(BankRequestFailedException throwable) {
+        ResponseEntity responseEntity = new ResponseEntity(throwable.getMessage(), ResponseConstant.INTERNAL_SERVER_ERROR, ResponseCategory.ERROR, ResponseOrigin.ASPSP);
+
+        if (throwable.getHttpStatusCode() != null && ResponseConstant.fromStatusCode(throwable.getHttpStatusCode()) != null) {
+            responseEntity.setCode(ResponseConstant.fromStatusCode(throwable.getHttpStatusCode()));
+        }
+
+        LOG.error("Bank request failed with responseCode={}. See following lines", responseEntity.getCode().getStatusCode());
         try (Jsonb jsonb = JsonbBuilder.create()) {
             TPPMessagesWrapper tppMessagesWrapper = jsonb.fromJson(throwable.getMessage(), TPPMessagesWrapper.class);
 
             ResponseConstant responseConstant = ResponseConstant.getEnumByString(tppMessagesWrapper.getTppMessages().get(0).getCode());
-            ResponseEntity responseEntity = new ResponseEntity(tppMessagesWrapper.getTppMessages().get(0).getText(), responseConstant, ResponseCategory.ERROR, ResponseOrigin.ASPSP);
-
-            tppMessagesWrapper.getTppMessages().forEach(tppMsg -> LOG.error("TPPMessage code={}, text={}, category={}, path={}", tppMsg.getCode(), tppMsg.getText(), tppMsg.getCategory(), tppMsg.getPath()));
-
-            return Response.status(responseEntity.getCode().getStatusCode()).type(MediaType.APPLICATION_JSON).entity(responseEntity).build();
-        } catch (Exception e) {
-            LOG.error("Unable to deserialize TPPMessages rawMessage={}", throwable.getMessage());
-
-            ResponseEntity responseEntity = new ResponseEntity(throwable.getMessage(), ResponseConstant.INTERNAL_SERVER_ERROR, ResponseCategory.ERROR, ResponseOrigin.ASPSP);
-
-            if (throwable.getHttpStatusCode() != null && ResponseConstant.fromStatusCode(throwable.getHttpStatusCode()) != null) {
-                responseEntity.setCode(ResponseConstant.fromStatusCode(throwable.getHttpStatusCode()));
+            assert responseConstant != null;
+            if (responseConstant.getStatusCode() == 406) {
+                responseEntity.setMessage(tppMessagesWrapper.getTppMessages().get(0).getText());
+                responseEntity.setCode(responseConstant);
             }
 
-            LOG.error("Bank request failed with responseCode={}. See following lines", responseEntity.getCode().getStatusCode());
-
-            return Response.status(responseEntity.getCode().getStatusCode()).type(MediaType.APPLICATION_JSON).entity(responseEntity).build();
+            tppMessagesWrapper.getTppMessages().forEach(tppMsg -> LOG.error("TPPMessage code={}, text={}, category={}, path={}", tppMsg.getCode(), tppMsg.getText(), tppMsg.getCategory(), tppMsg.getPath()));
+        } catch (Exception e) {
+            LOG.error("Unable to deserialize TPPMessages rawMessage={}", throwable.getMessage());
         }
+        return Response.status(responseEntity.getCode().getStatusCode()).type(MediaType.APPLICATION_JSON).entity(responseEntity).build();
     }
 }

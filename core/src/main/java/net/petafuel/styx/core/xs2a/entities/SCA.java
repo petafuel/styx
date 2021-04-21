@@ -5,7 +5,7 @@ import javax.json.bind.annotation.JsonbProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SCA extends StrongAuthenticatableResource {
+public class SCA extends StrongAuthenticatableResource implements XS2AResponse {
 
     private Approach approach;
     private Status scaStatus;
@@ -19,7 +19,7 @@ public class SCA extends StrongAuthenticatableResource {
     }
 
     @JsonbCreator
-    public SCA(@JsonbProperty("scaStatus") String scaStatus){
+    public SCA(@JsonbProperty("scaStatus") String scaStatus) {
         this();
         this.scaStatus = Status.valueOf(scaStatus.toUpperCase());
     }

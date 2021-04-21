@@ -1,16 +1,18 @@
 package net.petafuel.styx.api.v1.payment.entity;
 
-import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
+import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 import net.petafuel.styx.core.xs2a.entities.serializers.ISODateDeserializer;
 
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTypeDeserializer;
-import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
-public class BulkPaymentInitiation extends SinglePaymentInitiation {
+public class BulkPaymentInitiation {
     @JsonbProperty("batchBookingPreferred")
     private Boolean batchBookingPreferred = false;
 
@@ -19,15 +21,18 @@ public class BulkPaymentInitiation extends SinglePaymentInitiation {
     @JsonbTypeDeserializer(ISODateDeserializer.class)
     private Date requestedExecutionDate;
 
-    @Valid
-    @NotNull
-    private Account debtorAccount;
+    @NotNull(message = "debtorAccount cannot be null and needs to be outside of the payment object")
+    private AccountReference debtorAccount;
 
-    public Account getDebtorAccount() {
+    @NotEmpty(message = "Cannot initiate payment without payment objects")
+    @JsonbProperty("payments")
+    private List<SinglePayment> payments;
+
+    public AccountReference getDebtorAccount() {
         return debtorAccount;
     }
 
-    public void setDebtorAccount(Account debtorAccount) {
+    public void setDebtorAccount(AccountReference debtorAccount) {
         this.debtorAccount = debtorAccount;
     }
 
@@ -45,5 +50,13 @@ public class BulkPaymentInitiation extends SinglePaymentInitiation {
 
     public void setRequestedExecutionDate(Date requestedExecutionDate) {
         this.requestedExecutionDate = requestedExecutionDate;
+    }
+
+    public List<SinglePayment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<SinglePayment> payments) {
+        this.payments = payments;
     }
 }

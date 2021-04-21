@@ -1,21 +1,18 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.petafuel.jsepa.SEPAParser;
 import net.petafuel.jsepa.exception.SEPAParsingException;
 import net.petafuel.jsepa.facades.ReportConverter;
 import net.petafuel.jsepa.model.pain002.TransactionReport;
+import net.petafuel.styx.core.xs2a.SinglePaymentWrapper;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
 import net.petafuel.styx.core.xs2a.contracts.SCARequest;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
+import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
-import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PaymentStatus;
@@ -23,6 +20,7 @@ import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import net.petafuel.styx.core.xs2a.entities.TransactionStatus;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.sca.SCAUtils;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.AuthoriseTransactionRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.GetAuthorisationsRequest;
@@ -32,9 +30,7 @@ import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.StartAuthoris
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUAuthenticationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http.UpdatePSUIdentificationRequest;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentSerializer;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PaymentStatusSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PeriodicPaymentMultipartBodySerializer;
-import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.serializers.PeriodicPaymentSerializer;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -101,7 +97,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
             xs2AGetRequest.addHeader(XS2AHeader.ACCEPT, JSON.toString());
         }
         this.createHeaders(xs2AGetRequest);
-        try (Response response = this.execute()) {
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String contentType;
             if ((contentType = response.headers().get("content-type")) == null) {
                 throw new BankRequestFailedException("Content-Type Header is not set, parsing of json or xml is not possible", response.code());
@@ -109,10 +105,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
             String responseBody = extractResponseBody(response, 200);
 
             if (contentType.contains(MediaType.APPLICATION_JSON)) {
-                Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(PaymentStatus.class, new PaymentStatusSerializer())
-                        .create();
-                return gson.fromJson(responseBody, PaymentStatus.class);
+                return jsonb.fromJson(responseBody, PaymentStatus.class);
             } else {
                 ReportConverter converter = new ReportConverter();
                 TransactionReport report = converter.processReport(responseBody);
@@ -120,6 +113,8 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
             }
         } catch (IOException | SEPAParsingException e) {
             throw new BankRequestFailedException(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new SerializerException("Unable to deserialize json to PaymentStatus", e);
         }
     }
 
@@ -143,17 +138,13 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
             String responseBody = extractResponseBody(response, 200);
             if (contentType.contains(MediaType.APPLICATION_JSON)) {
                 if (xs2AGetRequest.getPaymentService().equals(PaymentService.PERIODIC_PAYMENTS)) {
-                    Gson periodicPaymentGson = new GsonBuilder()
-                            .registerTypeAdapter(PeriodicPayment.class, new PeriodicPaymentSerializer())
-                            .create();
-                    return periodicPaymentGson.fromJson(responseBody, PeriodicPayment.class);
+                    return jsonb.fromJson(responseBody, PeriodicPayment.class);
                 } else if (xs2AGetRequest.getPaymentService().equals(PaymentService.PAYMENTS)) {
-                    return jsonb.fromJson(responseBody, Payment.class);
+                    SinglePaymentWrapper singlePaymentWrapper = jsonb.fromJson(responseBody, SinglePaymentWrapper.class);
+                    return singlePaymentWrapper.getPayment() != null ? singlePaymentWrapper.getPayment() : singlePaymentWrapper;
+                } else {
+                    return jsonb.fromJson(responseBody, BulkPayment.class);
                 }
-                Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(InitializablePayment.class, new PaymentSerializer(xs2AGetRequest.getPaymentService()))
-                        .create();
-                return gson.fromJson(responseBody, InitializablePayment.class);
             } else {
                 if (xs2AGetRequest.getPaymentService().equals(PaymentService.PERIODIC_PAYMENTS)) {
                     ByteArrayDataSource datasource = new ByteArrayDataSource(responseBody, "multipart/form-data");
@@ -161,7 +152,7 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
 
                     int count = multipart.getCount();
                     StringBuilder xmlSb = new StringBuilder();
-                    StringBuilder jSonSb = new StringBuilder();
+                    StringBuilder jsonStringBuilder = new StringBuilder();
                     String str;
                     for (int i = 0; i < count; i++) {
                         BodyPart bodyPart = multipart.getBodyPart(i);
@@ -173,16 +164,15 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
                             }
                         } else {
                             while ((str = reader.readLine()) != null) {
-                                jSonSb.append(str);
+                                jsonStringBuilder.append(str);
                             }
                         }
                     }
                     SEPAParser sepaParser = new SEPAParser(xmlSb.toString());
-                    String jsonString = jSonSb.toString();
-                    JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                    String jsonString = jsonStringBuilder.toString();
 
                     return PeriodicPaymentMultipartBodySerializer.xmlDeserialize(sepaParser.parseSEPA()
-                            .getSepaDocument(), jsonObject);
+                            .getSepaDocument(), jsonb.fromJson(jsonString, PeriodicPayment.class));
                 } else {
                     SEPAParser sepaParser = new SEPAParser(responseBody);
                     return PaymentSerializer.xmlDeserialize(sepaParser.parseSEPA().getSepaDocument(), xs2AGetRequest.getPaymentService());

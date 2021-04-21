@@ -1,13 +1,13 @@
 package net.petafuel.styx.api.v1.payment.boundary;
 
 import net.petafuel.styx.api.exception.ResponseConstant;
-import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
-import net.petafuel.styx.api.filter.CheckAccessToken;
-import net.petafuel.styx.api.filter.RequiresBIC;
-import net.petafuel.styx.api.filter.RequiresPSU;
+import net.petafuel.styx.api.filter.authentication.boundary.AcceptsPreStepAuth;
+import net.petafuel.styx.api.filter.authentication.boundary.CheckAccessToken;
+import net.petafuel.styx.api.filter.input.boundary.RequiresBIC;
+import net.petafuel.styx.api.filter.input.boundary.RequiresPSU;
+import net.petafuel.styx.api.ioprocessing.IOProcessor;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.AspspUrlMapper;
-import net.petafuel.styx.api.util.io.IOProcessor;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationIdsResponse;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationRequest;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -59,7 +60,7 @@ public class PaymentAuthorisationResource extends RestResource {
     @Path("/{paymentService}/{paymentProduct}/{paymentId}/authorisations")
     public Response startPaymentAuthorisation(@BeanParam PaymentTypeBean paymentTypeBean,
                                               @NotEmpty @NotBlank @PathParam("paymentId") String paymentId,
-                                              @Valid AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
+                                              @Valid @NotNull AuthorisationRequest authorisationRequest) throws BankRequestFailedException {
         XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
         xs2AFactoryInput.setPaymentService(paymentTypeBean.getPaymentService());
         xs2AFactoryInput.setPaymentProduct(paymentTypeBean.getPaymentProduct());

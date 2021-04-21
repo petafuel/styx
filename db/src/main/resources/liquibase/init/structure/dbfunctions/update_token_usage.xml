@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="liquibase" id="12312314">
+        <sql endDelimiter="\n">
+            CREATE OR REPLACE FUNCTION public.update_token_usage(
+            	token character varying)
+                RETURNS void
+                LANGUAGE 'sql'
+
+                COST 100
+                VOLATILE SECURITY DEFINER
+
+            AS $BODY$
+            UPDATE tokens
+            SET last_used_on = now()
+            WHERE id = $1;
+            $BODY$;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

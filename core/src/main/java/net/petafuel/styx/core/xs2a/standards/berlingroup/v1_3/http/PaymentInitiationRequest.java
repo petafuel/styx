@@ -9,10 +9,10 @@ import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.BulkPaymentAdapter;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
-import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
+import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.utils.PaymentXMLSerializer;
 import okhttp3.Headers;
@@ -27,6 +27,7 @@ import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -70,9 +71,12 @@ public class PaymentInitiationRequest extends PISRequest {
         return String.format("/v1/%s/%s", getPaymentService().getValue(), getPaymentProduct().getValue());
     }
 
+    /*
+     * @return payment request body for sepa-single-payments in xml or json as String
+     */
     private Optional<String> createSinglePayment() {
         if (getPaymentProduct().isXml()) {
-            PAIN00100303Document document = (new PaymentXMLSerializer()).serialize(UUID.randomUUID().toString(), (Payment) payment);
+            PAIN00100303Document document = (new PaymentXMLSerializer()).serialize(UUID.randomUUID().toString(), (SinglePayment) payment);
             PaymentInstructionInformation xmlPayment = document.getCctInitiation().getPmtInfos().get(0);
 
             if (this.getPaymentProduct().equals(PaymentProduct.PAIN_001_SEPA_CREDIT_TRANSFERS) && (xmlPayment.getRequestedExecutionDate() == null || "".equals(xmlPayment.getRequestedExecutionDate()))) {
@@ -90,8 +94,12 @@ public class PaymentInitiationRequest extends PISRequest {
         } else {
             JsonbConfig jsonbConfig = new JsonbConfig();
             jsonbConfig.withNullValues(false);
+            jsonbConfig.withLocale(Locale.GERMANY);
+            jsonbConfig.withDateFormat("yyyy-MM-dd", Locale.GERMANY);
             try (Jsonb jsonb = JsonbBuilder.create(jsonbConfig)) {
-                return Optional.ofNullable(jsonb.toJson(payment));
+                String paymentBodyJson = jsonb.toJson(payment);
+                LOG.debug("Outgoing Single Payment Body={}", paymentBodyJson);
+                return Optional.ofNullable(paymentBodyJson);
             } catch (Exception e) {
                 return Optional.empty();
             }

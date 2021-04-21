@@ -1,22 +1,24 @@
 package net.petafuel.styx.core.xs2a.oauth;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.petafuel.styx.core.banklookup.sad.entities.Url;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.entities.StrongAuthenticatableResource;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
+import net.petafuel.styx.core.xs2a.exceptions.OAuthTokenExpiredException;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import net.petafuel.styx.core.xs2a.oauth.http.OAuthTokenRequest;
+import net.petafuel.styx.core.xs2a.oauth.http.RefreshTokenRequest;
 import net.petafuel.styx.core.xs2a.oauth.serializers.EndpointsSerializer;
-import net.petafuel.styx.core.xs2a.oauth.serializers.TokenSerializer;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.BerlinGroupSigner;
 import net.petafuel.styx.core.xs2a.utils.Config;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -36,16 +38,17 @@ public class OAuthService extends BasicService {
         super(LOG, null, new BerlinGroupSigner());
     }
 
-    private static String generateState() {
-        return UUID.randomUUID().toString();
-    }
-
-    private static String generateCodeVerifier() {
+    public static String generateCodeVerifier() {
 
         SecureRandom sr = new SecureRandom();
         byte[] code = new byte[32];
         sr.nextBytes(code);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(code);
+    }
+
+    public static String getCodeChallengeFromState(String state) {
+        OAuthSession session = PersistentOAuthSession.getByState(state);
+        return generateCodeChallenge(session.getCodeVerifier());
     }
 
     //SHA-256 is predefined for key exchange on oAuth 2.0 @see https://tools.ietf.org/html/rfc7636#section-4.2
@@ -66,22 +69,27 @@ public class OAuthService extends BasicService {
         }
     }
 
-    public static String buildLink(String state) {
-        OAuthSession stored = PersistentOAuthSession.get(state);
+    public static String getRedirectUri(UUID xRequestId, String realm) {
+        Properties properties = Config.getInstance().getProperties();
+        return properties.getProperty("styx.redirect.baseurl") + realm + "/ok/" + xRequestId.toString();
+    }
+
+    public static String buildLink(String state, UUID xRequestId, String realm) {
+        OAuthSession stored = PersistentOAuthSession.getByState(state);
         HashMap<String, String> queryParams = getQueryParameters(stored);
         Properties properties = Config.getInstance().getProperties();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
-        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + SCA);
+        queryParams.put("redirect_uri", getRedirectUri(xRequestId, realm));
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 
     public static String buildLink(String state, String bic) {
-        OAuthSession stored = PersistentOAuthSession.get(state);
+        OAuthSession stored = PersistentOAuthSession.getByState(state);
         HashMap<String, String> queryParams = getQueryParameters(stored);
         queryParams.put("bic", bic);
         Properties properties = Config.getInstance().getProperties();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
-        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + PREAUTH);
+        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + "oauth/" + PREAUTH + "/" + stored.getState());
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 
@@ -101,28 +109,20 @@ public class OAuthService extends BasicService {
 
         OAuthService service = new OAuthService();
         Map<String, String> endpoints = service.getEndpoints(strongAuthenticatableResource.getLinks().getScaOAuth().getUrl());
-        String state = OAuthService.generateState();
-        String codeVerifier = OAuthService.generateCodeVerifier();
-        OAuthSession session = new OAuthSession();
-        session.setCodeVerifier(codeVerifier);
+        OAuthSession session = OAuthSession.start(strongAuthenticatableResource.getxRequestId());
         session.setScope(scope);
         session.setAuthorizationEndpoint(endpoints.get("authorization_endpoint"));
         session.setTokenEndpoint(endpoints.get("token_endpoint"));
-        session.setState(state);
 
         return PersistentOAuthSession.create(session);
     }
 
     public static OAuthSession startPreAuthSession(Url url, String scope) {
-
-        String state = OAuthService.generateState();
-        String codeVerifier = OAuthService.generateCodeVerifier();
-        OAuthSession session = new OAuthSession();
-        session.setCodeVerifier(codeVerifier);
+        OAuthSession session = OAuthSession.start(null); // The X-Request-Id is not relevant for the prestep, since the OAuthSession will not directly relate to a consent or payment
         session.setScope(scope);
         session.setAuthorizationEndpoint(url.getPreauthAuthorizationEndpoint());
         session.setTokenEndpoint(url.getPreauthTokenEndpoint());
-        session.setState(state);
+        session.setxRequestId(session.getId());
 
         return PersistentOAuthSession.create(session);
     }
@@ -136,31 +136,44 @@ public class OAuthService extends BasicService {
             this.createBody(RequestType.POST, FORM_URLENCODED, request);
         }
 
-        try (Response response = this.execute()) {
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String body = extractResponseBody(response, 200);
-
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(OAuthSession.class, new TokenSerializer())
-                    .create();
-            return gson.fromJson(body, OAuthSession.class);
+            return jsonb.fromJson(body, OAuthSession.class);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);
         }
     }
 
-    public Map<String, String> getEndpoints(String url) {
+    /**
+     *
+     * @param url
+     * @return HashMap<String, String>
+     */
+    private Map<String, String> getEndpoints(String url) {
         this.setUrl(url);
         this.createBody(RequestType.GET);
 
-        try (Response response = this.execute()) {
-            String body = response.body().string();
-
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(HashMap.class, new EndpointsSerializer())
-                    .create();
-            return gson.fromJson(body, HashMap.class);
+        JsonbConfig jsonbConfig = new JsonbConfig();
+        jsonbConfig.withDeserializers(new EndpointsSerializer());
+        try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create(jsonbConfig)) {
+            String body = extractResponseBody(response, 200);
+            return jsonb.fromJson(body, HashMap.class);
         } catch (Exception e) {
             return new HashMap<>();
+        }
+    }
+
+    public static OAuthSession refreshToken(OAuthSession oAuthSession) throws OAuthTokenExpiredException {
+        String state = oAuthSession.getState();
+        RefreshTokenRequest request = new RefreshTokenRequest(oAuthSession.getRefreshToken());
+        OAuthService service = new OAuthService();
+        try {
+            oAuthSession = service.tokenRequest(oAuthSession.getTokenEndpoint(), request);
+            oAuthSession.setState(state);
+            PersistentOAuthSession.update(oAuthSession);
+            return oAuthSession;
+        } catch (BankRequestFailedException expiredToken) {
+            throw new OAuthTokenExpiredException(OAuthTokenExpiredException.MESSAGE);
         }
     }
 }

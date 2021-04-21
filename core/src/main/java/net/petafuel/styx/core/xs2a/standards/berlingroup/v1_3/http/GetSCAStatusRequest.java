@@ -30,9 +30,9 @@ public class GetSCAStatusRequest extends SCARequest {
                     getPaymentService().getValue(),
                     getPaymentProduct().getValue(),
                     getPaymentId(),
-                    getAuthroisationId());
+                    getAuthorisationId());
         } else {
-            return String.format(CS_GET_SCA_STATUS, getConsentId(), getAuthroisationId());
+            return String.format(CS_GET_SCA_STATUS, getConsentId(), getAuthorisationId());
         }
     }
 }

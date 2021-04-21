@@ -1,7 +1,7 @@
 package net.petafuel.styx.api.v1.authentication.boundary;
 
-import net.petafuel.styx.api.filter.AbstractTokenFilter;
-import net.petafuel.styx.api.filter.CheckMasterToken;
+import net.petafuel.styx.api.filter.authentication.boundary.CheckMasterToken;
+import net.petafuel.styx.api.filter.authentication.control.AbstractTokenFilter;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.ApiProperties;
 import net.petafuel.styx.api.v1.authentication.control.AuthenticationHandler;

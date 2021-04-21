@@ -1,19 +1,21 @@
 package net.petafuel.styx.api.v1.payment.boundary;
 
+import net.petafuel.styx.api.event.RequestUUIDAdapter;
 import net.petafuel.styx.api.exception.ResponseCategory;
 import net.petafuel.styx.api.exception.ResponseConstant;
 import net.petafuel.styx.api.exception.ResponseEntity;
 import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxException;
-import net.petafuel.styx.api.filter.AbstractTokenFilter;
-import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
-import net.petafuel.styx.api.filter.CheckAccessToken;
-import net.petafuel.styx.api.filter.RequiresBIC;
-import net.petafuel.styx.api.filter.RequiresMandatoryHeader;
-import net.petafuel.styx.api.filter.RequiresPSU;
+import net.petafuel.styx.api.filter.authentication.boundary.AcceptsPreStepAuth;
+import net.petafuel.styx.api.filter.authentication.boundary.CheckAccessToken;
+import net.petafuel.styx.api.filter.authentication.control.AbstractTokenFilter;
+import net.petafuel.styx.api.filter.authentication.control.PreAuthAccessFilter;
+import net.petafuel.styx.api.filter.input.boundary.RequiresBIC;
+import net.petafuel.styx.api.filter.input.boundary.RequiresMandatoryHeader;
+import net.petafuel.styx.api.filter.input.boundary.RequiresPSU;
+import net.petafuel.styx.api.ioprocessing.IOProcessor;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.AspspUrlMapper;
-import net.petafuel.styx.api.util.io.IOProcessor;
 import net.petafuel.styx.api.v1.payment.entity.BulkPaymentInitiation;
 import net.petafuel.styx.api.v1.payment.entity.PaymentResponse;
 import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
@@ -21,13 +23,12 @@ import net.petafuel.styx.api.v1.payment.entity.PeriodicPaymentInitiation;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
-import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
-import net.petafuel.styx.core.xs2a.entities.Account;
+import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
-import net.petafuel.styx.core.xs2a.entities.Payment;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.entities.PeriodicPayment;
+import net.petafuel.styx.core.xs2a.entities.SinglePayment;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.factory.PISRequestFactory;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
@@ -39,6 +40,7 @@ import net.petafuel.styx.keepalive.threads.ThreadManager;
 import net.petafuel.styx.spi.tokentypemapper.api.XS2ATokenType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
@@ -46,11 +48,14 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * PIS - Payment initiation request
@@ -63,6 +68,9 @@ import java.util.Optional;
 @RequiresBIC
 public class PaymentInitiationResource extends RestResource {
     private static final Logger LOG = LogManager.getLogger(PaymentInitiationResource.class);
+
+    @Context
+    ContainerRequestContext containerRequestContext;
 
     /**
      * Initiate single or future dated payments
@@ -79,11 +87,11 @@ public class PaymentInitiationResource extends RestResource {
     public Response initiateSinglePayment(@BeanParam PaymentTypeBean paymentTypeBean,
                                           @Valid SinglePaymentInitiation singlePaymentBody) throws BankRequestFailedException {
 
-        Optional<Payment> singlePayment = singlePaymentBody.getPayments().stream().findFirst();
+        Optional<SinglePayment> singlePayment = singlePaymentBody.getPayments().stream().findFirst();
         if (!singlePayment.isPresent()) {
             throw new StyxException(new ResponseEntity("No valid single payment object was found within the payments array", ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
         }
-        Payment payment = singlePayment.get();
+        SinglePayment payment = singlePayment.get();
 
         XS2AFactoryInput xs2AFactoryInput = new XS2AFactoryInput();
         xs2AFactoryInput.setPayment(payment);
@@ -97,28 +105,35 @@ public class PaymentInitiationResource extends RestResource {
         PISRequest paymentInitiationRequest = new PISRequestFactory().create(getXS2AStandard().getRequestClassProvider().paymentInitiation(), xs2AFactoryInput);
         paymentInitiationRequest.getHeaders().putAll(getAdditionalHeaders());
         paymentInitiationRequest.setTppRedirectPreferred(getRedirectPreferred());
+        paymentInitiationRequest.setXrequestId(ThreadContext.get(RequestUUIDAdapter.REQUEST_UUID));
         ioProcessor.modifyRequest(paymentInitiationRequest, xs2AFactoryInput);
 
         InitiatedPayment initiatedPayment = getXS2AStandard().getPis().initiatePayment(paymentInitiationRequest);
+
+        ioProcessor.modifyResponse(initiatedPayment);
+
         PaymentResponse paymentResponse = new PaymentResponse(initiatedPayment);
         SCAApproach approach = SCAHandler.decision(initiatedPayment);
         if (approach instanceof OAuth2) {
             paymentResponse.getLinks().getScaOAuth().setUrl(((OAuth2) approach).getAuthoriseLink());
         }
 
-        LOG.info("Initiate single payment bic={} aspsp_name={} aspsp_id={} paymentId={}", getXS2AStandard().getAspsp().getBic(), getXS2AStandard().getAspsp().getName(), getXS2AStandard().getAspsp().getId(), paymentResponse.getPaymentId());
+        LOG.info("Initiate single payment bic={} aspsp_name={} aspsp_id={} paymentId={} xrequestid={}", getXS2AStandard().getAspsp().getBic(), getXS2AStandard().getAspsp().getName(), getXS2AStandard().getAspsp().getId(), paymentResponse.getPaymentId(), paymentInitiationRequest.getXrequestId());
 
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(paymentInitiationRequest.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus(), PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct());
 
         xs2AFactoryInput.setPaymentId(paymentResponse.getPaymentId());
-        String authHeader = paymentInitiationRequest.getAuthorization();
-        if (authHeader == null) {
-            authHeader = paymentInitiationRequest.getHeaders().get(XS2AHeader.AUTHORIZATION);
+
+        if (!(approach instanceof OAuth2)) {
+            String xrequestId = paymentInitiationRequest.getXrequestId();
+            if (containerRequestContext.getProperty(PreAuthAccessFilter.class.getName()) != null) {
+                xrequestId = containerRequestContext.getHeaderString(PreAuthAccessFilter.PRE_AUTH_ID);
+            }
+            ThreadManager.getInstance().queueTask(new PaymentStatusPoll(xs2AFactoryInput, getXS2AStandard().getAspsp().getBic(), UUID.fromString(xrequestId)));
         }
-        ThreadManager.getInstance().queueTask(new PaymentStatusPoll(xs2AFactoryInput, getXS2AStandard().getAspsp().getBic(), authHeader));
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 
@@ -138,11 +153,11 @@ public class PaymentInitiationResource extends RestResource {
             @BeanParam PaymentTypeBean paymentTypeBean,
             @Valid BulkPaymentInitiation bulkPaymentBody) throws BankRequestFailedException {
         //Debtors should all be the same within the payments, we take one of them
-        Optional<Payment> singlePayment = bulkPaymentBody.getPayments().stream().findAny();
+        Optional<SinglePayment> singlePayment = bulkPaymentBody.getPayments().stream().findAny();
         if (!singlePayment.isPresent()) {
             throw new StyxException(new ResponseEntity("No valid payment object was found within the bulk payments array", ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
         }
-        Account debtor = bulkPaymentBody.getDebtorAccount();
+        AccountReference debtor = bulkPaymentBody.getDebtorAccount();
         BulkPayment bulkPayment = new BulkPayment();
         bulkPayment.setBatchBookingPreferred(bulkPaymentBody.getBatchBookingPreferred());
         bulkPayment.setDebtorAccount(debtor);
@@ -164,6 +179,7 @@ public class PaymentInitiationResource extends RestResource {
         ioProcessor.modifyRequest(bulkpaymentInitiationRequest, xs2AFactoryInput);
 
         bulkpaymentInitiationRequest.setTppRedirectPreferred(getRedirectPreferred());
+        bulkpaymentInitiationRequest.setXrequestId(ThreadContext.get(RequestUUIDAdapter.REQUEST_UUID));
 
         InitiatedPayment initiatedPayment = getXS2AStandard().getPis().initiatePayment(bulkpaymentInitiationRequest);
         PaymentResponse paymentResponse = new PaymentResponse(initiatedPayment);
@@ -176,7 +192,7 @@ public class PaymentInitiationResource extends RestResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.BULK_PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(bulkpaymentInitiationRequest.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus(), PaymentService.BULK_PAYMENTS, paymentTypeBean.getPaymentProduct());
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 
@@ -194,16 +210,16 @@ public class PaymentInitiationResource extends RestResource {
     @AcceptsPreStepAuth
     public Response initiatePeriodicPayment(@BeanParam PaymentTypeBean paymentTypeBean,
                                             @Valid PeriodicPaymentInitiation periodicPaymentBody) throws BankRequestFailedException {
-        Optional<Payment> singlePayment = periodicPaymentBody.getPayments().stream().findFirst();
+        Optional<SinglePayment> singlePayment = periodicPaymentBody.getPayments().stream().findFirst();
         if (!singlePayment.isPresent()) {
             throw new StyxException(new ResponseEntity("No valid payment object was found", ResponseConstant.BAD_REQUEST, ResponseCategory.ERROR, ResponseOrigin.CLIENT));
         }
-        Payment payment = singlePayment.get();
+        SinglePayment payment = singlePayment.get();
 
         PeriodicPayment periodicPayment = new PeriodicPayment();
-        periodicPayment.setCreditor(payment.getCreditor());
+        periodicPayment.setCreditorAccount(payment.getCreditorAccount());
         periodicPayment.setCreditorName(payment.getCreditorName());
-        periodicPayment.setDebtor(payment.getDebtor());
+        periodicPayment.setDebtorAccount(payment.getDebtorAccount());
         periodicPayment.setEndToEndIdentification(payment.getEndToEndIdentification());
         periodicPayment.setInstructedAmount(payment.getInstructedAmount());
         periodicPayment.setRemittanceInformationUnstructured(payment.getRemittanceInformationUnstructured());
@@ -227,6 +243,7 @@ public class PaymentInitiationResource extends RestResource {
         ioProcessor.modifyRequest(periodicPaymentInitiation, xs2AFactoryInput);
 
         periodicPaymentInitiation.setTppRedirectPreferred(getRedirectPreferred());
+        periodicPaymentInitiation.setXrequestId(ThreadContext.get(RequestUUIDAdapter.REQUEST_UUID));
 
         InitiatedPayment initiatedPayment = getXS2AStandard().getPis().initiatePayment(periodicPaymentInitiation);
         PaymentResponse paymentResponse = new PaymentResponse(initiatedPayment);
@@ -239,7 +256,7 @@ public class PaymentInitiationResource extends RestResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PERIODIC_PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
-        PersistentPayment.create(paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus());
+        PersistentPayment.create(periodicPaymentInitiation.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus(), PaymentService.PERIODIC_PAYMENTS, paymentTypeBean.getPaymentProduct());
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 }

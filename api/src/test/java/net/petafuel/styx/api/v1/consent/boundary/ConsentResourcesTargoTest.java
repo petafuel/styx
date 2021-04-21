@@ -7,7 +7,7 @@ import net.petafuel.styx.api.v1.consent.entity.POSTConsentResponse;
 import net.petafuel.styx.api.v1.payment.entity.AuthorisationStatusResponse;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
 import net.petafuel.styx.core.xs2a.entities.AuthenticationObject;
-import net.petafuel.styx.core.xs2a.entities.Consent;
+import net.petafuel.styx.core.xs2a.entities.ConsentStatus;
 import net.petafuel.styx.core.xs2a.entities.SCA;
 import org.apache.commons.io.IOUtils;
 import org.junit.FixMethodOrder;
@@ -96,7 +96,7 @@ public class ConsentResourcesTargoTest extends ConsentResourcesTest {
 
         Assertions.assertEquals(200, response.getStatus());
         GetConsentStatusResponse consentStatusResponse = jsonb.fromJson(IOUtils.toString((InputStream) response.getEntity(), StandardCharsets.UTF_8), GetConsentStatusResponse.class);
-        Assertions.assertEquals(Consent.State.RECEIVED, consentStatusResponse.getState());
+        Assertions.assertEquals(ConsentStatus.RECEIVED, consentStatusResponse.getState());
     }
 
     @Test

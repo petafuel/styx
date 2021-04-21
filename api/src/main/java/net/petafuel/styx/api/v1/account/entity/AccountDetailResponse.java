@@ -21,9 +21,8 @@ public class AccountDetailResponse {
     }
 
     /**
-     * @deprecated default constructor for json binding
+     * default constructor for json binding
      */
-    @Deprecated
     public AccountDetailResponse() {
         //default constructor for json binding
     }
@@ -54,9 +53,8 @@ public class AccountDetailResponse {
         }
 
         /**
-         * @deprecated default constructor for json binding
+         * default constructor for json binding
          */
-        @Deprecated
         public AccountJson() {
             //default constructor for json binding
         }

@@ -6,6 +6,8 @@ import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.exceptions.XS2AFactoryException;
+import net.petafuel.styx.core.xs2a.utils.TPPRedirectUtillity;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -23,9 +25,11 @@ public class PISRequestFactory implements XS2ARequestFactory<PISRequest> {
             Constructor<? extends PISRequest> constructor = providedRequest.getConstructor(PaymentService.class, PaymentProduct.class, PSU.class, InitializablePayment.class);
             PISRequest pisRequest = constructor.newInstance(factoryInput.getPaymentService(), factoryInput.getPaymentProduct(), factoryInput.getPsu(), factoryInput.getPayment());
             if (factoryInput.getAuthorisationId() != null) {
-                pisRequest.setAuthroisationId(factoryInput.getAuthorisationId());
+                pisRequest.setAuthorisationId(factoryInput.getAuthorisationId());
             }
             pisRequest.setPaymentId(factoryInput.getPaymentId());
+            pisRequest.setTppRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("payment/ok/" + ThreadContext.get("requestUUID")));
+            pisRequest.setTppNokRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("payment/nok/" + ThreadContext.get("requestUUID")));
 
             return pisRequest;
         } catch (NoSuchMethodException e) {

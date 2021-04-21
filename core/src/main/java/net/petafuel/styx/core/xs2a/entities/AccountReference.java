@@ -17,6 +17,10 @@ public class AccountReference {
     @JsonbTransient
     private Type type;
 
+    /**
+     * Noncompliant optional field for compatibility reasons
+     */
+    private String name;
 
     public AccountReference(String identifier, Type type) {
         this.currency = Currency.EUR;
@@ -41,9 +45,8 @@ public class AccountReference {
     }
 
     /**
-     * @deprecated default ctor for json binding
+     * default ctor for json binding
      */
-    @Deprecated
     public AccountReference() {
         // default ctor for json binding
     }
@@ -53,6 +56,9 @@ public class AccountReference {
     }
 
     public void setIban(String iban) {
+        if (iban == null) {
+            return;
+        }
         this.iban = iban;
         this.type = Type.IBAN;
     }
@@ -62,6 +68,9 @@ public class AccountReference {
     }
 
     public void setBban(String bban) {
+        if (bban == null) {
+            return;
+        }
         this.bban = bban;
         this.type = Type.BBAN;
     }
@@ -71,6 +80,9 @@ public class AccountReference {
     }
 
     public void setPan(String pan) {
+        if (pan == null) {
+            return;
+        }
         this.pan = pan;
         this.type = Type.PAN;
     }
@@ -80,6 +92,9 @@ public class AccountReference {
     }
 
     public void setMaskedPan(String maskedPan) {
+        if (maskedPan == null) {
+            return;
+        }
         this.maskedPan = maskedPan;
         this.type = Type.MASKED_PAN;
     }
@@ -89,6 +104,9 @@ public class AccountReference {
     }
 
     public void setMsisdn(String msisdn) {
+        if (msisdn == null) {
+            return;
+        }
         this.msisdn = msisdn;
         this.type = Type.MSISDN;
     }
@@ -119,12 +137,12 @@ public class AccountReference {
         }
     }
 
-    public enum Type {
-        IBAN,
-        BBAN,
-        PAN,
-        MASKED_PAN,
-        MSISDN
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -138,5 +156,13 @@ public class AccountReference {
     @Override
     public int hashCode() {
         return this.getIdentifier(this.getType()).hashCode();
+    }
+
+    public enum Type {
+        IBAN,
+        BBAN,
+        PAN,
+        MASKED_PAN,
+        MSISDN
     }
 }

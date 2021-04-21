@@ -18,7 +18,7 @@ public abstract class XS2ARequest {
     /**
      * Common Request Attributes
      */
-    protected String authroisationId;
+    protected String authorisationId;
     /**
      * Header fields
      */
@@ -54,12 +54,12 @@ public abstract class XS2ARequest {
         queryParameters = new LinkedHashMap<>();
     }
 
-    public String getAuthroisationId() {
-        return authroisationId;
+    public String getAuthorisationId() {
+        return authorisationId;
     }
 
-    public void setAuthroisationId(String authroisationId) {
-        this.authroisationId = authroisationId;
+    public void setAuthorisationId(String authorisationId) {
+        this.authorisationId = authorisationId;
     }
 
     public abstract Optional<String> getRawBody();
@@ -123,7 +123,9 @@ public abstract class XS2ARequest {
     }
 
     public void setXrequestId(String xrequestId) {
-        this.xrequestId = xrequestId;
+        if (xrequestId != null) {
+            this.xrequestId = xrequestId;
+        }
     }
 
     public String getTppRedirectUri() {
@@ -155,6 +157,9 @@ public abstract class XS2ARequest {
     }
 
     public void setAuthorization(String authorization) {
+        if (authorization != null && !authorization.contains("Bearer")) {
+            authorization = "Bearer " + authorization;
+        }
         this.authorization = authorization;
     }
 

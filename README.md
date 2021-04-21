@@ -17,8 +17,7 @@ For more information please have a look at the [Styx wiki](https://github.com/pe
 
 ## Client API
 
-The Styx Client API is a REST interface that follows the Berlin Group NextGenPSD2 specification. The documentation is available 
-in OpenAPI format.
+The Styx Client API is a REST interface that follows the Berlin Group NextGenPSD2 specification. The documentation is available in OpenAPI format.
 
 [Styx Client API documentation](https://petafuel.github.io/styx/api/)
 
@@ -26,9 +25,12 @@ in OpenAPI format.
 
 Styx is build using the Amazon Corretto 8 - the production-ready distribution of Open Java Development Kit (OpenJDK) and uses a PostgreSQL database.
 
-1. Clone the repository \
+1. Clone the repository
+
    `git clone https://github.com/petafuel/styx.git`
-2. Styx uses packages provided through GitHub Packages \
+
+2. Styx uses packages provided through GitHub Packages
+
    Edit your *~/.2/settings.xml* and add your GitHub username and your personal access token. Also see [here](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-apache-maven-for-use-with-github-packages#authenticating-to-github-packages).
 
    ```xml
@@ -49,14 +51,17 @@ Styx is build using the Amazon Corretto 8 - the production-ready distribution of
    ```
 
 3. Configure Styx
+
    You have to adjust *connectionpool.properties* to configure the connection to your PostgreSQL database.
    Also adjust *API/src/main/resources/api.properties* and *Core/src/main/resource/core.properties* according to your Styx deployment.
 
 4. Build Styx
+
    Run `mvn clean -DskipTests=true install` to build Styx.
 
 5. Execute Styx
-   ```
+
+   ```sh
    cd API/target
    java -jar styxRest.jar
    ```

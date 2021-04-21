@@ -1,7 +1,5 @@
 package net.petafuel.styx.core.banklookup.sad;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import net.petafuel.styx.core.banklookup.BankLookUpInterface;
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
@@ -16,11 +14,17 @@ import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PIISInterface;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.exceptions.SADException;
+import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.factory.XS2ARequestClassProvider;
 import net.petafuel.styx.core.xs2a.utils.Version;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import java.lang.reflect.InvocationTargetException;
 import java.util.EnumMap;
 import java.util.Map;
@@ -120,13 +124,13 @@ public class SAD implements BankLookUpInterface {
 
 
         } catch (InstantiationException | IllegalAccessException e) {
-            LOG.error("Error initialising service class through SAD: {}", e.getMessage());
+            LOG.error("Error initialising service class through SAD: {}", e.getMessage(), e);
             throw new BankLookupFailedException(e.getMessage(), e);
         } catch (InvocationTargetException e) {
-            LOG.error("Error calling service class constructor through SAD: {}", e.getMessage());
+            LOG.error("Error calling service class constructor through SAD: {}", e.getMessage(), e);
             throw new BankLookupFailedException(e.getMessage(), e);
         } catch (NoSuchMethodException e) {
-            LOG.error("The service class has no matching constructor for initialisation through SAD: {}", e.getMessage());
+            LOG.error("The service class has no matching constructor for initialisation through SAD: {}", e.getMessage(), e);
             throw new BankLookupFailedException(e.getMessage(), e);
         }
         return xs2AStandard;
@@ -151,30 +155,46 @@ public class SAD implements BankLookUpInterface {
      * @param aspsp Aspsp object that should be used and should be modified with the parsed implementer options
      */
     private void parseImplementerOptions(Aspsp aspsp) {
-        String rawJsonConfig;
-        Gson gson = new Gson();
+        String rawDefaultConfig;
         //Check if there is a config on aspsp level and use the standard config template if not present for aspsp
-        if ((rawJsonConfig = aspsp.getConfig().getConfiguration()) == null) {
-            rawJsonConfig = aspsp.getConfig().getStandard().getConfigTemplate();
+        if ((rawDefaultConfig = aspsp.getConfig().getConfiguration()) == null) {
+            rawDefaultConfig = aspsp.getConfig().getStandard().getConfigTemplate();
         }
-        JsonObject jsonConfig = gson.fromJson(rawJsonConfig, JsonObject.class);
+        JsonObject defaultConfig = null;
 
-        //Merge styx configs into the normal implementer options
-        if (aspsp.getConfig().getStyxConfiguration() != null) {
-            JsonObject styxConfigs = gson.fromJson(aspsp.getConfig().getStyxConfiguration(), JsonObject.class);
-            styxConfigs.entrySet().forEach(entry -> jsonConfig.add(entry.getKey(), entry.getValue()));
-        } else {
-            JsonObject styxConfigs = gson.fromJson(aspsp.getConfig().getStandard().getStyxConfigTemplate(), JsonObject.class);
-            styxConfigs.entrySet().forEach(entry -> jsonConfig.add(entry.getKey(), entry.getValue()));
+        try(Jsonb jsonb = JsonbBuilder.create()){
+            defaultConfig = jsonb.fromJson(rawDefaultConfig, JsonObject.class);
+        } catch (Exception e) {
+            throw new SerializerException("unable to deserialize implementer-options json on SAD Service usage", e);
         }
 
-        jsonConfig.entrySet().parallelStream().forEach(entry -> {
-            JsonObject content = entry.getValue().getAsJsonObject();
+        //Check if there is a styx config on aspsp level
+        //If not present on aspsp level use styx config template of related standard
+        String rawStyxConfig;
+        if ((rawStyxConfig = aspsp.getConfig().getStyxConfiguration()) == null) {
+            rawStyxConfig = aspsp.getConfig().getStandard().getStyxConfigTemplate();
+        }
+        //Merge the styx config options into the defaultConfig
+        JsonObject styxConfig = null;
+
+        try(Jsonb jsonb = JsonbBuilder.create()){
+            styxConfig = jsonb.fromJson(rawStyxConfig, JsonObject.class);
+        } catch (Exception e) {
+            throw new SerializerException("unable to deserialize styx-options json on SAD Service usage", e);
+        }
+        JsonObjectBuilder defaultConfigJsonBuilder = Json.createObjectBuilder(defaultConfig);
+        defaultConfigJsonBuilder.addAll(Json.createObjectBuilder(styxConfig));
+        defaultConfig = defaultConfigJsonBuilder.build();
+        defaultConfig.entrySet().stream().forEach(entry -> {
+            JsonObject currentOption = entry.getValue().asJsonObject();
             ImplementerOption implementerOption = new ImplementerOption();
             implementerOption.setId(entry.getKey());
-            implementerOption.setDescription(content.get("description").getAsString());
-            JsonObject options = content.get("options").getAsJsonObject();
-            options.entrySet().parallelStream().forEach(option -> implementerOption.addOption(option.getKey(), option.getValue()));
+            implementerOption.setDescription(currentOption.getString("description", "default"));
+
+            currentOption.get("options").asJsonObject()
+                    .entrySet()
+                    .stream()
+                    .forEach(option -> implementerOption.addOption(option.getKey(), Boolean.valueOf(option.getValue().toString())));
             aspsp.getConfig().getImplementerOptions().put(implementerOption.getId(), implementerOption);
         });
     }

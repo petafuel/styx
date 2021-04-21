@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -64,12 +64,15 @@
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>5.2.4</version>
+                    <version>6.1.2</version>
                     <configuration>
                         <skipProvidedScope>true</skipProvidedScope>
                         <skipSystemScope>true</skipSystemScope>
                         <skipTestScope>true</skipTestScope>
                         <skipArtifactType>com.typesafe.*</skipArtifactType>
+                        <suppressionFiles>
+                            <suppressionFile>styx_private.xml</suppressionFile>
+                        </suppressionFiles>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -100,29 +103,136 @@
                         <configuration>
                             <excludedGroups>Integration,integration,net.petafuel.styx.api.IntegrationTest
                             </excludedGroups>
+                            <systemPropertyVariables>
+                                <!--styx core test configuration-->
+                                <keystore.path>${styx.keystore.path}</keystore.path>
+                                <keystore.password.path>${styx.keystore.password.path}</keystore.password.path>
+                                <keystore.client_id>${styx.keystore.client_id}</keystore.client_id>
+                                <keystore.styxalias>${styx.keystore.styxalias}</keystore.styxalias>
+                                <styx.redirect.baseurl>${styx.styx.redirect.baseurl}</styx.redirect.baseurl>
+                                <client.redirect.baseurl>${styx.client.redirect.baseurl}</client.redirect.baseurl>
+                                <persistence.dbname>${styx.persistence.dbname}</persistence.dbname>
+                                <!-- styx core test db configuration-->
+                                <db.jdbcurl.prep_styx>${styx.db.jdbcurl.prep_styx}</db.jdbcurl.prep_styx>
+                                <db.user.prep_styx>${styx.db.user.prep_styx}</db.user.prep_styx>
+                                <db.password.prep_styx>${styx.db.password.prep_styx}</db.password.prep_styx>
+                                <!--styx keepalive test configuration-->
+                                <keepalive.threads.coreWorker.minAmount>${styx.keepalive.threads.coreWorker.minAmount}
+                                </keepalive.threads.coreWorker.minAmount>
+                                <keepalive.threads.coreWorker.maxAmount>${styx.keepalive.threads.coreWorker.maxAmount}
+                                </keepalive.threads.coreWorker.maxAmount>
+                                <keepalive.threads.coreWorker.spawnThresholdTasksPerWorker>
+                                    ${styx.keepalive.threads.coreWorker.spawnThresholdTasksPerWorker}
+                                </keepalive.threads.coreWorker.spawnThresholdTasksPerWorker>
+                                <keepalive.threads.retryFailureWorker.maxExecutionRetries>
+                                    ${styx.keepalive.threads.retryFailureWorker.maxExecutionRetries}
+                                </keepalive.threads.retryFailureWorker.maxExecutionRetries>
+                                <keepalive.threads.retryFailureWorker.maxAmount>
+                                    ${styx.keepalive.threads.retryFailureWorker.maxAmount}
+                                </keepalive.threads.retryFailureWorker.maxAmount>
+                                <keepalive.manager.useRecovery>${styx.keepalive.manager.useRecovery}
+                                </keepalive.manager.useRecovery>
+                                <keepalive.manager.probeFrequencyMS>${styx.keepalive.manager.probeFrequencyMS}
+                                </keepalive.manager.probeFrequencyMS>
+                                <keepalive.manager.probeInitialDelay>${styx.keepalive.manager.probeInitialDelay}
+                                </keepalive.manager.probeInitialDelay>
+                                <keepalive.tasks.consentpoll.amountRetries>
+                                    ${styx.keepalive.tasks.consentpoll.amountRetries}
+                                </keepalive.tasks.consentpoll.amountRetries>
+                                <keepalive.tasks.consentpoll.timoutBetweenRetriesMS>
+                                    ${styx.keepalive.tasks.consentpoll.timoutBetweenRetriesMS}
+                                </keepalive.tasks.consentpoll.timoutBetweenRetriesMS>
+                                <keepalive.tasks.paymentstatuspoll.service>
+                                    ${styx.keepalive.tasks.paymentstatuspoll.service}
+                                </keepalive.tasks.paymentstatuspoll.service>
+                                <keepalive.tasks.paymentstatuspoll.maxExecutionTimeMS>
+                                    ${styx.keepalive.tasks.paymentstatuspoll.maxExecutionTimeMS}
+                                </keepalive.tasks.paymentstatuspoll.maxExecutionTimeMS>
+                                <keepalive.tasks.paymentstatuspoll.maxRequestFailures>
+                                    ${styx.keepalive.tasks.paymentstatuspoll.maxRequestFailures}
+                                </keepalive.tasks.paymentstatuspoll.maxRequestFailures>
+                                <keepalive.tasks.paymentstatuspoll.timoutBetweenRetriesMS>
+                                    ${styx.keepalive.tasks.paymentstatuspoll.timoutBetweenRetriesMS}
+                                </keepalive.tasks.paymentstatuspoll.timoutBetweenRetriesMS>
+                                <!--styx api test configuration-->
+                                <api.ip>${styx.api.ip}</api.ip>
+                                <api.port>${styx.api.port}</api.port>
+                                <api.sad.sandbox.enabled>${styx.api.sad.sandbox.enabled}</api.sad.sandbox.enabled>
+                                <proxy.enabled>${styx.proxy.enabled}</proxy.enabled>
+                                <proxy.hostname>${styx.proxy.hostname}</proxy.hostname>
+                                <proxy.port>${styx.proxy.port}</proxy.port>
+                                <proxy.schema>${styx.proxy.schema}</proxy.schema>
+                                <token.access.unusedlifetime>${styx.token.access.unusedlifetime}
+                                </token.access.unusedlifetime>
+                                <!--styx spi test configuration-->
+                                <spi.paymentstatushook.pfrest.baseurl>${styx.spi.paymentstatushook.pfrest.baseurl}
+                                </spi.paymentstatushook.pfrest.baseurl>
+                                <spi.paymentstatushook.pfrest.mastertoken>
+                                    ${styx.spi.paymentstatushook.pfrest.mastertoken}
+                                </spi.paymentstatushook.pfrest.mastertoken>
+                            </systemPropertyVariables>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>sonarqubeReporting</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>aggregate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <formats>HTML,XML</formats>
+                            <name>OWASP Report</name>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sonar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
         </profile>
     </profiles>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.6.2</version>
+            <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.6.1</version>
+            <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -134,12 +244,12 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.13.3</version>
+            <version>2.14.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.13.3</version>
+            <version>2.14.0</version>
         </dependency>
         <!-- rest interface dependencies -->
         <dependency>
@@ -150,12 +260,12 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.10</version>
+            <version>3.12.0</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.6</version>
+            <version>2.7</version>
         </dependency>
     </dependencies>
 </project>

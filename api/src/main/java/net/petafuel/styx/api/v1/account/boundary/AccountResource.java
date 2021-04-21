@@ -1,11 +1,11 @@
 package net.petafuel.styx.api.v1.account.boundary;
 
-import net.petafuel.styx.api.filter.AcceptsPreStepAuth;
-import net.petafuel.styx.api.filter.CheckAccessToken;
-import net.petafuel.styx.api.filter.RequiresBIC;
+import net.petafuel.styx.api.filter.authentication.boundary.AcceptsPreStepAuth;
+import net.petafuel.styx.api.filter.authentication.boundary.CheckAccessToken;
+import net.petafuel.styx.api.filter.input.boundary.RequiresBIC;
+import net.petafuel.styx.api.ioprocessing.IOProcessor;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.AspspUrlMapper;
-import net.petafuel.styx.api.util.io.IOProcessor;
 import net.petafuel.styx.api.v1.account.control.AccountListResponseAdapter;
 import net.petafuel.styx.api.v1.account.control.TransactionListResponseAdapter;
 import net.petafuel.styx.api.v1.account.entity.AccountDetailResponse;
@@ -65,6 +65,7 @@ public class AccountResource extends RestResource {
         ioProcessor.modifyRequest(accountListRequest, xs2AFactoryInput);
 
         List<AccountDetails> accountList = getXS2AStandard().getAis().getAccountList(accountListRequest);
+        accountList.forEach(accountDetails -> accountDetails.setLinks(new AspspUrlMapper(accountDetails.getResourceId()).map(accountDetails.getLinks())));
         LOG.info("Successfully fetched account list for bic={}", getXS2AStandard().getAspsp().getBic());
         return Response.status(200).entity(new AccountListResponseAdapter(accountList)).build();
     }

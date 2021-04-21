@@ -1,5 +1,6 @@
 package net.petafuel.styx.api;
 
+import net.petafuel.styx.api.event.AccessTraceAdapter;
 import net.petafuel.styx.api.event.RequestUUIDAdapter;
 import net.petafuel.styx.api.exception.BankRequestFailedExceptionHandler;
 import net.petafuel.styx.api.exception.ClientExceptionHandler;
@@ -10,14 +11,15 @@ import net.petafuel.styx.api.exception.ResponseEntity;
 import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxExceptionHandler;
 import net.petafuel.styx.api.exception.UncaughtExceptionHandler;
-import net.petafuel.styx.api.filter.AccessTokenFilter;
-import net.petafuel.styx.api.filter.BICFilter;
-import net.petafuel.styx.api.filter.MandatoryHeaderFilter;
-import net.petafuel.styx.api.filter.MasterTokenFilter;
-import net.petafuel.styx.api.filter.PSUFilter;
-import net.petafuel.styx.api.filter.PreAuthAccessFilter;
-import net.petafuel.styx.api.filter.SADInitialisationFilter;
-import net.petafuel.styx.api.filter.SandboxHeaderPassthroughs;
+import net.petafuel.styx.api.filter.authentication.control.AccessTokenFilter;
+import net.petafuel.styx.api.filter.authentication.control.MasterTokenFilter;
+import net.petafuel.styx.api.filter.authentication.control.PreAuthAccessFilter;
+import net.petafuel.styx.api.filter.input.control.BICFilter;
+import net.petafuel.styx.api.filter.input.control.MandatoryHeaderFilter;
+import net.petafuel.styx.api.filter.input.control.PSUFilter;
+import net.petafuel.styx.api.filter.input.control.SADInitialisationFilter;
+import net.petafuel.styx.api.filter.input.control.SandboxHeaderPassthroughs;
+import net.petafuel.styx.api.filter.output.control.ReferenceHeaderFilter;
 import net.petafuel.styx.api.injection.ServiceBinder;
 import net.petafuel.styx.api.util.ApiProperties;
 import net.petafuel.styx.api.v1.account.boundary.AccountResource;
@@ -31,6 +33,7 @@ import net.petafuel.styx.api.v1.payment.boundary.PaymentAuthorisationResource;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentInitiationResource;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentStatusResource;
 import net.petafuel.styx.api.v1.preauth.boundary.PreAuthResource;
+import net.petafuel.styx.api.v1.status.boundary.StatusResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Request;
@@ -90,7 +93,8 @@ public class WebServer {
                 .register(PaymentInitiationResource.class)              // handle payment initiation calls
                 .register(FetchPaymentResource.class)                   // handle fetch payment calls
                 .register(PaymentAuthorisationResource.class)           // handle payment SCA calls
-                .register(PreAuthResource.class);
+                .register(PreAuthResource.class)
+                .register(StatusResource.class);                        //Handle Status calls from internal redirects, e.g. in SCA cases after a callback was received
         //Register Middlewares / Filters
         config.register(AccessTokenFilter.class)                        // request Requires valid client token and enabled master token
                 .register(PSUFilter.class)                              // request requires PSU data
@@ -98,7 +102,8 @@ public class WebServer {
                 .register(MandatoryHeaderFilter.class)                  // request requires certain header fields
                 .register(MasterTokenFilter.class)                      // request requires enabled master token
                 .register(SADInitialisationFilter.class)                // dynamically initialize Services from SAD
-                .register(PreAuthAccessFilter.class);                   // make preauth access token available in REST Endpoints
+                .register(PreAuthAccessFilter.class)                    // make preauth access token available in REST Endpoints
+                .register(ReferenceHeaderFilter.class);                 // add Reference header to all REST responses
 
         if (Boolean.TRUE.equals(WebServer.isSandbox())) {
             config.register(SandboxHeaderPassthroughs.class);            // makes all X-STYX-... headers available in the request context, if styx is running in sandbox mode
@@ -116,6 +121,7 @@ public class WebServer {
         ServletHolder styxRoutes = new ServletHolder(new ServletContainer(config));
         context.addServlet(styxRoutes, "/*");
         context.addEventListener(new RequestUUIDAdapter());             // add uuid to every log entry served for one single request
+        context.addEventListener(new AccessTraceAdapter());             // Log incoming request and outgoing response meta data(no http body) on the Styx REST interface
 
         try {
             server.start();

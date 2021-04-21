@@ -4,6 +4,7 @@ import net.petafuel.styx.core.xs2a.contracts.AISInterface;
 import net.petafuel.styx.core.xs2a.contracts.AISRequest;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
+import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.entities.AccountDetails;
 import net.petafuel.styx.core.xs2a.entities.BalanceContainer;
 import net.petafuel.styx.core.xs2a.entities.Transaction;
@@ -13,6 +14,8 @@ import net.petafuel.styx.core.xs2a.exceptions.SerializerException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountDetailsResponse;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadAccountListResponse;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionDetailsResponse;
+import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.ReadTransactionsRequest;
+import net.petafuel.styx.core.xs2a.utils.sepa.camt052.control.Camt052Converter;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,11 +83,20 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
     @Override
     public TransactionContainer getTransactionsByAccount(AISRequest request) throws BankRequestFailedException {
         this.setUrl(this.url + request.getServicePath() + this.getHttpQueryString(request));
+        boolean isXmlRequest = false;
+        if (request instanceof ReadTransactionsRequest && ((ReadTransactionsRequest) request).isXml()) {
+            isXmlRequest = true;
+            request.addHeader(XS2AHeader.ACCEPT, "application/xml");
+        }
         this.createBody(RequestType.GET);
         this.createHeaders(request);
 
         try (Response response = this.execute(); Jsonb jsonb = JsonbBuilder.create()) {
             String responseBody = extractResponseBody(response, 200);
+            if (isXmlRequest) {
+                Camt052Converter converter = new Camt052Converter();
+                return converter.processReport(responseBody);
+            }
             return jsonb.fromJson(responseBody, TransactionContainer.class);
         } catch (Exception e) {
             throw new BankRequestFailedException(e.getMessage(), e);

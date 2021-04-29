@@ -78,6 +78,7 @@ public enum ResponseConstant implements Response.StatusType, Serializable {
     EXECUTION_DATE_INVALID(406, "Execution date in payment body is invalid"),
     ACCESS_EXCEEDED(406, "Consent access per-day without PSU involvment exceeded"),
     PERIOD_INVALID(406, "AIS requested period of transactions or balance is invalid"),
+    FORMAT_ERROR(406, "Generic wrong format in payload body or headers"),
 
     /*
     ASPSP styx mapped codes
@@ -93,7 +94,6 @@ public enum ResponseConstant implements Response.StatusType, Serializable {
     CERTIFICATE_MISSING(500, ""),
     SIGNATURE_INVALID	(500, "Application level eIDAS signature invalid"),
     SIGNATURE_MISSING(500, ""),
-    FORMAT_ERROR(500, "Generic wrong format in payload body or headers"),
     PARAMETER_NOT_CONSISTENT(500, "Query parameters were not consistent"),
     PARAMETER_NOT_SUPPORTED(500, "An optional parameter is used but not supported by the bank"),
     SERVICE_INVALID(500, ""),

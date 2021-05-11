@@ -28,11 +28,7 @@ public class CallbackHandler {
         //We also check for the state which we need to get the token, if the sate query parameter is not present we try to do
         //a normal redirect callback as the oauth approach is always going to fail without state
         if (oAuthCallback != null && (oAuthCallback.getCode() != null || oAuthCallback.getError() != null)) {
-            if (oAuthCallback.getState() != null) {
-                redirectStatus = OAuthCallbackProcessor.processCallback(requestedRealm, param, xRequestId, oAuthCallback);
-            } else {
-                LOG.warn("Received callback seems to be oauth(code query param present) but state is missing. Continue as redirect");
-            }
+            redirectStatus = OAuthCallbackProcessor.processCallback(requestedRealm, param, xRequestId, oAuthCallback);
         }
         if (redirectStatus == null) {
             redirectStatus = RedirectCallbackProcessor.processCallback(requestedRealm, param, xRequestId);

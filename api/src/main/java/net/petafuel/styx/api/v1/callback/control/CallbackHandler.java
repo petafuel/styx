@@ -3,6 +3,8 @@ package net.petafuel.styx.api.v1.callback.control;
 import net.petafuel.styx.api.v1.callback.entity.OAuthCallback;
 import net.petafuel.styx.api.v1.status.control.StatusHelper;
 import net.petafuel.styx.api.v1.status.entity.RedirectStatus;
+import net.petafuel.styx.core.xs2a.callback.entity.RealmParameter;
+import net.petafuel.styx.core.xs2a.callback.entity.ServiceRealm;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,24 +16,29 @@ public class CallbackHandler {
     private CallbackHandler() {
     }
 
-    public static Response handleCallback(String realm, String param, String xRequestId, OAuthCallback oAuthCallback) {
-        RedirectCallbackProcessor.REALM requestedRealm;
+    public static Response handleCallback(String serviceRealm, String realmParameter, String xRequestId, OAuthCallback oAuthCallback) {
+        ServiceRealm requestedServiceRealm;
+        RealmParameter receivedRealmParameter;
         RedirectStatus redirectStatus = null;
         try {
-            requestedRealm = RedirectCallbackProcessor.REALM.valueOf(realm.toUpperCase());
+            requestedServiceRealm = ServiceRealm.valueOf(serviceRealm.toUpperCase());
         } catch (IllegalArgumentException unknownRealmException) {
-            LOG.warn("Callback was received with an unknown resource realm={}", realm);
-            requestedRealm = RedirectCallbackProcessor.REALM.UNKNOWN;
+            LOG.warn("Callback was received with an unknown serviceRealm={}", serviceRealm);
+            requestedServiceRealm = ServiceRealm.UNKNOWN;
         }
-        LOG.info("Received callback for resource realm={}, param={}, originRequestUUID={}, oAuthCallback={}", requestedRealm, param, xRequestId, oAuthCallback);
-        //If we receive a callback that seems to be from a previous oauth sca(containing a code query parameter from the aspsp)
-        //We also check for the state which we need to get the token, if the sate query parameter is not present we try to do
-        //a normal redirect callback as the oauth approach is always going to fail without state
+        try {
+            receivedRealmParameter = RealmParameter.valueOf(realmParameter.toUpperCase());
+        } catch (IllegalArgumentException unknownRealmException) {
+            LOG.warn("Callback was received with an unknown realmParameter={}", realmParameter);
+            receivedRealmParameter = RealmParameter.UNKNOWN;
+        }
+
+        LOG.info("Received callback for resource serviceRealm={}, realmParameter={}, originRequestUUID={}, oAuthCallback={}", requestedServiceRealm, realmParameter, xRequestId, oAuthCallback);
         if (oAuthCallback != null && (oAuthCallback.getCode() != null || oAuthCallback.getError() != null)) {
-            redirectStatus = OAuthCallbackProcessor.processCallback(requestedRealm, param, xRequestId, oAuthCallback);
+            redirectStatus = OAuthCallbackProcessor.processCallback(requestedServiceRealm, receivedRealmParameter, xRequestId, oAuthCallback);
         }
         if (redirectStatus == null) {
-            redirectStatus = RedirectCallbackProcessor.processCallback(requestedRealm, param, xRequestId);
+            redirectStatus = RedirectCallbackProcessor.processCallback(requestedServiceRealm, receivedRealmParameter, xRequestId);
         }
 
         return StatusHelper.createStatusRedirection(redirectStatus);

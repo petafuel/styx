@@ -1,5 +1,10 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import net.petafuel.styx.core.xs2a.entities.serializers.PurposeCodeTypeAdapter;
+
+import javax.json.bind.annotation.JsonbTypeAdapter;
+
+@JsonbTypeAdapter(PurposeCodeTypeAdapter.class)
 public enum PurposeCode {
     BKDF,    //Bank Loan Delayed Draw Funding
     BKFE,    //BankLoanFees

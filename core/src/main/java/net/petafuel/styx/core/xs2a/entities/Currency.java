@@ -1,5 +1,10 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import net.petafuel.styx.core.xs2a.entities.serializers.CurrencyTypeAdapter;
+
+import javax.json.bind.annotation.JsonbTypeAdapter;
+
+@JsonbTypeAdapter(CurrencyTypeAdapter.class)
 public enum Currency {
     AED,
     AFN,

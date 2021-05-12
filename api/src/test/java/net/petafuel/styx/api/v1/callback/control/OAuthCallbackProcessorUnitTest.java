@@ -5,7 +5,10 @@ import net.petafuel.styx.api.v1.status.entity.RedirectStatus;
 import net.petafuel.styx.api.v1.status.entity.StatusType;
 import net.petafuel.styx.core.xs2a.callback.entity.RealmParameter;
 import net.petafuel.styx.core.xs2a.callback.entity.ServiceRealm;
+import net.petafuel.styx.core.xs2a.utils.CertificateManager;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -15,10 +18,26 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+
 class OAuthCallbackProcessorUnitTest {
+    @BeforeEach
+    void checkConfig() {
+        boolean configPresent = false;
+        try {
+            //BerlinGroup Signer is initialised as soon as the OauthService is initialised
+            // which in the end requries the CertificateManager to load and verify the PSD2 certificate
+            //If this failes, this test cannot execute properly
+            CertificateManager.getInstance();
+            configPresent = true;
+        } catch (Throwable ignored) {
+        }
+        Assumptions.assumeTrue(configPresent);
+    }
+
     @ParameterizedTest
     @ArgumentsSource(OAuthCallbackProcessorUnitTest.CallbackTestDataProvider.class)
     void testPaymentResourceRealm_SCACallback_Ok(ServiceRealm serviceRealm, RealmParameter realmParameter, String identifer, OAuthCallback oAuthCallback, StatusType expected) {
+
         RedirectStatus redirectStatus = OAuthCallbackProcessor.processCallback(serviceRealm, realmParameter, identifer, oAuthCallback);
         Assertions.assertEquals(expected, redirectStatus.getStatusType());
     }

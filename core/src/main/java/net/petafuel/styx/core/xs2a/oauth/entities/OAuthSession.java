@@ -15,6 +15,7 @@ public class OAuthSession {
 
     /**
      * also used as "preauthId" during the pre-step
+     * during pre-step, id and xRequestId is equal
      */
     private UUID id;
     /**

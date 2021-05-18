@@ -23,22 +23,22 @@ public class CallbackResource {
     /**
      * Callback Endpoint for XS2A SCA Flows
      *
-     * @param realm         should be a known REALM
-     * @param param         generic string for usage in CallBackHandler&Processor
-     * @param requestUUID   should be the requestUUID/xrequest id of a previous styx session in payment initiation or consent creation
-     * @param oAuthCallback query parameters for success or error redirects from an aspsp
+     * @param serviceRealm   should be a known REALM
+     * @param realmParameter generic string for usage in CallBackHandler&Processor
+     * @param styxReference  should be the requestUUID/xrequest id of a previous styx session in payment initiation or consent creation
+     * @param oAuthCallback  query parameters for success or error redirects from an aspsp
      * @return will redirect to styx status pages
      */
     @GET
-    @Path("/callbacks/{realm}/{param}/{requestuuid}")
+    @Path("/callbacks/{service-realm}/{realm-parameter}/{styx-reference}")
     @Produces(MediaType.TEXT_HTML)
-    public Response processCallback(@PathParam("realm") String realm, @PathParam("param") String param, @PathParam("requestuuid") String requestUUID,
+    public Response processCallback(@PathParam("service-realm") String serviceRealm, @PathParam("realm-parameter") String realmParameter, @PathParam("styx-reference") String styxReference,
                                     @BeanParam OAuthCallback oAuthCallback) {
-        realm = Sanitizer.replaceEscSeq(realm);
-        param = Sanitizer.replaceEscSeq(param);
-        requestUUID = Sanitizer.replaceEscSeq(requestUUID);
+        serviceRealm = Sanitizer.replaceEscSeq(serviceRealm);
+        realmParameter = Sanitizer.replaceEscSeq(realmParameter);
+        styxReference = Sanitizer.replaceEscSeq(styxReference);
 
-        return CallbackHandler.handleCallback(realm, param, requestUUID, oAuthCallback);
+        return CallbackHandler.handleCallback(serviceRealm, realmParameter, styxReference, oAuthCallback);
     }
 
     /**

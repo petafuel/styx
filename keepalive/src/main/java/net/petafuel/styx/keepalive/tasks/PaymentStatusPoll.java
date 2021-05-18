@@ -179,7 +179,7 @@ public class PaymentStatusPoll extends WorkableTask {
                 .add("bic", xs2AStandard.getAspsp().getBic())
                 .add("xRequestId", String.valueOf(xRequestId));
 
-        if (xs2AFactoryInput.getPsu() != null) {
+        if (xs2AFactoryInput.getPsu() != null && xs2AFactoryInput.getPsu().getId() != null) {
             jsonObjectBuilder.add("psuId", xs2AFactoryInput.getPsu().getId());
         }
 

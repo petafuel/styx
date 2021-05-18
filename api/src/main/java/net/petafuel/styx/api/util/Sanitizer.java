@@ -11,6 +11,6 @@ public class Sanitizer {
      * @return sanitized text is returned
      */
     public static String replaceEscSeq(String text) {
-        return text.replaceAll("[\n\r\t]", "_");
+        return text != null ? text.replaceAll("[\n\r\t]", "_") : null;
     }
 }

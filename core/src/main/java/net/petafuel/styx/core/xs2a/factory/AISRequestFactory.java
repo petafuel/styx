@@ -1,12 +1,10 @@
 package net.petafuel.styx.core.xs2a.factory;
 
-import net.petafuel.styx.core.xs2a.callback.control.CallbackProvider;
-import net.petafuel.styx.core.xs2a.callback.entity.RealmParameter;
-import net.petafuel.styx.core.xs2a.callback.entity.ServiceRealm;
 import net.petafuel.styx.core.xs2a.contracts.AISRequest;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.exceptions.XS2AFactoryException;
 import net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http.CreateConsentRequest;
+import net.petafuel.styx.core.xs2a.utils.TPPRedirectUtillity;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.lang.reflect.Constructor;
@@ -30,8 +28,8 @@ public class AISRequestFactory implements XS2ARequestFactory<AISRequest> {
             aisRequest.setEntryReferenceFrom(factoryInput.getEntryReferenceFrom());
             aisRequest.setDeltaList(factoryInput.getDeltaList());
             if (aisRequest instanceof CreateConsentRequest) {
-                aisRequest.setTppRedirectUri(CallbackProvider.generateCallbackUrl(ServiceRealm.CONSENT, RealmParameter.OK, ThreadContext.get("requestUUID")));
-                aisRequest.setTppNokRedirectUri(CallbackProvider.generateCallbackUrl(ServiceRealm.PAYMENT, RealmParameter.FAILED, ThreadContext.get("requestUUID")));
+                aisRequest.setTppRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("consent/ok/" + ThreadContext.get("requestUUID")));
+                aisRequest.setTppNokRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("consent/nok/" + ThreadContext.get("requestUUID")));
             }
             return aisRequest;
         } catch (NoSuchMethodException e) {

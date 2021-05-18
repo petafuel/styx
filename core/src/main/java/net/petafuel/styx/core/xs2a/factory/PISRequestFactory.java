@@ -1,14 +1,12 @@
 package net.petafuel.styx.core.xs2a.factory;
 
-import net.petafuel.styx.core.xs2a.callback.control.CallbackProvider;
-import net.petafuel.styx.core.xs2a.callback.entity.RealmParameter;
-import net.petafuel.styx.core.xs2a.callback.entity.ServiceRealm;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
 import net.petafuel.styx.core.xs2a.exceptions.XS2AFactoryException;
+import net.petafuel.styx.core.xs2a.utils.TPPRedirectUtillity;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.lang.reflect.Constructor;
@@ -17,9 +15,9 @@ import java.text.MessageFormat;
 
 public class PISRequestFactory implements XS2ARequestFactory<PISRequest> {
     /**
-     * @param providedRequest should a request Class from XS2ARequestClassProvider
-     * @param factoryInput    should contain all data necessary for object construction
-     * @return the initialized PISRequest will be returned
+     * @param providedRequest
+     * @param factoryInput
+     * @return
      */
     @Override
     public PISRequest create(Class<? extends PISRequest> providedRequest, XS2AFactoryInput factoryInput) {
@@ -30,9 +28,8 @@ public class PISRequestFactory implements XS2ARequestFactory<PISRequest> {
                 pisRequest.setAuthorisationId(factoryInput.getAuthorisationId());
             }
             pisRequest.setPaymentId(factoryInput.getPaymentId());
-
-            pisRequest.setTppRedirectUri(CallbackProvider.generateCallbackUrl(ServiceRealm.PAYMENT, RealmParameter.OK, ThreadContext.get("requestUUID")));
-            pisRequest.setTppNokRedirectUri(CallbackProvider.generateCallbackUrl(ServiceRealm.PAYMENT, RealmParameter.FAILED, ThreadContext.get("requestUUID")));
+            pisRequest.setTppRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("payment/ok/" + ThreadContext.get("requestUUID")));
+            pisRequest.setTppNokRedirectUri(TPPRedirectUtillity.getTPPRedirectFromConfig("payment/nok/" + ThreadContext.get("requestUUID")));
 
             return pisRequest;
         } catch (NoSuchMethodException e) {

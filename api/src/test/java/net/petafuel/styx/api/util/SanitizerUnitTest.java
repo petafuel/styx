@@ -10,9 +10,4 @@ class SanitizerUnitTest {
         String text = "newline\ntab\treturn\r";
         Assertions.assertEquals("newline_tab_return_", Sanitizer.replaceEscSeq(text));
     }
-
-    @Test
-    void testNullValue() {
-        Assertions.assertNull(Sanitizer.replaceEscSeq(null));
-    }
 }

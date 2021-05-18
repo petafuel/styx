@@ -57,8 +57,8 @@ public class IOProcessor {
         applicableImplementerOptions.get(IOOrder.POST_CREATION).forEach(option -> applySafe(option, xs2AFactoryInput, xs2ARequest, null));
     }
 
-    public void modifyResponse(XS2AResponse xs2AResponse, XS2AFactoryInput xs2AFactoryInput) {
-        applicableImplementerOptions.get(IOOrder.PRE_RESPONSE).forEach(option -> applySafe(option, xs2AFactoryInput, null, xs2AResponse));
+    public void modifyResponse(XS2AResponse xs2AResponse) {
+        applicableImplementerOptions.get(IOOrder.PRE_RESPONSE).forEach(option -> applySafe(option, null, null, xs2AResponse));
     }
 
     private void applySafe(ApplicableImplementerOption applicableImplementerOption, XS2AFactoryInput xs2AFactoryInput, XS2ARequest xs2ARequest, XS2AResponse xs2AResponse) {

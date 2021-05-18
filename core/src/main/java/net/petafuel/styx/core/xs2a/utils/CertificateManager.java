@@ -48,11 +48,11 @@ public class CertificateManager {
     @SuppressWarnings("squid:S4797")
     private CertificateManager() {
 
-        String keyStorePath = System.getProperty(KEYSTORE_PATH);
-        this.keyStoreStyxAlias = System.getProperty(KEYSTORE_STYX_ALIAS);
+        String keyStorePath = Config.getInstance().getProperties().getProperty(KEYSTORE_PATH);
+        this.keyStoreStyxAlias = Config.getInstance().getProperties().getProperty(KEYSTORE_STYX_ALIAS);
         try {
             this.password = new String(Files.readAllBytes(
-                    Paths.get(System.getProperty(KEYSTORE_PASS_PATH))),
+                    Paths.get(Config.getInstance().getProperties().getProperty(KEYSTORE_PASS_PATH))),
                     StandardCharsets.UTF_8)
                     .toCharArray();
         } catch (IOException e) {

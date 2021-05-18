@@ -2,9 +2,6 @@ package net.petafuel.styx.core.xs2a.oauth;
 
 import net.petafuel.styx.core.banklookup.sad.entities.Url;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
-import net.petafuel.styx.core.xs2a.callback.control.CallbackProvider;
-import net.petafuel.styx.core.xs2a.callback.entity.RealmParameter;
-import net.petafuel.styx.core.xs2a.callback.entity.ServiceRealm;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.entities.StrongAuthenticatableResource;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
@@ -32,7 +29,10 @@ import java.util.Properties;
 import java.util.UUID;
 
 public class OAuthService extends BasicService {
+
     private static final Logger LOG = LogManager.getLogger(OAuthService.class);
+    public static final String PREAUTH = "preauth";
+    public static final String SCA = "SCA";
 
     public OAuthService() {
         super(LOG, null, new BerlinGroupSigner());
@@ -69,12 +69,17 @@ public class OAuthService extends BasicService {
         }
     }
 
-    public static String buildLink(String state, UUID xRequestId, ServiceRealm serviceRealm) {
+    public static String getRedirectUri(UUID xRequestId, String realm) {
+        Properties properties = Config.getInstance().getProperties();
+        return properties.getProperty("styx.redirect.baseurl") + realm + "/ok/" + xRequestId.toString();
+    }
+
+    public static String buildLink(String state, UUID xRequestId, String realm) {
         OAuthSession stored = PersistentOAuthSession.getByState(state);
         HashMap<String, String> queryParams = getQueryParameters(stored);
         Properties properties = Config.getInstance().getProperties();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
-        queryParams.put("redirect_uri", CallbackProvider.generateCallbackUrl(serviceRealm, RealmParameter.NONE, xRequestId.toString()));
+        queryParams.put("redirect_uri", getRedirectUri(xRequestId, realm));
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 
@@ -84,7 +89,7 @@ public class OAuthService extends BasicService {
         queryParams.put("bic", bic);
         Properties properties = Config.getInstance().getProperties();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
-        queryParams.put("redirect_uri", CallbackProvider.generateCallbackUrl(ServiceRealm.OAUTH, RealmParameter.PREAUTH, stored.getState()));
+        queryParams.put("redirect_uri", properties.getProperty("styx.redirect.baseurl") + "oauth/" + PREAUTH + "/" + stored.getState());
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 
@@ -140,7 +145,8 @@ public class OAuthService extends BasicService {
     }
 
     /**
-     * @param url should be a .well-known url within oauth flow
+     *
+     * @param url
      * @return HashMap<String, String>
      */
     private Map<String, String> getEndpoints(String url) {

@@ -1,0 +1,10 @@
+Mt94x Software License Agreement
+Copyright 2021 petaFuel GmbH
+
+This is a legal agreement between the licensee (you - either an individual or entity) and the licensor (petaFuel GmbH).
+Licensee acknowledges that this is only a limited non-exclusive license. Licensor is and remains the owner of all titles, rights, and interests in the software.
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+Redistribution and use of the licensed materials in binary form, without modification, are permitted provided that the following conditions are met:
+a. No reverse engineering, decompilation, or disassembly of this software is permitted with respect to any software provided in binary form.
+b. Any redistribution and use are licensed by petaFuel GmbH for use only with petaFuel GmbH software.
+THIS SOFTWARE IS PROVIDED BY PETAFUEL GMBH "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL PETAFUEL GMBH BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

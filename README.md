@@ -65,3 +65,13 @@ Styx is build using the Amazon Corretto 8 - the production-ready distribution of
    cd API/target
    java -jar styxRest.jar
    ```
+
+## Third Party Libraries
+
+Styx is build using great third party projects such as
+
+* OWASP Dependency-Check,
+* Eclipse Yasson,
+* REST-assured and many others.
+
+You can find the [complete list of third party libraries](https://github.com/petafuel/styx/blob/main/third_party/README.md) and their respective licenses in the 'third_party' directory.

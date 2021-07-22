@@ -13,8 +13,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Priority;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.Provider;
 
 @Provider
@@ -22,6 +24,9 @@ import javax.ws.rs.ext.Provider;
 @Priority(StyxFilterPriorites.INPUT_VALIDATION)
 public class PSUFilter implements ContainerRequestFilter {
     private static final Logger LOG = LogManager.getLogger(PSUFilter.class);
+
+    @Context
+    private HttpServletRequest httpServletRequest;
 
     @Override
     public void filter(ContainerRequestContext containerRequestContext) {
@@ -33,12 +38,7 @@ public class PSUFilter implements ContainerRequestFilter {
         psu.setIdType(containerRequestContext.getHeaderString(XS2AHeader.PSU_ID_TYPE));
         psu.setCorporateId(containerRequestContext.getHeaderString(XS2AHeader.PSU_CORPORATE_ID));
         psu.setCorporateIdType(containerRequestContext.getHeaderString(XS2AHeader.PSU_CORPORATE_ID_TYPE));
-        String psuIp = containerRequestContext.getHeaderString(XS2AHeader.PSU_IP_ADDRESS);
-        if (psuIp == null || "".equals(psuIp)) {
-            psu.setIp("127.0.0.1");
-        } else {
-            psu.setIp(psuIp);
-        }
+        psu.setIp(httpServletRequest.getRemoteAddr());
 
         String psuPort = containerRequestContext.getHeaderString(XS2AHeader.PSU_IP_PORT);
         try {

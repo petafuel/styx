@@ -5,6 +5,7 @@ import net.petafuel.jsepa.exception.SEPAParsingException;
 import net.petafuel.jsepa.facades.ReportConverter;
 import net.petafuel.jsepa.model.pain002.TransactionReport;
 import net.petafuel.styx.core.xs2a.SinglePaymentWrapper;
+import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.IXS2AHttpSigner;
 import net.petafuel.styx.core.xs2a.contracts.PISInterface;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
@@ -66,9 +67,12 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
                 this.createBody(RequestType.POST, mt, xs2ARequest);
             } else {
                 this.createBody(RequestType.POST, XML, xs2ARequest);
+                xs2ARequest.setContentType("application/xml");
             }
         } else {
             this.createBody(RequestType.POST, JSON, xs2ARequest);
+            xs2ARequest.setContentType(BasicService.JSON.toString());
+            xs2ARequest.setAccept(BasicService.JSON.toString());
         }
 
         this.setUrl(this.url + xs2ARequest.getServicePath());

@@ -19,6 +19,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -75,7 +76,9 @@ public abstract class BasicService {
         if (!requestType.equals(RequestType.GET) && !request.getRawBody().isPresent()) {
             logger.warn("Sending empty request body for non GET http-method");
         }
-        createBody(requestType, RequestBody.create(request.getRawBody().orElse(""), mediaType));
+        // RequestBody.create() method would add charset to media type automatically if signature (String, MediaType)
+        // if signature (byte[], MediaType) media is used as supplied
+        createBody(requestType, RequestBody.create(request.getRawBody().orElse("").getBytes(StandardCharsets.UTF_8), mediaType));
     }
 
     protected void createBody(RequestType requestType, RequestBody body) {

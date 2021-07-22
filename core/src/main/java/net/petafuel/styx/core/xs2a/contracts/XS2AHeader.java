@@ -33,6 +33,7 @@ public @interface XS2AHeader {
     //Styx specific
     String PSU_BIC = "psu-bic";
     String REDIRECT_PREFERRED = "redirectPreferred";
+    String CONTENT_TYPE = "content-type";
 
     String value() default "";
 

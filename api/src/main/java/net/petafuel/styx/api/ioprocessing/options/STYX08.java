@@ -11,6 +11,10 @@ import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * ASPSP requires PSU-IP-Address
+ * add psuIpAddress header to xs2aRequest if option is true
+ */
 public class STYX08 extends ApplicableImplementerOption {
     private static final Logger LOG = LogManager.getLogger(STYX08.class);
 

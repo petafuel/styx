@@ -18,6 +18,9 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Recreating the JerseyTestContainerFactory but changing the StyxTestContainer Constructor to initialise the server using a ServletContext in order to test @context injections within Servlet/API Resources like Endpoints and Middlewares/Filters
+ */
 public class StyxTestContainerFactory implements TestContainerFactory {
     public StyxTestContainerFactory() {
     }

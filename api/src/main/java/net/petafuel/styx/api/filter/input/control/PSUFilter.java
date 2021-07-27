@@ -7,6 +7,8 @@ import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxException;
 import net.petafuel.styx.api.filter.input.boundary.RequiresPSU;
 import net.petafuel.styx.api.rest.StyxFilterPriorites;
+import net.petafuel.styx.api.util.ApiProperties;
+import net.petafuel.styx.api.util.Sanitizer;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +40,12 @@ public class PSUFilter implements ContainerRequestFilter {
         psu.setIdType(containerRequestContext.getHeaderString(XS2AHeader.PSU_ID_TYPE));
         psu.setCorporateId(containerRequestContext.getHeaderString(XS2AHeader.PSU_CORPORATE_ID));
         psu.setCorporateIdType(containerRequestContext.getHeaderString(XS2AHeader.PSU_CORPORATE_ID_TYPE));
-        psu.setIp(httpServletRequest.getRemoteAddr());
+        if (Boolean.getBoolean(ApiProperties.STYX_PROXY_ENABLED)) {
+            String forwardedIps = containerRequestContext.getHeaderString(XS2AHeader.X_FORWARDED_FOR);
+            psu.setIp(Sanitizer.parseClientIpFromForwardedIPs(forwardedIps));
+        } else {
+            psu.setIp(httpServletRequest.getRemoteAddr());
+        }
 
         String psuPort = containerRequestContext.getHeaderString(XS2AHeader.PSU_IP_PORT);
         try {

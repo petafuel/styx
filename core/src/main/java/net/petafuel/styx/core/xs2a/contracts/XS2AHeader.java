@@ -33,6 +33,7 @@ public @interface XS2AHeader {
     String PSU_BIC = "psu-bic";
     String REDIRECT_PREFERRED = "redirectPreferred";
     String CONTENT_TYPE = "content-type";
+    String X_FORWARDED_FOR = "x-forwarded-for";
 
     String value() default "";
 

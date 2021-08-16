@@ -26,6 +26,9 @@ public class ClientTokenInfo {
     @HeaderParam("expiresIn")
     private String expiresIn;
 
+    @HeaderParam("clientReference")
+    private String clientReference;
+
     public String getToken() {
         return token;
     }
@@ -48,5 +51,9 @@ public class ClientTokenInfo {
 
     public void setExpiresIn(Integer expiresIn) {
         this.expiresIn = String.valueOf(expiresIn);
+    }
+
+    public String getClientReference() {
+        return clientReference;
     }
 }

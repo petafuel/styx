@@ -1,17 +1,19 @@
 package net.petafuel.styx.core.persistence.models;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * This model holds the styx mastertoken + metadata
  */
-public class ClientApp {
-    private String masterToken;
+public class MasterToken {
+    private String token;
     private String name;
     private String redirectUrl;
     private boolean enabled;
     private Date createdAt;
     private Date updatedAt;
+    private Map<String, MasterTokenRestriction> restrictions;
 
     public String getName() {
         return name;
@@ -21,12 +23,12 @@ public class ClientApp {
         this.name = name;
     }
 
-    public String getMasterToken() {
-        return masterToken;
+    public String getToken() {
+        return token;
     }
 
-    public void setMasterToken(String masterToken) {
-        this.masterToken = masterToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getRedirectUrl() {
@@ -59,5 +61,13 @@ public class ClientApp {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Map<String, MasterTokenRestriction> getRestrictions() {
+        return restrictions;
+    }
+
+    public void setRestrictions(Map<String, MasterTokenRestriction> restrictions) {
+        this.restrictions = restrictions;
     }
 }

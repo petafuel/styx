@@ -14,6 +14,8 @@ public class AccessToken {
     private String serviceType;
     private int expiresIn;
     private Date lastUsedOn;
+    private int usages;
+    private String clientReference;
 
     public String getId() {
         return id;
@@ -79,4 +81,19 @@ public class AccessToken {
         this.lastUsedOn = lastUsedOn;
     }
 
+    public int getUsages() {
+        return usages;
+    }
+
+    public void setUsages(int usages) {
+        this.usages = usages;
+    }
+
+    public void setClientReference(String clientReference) {
+        this.clientReference = clientReference;
+    }
+
+    public String getClientReference() {
+        return clientReference;
+    }
 }

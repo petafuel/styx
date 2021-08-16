@@ -21,6 +21,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Objects;
 
+/**
+ * master token restrictions have to be set correctly so that these tests can be successful
+ * => keys aispis and ais are used within these tests
+ * => restrictions can be f.e. "{ "ais": { "max-usages": 10 }, "aispis": { "max-usages": 5 } }"
+ */
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AuthenticationResourceTest extends StyxRESTTest {
     @Override
@@ -117,7 +123,7 @@ public class AuthenticationResourceTest extends StyxRESTTest {
 
         invocation = invocationBuilder.buildPost(Entity.entity(new Object(), MediaType.APPLICATION_JSON));
         response = invocation.invoke(Response.class);
-        Assertions.assertEquals(403, response.getStatus());
+        Assertions.assertEquals(409, response.getStatus());
         JsonObject errorObject = response.readEntity(JsonObject.class);
 
         Assertions.assertEquals(ResponseCategory.ERROR.name(), errorObject.getString("category"));

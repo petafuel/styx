@@ -64,6 +64,8 @@ public enum ResponseConstant implements Response.StatusType, Serializable {
     SAD_ASPSP_NOT_FOUND(409, "The requested ASPSP was not found within SAD"),
     STYX_PREAUTH_NOT_FOUND(409, "preAuthId not found"),
     SAD_ASPSP_INACTIVE(409, "Requested ASPSP is flagged inactive by styx"),
+    STYX_TOKEN_ACCESS_EXEEDED(409, "Max Usages of token reached"),
+    STYX_MASTER_TOKEN_RESTRICTED(409, "Master token does not allow service type"),
 
     /*
     ASPSP client forwarded codes

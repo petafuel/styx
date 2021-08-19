@@ -63,7 +63,7 @@ class AccessTokenFilterUnitTest {
             Assertions.assertEquals(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED.getReasonPhrase(), response.getMessage());
             Assertions.assertEquals(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED.getStatusCode(), response.getCode().getStatusCode());
             Assertions.assertEquals(ResponseCategory.ERROR, response.getCategory());
-            Assertions.assertEquals(ResponseOrigin.CLIENT, response.getOrigin());
+            Assertions.assertEquals(ResponseOrigin.STYX, response.getOrigin());
         }
     }
 
@@ -79,7 +79,7 @@ class AccessTokenFilterUnitTest {
             Assertions.assertEquals(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED.getReasonPhrase(), response.getMessage());
             Assertions.assertEquals(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED.getStatusCode(), response.getCode().getStatusCode());
             Assertions.assertEquals(ResponseCategory.ERROR, response.getCategory());
-            Assertions.assertEquals(ResponseOrigin.CLIENT, response.getOrigin());
+            Assertions.assertEquals(ResponseOrigin.STYX, response.getOrigin());
         }
     }
 

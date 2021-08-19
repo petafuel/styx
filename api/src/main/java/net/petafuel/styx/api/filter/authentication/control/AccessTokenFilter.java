@@ -101,7 +101,7 @@ public class AccessTokenFilter extends AbstractTokenFilter {
     public void checkRestrictions(MasterToken masterToken, String serviceType) {
         if (masterToken.getRestrictions() == null || !masterToken.getRestrictions().get(serviceType).isValid()) {
             LOG.error("Master Token restrictions not valid: masterTokenName={}", masterToken.getName());
-            ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
+            ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED, ResponseCategory.ERROR, ResponseOrigin.STYX);
             throw new StyxException(responseEntity);
         }
     }

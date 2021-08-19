@@ -41,8 +41,8 @@ public class TokenHashTest {
         // expect that there is a "token" in the response and it's a valid UUID
         String accessTokenString = element.getString("token");
         AccessToken accessToken = PersistentAccessToken.get(TokenGenerator.hashSHA256(accessTokenString));
-        Assertions.assertEquals(accessToken.getId(), TokenGenerator.hashSHA256(accessTokenString));
-        Assertions.assertEquals(accessToken.getClientReference(), TokenGenerator.hashSHA256("testRef"));
+        Assertions.assertEquals(TokenGenerator.hashSHA256(accessTokenString), accessToken.getId());
+        Assertions.assertEquals(TokenGenerator.hashSHA256("testRef"), accessToken.getClientReference());
         Assertions.assertEquals(0, accessToken.getUsages());
     }
 }

@@ -114,7 +114,7 @@ public class AccessTokenFilter extends AbstractTokenFilter {
      */
     public void checkMaxUsages(MasterToken masterToken, AccessToken accessToken) {
         int maxUsages = masterToken.getRestrictions().get(accessToken.getServiceType()).getMaxUsages();
-        if (maxUsages > 0 && maxUsages == accessToken.getUsages()) {
+        if (maxUsages > 0 && maxUsages >= accessToken.getUsages()) {
             ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_TOKEN_ACCESS_EXEEDED, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
             throw new StyxException(responseEntity);
         }

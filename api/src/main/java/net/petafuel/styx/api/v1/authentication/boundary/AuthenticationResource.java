@@ -59,8 +59,8 @@ public class AuthenticationResource extends RestResource {
             try {
                 clientReference = TokenGenerator.hashSHA256(clientReference);
             } catch (NoSuchAlgorithmException e) {
-                ResponseEntity responseEntity = new ResponseEntity(e.getMessage(), ResponseConstant.INTERNAL_SERVER_ERROR, ResponseCategory.ERROR, ResponseOrigin.STYX);
-                throw new StyxException(responseEntity);
+                LOG.warn("client_reference could not be hashed for new accessToken");
+                clientReference = null;
             }
         }
 

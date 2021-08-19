@@ -17,8 +17,6 @@ VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 $$;
 
-drop function if exits create_token(client_master_token character varying, access_token character varying, service character varying, expires_in integer);
-
 create or replace function update_token_usage(token character varying) returns void
     security definer
     language sql
@@ -27,4 +25,3 @@ UPDATE tokens
 SET last_used_on = now(), usages = usages + 1
 WHERE id = $1;
 $$;
-

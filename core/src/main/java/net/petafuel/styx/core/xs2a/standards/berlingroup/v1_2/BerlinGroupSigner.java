@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,6 +17,8 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PSSParameterSpec;
 import java.util.Base64;
 import java.util.LinkedList;
 import java.util.Map;
@@ -48,17 +51,22 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
     public BerlinGroupSigner() {
         CertificateManager certificateManager = CertificateManager.getInstance();
         try {
-
+            //QWAC => certificate which will be added to request
             X509Certificate crt = certificateManager.getCertificate();
             this.certificate = crt.getEncoded();
-            this.serialHex = crt.getSerialNumber().toString(16);
-            this.issuerDN = crt.getIssuerDN().getName();
-            this.algorithm = crt.getSigAlgName();
+
+            //QSealC => certificate to use for signing
+            X509Certificate sealCrt = certificateManager.getSealCertificate();
+            this.serialHex = sealCrt.getSerialNumber().toString(16);
+            this.issuerDN = sealCrt.getIssuerDN().getName();
+            this.algorithm = sealCrt.getSigAlgName();
 
             this.signature = Signature.getInstance(this.algorithm);
-            this.signature.initSign(certificateManager.getPrivateKey());
+            //set Parameter to handle algorithm RSASSA-PSS
+            this.signature.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 32, 1));
+            this.signature.initSign(certificateManager.getSealPrivateKey());
 
-        } catch (NoSuchAlgorithmException | InvalidKeyException | CertificateException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | CertificateException | InvalidAlgorithmParameterException e) {
             LOG.error(e.getMessage());
             throw new SigningException(e.getMessage(), e);
         }
@@ -99,7 +107,7 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
         try {
             this.signature.update(signatureContent.getBytes(StandardCharsets.UTF_8));
         } catch (SignatureException e) {
-            LOG.error(e.getStackTrace());
+            LOG.error("Unable to update signature: {}", e.getMessage());
         }
         String singedHeaders = null;
         try {

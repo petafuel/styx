@@ -70,13 +70,6 @@ public final class INGSigner extends BerlinGroupSigner implements IXS2AHttpSigne
 
         Map<String, String> headers = xs2aRequest.getHeaders();
 
-        //Sandbox specials
-        //todo delete for commit
-        headers.remove(XS2AHeader.TPP_REDIRECT_URL);
-        headers.put(XS2AHeader.TPP_REDIRECT_URL, "https://example.com/redirect");
-        headers.remove(XS2AHeader.PSU_IP_ADDRESS);
-        headers.put(XS2AHeader.PSU_IP_ADDRESS, "37.228.130.0");
-
         StringJoiner signatureStructureJoiner = new StringJoiner(" ");
         StringJoiner signatureContentJoiner = new StringJoiner("\n");
         LinkedList<String> supportedHeaders = new LinkedList<>();

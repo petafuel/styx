@@ -56,6 +56,10 @@ public class BerlinGroupPIS extends BasicAuthorisationService implements PISInte
         super(LOG, url, signer);
     }
 
+    public BerlinGroupPIS(Logger log, String url, IXS2AHttpSigner signer) {
+        super(log, url, signer);
+    }
+
     @Override
     public InitiatedPayment initiatePayment(PISRequest xs2ARequest) throws BankRequestFailedException {
         PaymentProduct product = xs2ARequest.getPaymentProduct();

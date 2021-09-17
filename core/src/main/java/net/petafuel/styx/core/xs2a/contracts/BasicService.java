@@ -160,6 +160,15 @@ public abstract class BasicService {
         return responseBody;
     }
 
+    /**
+     * add a header to builder
+     * @param key headerKey
+     * @param value headerValue
+     */
+    protected void addHeader(String key, String value){
+        this.builder.header(key, value);
+    }
+
     protected enum RequestType {
         POST,
         GET,

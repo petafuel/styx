@@ -76,6 +76,10 @@ public abstract class XS2ARequest {
         headers.put(key, value);
     }
 
+    public void removeHeader(String key) {
+        headers.remove(key);
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }

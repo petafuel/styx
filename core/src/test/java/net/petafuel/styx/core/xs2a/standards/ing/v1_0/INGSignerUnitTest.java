@@ -3,7 +3,6 @@ package net.petafuel.styx.core.xs2a.standards.ing.v1_0;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.utils.CertificateManager;
-import net.petafuel.styx.core.xs2a.utils.Config;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,14 +10,13 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
 
-class INGSignerTest {
+class INGSignerUnitTest {
 
     private XS2ARequest xs2ARequest;
     private INGSigner ingSigner;
 
     @BeforeEach
     void setUp() {
-        Config.getInstance();
         ingSigner = new INGSigner();
         xs2ARequest = new XS2ARequest() {
             @Override

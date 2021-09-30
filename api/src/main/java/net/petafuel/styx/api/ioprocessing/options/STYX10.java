@@ -52,7 +52,7 @@ public class STYX10 extends ApplicableImplementerOption {
         } else {
             return false;
         }
-        LOG.info("CountryCode = {}. PSU-ID-TYPE = {}", countryCode, psuIdType);
+        LOG.info("countryCode={}, psuIdType={}", countryCode, psuIdType);
 
         xs2ARequest.addHeader(XS2AHeader.PSU_ID_TYPE, psuIdType);
         return true;

@@ -11,6 +11,7 @@ import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 import net.petafuel.styx.core.banklookup.sad.entities.Config;
 import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;
 import net.petafuel.styx.core.banklookup.sad.entities.Url;
+import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -66,6 +67,11 @@ public class STYX09IntegrationTest extends StyxRESTTest {
             @Override
             public Optional<String> getRawBody() {
                 return Optional.empty();
+            }
+
+            @Override
+            public BasicService.RequestType getHttpMethod() {
+                return BasicService.RequestType.POST;
             }
 
             @Override

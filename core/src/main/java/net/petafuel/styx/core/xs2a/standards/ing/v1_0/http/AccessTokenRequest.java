@@ -30,6 +30,11 @@ public class AccessTokenRequest extends XS2ARequest {
     }
 
     @Override
+    public BasicService.RequestType getHttpMethod() {
+        return BasicService.RequestType.POST;
+    }
+
+    @Override
     public String getServicePath() {
         return "/oauth2/token";
     }

@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
+import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
 import net.petafuel.styx.core.xs2a.entities.InitializablePayment;
 import net.petafuel.styx.core.xs2a.entities.PSU;
@@ -16,6 +17,11 @@ public class ReadPaymentStatusRequest extends PISRequest {
     @Override
     public Optional<String> getRawBody() {
         return Optional.empty();
+    }
+
+    @Override
+    public BasicService.RequestType getHttpMethod() {
+        return BasicService.RequestType.GET;
     }
 
     @Override

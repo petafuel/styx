@@ -6,6 +6,7 @@ import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 import net.petafuel.styx.core.banklookup.sad.entities.Config;
 import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;
+import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.PSU;
@@ -52,6 +53,11 @@ class STYX08UnitTest {
             @Override
             public Optional<String> getRawBody() {
                 return Optional.empty();
+            }
+
+            @Override
+            public BasicService.RequestType getHttpMethod() {
+                return BasicService.RequestType.GET;
             }
 
             @Override

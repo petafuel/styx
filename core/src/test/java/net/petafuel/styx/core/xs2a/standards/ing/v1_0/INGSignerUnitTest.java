@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.ing.v1_0;
 
+import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.utils.CertificateManager;
@@ -22,6 +23,11 @@ class INGSignerUnitTest {
             @Override
             public Optional<String> getRawBody() {
                 return Optional.empty();
+            }
+
+            @Override
+            public BasicService.RequestType getHttpMethod() {
+                return BasicService.RequestType.GET;
             }
 
             @Override

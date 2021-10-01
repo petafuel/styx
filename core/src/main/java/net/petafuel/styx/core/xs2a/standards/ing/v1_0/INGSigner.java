@@ -9,6 +9,7 @@ import net.petafuel.styx.core.xs2a.standards.ing.v1_0.http.AccessTokenRequest;
 import net.petafuel.styx.core.xs2a.utils.CertificateManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -29,6 +30,9 @@ import java.util.StringJoiner;
  * @see IXS2AHttpSigner
  */
 public final class INGSigner extends BerlinGroupSigner implements IXS2AHttpSigner {
+
+    public static final String REQUEST_TARGET = "(request-target)";
+    public static final String ING_CLIENT_ID = "client_id";
 
     private static final Logger LOG = LogManager.getLogger(INGSigner.class);
 
@@ -80,7 +84,7 @@ public final class INGSigner extends BerlinGroupSigner implements IXS2AHttpSigne
         supportedHeaders.add(XS2AHeader.PSU_CORPORATE_ID);
         supportedHeaders.add(XS2AHeader.TPP_REDIRECT_URL);
         //additional header for signing
-        supportedHeaders.add(XS2AHeader.REQUEST_TARGET);
+        supportedHeaders.add(REQUEST_TARGET);
 
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             String key = entry.getKey();
@@ -124,8 +128,8 @@ public final class INGSigner extends BerlinGroupSigner implements IXS2AHttpSigne
             this.addCertificate(xs2aRequest);
         }
         //remove added headers after signing => header were just added for signing and should not be part of the real request
-        xs2aRequest.removeHeader(XS2AHeader.REQUEST_TARGET);
-        xs2aRequest.removeHeader(XS2AHeader.ING_CLIENT_ID);
+        xs2aRequest.removeHeader(REQUEST_TARGET);
+        xs2aRequest.removeHeader(ING_CLIENT_ID);
     }
 
     /**

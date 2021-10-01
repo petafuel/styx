@@ -34,8 +34,6 @@ public @interface XS2AHeader {
     String REDIRECT_PREFERRED = "redirectPreferred";
     String CONTENT_TYPE = "content-type";
     String X_FORWARDED_FOR = "x-forwarded-for";
-    String REQUEST_TARGET = "(request-target)";
-    String ING_CLIENT_ID = "client_id";
 
     String value() default "";
 

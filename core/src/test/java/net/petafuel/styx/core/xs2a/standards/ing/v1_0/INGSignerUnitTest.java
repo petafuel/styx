@@ -39,35 +39,35 @@ class INGSignerUnitTest {
 
     @Test
     void testSignWithClientId() {
-        xs2ARequest.addHeader(XS2AHeader.ING_CLIENT_ID, "test");
-        xs2ARequest.addHeader(XS2AHeader.REQUEST_TARGET, "post /v1/payments/sepa-credit-transfers");
+        xs2ARequest.addHeader(INGSigner.ING_CLIENT_ID, "test");
+        xs2ARequest.addHeader(INGSigner.REQUEST_TARGET, "post /v1/payments/sepa-credit-transfers");
         ingSigner.sign(xs2ARequest);
 
         //assert headers
-        Assertions.assertFalse(xs2ARequest.getHeaders().containsKey(XS2AHeader.ING_CLIENT_ID));
+        Assertions.assertFalse(xs2ARequest.getHeaders().containsKey(INGSigner.ING_CLIENT_ID));
         Assertions.assertNotNull(xs2ARequest.getHeaders().get(XS2AHeader.SIGNATURE));
 
         //assert given keyId is set and algorithm and request-target headers for ing
         String signature = xs2ARequest.getHeaders().get(XS2AHeader.SIGNATURE);
         Assertions.assertTrue(signature.contains("keyId=\"test\""));
         Assertions.assertTrue(signature.contains("algorithm=\"rsa-sha256\""));
-        Assertions.assertTrue(signature.contains("headers=\""+XS2AHeader.REQUEST_TARGET));
+        Assertions.assertTrue(signature.contains("headers=\""+INGSigner.REQUEST_TARGET));
     }
 
     @Test
     void testSignWithoutClientId() throws CertificateEncodingException {
-        xs2ARequest.addHeader(XS2AHeader.REQUEST_TARGET, "post /v1/oauth2/token");
+        xs2ARequest.addHeader(INGSigner.REQUEST_TARGET, "post /v1/oauth2/token");
         ingSigner.sign(xs2ARequest);
 
         //assert headers
-        Assertions.assertFalse(xs2ARequest.getHeaders().containsKey(XS2AHeader.ING_CLIENT_ID));
+        Assertions.assertFalse(xs2ARequest.getHeaders().containsKey(INGSigner.ING_CLIENT_ID));
         Assertions.assertNull(xs2ARequest.getHeaders().get(XS2AHeader.SIGNATURE));
         Assertions.assertNotNull(xs2ARequest.getHeaders().get(XS2AHeader.AUTHORIZATION));
 
         //assert algorithm and request-target headers for ing
         String authorization = xs2ARequest.getHeaders().get(XS2AHeader.AUTHORIZATION);
         Assertions.assertTrue(authorization.contains("algorithm=\"rsa-sha256\""));
-        Assertions.assertTrue(authorization.contains("headers=\""+XS2AHeader.REQUEST_TARGET));
+        Assertions.assertTrue(authorization.contains("headers=\""+INGSigner.REQUEST_TARGET));
 
         //assert keyId is build from qseal certificate
         CertificateManager certificateManager = CertificateManager.getInstance();

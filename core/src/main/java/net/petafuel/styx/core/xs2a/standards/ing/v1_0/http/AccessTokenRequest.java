@@ -3,6 +3,7 @@ package net.petafuel.styx.core.xs2a.standards.ing.v1_0.http;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import net.petafuel.styx.core.xs2a.standards.ing.v1_0.INGSigner;
 
 import javax.json.bind.annotation.JsonbProperty;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class AccessTokenRequest extends XS2ARequest {
     public AccessTokenRequest() {
         this.grantType = "client_credentials";
         //add request target header to include it in signature while signing
-        this.addHeader(XS2AHeader.REQUEST_TARGET, "post /oauth2/token");
+        this.addHeader(INGSigner.REQUEST_TARGET, "post /oauth2/token");
     }
 
     @Override

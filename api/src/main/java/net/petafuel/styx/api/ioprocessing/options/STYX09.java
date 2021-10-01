@@ -16,6 +16,7 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
+import net.petafuel.styx.core.xs2a.standards.ing.v1_0.INGSigner;
 import net.petafuel.styx.core.xs2a.standards.ing.v1_0.services.AccessTokenService;
 import net.petafuel.styx.core.xs2a.standards.ing.v1_0.entities.AccessToken;
 import net.petafuel.styx.core.xs2a.standards.ing.v1_0.http.AccessTokenRequest;
@@ -59,11 +60,11 @@ public class STYX09 extends ApplicableImplementerOption {
 
         //add additional data to headers for further requests
         xs2ARequest.addHeader(XS2AHeader.AUTHORIZATION, "Bearer " + accessToken.getToken());
-        xs2ARequest.addHeader(XS2AHeader.ING_CLIENT_ID, accessToken.getClientId());
+        xs2ARequest.addHeader(INGSigner.ING_CLIENT_ID, accessToken.getClientId());
 
         String httpMethod = xs2ARequest.getHttpMethod().toString().toLowerCase();
         String servicePath = xs2ARequest.getServicePath();
-        xs2ARequest.addHeader(XS2AHeader.REQUEST_TARGET, httpMethod + " " + servicePath);
+        xs2ARequest.addHeader(INGSigner.REQUEST_TARGET, httpMethod + " " + servicePath);
 
         return true;
     }

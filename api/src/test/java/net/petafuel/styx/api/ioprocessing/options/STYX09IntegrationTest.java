@@ -14,6 +14,7 @@ import net.petafuel.styx.core.banklookup.sad.entities.Url;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
+import net.petafuel.styx.core.xs2a.standards.ing.v1_0.INGSigner;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Assume;
 import org.junit.Test;
@@ -82,9 +83,9 @@ public class STYX09IntegrationTest extends StyxRESTTest {
 
         Assertions.assertTrue(styx09.apply(null, xs2ARequest, null));
         Assertions.assertNotNull(xs2ARequest.getHeaders().get(XS2AHeader.AUTHORIZATION));
-        Assertions.assertNotNull(xs2ARequest.getHeaders().get(XS2AHeader.ING_CLIENT_ID));
-        Assertions.assertNotNull(xs2ARequest.getHeaders().get(XS2AHeader.REQUEST_TARGET));
-        Assertions.assertEquals(ingClientId, xs2ARequest.getHeaders().get(XS2AHeader.ING_CLIENT_ID));
-        Assertions.assertNotEquals("post /oauth2/token", xs2ARequest.getHeaders().get(XS2AHeader.REQUEST_TARGET));
+        Assertions.assertNotNull(xs2ARequest.getHeaders().get(INGSigner.ING_CLIENT_ID));
+        Assertions.assertNotNull(xs2ARequest.getHeaders().get(INGSigner.REQUEST_TARGET));
+        Assertions.assertEquals(ingClientId, xs2ARequest.getHeaders().get(INGSigner.ING_CLIENT_ID));
+        Assertions.assertNotEquals("post /oauth2/token", xs2ARequest.getHeaders().get(INGSigner.REQUEST_TARGET));
     }
 }

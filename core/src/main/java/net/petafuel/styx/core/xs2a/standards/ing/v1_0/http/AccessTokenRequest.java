@@ -1,7 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.ing.v1_0.http;
 
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
-import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.standards.ing.v1_0.INGSigner;
 

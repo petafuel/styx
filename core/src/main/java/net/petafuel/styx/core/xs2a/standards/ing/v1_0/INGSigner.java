@@ -109,10 +109,10 @@ public final class INGSigner extends BerlinGroupSigner implements IXS2AHttpSigne
             LOG.error(e.getStackTrace());
         }
 
-        if (headers.containsKey("client_id")) {
+        if (headers.containsKey(INGSigner.ING_CLIENT_ID)) {
             //set client_id as key for all calls after getting ing access token and add signature header
             xs2aRequest.addHeader(XS2AHeader.SIGNATURE, String.format(SIGNATURE_STRINGFORMAT_ING,
-                    headers.get("client_id"),
+                    headers.get(INGSigner.ING_CLIENT_ID),
                     this.algorithm,
                     headerOrder,
                     singedHeaders));

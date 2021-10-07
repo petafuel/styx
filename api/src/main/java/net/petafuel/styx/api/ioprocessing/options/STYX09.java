@@ -17,9 +17,9 @@ import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
 import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import net.petafuel.styx.core.xs2a.standards.ing.v1_0.INGSigner;
-import net.petafuel.styx.core.xs2a.standards.ing.v1_0.services.AccessTokenService;
 import net.petafuel.styx.core.xs2a.standards.ing.v1_0.entities.AccessToken;
 import net.petafuel.styx.core.xs2a.standards.ing.v1_0.http.AccessTokenRequest;
+import net.petafuel.styx.core.xs2a.standards.ing.v1_0.services.AccessTokenService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,7 +46,7 @@ public class STYX09 extends ApplicableImplementerOption {
         AccessTokenService service = new AccessTokenService();
 
         Aspsp aspsp = ioParser.getAspsp();
-        String url = WebServer.isSandbox() ? aspsp.getSandboxUrl().getCommonUrl() : aspsp.getProductionUrl().getCommonUrl();
+        String url = Boolean.TRUE.equals(WebServer.isSandbox()) ? aspsp.getSandboxUrl().getCommonUrl() : aspsp.getProductionUrl().getCommonUrl();
 
         AccessTokenRequest request = new AccessTokenRequest();
         AccessToken accessToken;

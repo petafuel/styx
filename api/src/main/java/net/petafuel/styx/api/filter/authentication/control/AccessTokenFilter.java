@@ -95,14 +95,25 @@ public class AccessTokenFilter extends AbstractTokenFilter {
 
     /**
      * Check if master token Restrictions restrict usages of accessToken
+     *
      * @param masterToken model of MasterToken
      * @param serviceType string serviceType of accessToken
      */
     public void checkRestrictions(MasterToken masterToken, String serviceType) {
-        if (masterToken.getRestrictions() == null || !masterToken.getRestrictions().get(serviceType).isValid()) {
-            LOG.error("Master Token restrictions not valid: masterTokenName={}", masterToken.getName());
-            ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED, ResponseCategory.ERROR, ResponseOrigin.STYX);
-            throw new StyxException(responseEntity);
+        boolean abort = false;
+        if (masterToken.getRestrictions() == null) {
+            LOG.error("Master Token restrictions is null in database, treated as invalid. masterTokenName='{}'", masterToken.getName());
+            abort = true;
+        } else if (masterToken.getRestrictions().get(serviceType) == null) {
+            LOG.error("Master Token restrictions has no definition for used serviceType. masterTokenName='{}', serviceType='{}'", masterToken.getName(), serviceType);
+            abort = true;
+        } else if (!masterToken.getRestrictions().get(serviceType).isValid()) {
+            LOG.error("Master Token restrictions in database were validated as invalid, mastertoken configuration needs to be checked. masterTokenName='{}', serviceType='{}'", masterToken.getName(), serviceType);
+            abort = true;
+        }
+
+        if (abort) {
+            abortMasterTokenRestricted();
         }
     }
 
@@ -113,10 +124,28 @@ public class AccessTokenFilter extends AbstractTokenFilter {
      * @param accessToken model of AccessToken
      */
     public void checkMaxUsages(MasterToken masterToken, AccessToken accessToken) {
+        if (masterToken.getRestrictions().get(accessToken.getServiceType()) == null) {
+            LOG.error("Accesstoken has serviceType that does not match mastertoken. Mastertoken restrictions were changed after this accesstoken was created. masterTokenName='{}', accessTokenHash='{}', accessTokenServiceType='{}', accessTokenCreatedAt='{}', accessTokenClientReference='{}'",
+                    masterToken.getName(),
+                    accessToken.getId(),
+                    accessToken.getServiceType(),
+                    accessToken.getCreatedAt(),
+                    accessToken.getClientReference());
+            abortMasterTokenRestricted();
+        }
+
         int maxUsages = masterToken.getRestrictions().get(accessToken.getServiceType()).getMaxUsages();
         if (maxUsages > 0 && maxUsages <= accessToken.getUsages()) {
             ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_TOKEN_ACCESS_EXEEDED, ResponseCategory.ERROR, ResponseOrigin.CLIENT);
             throw new StyxException(responseEntity);
         }
+    }
+
+    /**
+     * @throws StyxException throws exception case for STYX_MASTER_TOKEN_RESTRICTED and Origin STYX
+     */
+    private void abortMasterTokenRestricted() {
+        ResponseEntity responseEntity = new ResponseEntity(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED, ResponseCategory.ERROR, ResponseOrigin.STYX);
+        throw new StyxException(responseEntity);
     }
 }

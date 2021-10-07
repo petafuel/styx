@@ -17,6 +17,25 @@ import java.util.Map;
 class AccessTokenFilterUnitTest {
 
     @Test
+    void testAccessTokenHasServiceTheMasterTokenDoesNotHaveAnymore() {
+        AccessToken accessToken = new AccessToken();
+        accessToken.setServiceType("ais");
+        MasterToken masterToken = prepareMasterToken("pis", 2);
+        AccessTokenFilter accessTokenFilter = new AccessTokenFilter();
+        Assertions.assertThrows(StyxException.class, () -> accessTokenFilter.checkMaxUsages(masterToken, accessToken));
+        try {
+            accessTokenFilter.checkMaxUsages(masterToken, accessToken);
+        } catch (StyxException exception) {
+            ResponseEntity response = exception.getResponseEntity();
+            Assertions.assertEquals(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED.getReasonPhrase(), response.getMessage());
+            Assertions.assertEquals(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED.getStatusCode(), response.getCode().getStatusCode());
+            Assertions.assertEquals(ResponseCategory.ERROR, response.getCategory());
+            Assertions.assertEquals(ResponseOrigin.STYX, response.getOrigin());
+        }
+    }
+
+
+    @Test
     void testCheckToken() {
         AccessTokenFilter accessTokenFilter = new AccessTokenFilter();
         Assertions.assertThrows(StyxException.class, () -> accessTokenFilter.checkToken("invalid"));
@@ -58,6 +77,22 @@ class AccessTokenFilterUnitTest {
         Assertions.assertThrows(StyxException.class, () -> accessTokenFilter.checkRestrictions(masterToken, "pis"));
         try {
             accessTokenFilter.checkRestrictions(masterToken, "pis");
+        } catch (StyxException exception) {
+            ResponseEntity response = exception.getResponseEntity();
+            Assertions.assertEquals(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED.getReasonPhrase(), response.getMessage());
+            Assertions.assertEquals(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED.getStatusCode(), response.getCode().getStatusCode());
+            Assertions.assertEquals(ResponseCategory.ERROR, response.getCategory());
+            Assertions.assertEquals(ResponseOrigin.STYX, response.getOrigin());
+        }
+    }
+
+    @Test
+    void testCheckRestrictionsOnChangedMasterTokenRestrictions() {
+        MasterToken masterToken = prepareMasterToken("pis", 2);
+        AccessTokenFilter accessTokenFilter = new AccessTokenFilter();
+        Assertions.assertThrows(StyxException.class, () -> accessTokenFilter.checkRestrictions(masterToken, "ais"));
+        try {
+            accessTokenFilter.checkRestrictions(masterToken, "ais");
         } catch (StyxException exception) {
             ResponseEntity response = exception.getResponseEntity();
             Assertions.assertEquals(ResponseConstant.STYX_MASTER_TOKEN_RESTRICTED.getReasonPhrase(), response.getMessage());

@@ -88,7 +88,9 @@ public class AccessTokenFilter extends AbstractTokenFilter {
         }
 
         //update lastUsedOn and increase usages of accessToken
-        PersistentAccessToken.updateLastUsedOn(tokenHash);
+        if (ri.getResourceClass().getAnnotation(CheckAccessToken.class).incrementUsage()) {
+            PersistentAccessToken.updateLastUsedOn(tokenHash);
+        }
 
         return accessToken.isValid() && masterToken.isEnabled();
     }

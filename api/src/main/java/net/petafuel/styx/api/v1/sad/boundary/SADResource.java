@@ -27,7 +27,7 @@ import java.util.Objects;
 @Path("/v1")
 @Produces({MediaType.APPLICATION_JSON + ";charset=UTF-8"})
 @CheckAccessToken(
-        allowedServices = {XS2ATokenType.AISPIS, XS2ATokenType.PIS, XS2ATokenType.AIS},
+        allowedServices = {XS2ATokenType.AISPIS, XS2ATokenType.PIS, XS2ATokenType.AIS, XS2ATokenType.PIIS},
         incrementUsage = false
 )
 public class SADResource extends RestResource {

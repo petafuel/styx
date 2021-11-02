@@ -24,9 +24,9 @@ public class ASPSPProcessor {
         // empty private constructor for sonarQube
     }
 
-    public static ASPSPResponse process(String bic) throws BankLookupFailedException, BankNotFoundException {
+    public static ASPSPResponse process(String bic) {
         try {
-            Aspsp aspsp =  getAspspByBic(bic);
+            Aspsp aspsp = getAspspByBic(bic);
             ASPSPResponse aspspResponse = new ASPSPResponse();
 
             if (Objects.nonNull(aspsp)) {
@@ -43,12 +43,9 @@ public class ASPSPProcessor {
                 aspspResponse.setSupportedServices(supportedServices);
                 aspspResponse.setPrestepRequired(processPrestepRequired(implementerOptions));
                 aspspResponse.setMulticurrencyAccountsSupported(proccessMulticurrencyAccountsSupported(implementerOptions));
-
-                return aspspResponse;
-            } else {
-                return aspspResponse;
             }
-        } catch (BankNotFoundException bankNotFoundException) {
+            return aspspResponse;
+        } catch (BankNotFoundException | BankLookupFailedException bankNotFoundException) {
             LOG.error("Bank not found for bic={} in SAD", bic);
             return null;
         }
@@ -56,6 +53,7 @@ public class ASPSPProcessor {
 
     /**
      * Gets the aspsp for the provided bic
+     *
      * @return Aspsp | null
      */
     private static Aspsp getAspspByBic(String bic) throws BankLookupFailedException, BankNotFoundException {
@@ -64,65 +62,96 @@ public class ASPSPProcessor {
     }
 
     /**
-     *
      * @param implementerOptionMap
      * @return AvailableSCAApproaches
      */
     private static AvailableSCAApproaches processScaApproaches(Map<String, ImplementerOption> implementerOptionMap) {
         AvailableSCAApproaches availableSCAApproaches = new AvailableSCAApproaches();
 
-        availableSCAApproaches.setRedirect(implementerOptionMap.get("IO5").getOptions().get("redirect"));
-        availableSCAApproaches.setoAuth(implementerOptionMap.get("IO5").getOptions().get("oauth"));
-        availableSCAApproaches.setDecoupled(implementerOptionMap.get("IO5").getOptions().get("decoupled"));
-        availableSCAApproaches.setEmbedded(implementerOptionMap.get("IO5").getOptions().get("embedded"));
+        availableSCAApproaches.setRedirect(
+                getIoValueFromIoMapForGetMethod(
+                        implementerOptionMap,
+                        "IO5",
+                        "redirect"
+                )
+        );
+        availableSCAApproaches.setoAuth(
+                getIoValueFromIoMapForGetMethod(
+                        implementerOptionMap,
+                        "IO5",
+                        "oauth"
+                )
+        );
+        availableSCAApproaches.setDecoupled(
+                getIoValueFromIoMapForGetMethod(
+                        implementerOptionMap,
+                        "IO5",
+                        "decoupled"
+                )
+        );
+        availableSCAApproaches.setEmbedded(
+                getIoValueFromIoMapForGetMethod(
+                        implementerOptionMap,
+                        "IO5",
+                        "embedded"
+                )
+        );
 
         return availableSCAApproaches;
     }
 
     /**
-     *
      * @param implementerOptionMap
      * @return Boolean
      */
     private static Boolean processPrestepRequired(Map<String, ImplementerOption> implementerOptionMap) {
-        if (implementerOptionMap.containsKey("IO6")) {
-            return implementerOptionMap.get("IO6").getOptions().get("required");
-        } else {
-            return false;
-        }
+        return getIoValueFromIoMapForGetMethod(implementerOptionMap, "IO6", "required");
     }
 
     /**
-     *
      * @param implementerOptionMap
      * @return Boolean
      */
     private static Boolean proccessMulticurrencyAccountsSupported(Map<String, ImplementerOption> implementerOptionMap) {
-        if (implementerOptionMap.containsKey("IO17")) {
-            return implementerOptionMap.get("IO17").getOptions().get("available");
-        } else {
-            return false;
-        }
+        return getIoValueFromIoMapForGetMethod(implementerOptionMap, "IO17", "available");
     }
 
     /**
-     *
      * @param implementerOptionMap
      * @return SupportedServicesPIS
      */
     private static SupportedServicesPIS processSupportServicesPis(Map<String, ImplementerOption> implementerOptionMap) {
         SupportedServicesPIS supportedServicesPIS = new SupportedServicesPIS();
 
-        supportedServicesPIS.setSinglePayments(implementerOptionMap.get("IO2").getOptions().containsValue(true));
-        supportedServicesPIS.setBulkPayments(implementerOptionMap.get("IO3").getOptions().containsValue(true));
-        supportedServicesPIS.setPeriodicPayments(implementerOptionMap.get("IO4").getOptions().containsValue(true));
-        supportedServicesPIS.setFutureDatedPayments(implementerOptionMap.get("IO21").getOptions().get("available"));
+        supportedServicesPIS.setSinglePayments(
+                getIoValueFromIoMapForContainsValueMethod(
+                        implementerOptionMap,
+                        "IO2"
+                )
+        );
+        supportedServicesPIS.setBulkPayments(
+                getIoValueFromIoMapForContainsValueMethod(
+                        implementerOptionMap,
+                        "IO3"
+                )
+        );
+        supportedServicesPIS.setPeriodicPayments(
+                getIoValueFromIoMapForContainsValueMethod(
+                        implementerOptionMap,
+                        "IO4"
+                )
+        );
+        supportedServicesPIS.setFutureDatedPayments(
+                getIoValueFromIoMapForGetMethod(
+                        implementerOptionMap,
+                        "IO21",
+                        "available")
+        );
 
         return supportedServicesPIS;
     }
 
     /**
-     *
      * @param implementerOptionMap
      * @return SupportedServicesAIS
      */
@@ -131,17 +160,35 @@ public class ASPSPProcessor {
 
         supportedServicesAIS.setAccountDetails(true);
         supportedServicesAIS.setAccountList(true);
-        if (implementerOptionMap.containsKey("IO32")) {
-            supportedServicesAIS.setAccountsWithBalance(implementerOptionMap.get("IO32").getOptions().get("accounts_with_balance"));
-            supportedServicesAIS.setAccountsAccountIdWithBalance(implementerOptionMap.get("IO32").getOptions().get("accounts_account-id_with_balance"));
-            supportedServicesAIS.setAccountsAccountIdTransactionsWithBalance(implementerOptionMap.get("IO32").getOptions().get("accounts_account-id_transactions_with_balance"));
-            supportedServicesAIS.setAccountsAccountIdTransactionsResourceId(implementerOptionMap.get("IO32").getOptions().get("accounts_account-id_transactions_resourceId"));
-        } else {
-            supportedServicesAIS.setAccountsWithBalance(false);
-            supportedServicesAIS.setAccountsAccountIdWithBalance(false);
-            supportedServicesAIS.setAccountsAccountIdTransactionsWithBalance(false);
-            supportedServicesAIS.setAccountsAccountIdTransactionsResourceId(false);
-        }
+
+        supportedServicesAIS.setAccountsWithBalance(
+                getIoValueFromIoMapForGetMethod(
+                        implementerOptionMap,
+                        "IO32",
+                        "accounts_with_balance"
+                )
+        );
+        supportedServicesAIS.setAccountsAccountIdWithBalance(
+                getIoValueFromIoMapForGetMethod(
+                        implementerOptionMap,
+                        "IO32",
+                        "accounts_account-id_with_balance"
+                )
+        );
+        supportedServicesAIS.setAccountsAccountIdTransactionsWithBalance(
+                getIoValueFromIoMapForGetMethod(
+                        implementerOptionMap,
+                        "IO32",
+                        "accounts_account-id_transactions_with_balance"
+                )
+        );
+        supportedServicesAIS.setAccountsAccountIdTransactionsResourceId(
+                getIoValueFromIoMapForGetMethod(
+                        implementerOptionMap,
+                        "IO32",
+                        "accounts_account-id_transactions_resourceId"
+                )
+        );
 
         return supportedServicesAIS;
     }
@@ -155,4 +202,30 @@ public class ASPSPProcessor {
 
         return supportedServicesCOF;
     }
+
+    /**
+     * @param implementerOptionMap
+     * @param io
+     * @param key
+     * @return boolean
+     */
+    private static Boolean getIoValueFromIoMapForGetMethod(Map<String, ImplementerOption> implementerOptionMap, String io, String key) {
+        if (implementerOptionMap.containsKey(io)) {
+            return implementerOptionMap.get(io).getOptions().get(key);
+        }
+        return false;
+    }
+
+    /**
+     * @param implementerOptionMap
+     * @param io
+     * @return boolean
+     */
+    private static Boolean getIoValueFromIoMapForContainsValueMethod(Map<String, ImplementerOption> implementerOptionMap, String io) {
+        if (implementerOptionMap.containsKey(io)) {
+            return implementerOptionMap.get(io).getOptions().containsValue(true);
+        }
+        return false;
+    }
+
 }

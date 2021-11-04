@@ -121,9 +121,9 @@ public abstract class BasicService {
                 }
             }
         } catch (KeyStoreException | NoSuchAlgorithmException e) {
-            logger.error(e.getMessage());
+            logger.error("Unable to execute request", e);
         } catch (NullPointerException e) {
-            logger.error("Unable to get Trust Managers from TrustManager Factory");
+            logger.error("Unable to get Trust Managers from TrustManager Factory", e);
         }
         if (x509Tm == null) {
             throw new CertificateException("There is no default Trust store available");

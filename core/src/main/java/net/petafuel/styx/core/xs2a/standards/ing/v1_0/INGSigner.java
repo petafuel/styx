@@ -57,7 +57,7 @@ public final class INGSigner extends BerlinGroupSigner implements IXS2AHttpSigne
             this.signature.initSign(certificateManager.getSealPrivateKey());
 
         } catch (NoSuchAlgorithmException | InvalidKeyException | CertificateException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Unable to initialize Signer", e);
             throw new SigningException(e.getMessage(), e);
         }
     }
@@ -69,7 +69,7 @@ public final class INGSigner extends BerlinGroupSigner implements IXS2AHttpSigne
         try {
             this.digest(xs2aRequest);
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Unable to digest message: {}", e.getMessage());
+            LOG.error("Unable to digest message", e);
         }
 
         Map<String, String> headers = xs2aRequest.getHeaders();
@@ -100,13 +100,13 @@ public final class INGSigner extends BerlinGroupSigner implements IXS2AHttpSigne
         try {
             this.signature.update(signatureContent.getBytes(StandardCharsets.UTF_8));
         } catch (SignatureException e) {
-            LOG.error("Unable to update signature: {}", e.getMessage());
+            LOG.error("Unable to update signature", e);
         }
         String singedHeaders = null;
         try {
             singedHeaders = Base64.getEncoder().encodeToString(this.signature.sign());
         } catch (SignatureException e) {
-            LOG.error(e.getStackTrace());
+            LOG.error("Unable to base64 encode singed headers", e);
         }
 
         if (headers.containsKey(INGSigner.ING_CLIENT_ID)) {

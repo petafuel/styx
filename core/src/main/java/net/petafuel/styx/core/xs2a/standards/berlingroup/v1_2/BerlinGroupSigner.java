@@ -31,8 +31,6 @@ import java.util.StringJoiner;
  * @see IXS2AHttpSigner
  */
 public class BerlinGroupSigner implements IXS2AHttpSigner {
-    private static final Logger LOG = LogManager.getLogger(BerlinGroupSigner.class);
-
     /**
      * $1 certificate serial
      * $2 certificate issuer DN
@@ -41,7 +39,7 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
      * $5 Signature from headerlines defined in $4, hashed with $3 and base64 encoded
      */
     protected static final String SIGNATURE_STRINGFORMAT = "keyId=\"SN=%s,CA=%s\",algorithm=\"%s\",headers=\"%s\",signature=\"%s\"";
-
+    private static final Logger LOG = LogManager.getLogger(BerlinGroupSigner.class);
     protected Signature signature;
     protected byte[] sealCertificate;
     protected String serialHex;
@@ -67,7 +65,7 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
             this.signature.initSign(certificateManager.getSealPrivateKey());
 
         } catch (NoSuchAlgorithmException | InvalidKeyException | CertificateException | InvalidAlgorithmParameterException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Unable to initialize Signer", e);
             throw new SigningException(e.getMessage(), e);
         }
     }
@@ -78,7 +76,7 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
         try {
             this.digest(xs2aRequest);
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Unable to digest message: {}", e.getMessage());
+            LOG.error("Unable to digest message", e);
         }
 
         Map<String, String> headers = xs2aRequest.getHeaders();
@@ -107,13 +105,13 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
         try {
             this.signature.update(signatureContent.getBytes(StandardCharsets.UTF_8));
         } catch (SignatureException e) {
-            LOG.error("Unable to update signature: {}", e.getMessage());
+            LOG.error("Unable to update signature", e);
         }
         String singedHeaders = null;
         try {
             singedHeaders = Base64.getEncoder().encodeToString(this.signature.sign());
         } catch (SignatureException e) {
-            LOG.error(e.getStackTrace());
+            LOG.error("Unable to base64 encode singed headers", e);
         }
 
         xs2aRequest.addHeader(XS2AHeader.SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,

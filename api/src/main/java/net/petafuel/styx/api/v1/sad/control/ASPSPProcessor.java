@@ -24,16 +24,21 @@ public class ASPSPProcessor {
         // empty private constructor for sonarQube
     }
 
+    /**
+     *
+     * @param bic - BIC provided by the client
+     * @return ASPSPResponse | null
+     */
     public static ASPSPResponse process(String bic) {
         try {
             Aspsp aspsp = getAspspByBic(bic);
-            ASPSPResponse aspspResponse = new ASPSPResponse();
 
             if (Objects.nonNull(aspsp)) {
+                ASPSPResponse aspspResponse = new ASPSPResponse();
                 Map<String, ImplementerOption> implementerOptions = aspsp.getConfig().getImplementerOptions();
 
-                SupportedServicesPIS supportedServicesPIS = processSupportServicesPis(implementerOptions);
-                SupportedServicesAIS supportedServicesAIS = processSupportServicesAis(implementerOptions);
+                SupportedServicesPIS supportedServicesPIS = processSupportedServicesPis(implementerOptions);
+                SupportedServicesAIS supportedServicesAIS = processSupportedServicesAis(implementerOptions);
                 SupportedServicesCOF supportedServicesCOF = processSupportedServicesCof();
                 SupportedServices supportedServices = new SupportedServices(supportedServicesPIS, supportedServicesAIS, supportedServicesCOF);
 
@@ -43,8 +48,11 @@ public class ASPSPProcessor {
                 aspspResponse.setSupportedServices(supportedServices);
                 aspspResponse.setPrestepRequired(processPrestepRequired(implementerOptions));
                 aspspResponse.setMulticurrencyAccountsSupported(proccessMulticurrencyAccountsSupported(implementerOptions));
+
+                return aspspResponse;
+            } else {
+                return null;
             }
-            return aspspResponse;
         } catch (BankNotFoundException | BankLookupFailedException bankNotFoundException) {
             LOG.error("Bank not found for bic={} in SAD", bic);
             return null;
@@ -62,35 +70,35 @@ public class ASPSPProcessor {
     }
 
     /**
-     * @param implementerOptionMap
+     * @param implementerOptionMap - ImplementerOption map for the ASPSP
      * @return AvailableSCAApproaches
      */
     private static AvailableSCAApproaches processScaApproaches(Map<String, ImplementerOption> implementerOptionMap) {
         AvailableSCAApproaches availableSCAApproaches = new AvailableSCAApproaches();
 
         availableSCAApproaches.setRedirect(
-                getIoValueFromIoMapForGetMethod(
+                getIoValueByKey(
                         implementerOptionMap,
                         "IO5",
                         "redirect"
                 )
         );
         availableSCAApproaches.setoAuth(
-                getIoValueFromIoMapForGetMethod(
+                getIoValueByKey(
                         implementerOptionMap,
                         "IO5",
                         "oauth"
                 )
         );
         availableSCAApproaches.setDecoupled(
-                getIoValueFromIoMapForGetMethod(
+                getIoValueByKey(
                         implementerOptionMap,
                         "IO5",
                         "decoupled"
                 )
         );
         availableSCAApproaches.setEmbedded(
-                getIoValueFromIoMapForGetMethod(
+                getIoValueByKey(
                         implementerOptionMap,
                         "IO5",
                         "embedded"
@@ -101,48 +109,48 @@ public class ASPSPProcessor {
     }
 
     /**
-     * @param implementerOptionMap
-     * @return Boolean
+     * @param implementerOptionMap - ImplementerOption map for the ASPSP
+     * @return boolean
      */
-    private static Boolean processPrestepRequired(Map<String, ImplementerOption> implementerOptionMap) {
-        return getIoValueFromIoMapForGetMethod(implementerOptionMap, "IO6", "required");
+    private static boolean processPrestepRequired(Map<String, ImplementerOption> implementerOptionMap) {
+        return getIoValueByKey(implementerOptionMap, "IO6", "required");
     }
 
     /**
-     * @param implementerOptionMap
-     * @return Boolean
+     * @param implementerOptionMap - ImplementerOption map for the ASPSP
+     * @return boolean
      */
-    private static Boolean proccessMulticurrencyAccountsSupported(Map<String, ImplementerOption> implementerOptionMap) {
-        return getIoValueFromIoMapForGetMethod(implementerOptionMap, "IO17", "available");
+    private static boolean proccessMulticurrencyAccountsSupported(Map<String, ImplementerOption> implementerOptionMap) {
+        return getIoValueByKey(implementerOptionMap, "IO17", "available");
     }
 
     /**
-     * @param implementerOptionMap
+     * @param implementerOptionMap - ImplementerOption map for the ASPSP
      * @return SupportedServicesPIS
      */
-    private static SupportedServicesPIS processSupportServicesPis(Map<String, ImplementerOption> implementerOptionMap) {
+    private static SupportedServicesPIS processSupportedServicesPis(Map<String, ImplementerOption> implementerOptionMap) {
         SupportedServicesPIS supportedServicesPIS = new SupportedServicesPIS();
 
         supportedServicesPIS.setSinglePayments(
-                getIoValueFromIoMapForContainsValueMethod(
+                isIoTrue(
                         implementerOptionMap,
                         "IO2"
                 )
         );
         supportedServicesPIS.setBulkPayments(
-                getIoValueFromIoMapForContainsValueMethod(
+                isIoTrue(
                         implementerOptionMap,
                         "IO3"
                 )
         );
         supportedServicesPIS.setPeriodicPayments(
-                getIoValueFromIoMapForContainsValueMethod(
+                isIoTrue(
                         implementerOptionMap,
                         "IO4"
                 )
         );
         supportedServicesPIS.setFutureDatedPayments(
-                getIoValueFromIoMapForGetMethod(
+                getIoValueByKey(
                         implementerOptionMap,
                         "IO21",
                         "available")
@@ -152,38 +160,38 @@ public class ASPSPProcessor {
     }
 
     /**
-     * @param implementerOptionMap
+     * @param implementerOptionMap - ImplementerOption map for the ASPSP
      * @return SupportedServicesAIS
      */
-    private static SupportedServicesAIS processSupportServicesAis(Map<String, ImplementerOption> implementerOptionMap) {
+    private static SupportedServicesAIS processSupportedServicesAis(Map<String, ImplementerOption> implementerOptionMap) {
         SupportedServicesAIS supportedServicesAIS = new SupportedServicesAIS();
 
         supportedServicesAIS.setAccountDetails(true);
         supportedServicesAIS.setAccountList(true);
 
         supportedServicesAIS.setAccountsWithBalance(
-                getIoValueFromIoMapForGetMethod(
+                getIoValueByKey(
                         implementerOptionMap,
                         "IO32",
                         "accounts_with_balance"
                 )
         );
         supportedServicesAIS.setAccountsAccountIdWithBalance(
-                getIoValueFromIoMapForGetMethod(
+                getIoValueByKey(
                         implementerOptionMap,
                         "IO32",
                         "accounts_account-id_with_balance"
                 )
         );
         supportedServicesAIS.setAccountsAccountIdTransactionsWithBalance(
-                getIoValueFromIoMapForGetMethod(
+                getIoValueByKey(
                         implementerOptionMap,
                         "IO32",
                         "accounts_account-id_transactions_with_balance"
                 )
         );
         supportedServicesAIS.setAccountsAccountIdTransactionsResourceId(
-                getIoValueFromIoMapForGetMethod(
+                getIoValueByKey(
                         implementerOptionMap,
                         "IO32",
                         "accounts_account-id_transactions_resourceId"
@@ -204,12 +212,13 @@ public class ASPSPProcessor {
     }
 
     /**
-     * @param implementerOptionMap
-     * @param io
-     * @param key
+     * Method returns the value for a provided implementer option and key
+     * @param implementerOptionMap - ImplementerOption map for the ASPSP
+     * @param io - required implementer option
+     * @param key - required key
      * @return boolean
      */
-    private static Boolean getIoValueFromIoMapForGetMethod(Map<String, ImplementerOption> implementerOptionMap, String io, String key) {
+    private static boolean getIoValueByKey(Map<String, ImplementerOption> implementerOptionMap, String io, String key) {
         if (implementerOptionMap.containsKey(io)) {
             return implementerOptionMap.get(io).getOptions().get(key);
         }
@@ -217,11 +226,12 @@ public class ASPSPProcessor {
     }
 
     /**
-     * @param implementerOptionMap
-     * @param io
+     * Method checks if the options for a provided implementer option containing at least one boolean true as value
+     * @param implementerOptionMap - ImplementerOption map for the ASPSP
+     * @param io required implementer option
      * @return boolean
      */
-    private static Boolean getIoValueFromIoMapForContainsValueMethod(Map<String, ImplementerOption> implementerOptionMap, String io) {
+    private static boolean isIoTrue(Map<String, ImplementerOption> implementerOptionMap, String io) {
         if (implementerOptionMap.containsKey(io)) {
             return implementerOptionMap.get(io).getOptions().containsValue(true);
         }

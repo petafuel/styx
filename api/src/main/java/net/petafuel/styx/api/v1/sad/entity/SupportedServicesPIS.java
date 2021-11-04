@@ -4,57 +4,57 @@ import javax.json.bind.annotation.JsonbProperty;
 
 public class SupportedServicesPIS {
     @JsonbProperty("singlePayments")
-    private Boolean singlePayments;
+    private boolean singlePayments;
 
     @JsonbProperty("bulkPayments")
-    private Boolean bulkPayments;
+    private boolean bulkPayments;
 
     @JsonbProperty("periodicPayments")
-    private Boolean periodicPayments;
+    private boolean periodicPayments;
 
     @JsonbProperty("futureDatedPayments")
-    private Boolean futureDatedPayments;
+    private boolean futureDatedPayments;
 
     public SupportedServicesPIS() {
         // default constructor for json binding
     }
 
-    public SupportedServicesPIS(Boolean singlePayments, Boolean bulkPayments, Boolean periodicPayments, Boolean futureDatedPayments) {
+    public SupportedServicesPIS(boolean singlePayments, boolean bulkPayments, boolean periodicPayments, boolean futureDatedPayments) {
         this.singlePayments = singlePayments;
         this.bulkPayments = bulkPayments;
         this.periodicPayments = periodicPayments;
         this.futureDatedPayments = futureDatedPayments;
     }
 
-    public Boolean getSinglePayments() {
+    public boolean getSinglePayments() {
         return singlePayments;
     }
 
-    public void setSinglePayments(Boolean singlePayments) {
+    public void setSinglePayments(boolean singlePayments) {
         this.singlePayments = singlePayments;
     }
 
-    public Boolean getBulkPayments() {
+    public boolean getBulkPayments() {
         return bulkPayments;
     }
 
-    public void setBulkPayments(Boolean bulkPayments) {
+    public void setBulkPayments(boolean bulkPayments) {
         this.bulkPayments = bulkPayments;
     }
 
-    public Boolean getPeriodicPayments() {
+    public boolean getPeriodicPayments() {
         return periodicPayments;
     }
 
-    public void setPeriodicPayments(Boolean periodicPayments) {
+    public void setPeriodicPayments(boolean periodicPayments) {
         this.periodicPayments = periodicPayments;
     }
 
-    public Boolean getFutureDatedPayments() {
+    public boolean getFutureDatedPayments() {
         return futureDatedPayments;
     }
 
-    public void setFutureDatedPayments(Boolean futureDatedPayments) {
+    public void setFutureDatedPayments(boolean futureDatedPayments) {
         this.futureDatedPayments = futureDatedPayments;
     }
 }

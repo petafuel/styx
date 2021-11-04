@@ -7,25 +7,25 @@ public class ASPSPResponse {
     private String name;
 
     @JsonbProperty("active")
-    private Boolean active;
+    private boolean active;
 
     @JsonbProperty("prestepRequired")
-    private Boolean prestepRequired;
+    private boolean prestepRequired;
 
     @JsonbProperty("multicurrencyAccountsSupported")
-    private Boolean multicurrencyAccountsSupported;
+    private boolean multicurrencyAccountsSupported;
 
     @JsonbProperty("scaApproaches")
     private AvailableSCAApproaches scaApproaches;
 
-    @JsonbProperty("supportedService")
+    @JsonbProperty("supportedServices")
     private SupportedServices supportedServices;
 
     public ASPSPResponse() {
         // default constructor for json binding
     }
 
-    public ASPSPResponse(String name, Boolean active, AvailableSCAApproaches scaApproaches, SupportedServices supportedServices, Boolean prestepRequired, Boolean multicurrencyAccountsSupported) {
+    public ASPSPResponse(String name, boolean active, AvailableSCAApproaches scaApproaches, SupportedServices supportedServices, boolean prestepRequired, boolean multicurrencyAccountsSupported) {
         this.name = name;
         this.active = active;
         this.scaApproaches = scaApproaches;
@@ -42,11 +42,11 @@ public class ASPSPResponse {
         this.name = name;
     }
 
-    public Boolean getActive() {
+    public boolean getActive() {
         return active;
     }
 
-    public void setActive(Boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
@@ -66,19 +66,19 @@ public class ASPSPResponse {
         this.supportedServices = supportedServices;
     }
 
-    public Boolean getPrestepRequired() {
+    public boolean getPrestepRequired() {
         return prestepRequired;
     }
 
-    public void setPrestepRequired(Boolean prestepRequired) {
+    public void setPrestepRequired(boolean prestepRequired) {
         this.prestepRequired = prestepRequired;
     }
 
-    public Boolean getMulticurrencyAccountsSupported() {
+    public boolean getMulticurrencyAccountsSupported() {
         return multicurrencyAccountsSupported;
     }
 
-    public void setMulticurrencyAccountsSupported(Boolean multicurrencyAccountsSupported) {
+    public void setMulticurrencyAccountsSupported(boolean multicurrencyAccountsSupported) {
         this.multicurrencyAccountsSupported = multicurrencyAccountsSupported;
     }
 }

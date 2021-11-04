@@ -1,11 +1,13 @@
 package net.petafuel.styx.api.v1.sad.boundary;
 
+import net.petafuel.styx.api.exception.ResponseCategory;
+import net.petafuel.styx.api.exception.ResponseConstant;
+import net.petafuel.styx.api.exception.ResponseEntity;
+import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.filter.authentication.boundary.CheckAccessToken;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.v1.sad.control.ASPSPProcessor;
 import net.petafuel.styx.api.v1.sad.entity.ASPSPResponse;
-import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
-import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.spi.tokentypemapper.api.XS2ATokenType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,12 +37,17 @@ public class SADResource extends RestResource {
 
     @GET
     @Path("/aspsp/{bic}")
-    public Response getAspspDataByBic(@PathParam("bic") @NotEmpty @NotBlank String bic) throws BankLookupFailedException, BankNotFoundException {
+    public Response getAspspDataByBic(@PathParam("bic") @NotEmpty @NotBlank String bic) {
         ASPSPResponse aspspResponse = ASPSPProcessor.process(bic);
 
         if (Objects.isNull(aspspResponse)) {
-            String jsonMessage = "{\"message\": \"Aspsp not found for BIC " + bic + " in SAD\"}";
-            return Response.status(404).entity(jsonMessage).build();
+            ResponseEntity notFoundResponse = new ResponseEntity(
+                    "The requested ASPSP was not found within SAD for BIC " + bic,
+                    ResponseConstant.SAD_ASPSP_NOT_FOUND,
+                    ResponseCategory.ERROR,
+                    ResponseOrigin.STYX
+            );
+            return Response.status(409).entity(notFoundResponse).build();
         } else {
             LOG.info("Successfully got bank data for bic={}", bic);
             return Response.status(200).entity(aspspResponse).build();

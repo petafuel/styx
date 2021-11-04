@@ -4,38 +4,38 @@ import javax.json.bind.annotation.JsonbProperty;
 
 public class AvailableSCAApproaches {
     @JsonbProperty("redirect")
-    private Boolean redirect;
+    private boolean redirect;
 
     @JsonbProperty("oAuth")
-    private Boolean oAuth;
+    private boolean oAuth;
 
     @JsonbProperty("decoupled")
-    private Boolean decoupled;
+    private boolean decoupled;
 
     @JsonbProperty("embedded")
-    private Boolean embedded;
+    private boolean embedded;
 
-    public Boolean getRedirect() {
+    public boolean getRedirect() {
         return redirect;
     }
 
-    public void setRedirect(Boolean redirect) {
+    public void setRedirect(boolean redirect) {
         this.redirect = redirect;
     }
 
-    public Boolean getoAuth() {
+    public boolean getoAuth() {
         return oAuth;
     }
 
-    public void setoAuth(Boolean oAuth) {
+    public void setoAuth(boolean oAuth) {
         this.oAuth = oAuth;
     }
 
-    public Boolean getDecoupled() {
+    public boolean getDecoupled() {
         return decoupled;
     }
 
-    public void setDecoupled(Boolean decoupled) {
+    public void setDecoupled(boolean decoupled) {
         this.decoupled = decoupled;
     }
 

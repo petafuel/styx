@@ -4,28 +4,28 @@ import javax.json.bind.annotation.JsonbProperty;
 
 public class SupportedServicesAIS {
     @JsonbProperty("accountDetails")
-    private Boolean accountDetails;
+    private boolean accountDetails;
 
     @JsonbProperty("accountList")
-    private Boolean accountList;
+    private boolean accountList;
 
     @JsonbProperty("accountsWithBalance")
-    private Boolean accountsWithBalance;
+    private boolean accountsWithBalance;
 
     @JsonbProperty("accountsAccountIdWithBalance")
-    private Boolean accountsAccountIdWithBalance;
+    private boolean accountsAccountIdWithBalance;
 
     @JsonbProperty("accountsAccountIdTransactionsWithBalance")
-    private Boolean accountsAccountIdTransactionsWithBalance;
+    private boolean accountsAccountIdTransactionsWithBalance;
 
     @JsonbProperty("accountsAccountIdTransactionsResourceId")
-    private Boolean accountsAccountIdTransactionsResourceId;
+    private boolean accountsAccountIdTransactionsResourceId;
 
     public SupportedServicesAIS() {
         // default constructor for json binding
     }
 
-    public SupportedServicesAIS(Boolean accountDetails, Boolean accountList, Boolean accountsWithBalance, Boolean accountsAccountIdWithBalance, Boolean accountsAccountIdTransactionsWithBalance, Boolean accountsAccountIdTransactionsResourceId) {
+    public SupportedServicesAIS(boolean accountDetails, boolean accountList, boolean accountsWithBalance, boolean accountsAccountIdWithBalance, boolean accountsAccountIdTransactionsWithBalance, boolean accountsAccountIdTransactionsResourceId) {
         this.accountDetails = accountDetails;
         this.accountList = accountList;
         this.accountsWithBalance = accountsWithBalance;
@@ -34,51 +34,51 @@ public class SupportedServicesAIS {
         this.accountsAccountIdTransactionsResourceId = accountsAccountIdTransactionsResourceId;
     }
 
-    public Boolean getAccountDetails() {
+    public boolean getAccountDetails() {
         return accountDetails;
     }
 
-    public void setAccountDetails(Boolean accountDetails) {
+    public void setAccountDetails(boolean accountDetails) {
         this.accountDetails = accountDetails;
     }
 
-    public Boolean getAccountList() {
+    public boolean getAccountList() {
         return accountList;
     }
 
-    public void setAccountList(Boolean accountList) {
+    public void setAccountList(boolean accountList) {
         this.accountList = accountList;
     }
 
-    public Boolean getAccountsWithBalance() {
+    public boolean getAccountsWithBalance() {
         return accountsWithBalance;
     }
 
-    public void setAccountsWithBalance(Boolean accountsWithBalance) {
+    public void setAccountsWithBalance(boolean accountsWithBalance) {
         this.accountsWithBalance = accountsWithBalance;
     }
 
-    public Boolean getAccountsAccountIdWithBalance() {
+    public boolean getAccountsAccountIdWithBalance() {
         return accountsAccountIdWithBalance;
     }
 
-    public void setAccountsAccountIdWithBalance(Boolean accountsAccountIdWithBalance) {
+    public void setAccountsAccountIdWithBalance(boolean accountsAccountIdWithBalance) {
         this.accountsAccountIdWithBalance = accountsAccountIdWithBalance;
     }
 
-    public Boolean getAccountsAccountIdTransactionsWithBalance() {
+    public boolean getAccountsAccountIdTransactionsWithBalance() {
         return accountsAccountIdTransactionsWithBalance;
     }
 
-    public void setAccountsAccountIdTransactionsWithBalance(Boolean accountsAccountIdTransactionsWithBalance) {
+    public void setAccountsAccountIdTransactionsWithBalance(boolean accountsAccountIdTransactionsWithBalance) {
         this.accountsAccountIdTransactionsWithBalance = accountsAccountIdTransactionsWithBalance;
     }
 
-    public Boolean getAccountsAccountIdTransactionsResourceId() {
+    public boolean getAccountsAccountIdTransactionsResourceId() {
         return accountsAccountIdTransactionsResourceId;
     }
 
-    public void setAccountsAccountIdTransactionsResourceId(Boolean accountsAccountIdTransactionsResourceId) {
+    public void setAccountsAccountIdTransactionsResourceId(boolean accountsAccountIdTransactionsResourceId) {
         this.accountsAccountIdTransactionsResourceId = accountsAccountIdTransactionsResourceId;
     }
 }

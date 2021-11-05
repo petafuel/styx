@@ -37,6 +37,7 @@ public class StartUp {
         //checking if the configuration is sufficient
         prepareConfigurationValidations();
         HealthCheck.validateConfiguration();
+        HealthCheck.reset();
 
         LOG.info("Initializing CertificateManager Qwac and QSeal ");
         //constructor call to load qsealc and qwac data into static memory before the http server was started

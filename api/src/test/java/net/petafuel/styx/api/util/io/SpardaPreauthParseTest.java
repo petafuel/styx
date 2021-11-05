@@ -1,4 +1,4 @@
-package net.petafuel.styx.api.utils.io;
+package net.petafuel.styx.api.util.io;
 
 import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
 import org.junit.jupiter.api.Assertions;

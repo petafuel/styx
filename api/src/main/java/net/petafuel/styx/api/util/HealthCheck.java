@@ -18,6 +18,11 @@ public final class HealthCheck {
 
     }
 
+    public static void reset() {
+        HealthCheck.failed = false;
+        HealthCheck.properties.clear();
+    }
+
     private static void setFailed() {
         HealthCheck.failed = true;
     }
@@ -90,6 +95,11 @@ public final class HealthCheck {
         if (entry.getValue().isOptional && prop == null) {
             return true;
         }
+
+        if (prop == null || "".equals(prop)) {
+            return false;
+        }
+
         return Files.exists(new File(prop).toPath());
     }
 

@@ -11,18 +11,26 @@ import java.util.Map;
 
 public final class HealthCheck {
     private static final Logger LOG = LogManager.getLogger(HealthCheck.class);
-    private static final HashMap<String, CheckState> properties = new HashMap<>();
+    private static final HashMap<String, CheckState> checks = new HashMap<>();
     private static boolean failed = false;
 
     private HealthCheck() {
 
     }
 
+    /**
+     * This will clear the internal checks map and frees the static available memory.
+     * Will also reset the validation flag to "not failed"
+     */
     public static void reset() {
         HealthCheck.failed = false;
-        HealthCheck.properties.clear();
+        HealthCheck.checks.clear();
     }
 
+    /**
+     * Will mark the current Health check as failed. This is bound static to the class and therefore needs
+     * to be reset if another checks should be performaned
+     */
     private static void setFailed() {
         HealthCheck.failed = true;
     }
@@ -33,7 +41,7 @@ public final class HealthCheck {
      * @throws HealthCheckException in case a required configuration did not pass
      */
     public static void validateConfiguration() throws HealthCheckException {
-        for (Map.Entry<String, CheckState> entry : HealthCheck.properties.entrySet()) {
+        for (Map.Entry<String, CheckState> entry : HealthCheck.checks.entrySet()) {
             LOG.info("Checking '{}'...", entry.getKey());
             switch (entry.getValue().check) {
                 case STRING:
@@ -61,6 +69,12 @@ public final class HealthCheck {
         }
     }
 
+    /**
+     * Validates the given property path as String
+     *
+     * @param entry should be the current check entry
+     * @return returns true if the prop was not null and not empty or if the check was optional and the property path is not within the system properties
+     */
     private static boolean validateString(Map.Entry<String, CheckState> entry) {
         String prop = System.getProperty(entry.getKey());
         if (entry.getValue().isOptional && prop == null) {
@@ -69,6 +83,12 @@ public final class HealthCheck {
         return prop != null && !"".equals(prop);
     }
 
+    /**
+     * Validates the given property path as Integer
+     *
+     * @param entry should be the current check entry
+     * @return returns true of the prop was not empty and was parsable as Integer by Integer.parseInt. If the check was optional, it will return true if the prop path is not contained within the system propeties
+     */
     private static boolean validateInteger(Map.Entry<String, CheckState> entry) {
         String prop = System.getProperty(entry.getKey());
         if (entry.getValue().isOptional && prop == null) {
@@ -82,6 +102,12 @@ public final class HealthCheck {
         return !"".equals(prop);
     }
 
+    /**
+     * Validates a given property path as Boolean
+     *
+     * @param entry entry should be the current check entry
+     * @return returns true if the system property value is "true" or "false"
+     */
     private static boolean validateBoolean(Map.Entry<String, CheckState> entry) {
         String prop = System.getProperty(entry.getKey());
         if (entry.getValue().isOptional && prop == null) {
@@ -90,6 +116,12 @@ public final class HealthCheck {
         return Boolean.TRUE.toString().equals(prop) || Boolean.FALSE.toString().equals(prop);
     }
 
+    /**
+     * Validates if the given property values actually resolves to a valid filepath and existing file
+     *
+     * @param entry should be the current check entry
+     * @return returns true if the given property value does have a valid filepath in it and if the resulting file does exist
+     */
     private static boolean validateFileExists(Map.Entry<String, CheckState> entry) {
         String prop = System.getProperty(entry.getKey());
         if (entry.getValue().isOptional && prop == null) {
@@ -106,24 +138,31 @@ public final class HealthCheck {
     /**
      * strictly tests whether the system property exists and if the type is correct
      *
-     * @param property
-     * @param check
+     * @param property the property path to be checked
+     * @param check    which check should be performed
      */
     public static void addCheck(String property, CHECK check) {
-        HealthCheck.properties.put(property, new CheckState(check));
+        HealthCheck.checks.put(property, new CheckState(check));
     }
 
     /**
      * does the same as addCheck, but the actual check onto system property is only performed in case it is set within the system properties
      * in that case it is just validated as non optional properties
      *
-     * @param property
-     * @param check
+     * @param property the property path to be checked
+     * @param check    which check should be performed
      */
     public static void addOptionalCheck(String property, CHECK check) {
-        HealthCheck.properties.put(property, new CheckState(check, true));
+        HealthCheck.checks.put(property, new CheckState(check, true));
     }
 
+    /**
+     * Logs and fails the test in cases a validation could not be passed
+     *
+     * @param passed   should contain the boolean result of a performed validation/check
+     * @param property should be the system property name on which the validation/check was performed upon
+     * @param check    should be the check which was peformed
+     */
     private static void processValidation(boolean passed, String property, CHECK check) {
         if (!passed) {
             LOG.error("'{}' failed in {} validation", property, check);

@@ -189,8 +189,7 @@ public final class HealthCheck {
         }
 
         public CheckState(CHECK check) {
-            this.check = check;
-            this.isOptional = false;
+            this(check, false);
         }
     }
 }

@@ -1,10 +1,12 @@
 package net.petafuel.styx.core.xs2a.entities;
 
+import net.petafuel.styx.core.xs2a.entities.serializers.HrefTypeDeserializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -27,17 +29,18 @@ public class Links {
         return urlMapping.get(LinkType.SCA_REDIRECT);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("scaRedirect")
     public void setScaRedirect(Href scaRedirect) {
         urlMapping.put(LinkType.SCA_REDIRECT, scaRedirect);
     }
-
 
     @JsonbProperty("scaOAuth")
     public Href getScaOAuth() {
         return urlMapping.get(LinkType.SCA_OAUTH);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("scaOAuth")
     public void setScaOAuth(Href scaOAuth) {
         urlMapping.put(LinkType.SCA_OAUTH, scaOAuth);
@@ -48,6 +51,7 @@ public class Links {
         return urlMapping.get(LinkType.CONFIRMATION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("confirmation")
     public void setConfirmation(Href confirmation) {
         urlMapping.put(LinkType.CONFIRMATION, confirmation);
@@ -58,6 +62,7 @@ public class Links {
         return urlMapping.get(LinkType.START_AUTHORISATION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("startAuthorisation")
     public void setStartAuthorisation(Href startAuthorisation) {
         urlMapping.put(LinkType.START_AUTHORISATION, startAuthorisation);
@@ -68,6 +73,7 @@ public class Links {
         return urlMapping.get(LinkType.AUTHORISATION_WITH_PSU_IDENTIFICATION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("startAuthorisationWithPsuIdentification")
     public void setStartAuthorisationWithPsuIdentification(Href startAuthorisationWithPsuIdentification) {
         urlMapping.put(LinkType.AUTHORISATION_WITH_PSU_IDENTIFICATION, startAuthorisationWithPsuIdentification);
@@ -224,6 +230,7 @@ public class Links {
         return urlMapping.get(LinkType.SELF);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("self")
     public void setSelf(Href self) {
         urlMapping.put(LinkType.SELF, self);
@@ -234,6 +241,7 @@ public class Links {
         return urlMapping.get(LinkType.STATUS);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("status")
     public void setStatus(Href status) {
         urlMapping.put(LinkType.STATUS, status);
@@ -243,6 +251,7 @@ public class Links {
         return urlMapping.get(LinkType.SCA_STATUS);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("scaStatus")
     public void setScaStatus(Href scaStatus) {
         urlMapping.put(LinkType.SCA_STATUS, scaStatus);
@@ -253,6 +262,7 @@ public class Links {
         return urlMapping.get(LinkType.ACCOUNT);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("account")
     public void setAccount(Href account) {
         urlMapping.put(LinkType.ACCOUNT, account);
@@ -263,17 +273,18 @@ public class Links {
         return urlMapping.get(LinkType.BALANCES);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("balances")
     public void setBalances(Href balances) {
         urlMapping.put(LinkType.BALANCES, balances);
     }
 
     @JsonbProperty("transactions")
-
     public Href getTransactions() {
         return urlMapping.get(LinkType.TRANSACTIONS);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     public void setTransactions(Href transactions) {
         urlMapping.put(LinkType.TRANSACTIONS, transactions);
     }
@@ -283,6 +294,7 @@ public class Links {
         return urlMapping.get(LinkType.CARD_ACCOUNTS);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("cardAccount")
     public void setCardAccount(Href cardAccount) {
         urlMapping.put(LinkType.CARD_ACCOUNTS, cardAccount);
@@ -293,6 +305,7 @@ public class Links {
         return urlMapping.get(LinkType.CARD_TRANSACTIONS);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("cardTransactions")
     public void setCardTransactions(Href cardTransactions) {
         urlMapping.put(LinkType.CARD_TRANSACTIONS, cardTransactions);
@@ -303,6 +316,7 @@ public class Links {
         return urlMapping.get(LinkType.TRANSACTION_DETAILS);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("transactionDetails")
     public void setTransactionDetails(Href transactionDetails) {
         urlMapping.put(LinkType.TRANSACTION_DETAILS, transactionDetails);
@@ -313,6 +327,7 @@ public class Links {
         return urlMapping.get(LinkType.FIRST);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("first")
     public void setFirst(Href first) {
         urlMapping.put(LinkType.FIRST, first);
@@ -323,6 +338,7 @@ public class Links {
         return urlMapping.get(LinkType.NEXT);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("next")
     public void setNext(Href next) {
         urlMapping.put(LinkType.NEXT, next);
@@ -333,6 +349,7 @@ public class Links {
         return urlMapping.get(LinkType.PREVIOUS);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("previous")
     public void setPrevious(Href previous) {
         urlMapping.put(LinkType.PREVIOUS, previous);
@@ -343,6 +360,7 @@ public class Links {
         return urlMapping.get(LinkType.LAST);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("last")
     public void setLast(Href last) {
         urlMapping.put(LinkType.LAST, last);
@@ -353,6 +371,7 @@ public class Links {
         return urlMapping.get(LinkType.DOWNLOAD);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("download")
     public void setDownload(Href download) {
         urlMapping.put(LinkType.DOWNLOAD, download);
@@ -363,6 +382,7 @@ public class Links {
         return urlMapping.get(LinkType.AUTHORIZATION_ENDPOINT);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("authorization_endpoint")
     public void setAuthorizationEndpoint(Href authorizationEndpoint) {
         urlMapping.put(LinkType.AUTHORIZATION_ENDPOINT, authorizationEndpoint);

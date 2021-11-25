@@ -1,12 +1,12 @@
 package net.petafuel.styx.core.xs2a.standards.ing.v1_0;
 
 
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 
 public class INGScaLinksTest {
 

@@ -86,6 +86,7 @@ public class Links {
      * @deprecated This should only be viable until the typo is fixed in the specification
      */
     @Deprecated
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("startAuthorisationWithPsuIdentfication")
     public void setStartAuthorisationWithPsuIdentificationWithTypo(Href startAuthorisationWithPsuIdentification) {
         LOG.warn("ASPSP used incorrect method 'startAuthorisationWithPsuIdentfication' (containing typo).");
@@ -97,6 +98,7 @@ public class Links {
         return urlMapping.get(LinkType.START_AUTHORISATION_WITH_PROPRIETARY_DATA);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("startAuthorisationWithProprietaryData")
     public void setStartAuthorisationWithProprietaryData(Href startAuthorisationWithProprietaryData) {
         urlMapping.put(LinkType.START_AUTHORISATION_WITH_PROPRIETARY_DATA, startAuthorisationWithProprietaryData);
@@ -107,6 +109,7 @@ public class Links {
         return urlMapping.get(LinkType.UPDATE_PROPRIETARY_DATA);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("updateProprietaryData")
     public void setUpdateProprietaryData(Href updateProprietaryData) {
         urlMapping.put(LinkType.UPDATE_PROPRIETARY_DATA, updateProprietaryData);
@@ -117,6 +120,7 @@ public class Links {
         return urlMapping.get(LinkType.AUTHORISATION_WITH_PSU_AUTHENTICATION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("startAuthorisationWithPsuAuthentication")
     public void setStartAuthorisationWithPsuAuthentication(Href startAuthorisationWithPsuAuthentication) {
         urlMapping.put(LinkType.AUTHORISATION_WITH_PSU_AUTHENTICATION, startAuthorisationWithPsuAuthentication);
@@ -127,6 +131,7 @@ public class Links {
         return urlMapping.get(LinkType.UPDATE_PSU_AUTHENTICATION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("updatePsuAuthentication")
     public void setUpdatePsuAuthentication(Href updatePsuAuthentication) {
         urlMapping.put(LinkType.UPDATE_PSU_AUTHENTICATION, updatePsuAuthentication);
@@ -137,6 +142,7 @@ public class Links {
         return urlMapping.get(LinkType.UPDATE_ADDITIONAL_PSU_AUTHENTICATION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("updateAdditionalPsuAuthentication")
     public void setUpdateAdditionalPsuAuthentication(Href updateAdditionalPsuAuthentication) {
         urlMapping.put(LinkType.UPDATE_ADDITIONAL_PSU_AUTHENTICATION, updateAdditionalPsuAuthentication);
@@ -147,6 +153,7 @@ public class Links {
         return urlMapping.get(LinkType.AUTHORISATION_WITH_ENCRYPTED_PSU_AUTHENTICATION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("startAuthorisationWithEncryptedPsuAuthentication")
     public void setStartAuthorisationWithEncryptedPsuAuthentication(Href startAuthorisationWithEncryptedPsuAuthentication) {
         urlMapping.put(LinkType.AUTHORISATION_WITH_ENCRYPTED_PSU_AUTHENTICATION, startAuthorisationWithEncryptedPsuAuthentication);
@@ -157,6 +164,7 @@ public class Links {
         return urlMapping.get(LinkType.UPDATE_ENCRYPTED_PSU_AUTHENTICATION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("updateEncryptedPsuAuthentication")
     public void setUpdateEncryptedPsuAuthentication(Href updateEncryptedPsuAuthentication) {
         urlMapping.put(LinkType.UPDATE_ENCRYPTED_PSU_AUTHENTICATION, updateEncryptedPsuAuthentication);
@@ -167,6 +175,7 @@ public class Links {
         return urlMapping.get(LinkType.UPDATE_ENCRYPTED_ADDITIONAL_PSU_AUTHENTICATION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("updateAdditionalEncryptedPsuAuthentication")
     public void setUpdateAdditionalEncryptedPsuAuthentication(Href updateAdditionalEncryptedPsuAuthentication) {
         urlMapping.put(LinkType.UPDATE_ENCRYPTED_ADDITIONAL_PSU_AUTHENTICATION, updateAdditionalEncryptedPsuAuthentication);
@@ -177,6 +186,7 @@ public class Links {
         return urlMapping.get(LinkType.AUTHORISATION_WITH_METHOD_SELECTION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("startAuthorisationWithAuthenticationMethodSelection")
     public void setStartAuthorisationWithAuthenticationMethodSelection(Href startAuthorisationWithAuthenticationMethodSelection) {
         urlMapping.put(LinkType.AUTHORISATION_WITH_METHOD_SELECTION, startAuthorisationWithAuthenticationMethodSelection);

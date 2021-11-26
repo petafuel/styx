@@ -19,7 +19,9 @@ class INGScaLinksTest {
         InitiatedPayment payment1 = jsonb.fromJson(body, InitiatedPayment.class);
         InitiatedPayment payment2 = jsonb.fromJson(bodyWithHref, InitiatedPayment.class);
         Assertions.assertNotNull(payment1.getPaymentId());
+        Assertions.assertNotNull(payment1.getLinks().getScaRedirect());
         Assertions.assertNotNull(payment2.getPaymentId());
+        Assertions.assertNotNull(payment2.getLinks().getScaRedirect());
 
     }
 }

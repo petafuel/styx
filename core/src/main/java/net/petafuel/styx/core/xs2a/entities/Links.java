@@ -199,6 +199,7 @@ public class Links {
      * @deprecated This should only be viable until the typo is fixed in the specification
      */
     @Deprecated
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("startAuthorisationWithAuthentciationMethodSelection")
     public void setStartAuthorisationWithAuthenticationMethodSelectionWithTypo(Href startAuthorisationWithAuthenticationMethodSelection) {
         LOG.warn("ASPSP used incorrect method 'startAuthorisationWithAuthentciationMethodSelection' (containing typo).");
@@ -210,6 +211,7 @@ public class Links {
         return urlMapping.get(LinkType.SELECT_AUTHENTICATION_METHOD);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("selectAuthenticationMethod")
     public void setSelectAuthenticationMethod(Href selectAuthenticationMethod) {
         urlMapping.put(LinkType.SELECT_AUTHENTICATION_METHOD, selectAuthenticationMethod);
@@ -220,6 +222,7 @@ public class Links {
         return urlMapping.get(LinkType.AUTHORISATION_WITH_TRANSACTION_AUTHORISATION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("startAuthorisationWithTransactionAuthorisation")
     public void setStartAuthorisationWithTransactionAuthorisation(Href startAuthorisationWithTransactionAuthorisation) {
         urlMapping.put(LinkType.AUTHORISATION_WITH_TRANSACTION_AUTHORISATION, startAuthorisationWithTransactionAuthorisation);
@@ -230,6 +233,7 @@ public class Links {
         return urlMapping.get(LinkType.AUTHORISE_TRANSACTION);
     }
 
+    @JsonbTypeDeserializer(HrefTypeDeserializer.class)
     @JsonbProperty("authoriseTransaction")
     public void setAuthoriseTransaction(Href authoriseTransaction) {
         urlMapping.put(LinkType.AUTHORISE_TRANSACTION, authoriseTransaction);

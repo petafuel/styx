@@ -27,7 +27,7 @@ public class HrefTypeDeserializer implements JsonbDeserializer<Links.Href> {
             try (Jsonb jsonb = JsonbBuilder.create()) {
                 href = jsonb.fromJson(parsedValue.toString(), Links.Href.class);
             } catch (Exception e) {
-                LOG.error("Could not initiate jsonb instance. ErrorMessage={}", e.getMessage());
+                LOG.error("Error trying to deserialize Href", e);
             }
         } else {
             LinkType linkType = null;

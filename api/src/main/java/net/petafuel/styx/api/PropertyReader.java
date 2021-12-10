@@ -25,7 +25,7 @@ public class PropertyReader {
             } else {
                 stream = PropertyReader.class.getClassLoader().getResourceAsStream(PROP_FILENAME);
             }
-            props.load(stream); // loads all properties of the config.properties - file
+            props.load(stream); // loads all properties of the api.properties - file
         } catch (FileNotFoundException e) {
             LOG.error(String.format("Properties file not found: %s", e.getMessage()));
         } catch (IOException e) {

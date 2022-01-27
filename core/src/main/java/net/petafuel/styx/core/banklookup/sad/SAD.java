@@ -316,10 +316,8 @@ public class SAD implements BankLookUpInterface {
                 .getConfig()
                 .getImplementerOptions()
                 .get("IO1");
-        if (signOnApplicationLevelIO != null) {
-            return signOnApplicationLevelIO.getOptions().getOrDefault("required", true);
-        } else {
-            return true;
-        }
+       boolean doSign = signOnApplicationLevelIO == null || signOnApplicationLevelIO.getOptions().getOrDefault("required", true);
+       LOG.info("Application level signing through IO1 active='{}'", doSign);
+       return doSign;
     }
 }

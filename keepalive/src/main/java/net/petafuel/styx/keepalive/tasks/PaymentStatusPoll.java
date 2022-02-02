@@ -1,11 +1,11 @@
 package net.petafuel.styx.keepalive.tasks;
 
-
 import net.petafuel.styx.core.banklookup.XS2AStandard;
 import net.petafuel.styx.core.banklookup.exceptions.BankLookupFailedException;
 import net.petafuel.styx.core.banklookup.exceptions.BankNotFoundException;
 import net.petafuel.styx.core.banklookup.sad.SAD;
-import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;
+import net.petafuel.styx.core.ioprocessing.IOProcessor;
+import net.petafuel.styx.core.ioprocessing.StyxExecutionContext;
 import net.petafuel.styx.core.persistence.PersistenceEmptyResultSetException;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
@@ -51,13 +51,14 @@ public class PaymentStatusPoll extends WorkableTask {
     private XS2AStandard xs2AStandard;
     private PISRequest paymentStatusRequest;
     private String signature;
-    private XS2AFactoryInput xs2AFactoryInput;
+    private XS2AFactoryInput xs2aFactoryInput;
     private long startTimestamp;
     private long maxExecutionTime;
     private long timeoutBetweenRetries;
     private ScheduledFuture<?> future;
     private InitializablePayment payment = null;
     private UUID xRequestId;
+    private IOProcessor ioProcessor;
 
     /**
      * empty constructor for recovery
@@ -65,47 +66,50 @@ public class PaymentStatusPoll extends WorkableTask {
     public PaymentStatusPoll() {
     }
 
-    public PaymentStatusPoll(XS2AFactoryInput xs2AFactoryInput, String bic, UUID xRequestId) {
-        this.xs2AFactoryInput = xs2AFactoryInput;
-        hookImpl = new PaymentStatusHookService().provider(System.getProperty(Properties.PAYMENT_STATUS_HOOK_SERVICE, "net.petafuel.styx.spi.paymentstatushook.impl.PaymentStatusHookImpl"));
-        hookImpl.initialize(xs2AFactoryInput.getPaymentService(), xs2AFactoryInput.getPaymentProduct(), xs2AFactoryInput.getPaymentId(), bic);
-        signature = getId() + "-" + xs2AFactoryInput.getPaymentId();
-        maxExecutionTime = Long.parseLong(System.getProperty(Properties.PAYMENT_STATUS_POLL_MAX_EXECUTION_TIME, "60000"));
+    public PaymentStatusPoll(XS2AFactoryInput xs2aFactoryInput, String bic, UUID xRequestId) {
+        this.xs2aFactoryInput = xs2aFactoryInput;
+        hookImpl = new PaymentStatusHookService().provider(System.getProperty(Properties.PAYMENT_STATUS_HOOK_SERVICE,
+                "net.petafuel.styx.spi.paymentstatushook.impl.PaymentStatusHookImpl"));
+        hookImpl.initialize(xs2aFactoryInput.getPaymentService(), xs2aFactoryInput.getPaymentProduct(),
+                xs2aFactoryInput.getPaymentId(), bic);
+        signature = getId() + "-" + xs2aFactoryInput.getPaymentId();
+        maxExecutionTime = Long
+                .parseLong(System.getProperty(Properties.PAYMENT_STATUS_POLL_MAX_EXECUTION_TIME, "60000"));
         maxRequestFailures = Integer.parseInt(System.getProperty(Properties.PAYMENT_STATUS_MAX_REQUEST_FAILURES, "3"));
-        timeoutBetweenRetries = Long.parseLong(System.getProperty(Properties.PAYMENT_STATUS_TIMEOUT_BETWEEN_RETRIES, "2000"));
+        timeoutBetweenRetries = Long
+                .parseLong(System.getProperty(Properties.PAYMENT_STATUS_TIMEOUT_BETWEEN_RETRIES, "2000"));
         currentRequestFailures = 0;
         this.xRequestId = xRequestId;
 
         String authorisationHeader = this.checkAccessToken(xRequestId);
 
         try {
-            xs2AStandard = new SAD().getBankByBIC(bic, Boolean.parseBoolean(System.getProperty("styx.api.sad.sandbox.enabled", "true")));
+            xs2AStandard = new SAD().getBankByBIC(bic,
+                    Boolean.parseBoolean(System.getProperty("styx.api.sad.sandbox.enabled", "true")));
         } catch (BankLookupFailedException | BankNotFoundException e) {
             throw new TaskFinalFailureException(e.getMessage());
         }
-        paymentStatusRequest = new PISRequestFactory().create(xs2AStandard.getRequestClassProvider().paymentStatus(), xs2AFactoryInput);
-        paymentStatusRequest.setAuthorization(authorisationHeader);
-        paymentStatusRequest.setPsu(xs2AFactoryInput.getPsu());
 
-        //Fetch payment once on Task startup - some ASPSP do not allow payment retrieval after successful SCA
-        PISRequest paymentRetrievalRequest = new PISRequestFactory().create(xs2AStandard.getRequestClassProvider().paymentRetrieval(), xs2AFactoryInput);
+        this.ioProcessor = new IOProcessor(xs2AStandard, StyxExecutionContext.KEEP_ALIVE);
+
+        this.ioProcessor.modifyInput(xs2aFactoryInput);
+        paymentStatusRequest = new PISRequestFactory().create(xs2AStandard.getRequestClassProvider().paymentStatus(),
+                xs2aFactoryInput);
+        paymentStatusRequest.setAuthorization(authorisationHeader);
+        paymentStatusRequest.setPsu(xs2aFactoryInput.getPsu());
+
+        // Fetch payment once on Task startup - some ASPSP do not allow payment
+        // retrieval after successful SCA
+        PISRequest paymentRetrievalRequest = new PISRequestFactory()
+                .create(xs2AStandard.getRequestClassProvider().paymentRetrieval(), xs2aFactoryInput);
         paymentRetrievalRequest.setAuthorization(authorisationHeader);
 
-        //Technical Debt: Only for Sparda Bank
-        ImplementerOption implementerOption = xs2AStandard.getAspsp().getConfig().getImplementerOptions().get("STYX04");
-        if (implementerOption != null &&
-                implementerOption.getOptions().get("required") != null &&
-                Boolean.TRUE.equals(implementerOption.getOptions().get("required"))) {
-            paymentStatusRequest.addHeader("X-BIC", xs2AStandard.getAspsp().getBic());
-            paymentStatusRequest.setPsu(null);
-            paymentRetrievalRequest.addHeader("X-BIC", xs2AStandard.getAspsp().getBic());
-            paymentRetrievalRequest.setPsu(null);
-        }
-
         try {
+            this.ioProcessor.modifyRequest(paymentRetrievalRequest, xs2aFactoryInput);
             payment = xs2AStandard.getPis().getPayment(paymentRetrievalRequest);
+            this.ioProcessor.modifyResponse(payment, xs2aFactoryInput);
         } catch (BankRequestFailedException e) {
-            LOG.error("Failed to retrieve payment on task startup BankRequestFailedException, error={}", e.getMessage());
+            LOG.error("Failed to retrieve payment on task startup BankRequestFailedException", e);
         }
     }
 
@@ -119,20 +123,20 @@ public class PaymentStatusPoll extends WorkableTask {
         startTimestamp = new Date().getTime();
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         try {
-            //Execute polling method at a fixed rate
+            // Execute polling method at a fixed rate
             future = executorService.scheduleAtFixedRate(this::poll, 0, timeoutBetweenRetries, TimeUnit.MILLISECONDS);
-            //wait until the future gets canceled
+            // wait until the future gets canceled
             future.get();
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new TaskFinalFailureException(e.getMessage(), TaskFinalFailureCode.EXECUTING_TASK_INTERRUPTED);
         } catch (ExecutionException e) {
-            //throw cause
+            // throw cause
             throw e.getCause();
         } catch (CancellationException e) {
-            //log task was cancelled
-            LOG.debug("Task was canceled because of success/failure");
+            // log task was cancelled
+            LOG.debug("Task was canceled because of success/failure", e);
         } finally {
             executorService.shutdown();
         }
@@ -141,9 +145,12 @@ public class PaymentStatusPoll extends WorkableTask {
 
     private void poll() {
         if (((new Date().getTime()) - startTimestamp) >= maxExecutionTime) {
-            throw new TaskFinalFailureException(String.format("Max execution time of %s was reached", maxExecutionTime), TaskFinalFailureCode.EXCEEDED_MAX_EXECUTION_TIME);
+            throw new TaskFinalFailureException(String.format("Max execution time of %s was reached", maxExecutionTime),
+                    TaskFinalFailureCode.EXCEEDED_MAX_EXECUTION_TIME);
         } else if (maxRequestFailures != 0 && currentRequestFailures >= maxRequestFailures) {
-            throw new TaskFinalFailureException(String.format("Max xs2a request failures reached %s out of %s", currentRequestFailures, maxRequestFailures), TaskFinalFailureCode.EXCEEDED_MAX_XS2A_REQUEST_FAILURES);
+            throw new TaskFinalFailureException(String.format("Max xs2a request failures reached %s out of %s",
+                    currentRequestFailures, maxRequestFailures),
+                    TaskFinalFailureCode.EXCEEDED_MAX_XS2A_REQUEST_FAILURES);
         }
 
         HookStatus hookStatus;
@@ -151,12 +158,14 @@ public class PaymentStatusPoll extends WorkableTask {
         try {
             String authorisationHeader = this.checkAccessToken(xRequestId);
             paymentStatusRequest.setAuthorization(authorisationHeader);
-
+            this.ioProcessor.modifyRequest(paymentStatusRequest, xs2aFactoryInput);
             paymentStatus = xs2AStandard.getPis().getPaymentStatus(paymentStatusRequest);
+            this.ioProcessor.modifyResponse(paymentStatus, xs2aFactoryInput);
             hookStatus = hookImpl.onStatusUpdate(paymentStatus);
         } catch (BankRequestFailedException e) {
             currentRequestFailures += 1;
-            LOG.warn("Request towards the ASPSP failed: error={}, maxRequestFailures={}, currentRequestFailures={}", e.getMessage(), maxRequestFailures, currentRequestFailures);
+            LOG.warn("Request towards the ASPSP failed. maxRequestFailures={}, currentRequestFailures={}",
+                    maxRequestFailures, currentRequestFailures, e);
             return;
         }
         if (hookStatus == HookStatus.SUCCESS) {
@@ -173,14 +182,14 @@ public class PaymentStatusPoll extends WorkableTask {
     @Override
     public JsonObject getGoal() {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
-                .add("paymentService", xs2AFactoryInput.getPaymentService().name())
-                .add("paymentProduct", xs2AFactoryInput.getPaymentProduct().name())
-                .add("paymentId", xs2AFactoryInput.getPaymentId())
+                .add("paymentService", xs2aFactoryInput.getPaymentService().name())
+                .add("paymentProduct", xs2aFactoryInput.getPaymentProduct().name())
+                .add("paymentId", xs2aFactoryInput.getPaymentId())
                 .add("bic", xs2AStandard.getAspsp().getBic())
                 .add("xRequestId", String.valueOf(xRequestId));
 
-        if (xs2AFactoryInput.getPsu() != null && xs2AFactoryInput.getPsu().getId() != null) {
-            jsonObjectBuilder.add("psuId", xs2AFactoryInput.getPsu().getId());
+        if (xs2aFactoryInput.getPsu() != null && xs2aFactoryInput.getPsu().getId() != null) {
+            jsonObjectBuilder.add("psuId", xs2aFactoryInput.getPsu().getId());
         }
 
         if (paymentStatusRequest.getAuthorization() != null) {
@@ -218,7 +227,7 @@ public class PaymentStatusPoll extends WorkableTask {
         } catch (PersistenceEmptyResultSetException e) {
             return null;
         } catch (OAuthTokenExpiredException e) {
-            LOG.error("Refresh token expired, cannot refresh access token for xRequestId={}", xRequestId);
+            LOG.error("Refresh token expired, cannot refresh access token for xRequestId={}", xRequestId, e);
             throw new TaskFinalFailureException("Refresh token expired");
         }
     }

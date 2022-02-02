@@ -5,7 +5,7 @@ import javax.json.bind.annotation.JsonbProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SCA extends StrongAuthenticatableResource implements XS2AResponse {
+public class SCA extends StrongAuthenticatableResource {
 
     private Approach approach;
     private Status scaStatus;

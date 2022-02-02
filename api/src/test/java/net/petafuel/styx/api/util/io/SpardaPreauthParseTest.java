@@ -1,9 +1,10 @@
 package net.petafuel.styx.api.util.io;
 
-import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+
+import net.petafuel.styx.core.ioprocessing.ImplementerOptionException;
 
 import javax.json.JsonObject;
 import javax.json.bind.Jsonb;

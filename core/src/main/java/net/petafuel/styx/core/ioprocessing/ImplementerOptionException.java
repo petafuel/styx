@@ -1,4 +1,4 @@
-package net.petafuel.styx.api.ioprocessing.entities;
+package net.petafuel.styx.core.ioprocessing;
 
 public class ImplementerOptionException extends Exception {
     public ImplementerOptionException(String message) {

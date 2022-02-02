@@ -2,15 +2,15 @@ package net.petafuel.styx.api.ioprocessing.options;
 
 import net.petafuel.styx.api.IntegrationTest;
 import net.petafuel.styx.api.StyxRESTTest;
-import net.petafuel.styx.api.ioprocessing.IOParser;
-import net.petafuel.styx.api.ioprocessing.contracts.IOOrder;
-import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
 import net.petafuel.styx.api.v1.authentication.boundary.AuthenticationResource;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentInitiationResource;
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 import net.petafuel.styx.core.banklookup.sad.entities.Config;
 import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;
 import net.petafuel.styx.core.banklookup.sad.entities.Url;
+import net.petafuel.styx.core.ioprocessing.IOParser;
+import net.petafuel.styx.core.ioprocessing.IOOrder;
+import net.petafuel.styx.core.ioprocessing.ImplementerOptionException;
 import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;

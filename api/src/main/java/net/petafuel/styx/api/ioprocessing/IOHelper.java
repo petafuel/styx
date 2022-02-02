@@ -5,7 +5,9 @@ import net.petafuel.styx.api.exception.ResponseConstant;
 import net.petafuel.styx.api.exception.ResponseEntity;
 import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxException;
-import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
+import net.petafuel.styx.core.ioprocessing.IOParser;
+import net.petafuel.styx.core.ioprocessing.IOProcessor;
+import net.petafuel.styx.core.ioprocessing.ImplementerOptionException;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 

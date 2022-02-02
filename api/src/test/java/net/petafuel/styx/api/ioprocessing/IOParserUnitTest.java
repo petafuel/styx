@@ -1,16 +1,18 @@
 package net.petafuel.styx.api.ioprocessing;
 
-import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 import net.petafuel.styx.core.banklookup.sad.entities.Config;
 import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;
+import net.petafuel.styx.core.ioprocessing.IOParser;
+import net.petafuel.styx.core.ioprocessing.ImplementerOptionException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
+import static net.petafuel.styx.core.ioprocessing.IOParser.Option.REQUIRED;
 
-import static net.petafuel.styx.api.ioprocessing.IOParser.Option.REQUIRED;
+import java.util.Collections;
 
 class IOParserUnitTest {
     private static final String TEST_BIC = "TEST7999";

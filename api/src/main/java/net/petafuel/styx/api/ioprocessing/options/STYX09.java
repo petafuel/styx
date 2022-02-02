@@ -6,11 +6,11 @@ import net.petafuel.styx.api.exception.ResponseConstant;
 import net.petafuel.styx.api.exception.ResponseEntity;
 import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxException;
-import net.petafuel.styx.api.ioprocessing.IOParser;
-import net.petafuel.styx.api.ioprocessing.contracts.ApplicableImplementerOption;
-import net.petafuel.styx.api.ioprocessing.contracts.IOOrder;
-import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
+import net.petafuel.styx.core.ioprocessing.IOParser;
+import net.petafuel.styx.core.ioprocessing.ApplicableImplementerOption;
+import net.petafuel.styx.core.ioprocessing.IOOrder;
+import net.petafuel.styx.core.ioprocessing.ImplementerOptionException;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
@@ -24,8 +24,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * ASPSP requires PSU-IP-Address
- * add psuIpAddress header to xs2aRequest if option is true
+ * ING specific Token handling
+ * Carefull wenn using with banks initialized through SAD that do not use 
  */
 public class STYX09 extends ApplicableImplementerOption {
     private static final Logger LOG = LogManager.getLogger(STYX09.class);

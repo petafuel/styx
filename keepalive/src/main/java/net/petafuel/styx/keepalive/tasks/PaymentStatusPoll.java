@@ -29,6 +29,7 @@ import net.petafuel.styx.spi.paymentstatushook.api.HookStatus;
 import net.petafuel.styx.spi.paymentstatushook.spi.PaymentStatusHookSPI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -67,6 +68,7 @@ public class PaymentStatusPoll extends WorkableTask {
     }
 
     public PaymentStatusPoll(XS2AFactoryInput xs2aFactoryInput, String bic, UUID xRequestId) {
+        ThreadContext.put("requestUUID", xRequestId.toString());
         this.xs2aFactoryInput = xs2aFactoryInput;
         hookImpl = new PaymentStatusHookService().provider(System.getProperty(Properties.PAYMENT_STATUS_HOOK_SERVICE,
                 "net.petafuel.styx.spi.paymentstatushook.impl.PaymentStatusHookImpl"));

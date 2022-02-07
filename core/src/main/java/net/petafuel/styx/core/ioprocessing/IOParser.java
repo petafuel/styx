@@ -7,7 +7,6 @@ import java.util.Map;
 
 /**
  * Implementer Option Parser
- * TODO maybe complete put into core module
  */
 public final class IOParser {
     private final Map<String, ImplementerOption> implementerOptions;

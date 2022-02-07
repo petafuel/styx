@@ -1,10 +1,8 @@
-package net.petafuel.styx.api.ioprocessing;
+package net.petafuel.styx.core.ioprocessing;
 
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 import net.petafuel.styx.core.banklookup.sad.entities.Config;
 import net.petafuel.styx.core.banklookup.sad.entities.ImplementerOption;
-import net.petafuel.styx.core.ioprocessing.IOParser;
-import net.petafuel.styx.core.ioprocessing.ImplementerOptionException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;

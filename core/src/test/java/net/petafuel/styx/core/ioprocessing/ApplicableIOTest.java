@@ -14,7 +14,7 @@ import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 
-public class ApplicableIOTest {
+class ApplicableIOTest {
     @Test
     void testExecutionContext() throws ImplementerOptionException{
         

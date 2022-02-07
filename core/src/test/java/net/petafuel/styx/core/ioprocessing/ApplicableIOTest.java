@@ -15,6 +15,10 @@ import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 
 class ApplicableIOTest {
+    enum TestEC implements IOExecutionContext{
+        SOME
+    }
+
     @Test
     void testExecutionContext() throws ImplementerOptionException{
         
@@ -59,6 +63,13 @@ class ApplicableIOTest {
             aspsp.getConfig().getImplementerOptions().get("TEST1").setOptions(Collections.singletonMap("required", false));
             assertTrue(aio.shouldExecute(StyxExecutionContext.API));
             assertFalse(aio.shouldExecute(StyxExecutionContext.KEEP_ALIVE));
+            assertFalse(aio.shouldExecute(TestEC.SOME));
+
+            aspsp.getConfig().setImplementerOptions(Collections.emptyMap());
+            ioParser = new IOParser(aspsp);
+            assertTrue(aio.shouldExecute(StyxExecutionContext.API));
+            assertFalse(aio.shouldExecute(StyxExecutionContext.KEEP_ALIVE));
+            assertFalse(aio.shouldExecute(TestEC.SOME));
             
     }
 }

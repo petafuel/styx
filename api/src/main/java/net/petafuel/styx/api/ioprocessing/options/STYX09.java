@@ -1,19 +1,30 @@
 package net.petafuel.styx.api.ioprocessing.options;
 
+import net.petafuel.styx.api.WebServer;
+import net.petafuel.styx.api.exception.ResponseCategory;
+import net.petafuel.styx.api.exception.ResponseConstant;
+import net.petafuel.styx.api.exception.ResponseEntity;
+import net.petafuel.styx.api.exception.ResponseOrigin;
+import net.petafuel.styx.api.exception.StyxException;
 import net.petafuel.styx.api.ioprocessing.IOParser;
 import net.petafuel.styx.api.ioprocessing.contracts.ApplicableImplementerOption;
 import net.petafuel.styx.api.ioprocessing.contracts.IOOrder;
 import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
+import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.XS2AResponse;
+import net.petafuel.styx.core.xs2a.exceptions.BankRequestFailedException;
 import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
+import net.petafuel.styx.core.xs2a.standards.ing.v1_0.services.AccessTokenService;
+import net.petafuel.styx.core.xs2a.standards.ing.v1_0.entities.AccessToken;
+import net.petafuel.styx.core.xs2a.standards.ing.v1_0.http.AccessTokenRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * ASPSP requires PSU-ID-Type
- * add psuIdType header to xs2aRequest if option is true
+ * ASPSP requires PSU-IP-Address
+ * add psuIpAddress header to xs2aRequest if option is true
  */
 public class STYX09 extends ApplicableImplementerOption {
     private static final Logger LOG = LogManager.getLogger(STYX09.class);
@@ -31,16 +42,29 @@ public class STYX09 extends ApplicableImplementerOption {
             return false;
         }
 
-        if (xs2AFactoryInput == null || xs2AFactoryInput.getPsu() == null) {
-            LOG.error("PSU not initialized yet - cannot add psu id type header");
-            return false;
+        AccessTokenService service = new AccessTokenService();
+
+        Aspsp aspsp = ioParser.getAspsp();
+        String url = WebServer.isSandbox() ? aspsp.getSandboxUrl().getCommonUrl() : aspsp.getProductionUrl().getCommonUrl();
+
+        AccessTokenRequest request = new AccessTokenRequest();
+        AccessToken accessToken;
+        try {
+            accessToken = service.tokenRequest(url + "/oauth2/token", request);
+        } catch (BankRequestFailedException e) {
+            LOG.error("Error getting ing access token: {}", e.getMessage());
+            ResponseEntity responseEntity = new ResponseEntity("Generating ING access token failed", ResponseConstant.INTERNAL_SERVER_ERROR, ResponseCategory.ERROR, ResponseOrigin.STYX);
+            throw new StyxException(responseEntity);
         }
 
-        String bic = ioParser.getAspsp().getBic();
-        String countryCode = bic.substring(4, 6);
+        //add additional data to headers for further requests
+        xs2ARequest.addHeader(XS2AHeader.AUTHORIZATION, "Bearer " + accessToken.getToken());
+        xs2ARequest.addHeader(XS2AHeader.ING_CLIENT_ID, accessToken.getClientId());
 
-        String psuIdType = countryCode.equals("DE")  ? "HVB_ONLINEBANKING" : "24YOU";
-        xs2ARequest.addHeader(XS2AHeader.PSU_ID_TYPE, psuIdType);
+        String httpMethod = xs2ARequest.getHttpMethod().toString().toLowerCase();
+        String servicePath = xs2ARequest.getServicePath();
+        xs2ARequest.addHeader(XS2AHeader.REQUEST_TARGET, httpMethod + " " + servicePath);
+
         return true;
     }
 

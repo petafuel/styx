@@ -36,6 +36,10 @@ public class BerlinGroupCS extends BasicAuthorisationService implements CSInterf
         super(LOG, url, signer);
     }
 
+    public BerlinGroupCS(Logger log, String url, IXS2AHttpSigner signer) {
+        super(log, url, signer);
+    }
+
     public Consent createConsent(AISRequest consentRequest) throws BankRequestFailedException {
         this.setUrl(this.url + consentRequest.getServicePath());
         this.createBody(RequestType.POST, JSON, consentRequest);

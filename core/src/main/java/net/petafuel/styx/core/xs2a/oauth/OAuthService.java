@@ -74,7 +74,7 @@ public class OAuthService extends BasicService {
         HashMap<String, String> queryParams = getQueryParameters(stored);
         Properties properties = Config.getInstance().getProperties();
         queryParams.put("client_id", properties.getProperty("keystore.client_id"));
-        queryParams.put("redirect_uri", CallbackProvider.generateCallbackUrl(serviceRealm, RealmParameter.NONE, xRequestId.toString()));
+        queryParams.put("redirect_uri", CallbackProvider.generateCallbackUrl(serviceRealm, RealmParameter.OK, xRequestId.toString()));
         return stored.getAuthorizationEndpoint() + BasicService.httpBuildQuery(queryParams);
     }
 

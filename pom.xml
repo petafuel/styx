@@ -107,6 +107,8 @@
                                 <!--styx core test configuration-->
                                 <keystore.path>${styx.keystore.path}</keystore.path>
                                 <keystore.password.path>${styx.keystore.password.path}</keystore.password.path>
+                                <keystore.seal.path>${styx.keystore.seal.path}</keystore.seal.path>
+                                <keystore.seal.password.path>${styx.keystore.seal.password.path}</keystore.seal.password.path>
                                 <keystore.client_id>${styx.keystore.client_id}</keystore.client_id>
                                 <keystore.styxalias>${styx.keystore.styxalias}</keystore.styxalias>
                                 <styx.redirect.baseurl>${styx.styx.redirect.baseurl}</styx.redirect.baseurl>

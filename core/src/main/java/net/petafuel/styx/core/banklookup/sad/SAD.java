@@ -55,7 +55,7 @@ public class SAD implements BankLookUpInterface {
         Aspsp aspsp = PersistentSAD.getByBIC(bic);
         if (aspsp == null) {
             LOG.error("The requested bank for bic={} is not avaiable in SAD {}", bic, SAD_BANK_NOT_FOUND);
-            throw new BankNotFoundException("The requested aspsp for bic " + bic + " is not not available in SAD");
+            throw new BankNotFoundException("The requested aspsp for bic " + bic + " is not available in SAD");
         }
         XS2AStandard xs2AStandard = new XS2AStandard();
         //parse the implementer options into the implementerOptions List of the aspsp object

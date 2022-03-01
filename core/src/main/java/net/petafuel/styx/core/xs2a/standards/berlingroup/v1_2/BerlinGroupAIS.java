@@ -31,10 +31,6 @@ public class BerlinGroupAIS extends BasicService implements AISInterface {
         super(LOG, url, signer);
     }
 
-    public BerlinGroupAIS(Logger log, String url, IXS2AHttpSigner signer) {
-        super(log, url, signer);
-    }
-
     @Override
     public List<AccountDetails> getAccountList(AISRequest request) throws BankRequestFailedException {
         this.setUrl(this.url + request.getServicePath() + this.getHttpQueryString(request));

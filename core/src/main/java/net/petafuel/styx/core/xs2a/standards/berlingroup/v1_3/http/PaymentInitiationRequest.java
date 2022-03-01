@@ -4,6 +4,7 @@ import net.petafuel.jsepa.SEPAWriter;
 import net.petafuel.jsepa.exception.SEPAWriteException;
 import net.petafuel.jsepa.model.PAIN00100303Document;
 import net.petafuel.jsepa.model.PaymentInstructionInformation;
+import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
 import net.petafuel.styx.core.xs2a.entities.BulkPayment;
 import net.petafuel.styx.core.xs2a.entities.BulkPaymentAdapter;
@@ -64,6 +65,11 @@ public class PaymentInitiationRequest extends PISRequest {
         }
         requestBody.ifPresent(concreteBody -> body = concreteBody);
         return requestBody;
+    }
+
+    @Override
+    public BasicService.RequestType getHttpMethod() {
+        return BasicService.RequestType.POST;
     }
 
     @Override

@@ -15,11 +15,11 @@ public class AuthenticationHandler {
     private AuthenticationHandler() {
     }
 
-    public static JsonObject createAccessToken(String masterTokenHash, String service, Integer expiresIn) {
+    public static JsonObject createAccessToken(String masterTokenHash, String service, Integer expiresIn, String clientReference) {
         String plainToken = TokenGenerator.generateRandomBytes();
 
         try {
-            PersistentAccessToken.create(masterTokenHash, TokenGenerator.hashSHA256(plainToken), service, expiresIn);
+            PersistentAccessToken.create(masterTokenHash, TokenGenerator.hashSHA256(plainToken), service, expiresIn, clientReference);
         } catch (NoSuchAlgorithmException e) {
             ResponseEntity responseEntity = new ResponseEntity(e.getMessage(), ResponseConstant.INTERNAL_SERVER_ERROR, ResponseCategory.ERROR, ResponseOrigin.STYX);
             throw new StyxException(responseEntity);

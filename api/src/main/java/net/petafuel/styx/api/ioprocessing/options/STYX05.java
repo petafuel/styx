@@ -1,11 +1,11 @@
 package net.petafuel.styx.api.ioprocessing.options;
 
 import net.petafuel.styx.api.WebServer;
-import net.petafuel.styx.api.ioprocessing.IOParser;
-import net.petafuel.styx.api.ioprocessing.contracts.ApplicableImplementerOption;
-import net.petafuel.styx.api.ioprocessing.contracts.IOOrder;
-import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
 import net.petafuel.styx.core.banklookup.sad.entities.Aspsp;
+import net.petafuel.styx.core.ioprocessing.IOParser;
+import net.petafuel.styx.core.ioprocessing.ApplicableImplementerOption;
+import net.petafuel.styx.core.ioprocessing.IOOrder;
+import net.petafuel.styx.core.ioprocessing.ImplementerOptionException;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.LinkType;
@@ -35,7 +35,7 @@ public class STYX05 extends ApplicableImplementerOption {
             Boolean optionRequired = ioParser.getOption(IO, IOParser.Option.REQUIRED);
             if (optionRequired != null && optionRequired) {
                 StrongAuthenticatableResource response = (StrongAuthenticatableResource) xs2AResponse;
-                String authorizationLink = response.getLinks().getScaOAuth().getUrl();
+                String authorizationLink = response.getLinks().getScaRedirect().getUrl();
                 OAuthSession oAuthSession = OAuthSession.start(response.getxRequestId());
                 oAuthSession.setScope(SCAHandler.getQueryParameterValue(authorizationLink, "scope"));
                 oAuthSession.setAuthorizationEndpoint(getBaseUrl(authorizationLink));
@@ -51,7 +51,7 @@ public class STYX05 extends ApplicableImplementerOption {
                 String generatedCodeChallenge = OAuthService.getCodeChallengeFromState(oAuthSession.getState());
                 String codeChallengePlaceholder = SCAHandler.getQueryParameterValue(authorizationLink, "code_challenge");
                 authorizationLink = authorizationLink.replace(codeChallengePlaceholder, generatedCodeChallenge) + "&state=" + oAuthSession.getState();
-                response.getLinks().setScaOAuth(new Links.Href(authorizationLink, LinkType.SCA_OAUTH));
+                response.getLinks().setScaRedirect(new Links.Href(authorizationLink, LinkType.SCA_REDIRECT));
                 return true;
             }
         }

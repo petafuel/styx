@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
+import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.SCARequest;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
@@ -36,6 +37,11 @@ public class StartAuthorisationRequest extends SCARequest {
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public BasicService.RequestType getHttpMethod() {
+        return BasicService.RequestType.POST;
     }
 
     @Override

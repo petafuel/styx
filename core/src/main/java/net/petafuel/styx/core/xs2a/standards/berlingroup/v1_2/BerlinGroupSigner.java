@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,6 +17,8 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PSSParameterSpec;
 import java.util.Base64;
 import java.util.LinkedList;
 import java.util.Map;
@@ -28,8 +31,6 @@ import java.util.StringJoiner;
  * @see IXS2AHttpSigner
  */
 public class BerlinGroupSigner implements IXS2AHttpSigner {
-    private static final Logger LOG = LogManager.getLogger(BerlinGroupSigner.class);
-
     /**
      * $1 certificate serial
      * $2 certificate issuer DN
@@ -37,29 +38,34 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
      * $4 headers to be included in signature, order must be kept as in the raw HTTP Request
      * $5 Signature from headerlines defined in $4, hashed with $3 and base64 encoded
      */
-    private static final String SIGNATURE_STRINGFORMAT = "keyId=\"SN=%s,CA=%s\",algorithm=\"%s\",headers=\"%s\",signature=\"%s\"";
-
-    private final Signature signature;
-    private final byte[] certificate;
-    private final String serialHex;
-    private final String issuerDN;
-    private final String algorithm;
+    protected static final String SIGNATURE_STRINGFORMAT = "keyId=\"SN=%s,CA=%s\",algorithm=\"%s\",headers=\"%s\",signature=\"%s\"";
+    private static final Logger LOG = LogManager.getLogger(BerlinGroupSigner.class);
+    protected Signature signature;
+    protected byte[] sealCertificate;
+    protected String serialHex;
+    protected String issuerDN;
+    protected String algorithm;
 
     public BerlinGroupSigner() {
         CertificateManager certificateManager = CertificateManager.getInstance();
         try {
+            //QSealC => certificate to use for signing
+            X509Certificate sealCrt = certificateManager.getSealCertificate();
 
-            X509Certificate crt = certificateManager.getCertificate();
-            this.certificate = crt.getEncoded();
-            this.serialHex = crt.getSerialNumber().toString(16);
-            this.issuerDN = crt.getIssuerDN().getName();
-            this.algorithm = crt.getSigAlgName();
+            this.sealCertificate = sealCrt.getEncoded();
+            this.serialHex = sealCrt.getSerialNumber().toString(16);
+            this.issuerDN = sealCrt.getIssuerDN().getName();
+            this.algorithm = sealCrt.getSigAlgName();
 
+            //create signature with algorithm of styx qwac certificate
             this.signature = Signature.getInstance(this.algorithm);
-            this.signature.initSign(certificateManager.getPrivateKey());
+            //set Parameter to handle algorithm RSASSA-PSS
+            this.signature.setParameter(new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 32, 1));
+            //initialize sign with private key of qseal certificate
+            this.signature.initSign(certificateManager.getSealPrivateKey());
 
-        } catch (NoSuchAlgorithmException | InvalidKeyException | CertificateException e) {
-            LOG.error(e.getMessage());
+        } catch (NoSuchAlgorithmException | InvalidKeyException | CertificateException | InvalidAlgorithmParameterException e) {
+            LOG.error("Unable to initialize Signer", e);
             throw new SigningException(e.getMessage(), e);
         }
     }
@@ -70,7 +76,7 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
         try {
             this.digest(xs2aRequest);
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Unable to digest message: {}", e.getMessage());
+            LOG.error("Unable to digest message", e);
         }
 
         Map<String, String> headers = xs2aRequest.getHeaders();
@@ -99,13 +105,13 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
         try {
             this.signature.update(signatureContent.getBytes(StandardCharsets.UTF_8));
         } catch (SignatureException e) {
-            LOG.error(e.getStackTrace());
+            LOG.error("Unable to update signature", e);
         }
         String singedHeaders = null;
         try {
             singedHeaders = Base64.getEncoder().encodeToString(this.signature.sign());
         } catch (SignatureException e) {
-            LOG.error(e.getStackTrace());
+            LOG.error("Unable to base64 encode singed headers", e);
         }
 
         xs2aRequest.addHeader(XS2AHeader.SIGNATURE, String.format(SIGNATURE_STRINGFORMAT,
@@ -125,7 +131,7 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
      */
     //SHA-512 is predefined by the berlingroup spec for generating the http body digest RFC5843
     @SuppressWarnings("squid:S4790")
-    private void digest(XS2ARequest request) throws NoSuchAlgorithmException {
+    protected void digest(XS2ARequest request) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-512");
         byte[] requestBodyBytes = request.getRawBody().orElse("").getBytes(StandardCharsets.UTF_8);
         byte[] digestHeader = messageDigest.digest(requestBodyBytes);
@@ -137,7 +143,7 @@ public class BerlinGroupSigner implements IXS2AHttpSigner {
      *
      * @param request The full XS2ARequest that should contain the certificate
      */
-    private void addCertificate(XS2ARequest request) {
-        request.addHeader(XS2AHeader.TPP_SIGNATURE_CERTIFICATE, Base64.getEncoder().encodeToString(this.certificate));
+    protected void addCertificate(XS2ARequest request) {
+        request.addHeader(XS2AHeader.TPP_SIGNATURE_CERTIFICATE, Base64.getEncoder().encodeToString(this.sealCertificate));
     }
 }

@@ -47,16 +47,18 @@ public class PersistentAccessToken {
      * @param accessTokenHash - needs to be the hash of the access token
      * @param serviceType     - service type that will later be mapped to either ais, pis, piis or aispis
      * @param expiresIn       - default is 300
+     * @param clientReference - optional reference
      * @return new access token + metadata
      */
-    public static AccessToken create(String masterTokenHash, String accessTokenHash, String serviceType, Integer expiresIn) {
+    public static AccessToken create(String masterTokenHash, String accessTokenHash, String serviceType, Integer expiresIn, String clientReference) {
         Connection connection = Persistence.getInstance().getConnection();
         AccessToken model = new AccessToken();
-        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM create_token(?, ?, ?, ?);")) {
+        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM create_token(?, ?, ?, ?, ?);")) {
             query.setString(1, masterTokenHash);
             query.setString(2, accessTokenHash);
             query.setString(3, serviceType);
             query.setInt(4, expiresIn);
+            query.setString(5, clientReference);
             try (ResultSet resultSet = query.executeQuery()) {
                 if (resultSet.next()) {
                     model = dbToModel(resultSet);
@@ -105,6 +107,8 @@ public class PersistentAccessToken {
         model.setServiceType(resultSet.getString("service"));
         model.setExpiresIn(resultSet.getInt("expires_in"));
         model.setLastUsedOn(resultSet.getTimestamp("last_used_on"));
+        model.setUsages(resultSet.getInt("usages"));
+        model.setClientReference(resultSet.getString("client_reference"));
         return model;
     }
 

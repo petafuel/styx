@@ -14,15 +14,15 @@ import net.petafuel.styx.api.filter.input.control.PSUFilter;
 import net.petafuel.styx.api.filter.input.control.SADInitialisationFilter;
 import net.petafuel.styx.api.filter.input.control.SandboxHeaderPassthroughs;
 import net.petafuel.styx.api.injection.ServiceBinder;
+import net.petafuel.styx.core.xs2a.utils.Config;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.TimeZone;
 
 //This is just a setup class
 @SuppressWarnings("squid:S2187")
-public class StyxRESTTest extends JerseyTest {
+public class StyxRESTTest extends JerseyTestStyx {
     protected static String aisAccessToken;
     protected static String pisAccessToken;
     protected static String masterToken;
@@ -30,6 +30,7 @@ public class StyxRESTTest extends JerseyTest {
 
     protected ResourceConfig setupFiltersAndErrorHandlers() {
         new PropertyReader().loadProperties();
+        Config.getInstance();
         aisAccessToken = System.getProperty("test.token.access.ais");
         pisAccessToken = System.getProperty("test.token.access.pis");
         masterToken = System.getProperty("test.token.master");

@@ -38,6 +38,8 @@ public abstract class XS2ARequest {
     private String authorization;
     @XS2AHeader(XS2AHeader.ACCEPT)
     private String accept;
+    @XS2AHeader(XS2AHeader.CONTENT_TYPE)
+    private String contentType;
     /**
      * Aggregated Headers and Query parameters
      */
@@ -64,6 +66,8 @@ public abstract class XS2ARequest {
 
     public abstract Optional<String> getRawBody();
 
+    public abstract BasicService.RequestType getHttpMethod();
+
     /**
      * add a single header to the existing header map
      *
@@ -72,6 +76,10 @@ public abstract class XS2ARequest {
      */
     public void addHeader(String key, String value) {
         headers.put(key, value);
+    }
+
+    public void removeHeader(String key) {
+        headers.remove(key);
     }
 
     public Map<String, String> getHeaders() {
@@ -177,6 +185,14 @@ public abstract class XS2ARequest {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public abstract String getServicePath();

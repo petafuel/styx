@@ -1,8 +1,8 @@
 package net.petafuel.styx.api.v1.preauth.entity;
 
-import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
 import net.petafuel.styx.api.ioprocessing.options.STYX02;
 import net.petafuel.styx.api.util.DateConverter;
+import net.petafuel.styx.core.ioprocessing.ImplementerOptionException;
 import net.petafuel.styx.core.xs2a.oauth.entities.OAuthSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

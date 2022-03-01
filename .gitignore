@@ -10,3 +10,11 @@ connectionpool.properties
 api/src/main/resources/api.properties
 api/src/test/resources/api.properties
 core/src/main/resources/core.properties
+
+
+#vscode ignores
+.classpath
+.factorypath
+.project
+.settings/
+.vscode/

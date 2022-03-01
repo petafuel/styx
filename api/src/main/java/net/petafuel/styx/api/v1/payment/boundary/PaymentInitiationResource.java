@@ -13,7 +13,6 @@ import net.petafuel.styx.api.filter.authentication.control.PreAuthAccessFilter;
 import net.petafuel.styx.api.filter.input.boundary.RequiresBIC;
 import net.petafuel.styx.api.filter.input.boundary.RequiresMandatoryHeader;
 import net.petafuel.styx.api.filter.input.boundary.RequiresPSU;
-import net.petafuel.styx.api.ioprocessing.IOProcessor;
 import net.petafuel.styx.api.rest.RestResource;
 import net.petafuel.styx.api.util.AspspUrlMapper;
 import net.petafuel.styx.api.v1.payment.entity.BulkPaymentInitiation;
@@ -21,6 +20,7 @@ import net.petafuel.styx.api.v1.payment.entity.PaymentResponse;
 import net.petafuel.styx.api.v1.payment.entity.PaymentTypeBean;
 import net.petafuel.styx.api.v1.payment.entity.PeriodicPaymentInitiation;
 import net.petafuel.styx.api.v1.payment.entity.SinglePaymentInitiation;
+import net.petafuel.styx.core.ioprocessing.IOProcessor;
 import net.petafuel.styx.core.persistence.layers.PersistentPayment;
 import net.petafuel.styx.core.xs2a.contracts.PISRequest;
 import net.petafuel.styx.core.xs2a.entities.AccountReference;
@@ -35,8 +35,6 @@ import net.petafuel.styx.core.xs2a.factory.XS2AFactoryInput;
 import net.petafuel.styx.core.xs2a.sca.OAuth2;
 import net.petafuel.styx.core.xs2a.sca.SCAApproach;
 import net.petafuel.styx.core.xs2a.sca.SCAHandler;
-import net.petafuel.styx.keepalive.tasks.PaymentStatusPoll;
-import net.petafuel.styx.keepalive.threads.ThreadManager;
 import net.petafuel.styx.spi.tokentypemapper.api.XS2ATokenType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -110,7 +108,15 @@ public class PaymentInitiationResource extends RestResource {
 
         InitiatedPayment initiatedPayment = getXS2AStandard().getPis().initiatePayment(paymentInitiationRequest);
 
-        ioProcessor.modifyResponse(initiatedPayment);
+        PersistentPayment.create(paymentInitiationRequest.getXrequestId(), initiatedPayment.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), initiatedPayment.getStatus(), PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct());
+
+        if (containerRequestContext.getProperty(PreAuthAccessFilter.class.getName()) != null) {
+            initiatedPayment.setxRequestId(UUID.fromString(containerRequestContext.getHeaderString(PreAuthAccessFilter.PRE_AUTH_ID)));
+        }
+
+        xs2AFactoryInput.setPaymentId(initiatedPayment.getPaymentId());
+
+        ioProcessor.modifyResponse(initiatedPayment, xs2AFactoryInput);
 
         PaymentResponse paymentResponse = new PaymentResponse(initiatedPayment);
         SCAApproach approach = SCAHandler.decision(initiatedPayment);
@@ -123,17 +129,6 @@ public class PaymentInitiationResource extends RestResource {
         AspspUrlMapper aspspUrlMapper = new AspspUrlMapper(PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct(), paymentResponse.getPaymentId(), null);
         paymentResponse.setLinks(aspspUrlMapper.map(paymentResponse.getLinks()));
 
-        PersistentPayment.create(paymentInitiationRequest.getXrequestId(), paymentResponse.getPaymentId(), (String) getContainerRequestContext().getProperty(AbstractTokenFilter.class.getName()), getXS2AStandard().getAspsp().getBic(), paymentResponse.getTransactionStatus(), PaymentService.PAYMENTS, paymentTypeBean.getPaymentProduct());
-
-        xs2AFactoryInput.setPaymentId(paymentResponse.getPaymentId());
-
-        if (!(approach instanceof OAuth2)) {
-            String xrequestId = paymentInitiationRequest.getXrequestId();
-            if (containerRequestContext.getProperty(PreAuthAccessFilter.class.getName()) != null) {
-                xrequestId = containerRequestContext.getHeaderString(PreAuthAccessFilter.PRE_AUTH_ID);
-            }
-            ThreadManager.getInstance().queueTask(new PaymentStatusPoll(xs2AFactoryInput, getXS2AStandard().getAspsp().getBic(), UUID.fromString(xrequestId)));
-        }
         return Response.status(ResponseConstant.CREATED).entity(paymentResponse).build();
     }
 

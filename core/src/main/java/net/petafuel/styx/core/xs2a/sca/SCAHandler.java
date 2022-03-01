@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.sca;
 
+import net.petafuel.styx.core.xs2a.callback.entity.ServiceRealm;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 import net.petafuel.styx.core.xs2a.entities.InitiatedPayment;
 import net.petafuel.styx.core.xs2a.entities.Links;
@@ -27,17 +28,17 @@ public class SCAHandler {
         SCA sca;
         SCAApproach scaMethod = null;
         String scope;
-        String realm;
+        ServiceRealm serviceRealm;
         if (strongAuthenticatableResource instanceof Consent) {
             Consent consent = (Consent) strongAuthenticatableResource;
             sca = consent.getSca();
             scope = "AIS: " + consent.getId();
-            realm = "consent";
+            serviceRealm = ServiceRealm.CONSENT;
         } else if (strongAuthenticatableResource instanceof InitiatedPayment) {
             InitiatedPayment payment = (InitiatedPayment) strongAuthenticatableResource;
             sca = payment.getSca();
-            scope = "PIS: " + payment.getPaymentId();
-            realm = "payment";
+            scope = "PIS:" + payment.getPaymentId();
+            serviceRealm = ServiceRealm.PAYMENT;
         } else {
             return null;
         }
@@ -52,7 +53,7 @@ public class SCAHandler {
                     link = strongAuthenticatableResource.getLinks().getScaOAuth().getUrl();
                 } else {
                     OAuthSession session = OAuthService.startSession(strongAuthenticatableResource, scope);
-                    link = OAuthService.buildLink(session.getState(), strongAuthenticatableResource.getxRequestId(), realm);
+                    link = OAuthService.buildLink(session.getState(), strongAuthenticatableResource.getxRequestId(), serviceRealm);
                 }
                 scaMethod = new OAuth2(link);
                 break;

@@ -1,6 +1,7 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_2.http;
 
 import net.petafuel.styx.core.xs2a.contracts.AISRequest;
+import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.entities.Consent;
 
 import java.util.Optional;
@@ -14,6 +15,11 @@ public class GetConsentRequest extends AISRequest {
     @Override
     public Optional<String> getRawBody() {
         return Optional.empty();
+    }
+
+    @Override
+    public BasicService.RequestType getHttpMethod() {
+        return BasicService.RequestType.GET;
     }
 
     @Override

@@ -1,9 +1,9 @@
 package net.petafuel.styx.api.ioprocessing.options;
 
-import net.petafuel.styx.api.ioprocessing.IOParser;
-import net.petafuel.styx.api.ioprocessing.contracts.ApplicableImplementerOption;
-import net.petafuel.styx.api.ioprocessing.contracts.IOOrder;
-import net.petafuel.styx.api.ioprocessing.entities.ImplementerOptionException;
+import net.petafuel.styx.core.ioprocessing.IOParser;
+import net.petafuel.styx.core.ioprocessing.ApplicableImplementerOption;
+import net.petafuel.styx.core.ioprocessing.IOOrder;
+import net.petafuel.styx.core.ioprocessing.ImplementerOptionException;
 import net.petafuel.styx.core.persistence.layers.PersistentOAuthSession;
 import net.petafuel.styx.core.xs2a.contracts.XS2ARequest;
 import net.petafuel.styx.core.xs2a.entities.LinkType;

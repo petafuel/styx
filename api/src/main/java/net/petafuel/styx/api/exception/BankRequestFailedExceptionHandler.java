@@ -24,6 +24,13 @@ public class BankRequestFailedExceptionHandler implements ExceptionMapper<BankRe
         LOG.error("Bank request failed with responseCode={}. See following lines", responseEntity.getCode().getStatusCode());
         try (Jsonb jsonb = JsonbBuilder.create()) {
             TPPMessagesWrapper tppMessagesWrapper = jsonb.fromJson(throwable.getMessage(), TPPMessagesWrapper.class);
+
+            ResponseConstant responseConstant = ResponseConstant.getEnumByString(tppMessagesWrapper.getTppMessages().get(0).getCode());
+            if (responseConstant != null && responseConstant.getStatusCode() == 406) {
+                responseEntity.setMessage(tppMessagesWrapper.getTppMessages().get(0).getText());
+                responseEntity.setCode(responseConstant);
+            }
+
             tppMessagesWrapper.getTppMessages().forEach(tppMsg -> LOG.error("TPPMessage code={}, text={}, category={}, path={}", tppMsg.getCode(), tppMsg.getText(), tppMsg.getCategory(), tppMsg.getPath()));
         } catch (Exception e) {
             LOG.error("Unable to deserialize TPPMessages rawMessage={}", throwable.getMessage());

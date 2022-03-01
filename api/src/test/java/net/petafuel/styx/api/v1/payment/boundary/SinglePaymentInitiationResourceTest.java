@@ -80,6 +80,23 @@ public class SinglePaymentInitiationResourceTest extends StyxRESTTest {
 
     @Test
     @Category(IntegrationTest.class)
+    public void initiateSinglePayment_ING() {
+        Invocation.Builder invocationBuilder = target("/v1/payments/sepa-credit-transfers").request();
+        invocationBuilder.header("token", pisAccessToken);
+        invocationBuilder.header("PSU-ID", "PSDDE-BAFIN-125314");
+        invocationBuilder.header("PSU-BIC", "INGDDEFF");
+        invocationBuilder.header("redirectPreferred", true);
+
+        Jsonb jsonb = JsonbBuilder.create();
+        SinglePaymentInitiation singlePaymentInitiation = jsonb.fromJson("{\"payments\":[{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE25500105175415042884\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"0.01\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"***REMOVED***\"},\"creditorName\":\"***REMOVED***\"}]}", SinglePaymentInitiation.class);
+
+        Invocation invocation = invocationBuilder.buildPost(Entity.entity(singlePaymentInitiation, MediaType.APPLICATION_JSON));
+        Response response = invocation.invoke(Response.class);
+        Assert.assertEquals(201, response.getStatus());
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
     public void initiateBulkPayment_Targo() {
         Jsonb jsonb = JsonbBuilder.create();
         BulkPaymentInitiation bulkPaymentInitiation = jsonb.fromJson("{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"requestedExecutionDate\":\"" + currentDate + "\",\"payments\":[{\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"},{\"debtorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE60760300800500123456\"},\"instructedAmount\":{\"currency\":\"EUR\",\"amount\":\"520.00\"},\"creditorAccount\":{\"currency\":\"EUR\",\"iban\":\"DE15500105172295759744\"},\"creditorName\":\"WBG\",\"remittanceInformationUnstructured\":\"Ref.NumberWBG-1222\",\"requestedExecutionDate\":\"" + currentDate + "\"}]}", BulkPaymentInitiation.class);

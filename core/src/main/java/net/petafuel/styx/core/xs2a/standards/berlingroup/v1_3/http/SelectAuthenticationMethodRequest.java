@@ -1,5 +1,6 @@
 package net.petafuel.styx.core.xs2a.standards.berlingroup.v1_3.http;
 
+import net.petafuel.styx.core.xs2a.contracts.BasicService;
 import net.petafuel.styx.core.xs2a.contracts.SCARequest;
 import net.petafuel.styx.core.xs2a.entities.PaymentProduct;
 import net.petafuel.styx.core.xs2a.entities.PaymentService;
@@ -27,6 +28,11 @@ public class SelectAuthenticationMethodRequest extends SCARequest {
         String responseBody = Json.createObjectBuilder()
                 .add("authenticationMethodId", getAuthorisationMethodId()).build().toString();
         return Optional.ofNullable(responseBody);
+    }
+
+    @Override
+    public BasicService.RequestType getHttpMethod() {
+        return BasicService.RequestType.PUT;
     }
 
     @Override

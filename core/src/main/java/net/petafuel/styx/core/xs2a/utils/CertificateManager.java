@@ -37,22 +37,31 @@ import java.security.cert.X509Certificate;
 public class CertificateManager {
     private static final Logger LOG = LogManager.getLogger(CertificateManager.class);
     private static final String KEYSTORE_PATH = "keystore.path";
+    private static final String KEYSTORE_SEAL_PATH = "keystore.seal.path";
     private static final String KEYSTORE_PASS_PATH = "keystore.password.path";
+    private static final String KEYSTORE_SEAL_PASS_PATH = "keystore.seal.password.path";
     private static final String KEYSTORE_STYX_ALIAS = "keystore.styxalias";
     private static CertificateManager singletonInstance;
     private final KeyStore clientKeyStore;
+    private final KeyStore clientKeySealStore;
     private final String keyStoreStyxAlias;
     private final char[] password;
+    private final char[] sealPassword;
 
     //Reading an invalid keystore results in an exception. The path needs to be configured correctly
     @SuppressWarnings("squid:S4797")
     private CertificateManager() {
 
-        String keyStorePath = Config.getInstance().getProperties().getProperty(KEYSTORE_PATH);
-        this.keyStoreStyxAlias = Config.getInstance().getProperties().getProperty(KEYSTORE_STYX_ALIAS);
+        String keyStorePath = System.getProperty(KEYSTORE_PATH);
+        String keyStoreSealPath = System.getProperty(KEYSTORE_SEAL_PATH);
+        this.keyStoreStyxAlias = System.getProperty(KEYSTORE_STYX_ALIAS);
         try {
             this.password = new String(Files.readAllBytes(
-                    Paths.get(Config.getInstance().getProperties().getProperty(KEYSTORE_PASS_PATH))),
+                    Paths.get(System.getProperty(KEYSTORE_PASS_PATH))),
+                    StandardCharsets.UTF_8)
+                    .toCharArray();
+            this.sealPassword = new String(Files.readAllBytes(
+                    Paths.get(System.getProperty(KEYSTORE_SEAL_PASS_PATH))),
                     StandardCharsets.UTF_8)
                     .toCharArray();
         } catch (IOException e) {
@@ -63,14 +72,16 @@ public class CertificateManager {
         try {
             this.clientKeyStore = KeyStore.getInstance("PKCS12");
             this.clientKeyStore.load(new FileInputStream(keyStorePath), password);
+            this.clientKeySealStore = KeyStore.getInstance("PKCS12");
+            this.clientKeySealStore.load(new FileInputStream(keyStoreSealPath), sealPassword);
         } catch (KeyStoreException | NoSuchAlgorithmException | java.security.cert.CertificateException e) {
-            LOG.error("Something went wrong while loading keystore file: {}", e.getMessage(), e);
+            LOG.error("Something went wrong while loading keystore file", e);
             throw new CertificateException("Something went wrong while loading keystore file: " + e.getMessage(), e);
         } catch (FileNotFoundException e) {
-            LOG.error("Unable to find keystore file: {}", e.getMessage(), e);
+            LOG.error("Unable to find keystore file", e);
             throw new CertificateException("Unable to find keystore file: " + e.getMessage(), e);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("an I/O Error occurred", e);
             throw new CertificateException("Password or format error in keystore: " + e.getMessage(), e);
         }
 
@@ -98,7 +109,22 @@ public class CertificateManager {
         try {
             return (X509Certificate) this.clientKeyStore.getCertificate(this.keyStoreStyxAlias);
         } catch (KeyStoreException e) {
-            LOG.error("Unable to get styx certificate from keystore via alias {} : {}", this.keyStoreStyxAlias, e.getMessage(), e);
+            LOG.error("Unable to get styx certificate from keystore via alias {}", this.keyStoreStyxAlias, e);
+            throw new CertificateException("Unable to get styx certificate from keystore: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Return the QSealC certificate specified by the config.properties property keystore.styxalias
+     *
+     * @return X509Certificate
+     * @see IXS2AHttpSigner
+     */
+    public X509Certificate getSealCertificate() {
+        try {
+            return (X509Certificate) this.clientKeySealStore.getCertificate(this.keyStoreStyxAlias);
+        } catch (KeyStoreException e) {
+            LOG.error("Unable to get styx certificate from keystore via alias {}", this.keyStoreStyxAlias, e);
             throw new CertificateException("Unable to get styx certificate from keystore: " + e.getMessage(), e);
         }
     }
@@ -118,7 +144,7 @@ public class CertificateManager {
             sslContext = SSLContext.getInstance("TLSv1.2");
             sslContext.init(keyManagers, null, new SecureRandom());
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyManagementException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Unable to get SSLContext", e);
             throw new CertificateException("Unable to get sslcontext: " + e.getMessage(), e);
         }
         return sslContext;
@@ -130,11 +156,11 @@ public class CertificateManager {
      *
      * @return PrivateKey
      */
-    public PrivateKey getPrivateKey() {
+    public PrivateKey getSealPrivateKey() {
         try {
-            return (PrivateKey) this.clientKeyStore.getKey(this.keyStoreStyxAlias, this.password);
+            return (PrivateKey) this.clientKeySealStore.getKey(this.keyStoreStyxAlias, this.sealPassword);
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-            LOG.error("Unable to get styx private key from keystore via alias {} : {}", this.keyStoreStyxAlias, e.getMessage(), e);
+            LOG.error("Unable to get styx private key from keystore via alias {}", this.keyStoreStyxAlias, e);
             throw new CertificateException("Unable to get styx private key from keystore: " + e.getMessage(), e);
         }
     }

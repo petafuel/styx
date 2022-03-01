@@ -7,14 +7,18 @@ import net.petafuel.styx.api.exception.ResponseOrigin;
 import net.petafuel.styx.api.exception.StyxException;
 import net.petafuel.styx.api.filter.input.boundary.RequiresPSU;
 import net.petafuel.styx.api.rest.StyxFilterPriorites;
+import net.petafuel.styx.api.util.ApiProperties;
+import net.petafuel.styx.api.util.Sanitizer;
 import net.petafuel.styx.core.xs2a.contracts.XS2AHeader;
 import net.petafuel.styx.core.xs2a.entities.PSU;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Priority;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.Provider;
 
 @Provider
@@ -22,6 +26,9 @@ import javax.ws.rs.ext.Provider;
 @Priority(StyxFilterPriorites.INPUT_VALIDATION)
 public class PSUFilter implements ContainerRequestFilter {
     private static final Logger LOG = LogManager.getLogger(PSUFilter.class);
+
+    @Context
+    private HttpServletRequest httpServletRequest;
 
     @Override
     public void filter(ContainerRequestContext containerRequestContext) {
@@ -33,11 +40,11 @@ public class PSUFilter implements ContainerRequestFilter {
         psu.setIdType(containerRequestContext.getHeaderString(XS2AHeader.PSU_ID_TYPE));
         psu.setCorporateId(containerRequestContext.getHeaderString(XS2AHeader.PSU_CORPORATE_ID));
         psu.setCorporateIdType(containerRequestContext.getHeaderString(XS2AHeader.PSU_CORPORATE_ID_TYPE));
-        String psuIp = containerRequestContext.getHeaderString(XS2AHeader.PSU_IP_ADDRESS);
-        if (psuIp == null || "".equals(psuIp)) {
-            psu.setIp("127.0.0.1");
+        if (Boolean.getBoolean(ApiProperties.STYX_PROXY_ENABLED)) {
+            String forwardedIps = containerRequestContext.getHeaderString(XS2AHeader.X_FORWARDED_FOR);
+            psu.setIp(Sanitizer.parseClientIpFromForwardedIPs(forwardedIps));
         } else {
-            psu.setIp(psuIp);
+            psu.setIp(httpServletRequest.getRemoteAddr());
         }
 
         String psuPort = containerRequestContext.getHeaderString(XS2AHeader.PSU_IP_PORT);

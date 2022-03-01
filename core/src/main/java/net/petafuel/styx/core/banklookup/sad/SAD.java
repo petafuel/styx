@@ -29,7 +29,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.EnumMap;
 import java.util.Map;
 
-
 public class SAD implements BankLookUpInterface {
     private static final Logger LOG = LogManager.getLogger(SAD.class);
     private static final String SAD_BANK_NOT_FOUND = "SAD_BANK_NOT_FOUND";
@@ -39,26 +38,32 @@ public class SAD implements BankLookUpInterface {
     private String bic;
 
     /**
-     * Returns a fully initialized XS2AStandard including instances of the service classes if available/implemented for bank standard
+     * Returns a fully initialized XS2AStandard including instances of the service
+     * classes if available/implemented for bank standard
      * If there is no entry found for the bic, a BankNotFoundException is thrown
      *
      * @param bic       The bic which should be searched for in SAD
-     * @param isSandbox Should the service classes be initialized using the xs2a sandbox environment or production environment of the bank
-     * @return returns a XS2AStandard object which should contain fully initialized service objects for all service types if applicable/implemented
+     * @param isSandbox Should the service classes be initialized using the xs2a
+     *                  sandbox environment or production environment of the bank
+     * @return returns a XS2AStandard object which should contain fully initialized
+     *         service objects for all service types if applicable/implemented
      * @throws BankNotFoundException     the bic was not found in the SAD Database
-     * @throws BankLookupFailedException there was an error initializing a service which is necessary for
+     * @throws BankLookupFailedException there was an error initializing a service
+     *                                   which is necessary for
      */
-    public XS2AStandard getBankByBIC(String bic, boolean isSandbox) throws BankLookupFailedException, BankNotFoundException {
+    public XS2AStandard getBankByBIC(String bic, boolean isSandbox)
+            throws BankLookupFailedException, BankNotFoundException {
         this.bic = bic;
 
-        //Read aspsp data from SAD database into Aspsp.class model
+        // Read aspsp data from SAD database into Aspsp.class model
         Aspsp aspsp = PersistentSAD.getByBIC(bic);
         if (aspsp == null) {
             LOG.error("The requested bank for bic={} is not avaiable in SAD {}", bic, SAD_BANK_NOT_FOUND);
-            throw new BankNotFoundException("The requested aspsp for bic " + bic + " is not not available in SAD");
+            throw new BankNotFoundException("The requested aspsp for bic " + bic + " is not available in SAD");
         }
         XS2AStandard xs2AStandard = new XS2AStandard();
-        //parse the implementer options into the implementerOptions List of the aspsp object
+        // parse the implementer options into the implementerOptions List of the aspsp
+        // object
         parseImplementerOptions(aspsp);
         xs2AStandard.setAspsp(aspsp);
 
@@ -68,10 +73,10 @@ public class SAD implements BankLookUpInterface {
         Version version = new Version(aspsp.getConfig().getStandard().getVersion());
         String interfaceVersion = ".v" + version.getMajor() + "_" + version.getMinor();
 
-        //build a full qualified class name without service type suffix
+        // build a full qualified class name without service type suffix
         xs2aClassPrefix = SERVICES_PACKAGE_PATH + standardPackage + interfaceVersion + "." + standardClassName;
 
-        //Check if requesting sandbox or production urls
+        // Check if requesting sandbox or production urls
         if (isSandbox) {
             LOG.warn("SAD is using sandbox environment bic={}", bic);
             mapASPSPUrlSetup(aspsp.getSandboxUrl());
@@ -79,25 +84,26 @@ public class SAD implements BankLookUpInterface {
             mapASPSPUrlSetup(aspsp.getProductionUrl());
         }
 
-        //HttpSigner will be used in all following service initialisations and is therefore initialized first
-        //Signer might be null if the target standard does not require or did not implement the class in its package
+        // HttpSigner will be used in all following service initialisations and is
+        // therefore initialized first
+        // Signer might be null if the target standard does not require or did not
+        // implement the class in its package
         Class<?> httpSignerClazz = getServiceClass(xs2aClassPrefix + XS2AServices.HTTP_SIGNER.getValue());
         try {
             IXS2AHttpSigner httpSignerInstance = null;
-            if (httpSignerClazz != null) {
+            if (httpSignerClazz != null && shouldSign(xs2AStandard)) {
                 httpSignerInstance = (IXS2AHttpSigner) httpSignerClazz.getConstructor().newInstance();
             }
-            //initializing all service classes per service type and setting them into the xs2aStandard
+            // initializing all service classes per service type and setting them into the
+            // xs2aStandard
             CSInterface csServiceInstance = (CSInterface) reflectServiceInstance(
                     httpSignerInstance,
-                    XS2AServices.CS
-            );
+                    XS2AServices.CS);
             xs2AStandard.setCs(csServiceInstance);
 
             AISInterface aisServiceInstance = (AISInterface) reflectServiceInstance(
                     httpSignerInstance,
-                    XS2AServices.AIS
-            );
+                    XS2AServices.AIS);
             xs2AStandard.setAis(aisServiceInstance);
 
             PISInterface pisServiceInstance = (PISInterface) reflectServiceInstance(
@@ -114,14 +120,16 @@ public class SAD implements BankLookUpInterface {
             );
             xs2AStandard.setPiis(piisServiceInstance);
 
-            Class<?> requestClassProviderClazz = getServiceClass(xs2aClassPrefix + XS2AServices.REQUEST_CLASS_PROVIDER.getValue());
+            Class<?> requestClassProviderClazz = getServiceClass(
+                    xs2aClassPrefix + XS2AServices.REQUEST_CLASS_PROVIDER.getValue());
             if (requestClassProviderClazz == null) {
-                throw new SADException("RequestClassProvider was not found for the requested XS2A Standard but is required");
+                throw new SADException(
+                        "RequestClassProvider was not found for the requested XS2A Standard but is required");
             }
             XS2ARequestClassProvider requestClassProviderInstance;
-            requestClassProviderInstance = (XS2ARequestClassProvider) requestClassProviderClazz.getConstructor().newInstance();
+            requestClassProviderInstance = (XS2ARequestClassProvider) requestClassProviderClazz.getConstructor()
+                    .newInstance();
             xs2AStandard.setRequestClassProvider(requestClassProviderInstance);
-
 
         } catch (InstantiationException | IllegalAccessException e) {
             LOG.error("Error initialising service class through SAD: {}", e.getMessage(), e);
@@ -130,14 +138,16 @@ public class SAD implements BankLookUpInterface {
             LOG.error("Error calling service class constructor through SAD: {}", e.getMessage(), e);
             throw new BankLookupFailedException(e.getMessage(), e);
         } catch (NoSuchMethodException e) {
-            LOG.error("The service class has no matching constructor for initialisation through SAD: {}", e.getMessage(), e);
+            LOG.error("The service class has no matching constructor for initialisation through SAD: {}",
+                    e.getMessage(), e);
             throw new BankLookupFailedException(e.getMessage(), e);
         }
         return xs2AStandard;
     }
 
     /**
-     * Gets the XS2AStandard. By default it is initialized for production environments
+     * Gets the XS2AStandard. By default it is initialized for production
+     * environments
      *
      * @param bic
      * @return
@@ -150,34 +160,37 @@ public class SAD implements BankLookUpInterface {
     }
 
     /**
-     * Parsing the implementer options json and mapping to ImplementerOption List within the aspsp
+     * Parsing the implementer options json and mapping to ImplementerOption List
+     * within the aspsp
      *
-     * @param aspsp Aspsp object that should be used and should be modified with the parsed implementer options
+     * @param aspsp Aspsp object that should be used and should be modified with the
+     *              parsed implementer options
      */
     private void parseImplementerOptions(Aspsp aspsp) {
         String rawDefaultConfig;
-        //Check if there is a config on aspsp level and use the standard config template if not present for aspsp
+        // Check if there is a config on aspsp level and use the standard config
+        // template if not present for aspsp
         if ((rawDefaultConfig = aspsp.getConfig().getConfiguration()) == null) {
             rawDefaultConfig = aspsp.getConfig().getStandard().getConfigTemplate();
         }
         JsonObject defaultConfig = null;
 
-        try(Jsonb jsonb = JsonbBuilder.create()){
+        try (Jsonb jsonb = JsonbBuilder.create()) {
             defaultConfig = jsonb.fromJson(rawDefaultConfig, JsonObject.class);
         } catch (Exception e) {
             throw new SerializerException("unable to deserialize implementer-options json on SAD Service usage", e);
         }
 
-        //Check if there is a styx config on aspsp level
-        //If not present on aspsp level use styx config template of related standard
+        // Check if there is a styx config on aspsp level
+        // If not present on aspsp level use styx config template of related standard
         String rawStyxConfig;
         if ((rawStyxConfig = aspsp.getConfig().getStyxConfiguration()) == null) {
             rawStyxConfig = aspsp.getConfig().getStandard().getStyxConfigTemplate();
         }
-        //Merge the styx config options into the defaultConfig
+        // Merge the styx config options into the defaultConfig
         JsonObject styxConfig = null;
 
-        try(Jsonb jsonb = JsonbBuilder.create()){
+        try (Jsonb jsonb = JsonbBuilder.create()) {
             styxConfig = jsonb.fromJson(rawStyxConfig, JsonObject.class);
         } catch (Exception e) {
             throw new SerializerException("unable to deserialize styx-options json on SAD Service usage", e);
@@ -194,7 +207,8 @@ public class SAD implements BankLookUpInterface {
             currentOption.get("options").asJsonObject()
                     .entrySet()
                     .stream()
-                    .forEach(option -> implementerOption.addOption(option.getKey(), Boolean.valueOf(option.getValue().toString())));
+                    .forEach(option -> implementerOption.addOption(option.getKey(),
+                            Boolean.valueOf(option.getValue().toString())));
             aspsp.getConfig().getImplementerOptions().put(implementerOption.getId(), implementerOption);
         });
     }
@@ -210,7 +224,8 @@ public class SAD implements BankLookUpInterface {
      * @throws InvocationTargetException
      * @throws InstantiationException
      */
-    private Object reflectServiceInstance(IXS2AHttpSigner httpSignerInstance, XS2AServices xs2AReflection) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    private Object reflectServiceInstance(IXS2AHttpSigner httpSignerInstance, XS2AServices xs2AReflection)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Class<?> serviceClazz = getServiceClass(this.xs2aClassPrefix + xs2AReflection.getValue());
         Object serviceInstance = null;
         if (serviceClazz != null) {
@@ -223,24 +238,28 @@ public class SAD implements BankLookUpInterface {
     }
 
     /**
-     * Returns a Class representation for a xs2a service class using a string classpath
+     * Returns a Class representation for a xs2a service class using a string
+     * classpath
      *
      * @param classPath
      * @return null if the class was not found
      */
-    //The classPath is generated by Styx itself using the Styx Database as trusted source
+    // The classPath is generated by Styx itself using the Styx Database as trusted
+    // source
     @SuppressWarnings("squid:S1523")
     private Class<?> getServiceClass(String classPath) {
         try {
             return Class.forName(classPath);
         } catch (ClassNotFoundException e) {
-            LOG.warn("Class {} was not found within package while instanciating XS2AStandard from SAD for bic={}", classPath, this.bic);
+            LOG.warn("Class {} was not found within package while instanciating XS2AStandard from SAD for bic={}",
+                    classPath, this.bic);
             return null;
         }
     }
 
     /**
-     * Parse the urls to the correct service type depending on multiple or single route xs2a aspsp interfaces
+     * Parse the urls to the correct service type depending on multiple or single
+     * route xs2a aspsp interfaces
      *
      * @param urls
      */
@@ -284,5 +303,21 @@ public class SAD implements BankLookUpInterface {
         public String getValue() {
             return value;
         }
+    }
+
+    /**
+     * require http message signing per default if available
+     * 
+     * @param xs2AStandard
+     * @return
+     */
+    private boolean shouldSign(XS2AStandard xs2AStandard) {
+        ImplementerOption signOnApplicationLevelIO = xs2AStandard.getAspsp()
+                .getConfig()
+                .getImplementerOptions()
+                .get("IO1");
+       boolean doSign = signOnApplicationLevelIO == null || signOnApplicationLevelIO.getOptions().getOrDefault("required", true);
+       LOG.info("Application level signing through IO1 active='{}'", doSign);
+       return doSign;
     }
 }

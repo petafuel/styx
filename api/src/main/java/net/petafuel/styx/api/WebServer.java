@@ -33,6 +33,7 @@ import net.petafuel.styx.api.v1.payment.boundary.PaymentAuthorisationResource;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentInitiationResource;
 import net.petafuel.styx.api.v1.payment.boundary.PaymentStatusResource;
 import net.petafuel.styx.api.v1.preauth.boundary.PreAuthResource;
+import net.petafuel.styx.api.v1.sad.boundary.SADResource;
 import net.petafuel.styx.api.v1.status.boundary.StatusResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -94,6 +95,7 @@ public class WebServer {
                 .register(FetchPaymentResource.class)                   // handle fetch payment calls
                 .register(PaymentAuthorisationResource.class)           // handle payment SCA calls
                 .register(PreAuthResource.class)
+                .register(SADResource.class)                            // handle aspsp call to get SAD bank data
                 .register(StatusResource.class);                        //Handle Status calls from internal redirects, e.g. in SCA cases after a callback was received
         //Register Middlewares / Filters
         config.register(AccessTokenFilter.class)                        // request Requires valid client token and enabled master token

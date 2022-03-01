@@ -19,4 +19,6 @@ public @interface CheckAccessToken {
      * @return array of allowed services
      */
     XS2ATokenType[] allowedServices() default {};
+
+    boolean incrementUsage() default true;
 }

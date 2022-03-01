@@ -36,11 +36,13 @@ public class TokenHashTest {
     @Tag("integration")
     public void testTokenHashCheck() throws NoSuchAlgorithmException {
         //  handle the request
-        JsonObject element = AuthenticationHandler.createAccessToken(TokenGenerator.hashSHA256(masterToken), XS2ATokenType.AISPIS.name().toLowerCase(), 300);
+        JsonObject element = AuthenticationHandler.createAccessToken(TokenGenerator.hashSHA256(masterToken), XS2ATokenType.AISPIS.name().toLowerCase(), 300, TokenGenerator.hashSHA256("testRef"));
 
         // expect that there is a "token" in the response and it's a valid UUID
         String accessTokenString = element.getString("token");
         AccessToken accessToken = PersistentAccessToken.get(TokenGenerator.hashSHA256(accessTokenString));
-        Assertions.assertEquals(accessToken.getId(), TokenGenerator.hashSHA256(accessTokenString));
+        Assertions.assertEquals(TokenGenerator.hashSHA256(accessTokenString), accessToken.getId());
+        Assertions.assertEquals(TokenGenerator.hashSHA256("testRef"), accessToken.getClientReference());
+        Assertions.assertEquals(0, accessToken.getUsages());
     }
 }
